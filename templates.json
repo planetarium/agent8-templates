@@ -30,7 +30,7 @@
     "label": "Basic 3D Game Template",
     "description": "Template for building 3D games using Three.js and react-three-fiber. Perfect for creating immersive 3D environments, first-person experiences, and interactive 3D visualizations.",
     "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d",
+    "path": "basic-3d"
   },
   {
     "name": "basic-3d-character-animation",
