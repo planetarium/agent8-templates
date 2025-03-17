@@ -1,4 +1,4 @@
-import React, { RefObject } from "react";
+import React, { RefObject, Suspense } from "react";
 import { AnimationConfigMap } from "../../types/animation";
 import { useAnimationHandler } from "../../hooks/useAnimationHandler";
 import { useCharacterResource } from "../../hooks/useCharacterResource";
@@ -42,8 +42,10 @@ export const CharacterRenderer = <ActionType extends string>({
 
   return (
     <group>
-      <primitive object={scene} />
-      {children}
+      <Suspense fallback={null}>
+        <primitive object={scene} />
+        {children}
+      </Suspense>
     </group>
   );
 };
