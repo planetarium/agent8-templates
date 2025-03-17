@@ -31,11 +31,22 @@
     "description": "Template for building 3D games using Three.js and react-three-fiber. Perfect for creating immersive 3D environments, first-person experiences, and interactive 3D visualizations.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d",
+  },
+  {
+    "name": "basic-3d-character-animation",
+    "label": "3D Character Animation Template",
+    "description": "Template for implementing 3D rigged(mixamo) character with animations using Three.js. Features GLB model loading, animation system for creating interactive 3D character models.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-character-animation",
     "tags": [
       "vite",
       "react",
       "typescript",
-      "three.js"
+      "three.js",
+      "character",
+      "glb",
+      "animation",
+      "mixamo"
     ]
   }
 ]
