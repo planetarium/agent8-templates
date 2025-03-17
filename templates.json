@@ -1,0 +1,28 @@
+[
+  {
+    name: 'basic-vite-react',
+    label: 'Basic Template',
+    description: 'Lightweight Vite starter template for building fast static websites',
+    githubRepo: 'planetarium/agent8-templates',
+    path: 'basic-vite-react',
+    tags: ['vite', 'react', 'typescript', 'minimal'],
+  },
+  {
+    name: 'basic-2d-game',
+    label: 'Basic 2D Game Template',
+    description:
+      'Template for creating 2D games using Phaser with React integration. Ideal for platformers, top-down games, and side-scrollers with physics, sprites, and animations.',
+    githubRepo: 'planetarium/agent8-templates',
+    path: 'basic-2d',
+    tags: ['vite', 'react', 'typescript', 'phaser'],
+  },
+  {
+    name: 'basic-3d-game',
+    label: 'Basic 3D Game Template',
+    description:
+      'Template for building 3D games using Three.js and react-three-fiber. Perfect for creating immersive 3D environments, first-person experiences, and interactive 3D visualizations.',
+    githubRepo: 'planetarium/agent8-templates',
+    path: 'basic-3d',
+    tags: ['vite', 'react', 'typescript', 'three.js'],
+  },
+]
