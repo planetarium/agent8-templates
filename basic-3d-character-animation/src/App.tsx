@@ -1,8 +1,6 @@
 import "./App.css";
 import PreviewScene from "./components/PreviewScene";
 import { CharacterResource } from "./types/characterResource";
-import { useGLTF } from "@react-three/drei";
-import { useEffect } from "react";
 
 function App() {
   const characterModel: CharacterResource = {
@@ -31,22 +29,6 @@ function App() {
       DIE: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death.glb",
     },
   };
-
-  // Preload all animation files
-  useEffect(() => {
-    // Preload character model
-    useGLTF.preload(characterModel.url);
-
-    // Preload animation files
-    if (characterModel.animations) {
-      const animationUrls = Object.values(characterModel.animations);
-      console.log("Preloading animation files...", animationUrls.length);
-      animationUrls.forEach((url) => {
-        useGLTF.preload(url);
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <>

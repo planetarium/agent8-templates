@@ -1,134 +1,138 @@
-import { useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AnimationClip, Group, Mesh, Object3D } from "three";
-import { useAnimations, useGLTF } from "@react-three/drei";
-import { GLTF, SkeletonUtils } from "three-stdlib";
+import { useGLTF, useAnimations } from "@react-three/drei";
+import { GLTFLoader } from "three-stdlib";
+import { SkeletonUtils } from "three-stdlib";
 import { CharacterResource } from "../types/characterResource";
 import { AnimationType } from "../types/animation";
 import { ANIMATION_KEYWORDS } from "../constants/animation.constant";
+import { GLTF } from "three-stdlib";
 
-/**
- * Integrated hook for managing character models and animations
- *
- * This hook provides the following features:
- * 1. Loading and cloning character models
- * 2. Analyzing built-in animations and mapping them to AnimationType
- * 3. Using shared animations for AnimationTypes without built-in animations
- * 4. Providing animation controls
- *
- * @param characterResource - Character resource information
- * @returns Animation controls and scene information
- */
 export const useCharacterResource = (characterResource: CharacterResource) => {
-  // Load the model
+  const modelUrl = characterResource.url;
+  const animationEntries = useMemo(
+    () => Object.entries(characterResource.animations || {}),
+    [characterResource.animations]
+  );
+  const animationTypes = useMemo(
+    () => animationEntries.map(([type]) => type),
+    [animationEntries]
+  );
+  const animationUrls = useMemo(
+    () => animationEntries.map(([, url]) => url),
+    [animationEntries]
+  );
+
+  // 1) Loading main character model (handled by Suspense or error boundary)
   const { scene: originalScene, animations: originalAnimations } = useGLTF(
-    characterResource.url || ""
+    modelUrl || ""
   ) as GLTF;
 
-  // Create model clone
+  // 2) Clone character model and set up shadows
   const modelData = useMemo(() => {
-    if (!characterResource.url || !originalScene) return null;
-
+    if (!modelUrl || !originalScene) return null;
     try {
-      // Clone the scene (with skeleton handling)
       const clonedScene = SkeletonUtils.clone(originalScene) as Group;
-
-      // Set shadow properties
       clonedScene.traverse((child: Object3D) => {
         if (child instanceof Mesh) {
           child.castShadow = true;
           child.receiveShadow = true;
         }
       });
-
       return {
         scene: clonedScene,
-        builtInAnimations: originalAnimations?.length ? originalAnimations : [],
+        builtInAnimations: originalAnimations ?? [],
       };
     } catch (error) {
       console.error("Failed to load character model:", error);
-      console.error("Model path:", characterResource.url);
+      console.error("Model path:", modelUrl);
       return null;
     }
-  }, [characterResource.url, originalScene, originalAnimations]);
+  }, [modelUrl, originalScene, originalAnimations]);
 
-  // Load shared animations
-  const sharedAnimations = useMemo(() => {
-    const result: AnimationClip[] = [];
+  // 3) Load external animations once and handle failures
+  const [sharedGLTFs, setSharedGLTFs] = useState<(GLTF | null)[]>([]);
 
-    if (
-      !characterResource.animations ||
-      !Object.keys(characterResource.animations).length
-    ) {
-      return result;
+  useEffect(() => {
+    if (!animationUrls.length) {
+      setSharedGLTFs([]);
+      return;
     }
 
-    Object.entries(characterResource.animations).forEach(
-      ([animationType, url]) => {
-        try {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const gltf = useGLTF(url);
-          if (gltf && gltf.animations?.length) {
-            // Clone the first animation clip and rename it
-            const clip = gltf.animations[0].clone();
-            clip.name = animationType; // Use animation key as the name
-            clip.userData = { ...clip.userData, isExternal: true };
-            result.push(clip);
-          }
-        } catch (error) {
-          console.error(
-            `Failed to load animation ${animationType}, ${url}:`,
-            error
-          );
-        }
-      }
-    );
-    return result;
-  }, [characterResource.animations]);
+    let isMounted = true;
 
-  // Animation mapping logic
+    (async () => {
+      const results = await Promise.allSettled(
+        animationUrls.map((url) => new GLTFLoader().loadAsync(url))
+      );
+      if (!isMounted) return;
+
+      const loaded = results.map((result, i) => {
+        if (result.status === "fulfilled") {
+          return result.value;
+        } else {
+          console.error(
+            `Failed to load animation [${animationTypes[i]}]:`,
+            animationUrls[i],
+            result.reason
+          );
+          return null;
+        }
+      });
+      setSharedGLTFs(loaded);
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [animationUrls, animationTypes]);
+
+  // 4) Create AnimationClip from successfully loaded external GLTFs
+  const sharedAnimations: AnimationClip[] = useMemo(() => {
+    if (!sharedGLTFs.length) return [];
+    return sharedGLTFs.reduce<AnimationClip[]>((acc, gltf, i) => {
+      if (gltf?.animations?.length) {
+        const clip = gltf.animations[0].clone();
+        clip.name = animationTypes[i];
+        clip.userData = { ...clip.userData, isExternal: true };
+        acc.push(clip);
+      }
+      return acc;
+    }, []);
+  }, [sharedGLTFs, animationTypes]);
+
+  // 5) Merge and map built-in and external animations
   const { mappedAnimations, animationClips } = useMemo(() => {
+    if (!modelData) return { mappedAnimations: {}, animationClips: [] };
+
+    const builtIn = modelData.builtInAnimations;
     const animations: Partial<Record<AnimationType, AnimationClip>> = {};
     const mappedTypes = new Set<AnimationType>();
 
-    if (!modelData) {
-      return { mappedAnimations: {}, animationClips: [] };
-    }
-
-    // 1. Map built-in animations
-    if (modelData.builtInAnimations.length > 0) {
-      modelData.builtInAnimations.forEach((anim) => {
-        // Split animation name into tags
-        const tags = anim.name
-          .toLowerCase()
-          .split("|")
-          .map((tag) => tag.trim());
-
-        // Try matching for each AnimationType
-        Object.entries(ANIMATION_KEYWORDS).forEach(([type, keywords]) => {
-          const animationType = type as AnimationType;
-
-          // Skip already mapped types
-          if (mappedTypes.has(animationType)) return;
-
-          // 1. Check for exact match
-          const match = tags.some((tag) => keywords.includes(tag));
-          if (match) {
-            const clone = anim.clone();
-            clone.name = animationType;
-            clone.userData = { ...clone.userData, isBuiltIn: true };
-            animations[animationType] = clone;
-            mappedTypes.add(animationType);
-            return;
-          }
-        });
+    // A) Match keywords from built-in animations
+    builtIn.forEach((anim) => {
+      const tags = anim.name
+        .toLowerCase()
+        .split("|")
+        .map((tag) => tag.trim());
+      Object.entries(ANIMATION_KEYWORDS).forEach(([type, keywords]) => {
+        const animationType = type as AnimationType;
+        if (mappedTypes.has(animationType)) return;
+        if (tags.some((tag) => keywords.includes(tag))) {
+          const clone = anim.clone();
+          clone.name = animationType;
+          clone.userData = { ...clone.userData, isBuiltIn: true };
+          animations[animationType] = clone;
+          mappedTypes.add(animationType);
+        }
       });
-    }
+    });
 
-    // 2. Map shared animations (for types without built-in animations)
-    sharedAnimations.forEach((anim) => {
-      const animationType = anim.name as AnimationType;
+    // B) Use external animations for types not matched in built-in animations
+    sharedAnimations.forEach((clip) => {
+      const animationType = clip.name as AnimationType;
       if (!mappedTypes.has(animationType)) {
-        animations[animationType] = anim;
+        animations[animationType] = clip;
         mappedTypes.add(animationType);
       }
     });
@@ -139,26 +143,33 @@ export const useCharacterResource = (characterResource: CharacterResource) => {
     };
   }, [modelData, sharedAnimations]);
 
-  // Create animation actions using drei's useAnimations hook
+  // 6) Create animation controls using drei's useAnimations
   const animationControls = useAnimations(
     animationClips,
     modelData?.scene || undefined
   );
 
-  // Log output
+  // 7) Debug logging (if needed)
   useEffect(() => {
     if (modelData?.scene) {
-      console.log("Character loaded:", {
+      console.log("Character loaded successfully:", {
         characterName: characterResource.name || "Unknown",
         builtInAnimations: modelData.builtInAnimations.length,
-        sharedAnimations: sharedAnimations.length,
+        externalAnimationUrls: animationUrls.length,
+        externalAnimationsLoaded: sharedAnimations.length,
         mappedAnimations: Object.keys(mappedAnimations).length,
         animationTypes: Object.keys(mappedAnimations),
       });
     }
-  }, [modelData, sharedAnimations, mappedAnimations, characterResource.name]);
+  }, [
+    modelData,
+    characterResource.name,
+    animationUrls.length,
+    sharedAnimations.length,
+    mappedAnimations,
+  ]);
 
-  // Return animation controls with mapped animations and scene
+  // 8) Final return
   return {
     ...animationControls,
     mappedAnimations,
