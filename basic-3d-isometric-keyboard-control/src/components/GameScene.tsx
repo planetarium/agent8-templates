@@ -1,10 +1,8 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {Canvas} from "@react-three/fiber";
-import {Stats} from "@react-three/drei";
 import {Vector3} from "three";
 import {CharacterAction} from "../constants/character.constant";
 import {CharacterResource} from "../types/characterResource";
-import {PositionInfoUI} from "./ui/PositionInfoUI";
 import {World} from "./world/World.tsx";
 
 interface GameSceneProps {
@@ -47,8 +45,6 @@ export const GameScene: React.FC<GameSceneProps> = ({ characterResource }) => {
 
   return (
     <>
-      <PositionInfoUI position={position} currentAction={currentAction} />
-      <Stats />
       <Canvas shadows>
         <World
           characterResource={characterResource}
