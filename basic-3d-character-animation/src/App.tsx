@@ -3,7 +3,7 @@ import PreviewScene from "./components/PreviewScene";
 import { CharacterResource } from "./types/characterResource";
 
 function App() {
-  const characterModel: CharacterResource = {
+  const characterResource: CharacterResource = {
     name: "Default Character",
     url: "https://agent8-games.verse8.io/assets/3d/characters/space-marine.glb",
     animations: {
@@ -32,7 +32,7 @@ function App() {
 
   return (
     <>
-      <PreviewScene characterResource={characterModel} />
+      <PreviewScene characterResource={characterResource} />
     </>
   );
 }

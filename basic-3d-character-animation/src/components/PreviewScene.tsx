@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Character } from "./characters/Character";
+import { Character } from "./character/Character";
 import { CharacterResource } from "../types/characterResource";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { CharacterAction } from "../constants/character.constant.ts";
