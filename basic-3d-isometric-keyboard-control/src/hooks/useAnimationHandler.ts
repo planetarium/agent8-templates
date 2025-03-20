@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { AnimationConfigMap } from "../types/animation";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * Animation constants used throughout the animation system
@@ -37,6 +38,9 @@ export const useAnimationHandler = <ActionType extends string>(
 
   // Track the last played animation action
   const lastPlayedActionRef = useRef<ActionType | undefined>(undefined);
+
+  // Track the last checked action for comparison
+  const lastCheckedActionRef = useRef<ActionType | undefined>(undefined);
 
   /**
    * Plays an animation with proper configuration and transitions
@@ -194,6 +198,9 @@ export const useAnimationHandler = <ActionType extends string>(
     }
     const currentAnimation = animationConfig.animationType;
 
+    // Store current action for comparison
+    lastCheckedActionRef.current = actionRef.current;
+
     // Skip if the same animation is already playing
     if (actionRef.current === lastPlayedActionRef.current) {
       const action = api.actions[currentAnimation];
@@ -213,28 +220,27 @@ export const useAnimationHandler = <ActionType extends string>(
     } else {
       console.log("[ERROR] not found action: ", currentAnimation, api.actions);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animationConfigMap, api.actions, actionRef.current]);
+  }, [actionRef, animationConfigMap, api.actions, playAnimation]);
 
-  // Effect to handle animation changes and setup
+  // Check for action ref changes every frame and update animations
+  useFrame(() => {
+    // Check if actionRef.current value has changed
+    if (actionRef.current !== lastCheckedActionRef.current) {
+      updateAnimation();
+    }
+  });
+
+  // Initial setup effect
   useEffect(() => {
-    // Initialize animation on mount
+    // Initialize animation on first mount
     updateAnimation();
 
-    /**
-     * Function to check for animation changes on each loop
-     * This ensures animations are updated when needed
-     */
-    const checkForAnimationChanges = () => {
-      updateAnimation();
-    };
-
-    // Listen for animation loop events to check for changes
-    api.mixer.addEventListener("loop", checkForAnimationChanges);
-
-    // Cleanup event listener on unmount
     return () => {
-      api.mixer.removeEventListener("loop", checkForAnimationChanges);
+      // Cleanup on component unmount
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = null;
+      }
     };
-  }, [api.mixer, updateAnimation]);
+  }, [updateAnimation]);
 };

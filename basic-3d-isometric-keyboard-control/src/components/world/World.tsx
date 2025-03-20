@@ -1,78 +1,47 @@
-import React, { useRef, useCallback } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Environment, Grid, useKeyboardControls } from "@react-three/drei";
-import { Vector3, Group } from "three";
-import { CharacterAction } from "../../constants/character.constant";
+import React, { useMemo, useRef } from "react";
+import { Environment, Grid } from "@react-three/drei";
+import { RigidBody } from "@react-three/rapier";
 import { CharacterResource } from "../../types/characterResource";
 import { Character } from "../character/Character";
 import IsometricCamera from "../camera/IsometricCamera";
+import { RapierRigidBody } from "@react-three/rapier";
 
-interface GameWorldProps {
-  characterResource: CharacterResource;
-  position: Vector3;
-  currentAction: CharacterAction;
-  currentActionRef: React.RefObject<CharacterAction>;
-  onAnimationComplete: (action: CharacterAction) => void;
-  onPositionUpdate: (position: Vector3) => void;
-  onActionUpdate: (action: CharacterAction) => void;
-}
+export const World: React.FC = () => {
+  const rigidBodyRef = useRef<RapierRigidBody>(null);
 
-export const World: React.FC<GameWorldProps> = ({
-  characterResource,
-  position,
-  currentAction,
-  currentActionRef,
-  onAnimationComplete,
-  onPositionUpdate,
-  onActionUpdate,
-}) => {
-  const characterGroupRef = useRef<Group>(null);
-  const [, get] = useKeyboardControls();
-  const direction = useRef(new Vector3());
-
-  const calculateDirection = useCallback((): Vector3 => {
-    const { up, down, left, right } = get();
-    direction.current.set(0, 0, 0);
-
-    if (up) {
-      direction.current.z -= 1;
-    }
-    if (down) {
-      direction.current.z += 1;
-    }
-    if (right) {
-      direction.current.x += 1;
-    }
-    if (left) {
-      direction.current.x -= 1;
-    }
-
-    if (direction.current.length() > 0) {
-      direction.current.normalize();
-    }
-
-    return direction.current;
-  }, [get]);
-
-  useFrame((_, delta) => {
-    const direction = calculateDirection();
-    const baseSpeed = 5;
-    const speed = baseSpeed * delta;
-    const isMoving = direction.length() > 0;
-
-    if (isMoving) {
-      const newPosition = position.clone().add(direction.multiplyScalar(speed));
-      onPositionUpdate(newPosition);
-    }
-
-    const newAction = isMoving ? CharacterAction.WALK : CharacterAction.IDLE;
-    if (newAction !== currentAction) {
-      onActionUpdate(newAction);
-    }
-  });
+  const characterResource: CharacterResource = useMemo(
+    () => ({
+      name: "Default Character",
+      url: "https://agent8-games.verse8.io/assets/3d/characters/space-marine.glb",
+      animations: {
+        IDLE: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb",
+        WALK: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+        RUN: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run.glb",
+        JUMP_UP:
+          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump-up.glb",
+        FALL_IDLE:
+          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/fall-idle.glb",
+        FALL_DOWN:
+          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/fall-down.glb",
+        PUNCH:
+          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch.glb",
+        MELEE_ATTACK:
+          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
+        AIM: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/aimming.glb",
+        SHOOT:
+          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot.glb",
+        AIM_RUN:
+          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot-run.glb",
+        HIT: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit.glb",
+        DIE: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death.glb",
+      },
+    }),
+    []
+  );
 
   return (
     <>
+      {/* Lighting */}
       <ambientLight intensity={0.7} />
       <directionalLight
         position={[5, 5, 5]}
@@ -81,13 +50,22 @@ export const World: React.FC<GameWorldProps> = ({
         shadow-mapSize={[1024, 1024]}
       />
 
+      {/* Environment */}
       <Environment preset="sunset" background={false} />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, 0, 0]}>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#3f3f3f" />
-      </mesh>
+      {/* Ground plane */}
+      <RigidBody type="fixed" colliders="cuboid">
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          receiveShadow
+          position={[0, 0, 0]}
+        >
+          <planeGeometry args={[100, 100]} />
+          <meshStandardMaterial color="#3f3f3f" />
+        </mesh>
+      </RigidBody>
 
+      {/* Grid */}
       <Grid
         args={[100, 100]}
         position={[0, 0.01, 0]}
@@ -102,23 +80,14 @@ export const World: React.FC<GameWorldProps> = ({
         followCamera={false}
       />
 
-      <group ref={characterGroupRef} position={[position.x, 0, position.z]}>
-        <group
-          rotation={[
-            0,
-            Math.atan2(direction.current.x, direction.current.z),
-            0,
-          ]}
-        >
-          <Character
-            characterResource={characterResource}
-            currentActionRef={currentActionRef}
-            onAnimationComplete={onAnimationComplete}
-          />
-        </group>
-      </group>
+      {/* Character */}
+      <Character
+        characterResource={characterResource}
+        rigidBodyRef={rigidBodyRef}
+      />
 
-      <IsometricCamera target={characterGroupRef} />
+      {/* Camera */}
+      <IsometricCamera rigidBodyRef={rigidBodyRef} />
     </>
   );
 };

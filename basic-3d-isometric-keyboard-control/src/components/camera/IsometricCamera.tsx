@@ -1,6 +1,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { Group, PerspectiveCamera, OrthographicCamera } from "three";
-import { useEffect } from "react";
+import { Group, PerspectiveCamera, OrthographicCamera, Vector3 } from "three";
+import { useEffect, useRef } from "react";
+import { RapierRigidBody } from "@react-three/rapier";
 
 type CameraMode = "perspective" | "orthographic";
 
@@ -13,7 +14,7 @@ const ISOMETRIC = {
     // X-axis rotation angle (arctan(1/√2) ≈ 35.264 degrees)
     X: Math.atan(1 / Math.sqrt(2)),
     // Y-axis rotation angle (-45 degrees)
-    Y: 0, // or -Math.PI / 4,
+    Y: 0,
   },
   // Perspective camera settings
   PERSPECTIVE: {
@@ -31,82 +32,127 @@ const ISOMETRIC = {
 } as const;
 
 interface IsometricCameraProps {
-  target: React.RefObject<Group>;
+  targetRef?: React.RefObject<Group>;
+  rigidBodyRef?: React.RefObject<RapierRigidBody>;
   mode?: CameraMode;
 }
 
 const IsometricCamera = ({
-  target,
+  targetRef,
+  rigidBodyRef,
   mode = "perspective",
 }: IsometricCameraProps) => {
   const { camera, set } = useThree();
+  const lastValidPosition = useRef(new Vector3());
 
-  // Camera initialization
+  // Initialize camera
   useEffect(() => {
-    let newCamera;
     const aspect = window.innerWidth / window.innerHeight;
+    const newCamera =
+      mode === "perspective"
+        ? createPerspectiveCamera(aspect)
+        : createOrthographicCamera(aspect);
 
-    if (mode === "perspective") {
-      newCamera = new PerspectiveCamera(
-        ISOMETRIC.PERSPECTIVE.FOV,
-        aspect,
-        ISOMETRIC.PERSPECTIVE.NEAR,
-        ISOMETRIC.PERSPECTIVE.FAR
-      );
-    } else {
-      const frustumSize = ISOMETRIC.ORTHOGRAPHIC.VIEW_SIZE;
-      newCamera = new OrthographicCamera(
-        (frustumSize * aspect) / -2,
-        (frustumSize * aspect) / 2,
-        frustumSize / 2,
-        frustumSize / -2,
-        ISOMETRIC.ORTHOGRAPHIC.NEAR,
-        ISOMETRIC.ORTHOGRAPHIC.FAR
-      );
-    }
-
-    // Replace camera in Three.js scene
     set({ camera: newCamera });
 
-    // Handle window resize events
+    // Handle window resize
     const handleResize = () => {
       const newAspect = window.innerWidth / window.innerHeight;
-
-      if (mode === "perspective") {
-        newCamera.aspect = newAspect;
-      } else {
-        const frustumSize = ISOMETRIC.ORTHOGRAPHIC.VIEW_SIZE;
-        (newCamera as OrthographicCamera).left = (frustumSize * newAspect) / -2;
-        (newCamera as OrthographicCamera).right = (frustumSize * newAspect) / 2;
-        (newCamera as OrthographicCamera).top = frustumSize / 2;
-        (newCamera as OrthographicCamera).bottom = frustumSize / -2;
-      }
-      newCamera.updateProjectionMatrix();
+      updateCameraAspect(newCamera, newAspect, mode);
     };
 
     window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, [mode, set]);
 
+  // Follow character position each frame
   useFrame(() => {
-    if (!target.current) return;
-
-    // Set camera position to character position
-    camera.position.copy(target.current.position);
-
-    // Set rotation order (Y-axis rotation followed by X-axis rotation)
-    camera.rotation.order = "YXZ";
-
-    // Set camera rotation to precise isometric angles
-    camera.rotation.y = ISOMETRIC.ROTATION.Y; // Y-axis 0 or -45 degree rotation
-    camera.rotation.x = -ISOMETRIC.ROTATION.X; // X-axis -35.264 degree rotation (looking down)
-    camera.rotation.z = 0;
-
-    // Move camera back after rotation
-    camera.translateZ(ISOMETRIC.DISTANCE);
+    const position = getCharacterPosition();
+    updateCameraPosition(position);
   });
+
+  // Get character position from available refs
+  const getCharacterPosition = () => {
+    let position;
+    let hasValidPosition = false;
+
+    // Try getting position from direct rigidBodyRef
+    if (rigidBodyRef?.current) {
+      position = getPositionFromRigidBody(rigidBodyRef.current);
+      hasValidPosition = true;
+    }
+    // If no valid position from rigidBody, try target group
+    else if (targetRef?.current) {
+      position = targetRef.current.position.clone();
+      hasValidPosition = true;
+    }
+
+    // Use last valid position if no valid position found
+    if (!hasValidPosition) {
+      return lastValidPosition.current;
+    }
+
+    // Store valid position for future use
+    lastValidPosition.current.copy(position);
+    return position;
+  };
+
+  // Get position from rigid body
+  const getPositionFromRigidBody = (body: RapierRigidBody) => {
+    const translation = body.translation();
+    return new Vector3(translation.x, translation.y, translation.z);
+  };
+
+  // Update camera position and rotation
+  const updateCameraPosition = (position: Vector3) => {
+    camera.position.copy(position);
+    camera.rotation.order = "YXZ";
+    camera.rotation.y = ISOMETRIC.ROTATION.Y;
+    camera.rotation.x = -ISOMETRIC.ROTATION.X;
+    camera.rotation.z = 0;
+    camera.translateZ(ISOMETRIC.DISTANCE);
+  };
+
+  // Create perspective camera
+  const createPerspectiveCamera = (aspect: number) => {
+    return new PerspectiveCamera(
+      ISOMETRIC.PERSPECTIVE.FOV,
+      aspect,
+      ISOMETRIC.PERSPECTIVE.NEAR,
+      ISOMETRIC.PERSPECTIVE.FAR
+    );
+  };
+
+  // Create orthographic camera
+  const createOrthographicCamera = (aspect: number) => {
+    const frustumSize = ISOMETRIC.ORTHOGRAPHIC.VIEW_SIZE;
+    return new OrthographicCamera(
+      (frustumSize * aspect) / -2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      frustumSize / -2,
+      ISOMETRIC.ORTHOGRAPHIC.NEAR,
+      ISOMETRIC.ORTHOGRAPHIC.FAR
+    );
+  };
+
+  // Update camera aspect ratio
+  const updateCameraAspect = (
+    camera: PerspectiveCamera | OrthographicCamera,
+    aspect: number,
+    mode: CameraMode
+  ) => {
+    if (mode === "perspective") {
+      (camera as PerspectiveCamera).aspect = aspect;
+    } else {
+      const frustumSize = ISOMETRIC.ORTHOGRAPHIC.VIEW_SIZE;
+      (camera as OrthographicCamera).left = (frustumSize * aspect) / -2;
+      (camera as OrthographicCamera).right = (frustumSize * aspect) / 2;
+      (camera as OrthographicCamera).top = frustumSize / 2;
+      (camera as OrthographicCamera).bottom = frustumSize / -2;
+    }
+    camera.updateProjectionMatrix();
+  };
 
   return null;
 };
