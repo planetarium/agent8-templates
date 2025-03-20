@@ -1,8 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import "./App.css";
 import { KeyboardControls } from "@react-three/drei";
 
-import { CharacterResource } from "./types/characterResource";
 import { keyboardMap } from "./constants/controls.constant.ts";
 import { GameScene } from "./components/GameScene.tsx";
 
