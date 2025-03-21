@@ -41,23 +41,6 @@
     ]
   },
   {
-    "name": "basic-2d-character-animation",
-    "label": "2D Character Animation Template",
-    "description": "This example demonstrates how to load a character configuration file and set up a character using the Phaser game engine. The character configuration file includes settings for the character’s origin, collision boundaries, and animations (idle, move, attack). It also explains how to control the character’s state and animations using keyboard inputs (arrow keys and space bar).",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-2d-character-animation",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "phaser",
-      "character",
-      "animation",
-      "sprite",
-      "spritesheet"
-    ]
-  },
-  {
     "name": "basic-3d-isometric-keyboard-control",
     "label": "Basic 3D Isometric Keyboard Control Template",
     "description": "Template for creating isometric 3D games using Three.js and react-three-fiber. Features include GLB model loading, character animation system, isometric camera, rapier physics, and keyboard controls.",
