@@ -16,6 +16,14 @@
     "tags": ["vite", "react", "typescript", "phaser"]
   },
   {
+    "name": "basic-2d-sprite-character-gravity",
+    "label": "Basic 2D Sprite Character Gravity Template",
+    "description": "Template with animated sprite characters using Phaser, featuring gravity for jumping mechanics. Ideal for basic platformer games.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-2d-sprite-character-gravity",
+    "tags": ["vite", "react", "typescript", "phaser"]
+  },
+  {
     "name": "basic-3d-game",
     "label": "Basic 3D Game Template",
     "description": "Template for building 3D games using Three.js and react-three-fiber. Perfect for creating immersive 3D environments, first-person experiences, and interactive 3D visualizations.",
