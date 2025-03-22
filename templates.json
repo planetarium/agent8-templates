@@ -16,11 +16,11 @@
     "tags": ["vite", "react", "typescript", "phaser"]
   },
   {
-    "name": "basic-2d-sprite-character-gravity",
-    "label": "Basic 2D Sprite Character Gravity Template",
+    "name": "2d-phaser-sprite-character-gravity",
+    "label": "2D Phaser Sprite Character Gravity Template",
     "description": "Template with animated sprite characters using Phaser, featuring gravity for jumping mechanics. Ideal for basic platformer games.",
     "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-2d-sprite-character-gravity",
+    "path": "2d-phaser-sprite-character-gravity",
     "tags": ["vite", "react", "typescript", "phaser"]
   },
   {
