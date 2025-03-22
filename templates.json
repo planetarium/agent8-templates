@@ -8,20 +8,12 @@
     "tags": ["vite", "react", "typescript", "minimal"]
   },
   {
-    "name": "basic-2d-game",
-    "label": "Basic 2D Game Template",
-    "description": "Template for creating 2D games using Phaser with React integration. Ideal for platformers, top-down games, and side-scrollers with physics, sprites, and animations.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-2d",
-    "tags": ["vite", "react", "typescript", "phaser"]
-  },
-  {
     "name": "2d-phaser-sprite-character-gravity",
     "label": "2D Phaser Sprite Character Gravity Template",
-    "description": "Template with animated sprite characters using Phaser, featuring gravity for jumping mechanics. Ideal for basic platformer games.",
+    "description": "Template with animated sprite characters using Phaser, featuring gravity for jumping mechanics. Ideal for basic PLATFORMER games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "2d-phaser-sprite-character-gravity",
-    "tags": ["vite", "react", "typescript", "phaser"]
+    "tags": ["vite", "react", "typescript", "phaser", "platformer"]
   },
   {
     "name": "basic-3d-game",
