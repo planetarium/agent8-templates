@@ -1,7 +1,7 @@
 {
   "sprites": {
     "medieval-knight": {
-      "url": "https://agent8-games.verse8.io/assets/2D/sprite_characters/medieval-knight.png",
+      "url": "https://agent8-games.verse8.io/assets/2d/sprite_characters/medieval-knight.png",
       "description": "Medieval Knight",
       "metadata": {
         "frameWidth": 192,
