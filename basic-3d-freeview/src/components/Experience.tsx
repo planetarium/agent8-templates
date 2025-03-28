@@ -28,7 +28,7 @@ export function Experience() {
   return (
     <>
       {/* Grid */}
-      <Grid
+      {/* <Grid
         args={[100, 100]}
         position={[0, 0.01, 0]}
         cellSize={1}
@@ -40,7 +40,7 @@ export function Experience() {
         fadeDistance={100}
         fadeStrength={1}
         userData={{ camExcludeCollision: true }} // this won't be collide by camera ray
-      />
+      /> */}
 
       <Lights />
 
