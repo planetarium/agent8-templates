@@ -1,9 +1,17 @@
-import React, { useRef, useMemo } from 'react';
-import * as THREE from 'three';
-import { useKeyboardControls } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { CharacterState } from '../constants/character';
-import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterResource, ControllerHandle } from 'vibe-starter-3d';
+import React, { useRef, useMemo } from "react";
+import * as THREE from "three";
+import { useKeyboardControls } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { CharacterState } from "../constants/character";
+import {
+  AnimationConfig,
+  AnimationConfigMap,
+  CharacterRenderer,
+  CharacterResource,
+  ControllerHandle,
+} from "vibe-starter-3d";
+import Assets from "../assets.json";
+
 /**
  * Player input parameters for action determination
  */
@@ -36,7 +44,18 @@ interface PlayerProps {
 function usePlayerStates() {
   // Function to determine player state based on inputs and current state
   const determinePlayerState = React.useCallback(
-    (currentState: CharacterState, { isRevive, isDying, isPunching, isHit, isJumping, isMoving, isRunning }: PlayerInputs): CharacterState => {
+    (
+      currentState: CharacterState,
+      {
+        isRevive,
+        isDying,
+        isPunching,
+        isHit,
+        isJumping,
+        isMoving,
+        isRunning,
+      }: PlayerInputs
+    ): CharacterState => {
       // Revival processing - transition from DIE to IDLE
       if (isRevive && currentState === CharacterState.DIE) {
         return CharacterState.IDLE;
@@ -80,7 +99,7 @@ function usePlayerStates() {
       // Default - maintain current action
       return currentState;
     },
-    [],
+    []
   );
 
   return { determinePlayerState: determinePlayerState };
@@ -89,7 +108,9 @@ function usePlayerStates() {
 /**
  * Hook for handling player animations
  */
-function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterState>) {
+function usePlayerAnimations(
+  currentStateRef: React.MutableRefObject<CharacterState>
+) {
   const handleAnimationComplete = React.useCallback(
     (state: CharacterState) => {
       console.log(`Animation ${state} completed`);
@@ -108,51 +129,52 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
           break;
       }
     },
-    [currentStateRef],
+    [currentStateRef]
   );
 
   // Animation configuration
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
-    () => ({
-      [CharacterState.IDLE]: {
-        animationType: 'IDLE',
-        loop: true,
-      } as AnimationConfig,
-      [CharacterState.WALK]: {
-        animationType: 'WALK',
-        loop: true,
-      } as AnimationConfig,
-      [CharacterState.RUN]: {
-        animationType: 'RUN',
-        loop: true,
-      } as AnimationConfig,
-      [CharacterState.JUMP]: {
-        animationType: 'JUMP',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.JUMP),
-      } as AnimationConfig,
-      [CharacterState.PUNCH]: {
-        animationType: 'PUNCH',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-      } as AnimationConfig,
-      [CharacterState.HIT]: {
-        animationType: 'HIT',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.HIT),
-      } as AnimationConfig,
-      [CharacterState.DIE]: {
-        animationType: 'DIE',
-        loop: false,
-        duration: 10,
-        clampWhenFinished: true,
-      } as AnimationConfig,
-    }),
-    [handleAnimationComplete],
-  );
+  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> =
+    useMemo(
+      () => ({
+        [CharacterState.IDLE]: {
+          animationType: "IDLE",
+          loop: true,
+        } as AnimationConfig,
+        [CharacterState.WALK]: {
+          animationType: "WALK",
+          loop: true,
+        } as AnimationConfig,
+        [CharacterState.RUN]: {
+          animationType: "RUN",
+          loop: true,
+        } as AnimationConfig,
+        [CharacterState.JUMP]: {
+          animationType: "JUMP",
+          loop: false,
+          clampWhenFinished: true,
+          onComplete: () => handleAnimationComplete(CharacterState.JUMP),
+        } as AnimationConfig,
+        [CharacterState.PUNCH]: {
+          animationType: "PUNCH",
+          loop: false,
+          clampWhenFinished: true,
+          onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
+        } as AnimationConfig,
+        [CharacterState.HIT]: {
+          animationType: "HIT",
+          loop: false,
+          clampWhenFinished: true,
+          onComplete: () => handleAnimationComplete(CharacterState.HIT),
+        } as AnimationConfig,
+        [CharacterState.DIE]: {
+          animationType: "DIE",
+          loop: false,
+          duration: 10,
+          clampWhenFinished: true,
+        } as AnimationConfig,
+      }),
+      [handleAnimationComplete]
+    );
 
   return { animationConfigMap };
 }
@@ -162,7 +184,10 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-export const Player: React.FC<PlayerProps> = ({ initState: initAction = CharacterState.IDLE, controllerRef }) => {
+export const Player: React.FC<PlayerProps> = ({
+  initState: initAction = CharacterState.IDLE,
+  controllerRef,
+}) => {
   const currentStateRef = useRef<CharacterState>(initAction);
   const [, get] = useKeyboardControls();
   const { determinePlayerState: determinePlayerState } = usePlayerStates();
@@ -208,20 +233,26 @@ export const Player: React.FC<PlayerProps> = ({ initState: initAction = Characte
   // Define the character resource with all animations
   const characterResource: CharacterResource = useMemo(
     () => ({
-      name: 'Default Character',
-      url: 'https://agent8-games.verse8.io/assets/3d/characters/human/space-marine.glb',
+      name: "Default Character",
+      url: Assets.characters["space-marine"].url,
       animations: {
-        IDLE: 'https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb',
-        WALK: 'https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb',
-        RUN: 'https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run.glb',
-        JUMP: 'https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump-up.glb',
-        PUNCH: 'https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch.glb',
-        HIT: 'https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit.glb',
-        DIE: 'https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death.glb',
+        IDLE: Assets.animations.idle.url,
+        WALK: Assets.animations.walk.url,
+        RUN: Assets.animations.run.url,
+        JUMP: Assets.animations.jump.url,
+        PUNCH: Assets.animations.punch.url,
+        HIT: Assets.animations.hit.url,
+        DIE: Assets.animations.die.url,
       },
     }),
-    [],
+    []
   );
 
-  return <CharacterRenderer characterResource={characterResource} animationConfigMap={animationConfigMap} currentActionRef={currentStateRef} />;
+  return (
+    <CharacterRenderer
+      characterResource={characterResource}
+      animationConfigMap={animationConfigMap}
+      currentActionRef={currentStateRef}
+    />
+  );
 };
