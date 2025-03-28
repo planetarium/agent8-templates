@@ -1,19 +1,20 @@
-import React, { RefObject, createRef } from "react";
-import { AnimationConfigMap } from "../../types/animation";
-import { CharacterRenderer } from "./CharacterRenderer";
-import { CharacterResource } from "../../types/characterResource";
-import { CharacterAction } from "../../constants/character.constant.ts";
+import React, { RefObject, createRef, useMemo } from "react";
+
+import {
+  AnimationConfigMap,
+  CharacterRenderer,
+  CharacterResource,
+} from "vibe-starter-3d";
+import Assets from "../../assets.json";
+import { CharacterAction } from "../../constants/character";
 
 /**
  * Props for the PreviewCharacter component
  */
 interface CharacterProps {
-  /** Character Resource */
-  characterResource: CharacterResource;
   /** Reference to the current character action */
   currentActionRef: RefObject<CharacterAction | undefined>;
-  /** Optional callback for when an animation completes */
-  onAnimationComplete?: (action: CharacterAction) => void;
+  onAnimationComplete: (action: CharacterAction) => void;
 }
 
 /**
@@ -31,10 +32,30 @@ interface CharacterProps {
  * @component
  */
 export const Character = ({
-  characterResource,
   currentActionRef = createRef<CharacterAction>(),
   onAnimationComplete,
 }: CharacterProps) => {
+  const characterResource: CharacterResource = useMemo(
+    () => ({
+      name: "Default Character",
+      url: Assets.characters["space-marine"].url,
+      animations: {
+        IDLE: Assets.animations.idle.url,
+        WALK: Assets.animations.walk.url,
+        RUN: Assets.animations.run.url,
+        JUMP: Assets.animations.jump.url,
+        PUNCH: Assets.animations.punch.url,
+        MELEE_ATTACK: Assets.animations.melee_attack.url,
+        AIM: Assets.animations.aim.url,
+        SHOOT: Assets.animations.shoot.url,
+        AIM_RUN: Assets.animations.aim_run.url,
+        HIT: Assets.animations.hit.url,
+        DIE: Assets.animations.die.url,
+      },
+    }),
+    []
+  );
+
   const animationConfigMap: Partial<AnimationConfigMap<CharacterAction>> = {
     [CharacterAction.IDLE]: {
       animationType: "IDLE",
@@ -48,25 +69,8 @@ export const Character = ({
       animationType: "RUN",
       loop: true,
     },
-    [CharacterAction.JUMP_UP]: {
-      animationType: "JUMP_UP",
-      loop: false,
-      clampWhenFinished: true,
-      onComplete: () => {
-        if (
-          currentActionRef.current === CharacterAction.JUMP_UP &&
-          onAnimationComplete
-        ) {
-          onAnimationComplete(CharacterAction.JUMP_UP);
-        }
-      },
-    },
-    [CharacterAction.FALL_IDLE]: {
-      animationType: "FALL_IDLE",
-      loop: true,
-    },
-    [CharacterAction.FALL_DOWN]: {
-      animationType: "FALL_DOWN",
+    [CharacterAction.JUMP]: {
+      animationType: "JUMP",
       loop: false,
       clampWhenFinished: true,
     },

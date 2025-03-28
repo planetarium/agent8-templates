@@ -1,16 +1,16 @@
 import React, {
   useRef,
+  useCallback,
   useState,
   useEffect,
-  useCallback,
   useMemo,
 } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Character } from "./character/Character";
-import { CharacterResource } from "../types/characterResource";
 import { Environment, OrbitControls } from "@react-three/drei";
-import { CharacterAction } from "../constants/character.constant.ts";
-
+import { CharacterAction } from "../constants/character";
+import { CharacterResource } from "vibe-starter-3d";
+import Assets from "../assets.json";
 /**
  * Simple 3D character preview scene
  */
@@ -20,26 +20,19 @@ const PreviewScene: React.FC = () => {
   );
   const currentActionRef = useRef<CharacterAction>(CharacterAction.IDLE);
 
-  // Update currentActionRef when currentAction state changes
   useEffect(() => {
     currentActionRef.current = currentAction;
   }, [currentAction]);
 
   // Handle animation completion
-  const handleAnimationComplete = useCallback((action: CharacterAction) => {
+  const onAnimationComplete = useCallback((action: CharacterAction) => {
     console.log(`Animation ${action} completed`);
 
     // Transition to appropriate next state after animation completion
     switch (action) {
-      case CharacterAction.JUMP_UP:
-        // Transition to FALL_IDLE after JUMP_UP animation completes
-        console.log("Transitioning from JUMP_UP to FALL_IDLE");
-        setCurrentAction(CharacterAction.FALL_IDLE);
-        break;
-
-      case CharacterAction.FALL_DOWN:
-        // Transition to IDLE after FALL_DOWN animation completes
-        console.log("Transitioning from FALL_DOWN to IDLE");
+      case CharacterAction.HIT:
+        // Transition to IDLE after HIT animation completes
+        console.log("Transitioning from HIT to IDLE");
         setCurrentAction(CharacterAction.IDLE);
         break;
 
@@ -52,28 +45,19 @@ const PreviewScene: React.FC = () => {
   const characterResource: CharacterResource = useMemo(
     () => ({
       name: "Default Character",
-      url: "https://agent8-games.verse8.io/assets/3d/characters/space-marine.glb",
+      url: Assets.characters["space-marine"].url,
       animations: {
-        IDLE: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb",
-        WALK: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
-        RUN: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run.glb",
-        JUMP_UP:
-          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump-up.glb",
-        FALL_IDLE:
-          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/fall-idle.glb",
-        FALL_DOWN:
-          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/fall-down.glb",
-        PUNCH:
-          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch.glb",
-        MELEE_ATTACK:
-          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
-        AIM: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/aimming.glb",
-        SHOOT:
-          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot.glb",
-        AIM_RUN:
-          "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot-run.glb",
-        HIT: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit.glb",
-        DIE: "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death.glb",
+        IDLE: Assets.animations.idle.url,
+        WALK: Assets.animations.walk.url,
+        RUN: Assets.animations.run.url,
+        JUMP: Assets.animations.jump.url,
+        PUNCH: Assets.animations.punch.url,
+        MELEE_ATTACK: Assets.animations.melee_attack.url,
+        AIM: Assets.animations.aim.url,
+        SHOOT: Assets.animations.shoot.url,
+        AIM_RUN: Assets.animations.aim_run.url,
+        HIT: Assets.animations.hit.url,
+        DIE: Assets.animations.die.url,
       },
     }),
     []
@@ -114,7 +98,7 @@ const PreviewScene: React.FC = () => {
             <Character
               characterResource={characterResource}
               currentActionRef={currentActionRef}
-              onAnimationComplete={handleAnimationComplete}
+              onAnimationComplete={onAnimationComplete}
             />
           </group>
 
@@ -145,7 +129,9 @@ const PreviewScene: React.FC = () => {
                 borderRadius: "4px",
                 cursor: "pointer",
               }}
-              onClick={() => setCurrentAction(action as CharacterAction)}
+              onClick={() => {
+                setCurrentAction(action as CharacterAction);
+              }}
             >
               {action}
             </button>
