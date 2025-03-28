@@ -53,9 +53,9 @@ export function Experience() {
           {/* player character with controller */}
           <FreeViewController
             ref={controllerRef}
-            camInitDis={-4}
-            camMinDis={-4}
-            camMaxDis={-4}
+            camInitDis={4}
+            camMinDis={4}
+            camMaxDis={4}
             capsuleRadius={0.3}
             capsuleHeight={0.8}
           >
