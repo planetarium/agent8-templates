@@ -1,8 +1,8 @@
 {
   "characters": {
-    "space-marine": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/space-marine.glb",
-      "description": "Space Marine"
+    "player": {
+      "url": "vrm or glb",
+      "description": "Player Character"
     }
   },
   "animations": {

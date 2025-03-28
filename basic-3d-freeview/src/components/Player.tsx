@@ -234,7 +234,7 @@ export const Player: React.FC<PlayerProps> = ({
   const characterResource: CharacterResource = useMemo(
     () => ({
       name: "Default Character",
-      url: Assets.characters["space-marine"].url,
+      url: Assets.characters.player.url,
       animations: {
         IDLE: Assets.animations.idle.url,
         WALK: Assets.animations.walk.url,
