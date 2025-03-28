@@ -25,10 +25,7 @@ export function Experience() {
   }, []);
 
   const controllerRef = useRef<ControllerHandle>(null);
-  const camDistance = -4;
-  const capsuleRadius = 0.3;
-  const capsuleHeight = 0.8;
-  const position = new Vector3(0, capsuleHeight / 2 + capsuleRadius, 0);
+  
   return (
     <>
       {/* Grid */}
@@ -57,12 +54,12 @@ export function Experience() {
           {/* player character with controller */}
           <FreeViewController
             ref={controllerRef}
-            position={position}
-            camInitDis={camDistance}
-            camMinDis={camDistance}
-            camMaxDis={camDistance}
-            capsuleRadius={capsuleRadius}
-            capsuleHeight={capsuleHeight}
+            position={[0, 1, 0]}
+            camInitDis={-4}
+            camMinDis={-4}
+            camMaxDis={-4}
+            capsuleRadius={0.3}
+            capsuleHeight={0.8}
           >
             <Player initState={CharacterState.IDLE} controllerRef={controllerRef} />
           </FreeViewController>
