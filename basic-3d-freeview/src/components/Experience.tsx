@@ -6,11 +6,10 @@ import { CharacterState } from '../constants/character';
 import { FreeViewController, ControllerHandle } from 'vibe-starter-3d';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import Lights from './Lights';
 import { keyboardMap } from '../constants/controls';
 import { Floor } from './Floor';
 import { Vector3 } from 'three';
-
+import { Lights } from './Lights';
 export function Experience() {
   /**
    * Delay physics activate
@@ -25,10 +24,7 @@ export function Experience() {
   }, []);
 
   const controllerRef = useRef<ControllerHandle>(null);
-  const camDistance = -4;
-  const capsuleRadius = 0.3;
-  const capsuleHeight = 0.8;
-  const position = new Vector3(0, capsuleHeight / 2 + capsuleRadius, 0);
+  
   return (
     <>
       {/* Grid */}
@@ -57,12 +53,11 @@ export function Experience() {
           {/* player character with controller */}
           <FreeViewController
             ref={controllerRef}
-            position={position}
-            camInitDis={camDistance}
-            camMinDis={camDistance}
-            camMaxDis={camDistance}
-            capsuleRadius={capsuleRadius}
-            capsuleHeight={capsuleHeight}
+            camInitDis={-4}
+            camMinDis={-4}
+            camMaxDis={-4}
+            capsuleRadius={0.3}
+            capsuleHeight={0.8}
           >
             <Player initState={CharacterState.IDLE} controllerRef={controllerRef} />
           </FreeViewController>
