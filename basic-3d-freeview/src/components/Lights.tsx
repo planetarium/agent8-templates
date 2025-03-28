@@ -4,7 +4,7 @@ import { DEFAULT_CONTROLLER_CONFIG } from 'vibe-starter-3d';
 
 const CAMERA_INIT_DISTANCE = 50;
 
-export default function Lights() {
+export function Lights() {
   const directionalLightRef = useRef<THREE.DirectionalLight>();
 
   // useHelper(directionalLightRef, THREE.DirectionalLightHelper, 1);
