@@ -39,57 +39,5 @@
       "animation",
       "mixamo"
     ]
-  },
-  {
-    "name": "basic-3d-isometric-keyboard-control",
-    "label": "Basic 3D Isometric Keyboard Control Template",
-    "description": "Template for creating isometric 3D games using Three.js and react-three-fiber. Features include GLB model loading, character animation system, isometric camera, rapier physics, and keyboard controls.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-isometric-keyboard-control",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "three.js",
-      "3d",
-      "rpg",
-      "isometric",
-      "game",
-      "animation",
-      "character",
-      "casual",
-      "physics",
-      "keyboard",
-      "control",
-      "glb",
-      "mixamo"
-    ]
-  },
-  {
-    "name": "basic-3d-third-person-shooter",
-    "label": "Basic 3D Third Person Shooter Template",
-    "description": "Template for creating third person shooter games using Three.js and react-three-fiber. Features include GLB model loading, character animation system, third person camera, rapier physics, and mouse with keyboard controls.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-tps",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "three.js",
-      "3d",
-      "rpg",
-      "tps",
-      "third person",
-      "sholder view",
-      "game",
-      "animation",
-      "character",
-      "casual",
-      "physics",
-      "keyboard",
-      "control",
-      "glb",
-      "mixamo"
-    ]
   }
 ]
