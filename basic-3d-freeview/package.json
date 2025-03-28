@@ -13,7 +13,7 @@
     "@agent8/gameserver": "^1.5.1",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
-    "@react-three/postprocessing": "^2.19.1",
+    "@react-three/postprocessing": "^2.16.6",
     "@react-three/rapier": "^1.5.0",
     "ecctrl": "^1.0.92",
     "lucide-react": "^0.482.0",
@@ -23,19 +23,19 @@
     "vibe-starter-3d": "^0.1.5"
   },
   "devDependencies": {
-    "@eslint/js": "^9.23.0",
-    "@types/react": "^18.3.20",
-    "@types/react-dom": "^18.3.5",
+    "@eslint/js": "^9.22.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
     "@types/three": "^0.174.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
-    "eslint": "^9.23.0",
+    "eslint": "^9.22.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^3.4.1",
     "typescript": "~5.8.2",
-    "typescript-eslint": "^8.28.0",
-    "vite": "^6.2.3"
+    "typescript-eslint": "^8.26.1",
+    "vite": "^6.2.2"
   }
 }
