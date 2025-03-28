@@ -6,11 +6,10 @@ import { CharacterState } from '../constants/character';
 import { FreeViewController, ControllerHandle } from 'vibe-starter-3d';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import Lights from './Lights';
 import { keyboardMap } from '../constants/controls';
 import { Floor } from './Floor';
 import { Vector3 } from 'three';
-
+import { Lights } from './Lights';
 export function Experience() {
   /**
    * Delay physics activate
@@ -54,7 +53,6 @@ export function Experience() {
           {/* player character with controller */}
           <FreeViewController
             ref={controllerRef}
-            position={[0, 1, 0]}
             camInitDis={-4}
             camMinDis={-4}
             camMaxDis={-4}
