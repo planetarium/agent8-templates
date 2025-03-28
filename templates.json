@@ -25,7 +25,7 @@
   {
     "name": "basic-3d-character-animation",
     "label": "3D Character Animation Template",
-    "description": "Template for implementing 3D rigged(mixamo) character with animations using Three.js. Features GLB model loading, animation system for creating interactive 3D character models.",
+    "description": "Template for implementing 3D rigged(mixamo) character with animations using Three.js. Features GLTF, VRM model loading, animation system for creating interactive 3D character models.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-character-animation",
     "tags": [
@@ -38,6 +38,34 @@
       "glb",
       "animation",
       "mixamo"
+    ]
+  },
+  {
+    "name": "basic-3d-freeview",
+    "label": "3D Character Freeview Template",
+    "description": "Template for implementing 3D game with map and character. Features character system and freeview camera system. Use for general 3D game with map and character.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-freeview",
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "three.js",
+      "3d",
+      "character",
+      "glb",
+      "gltf",
+      "vrm",
+      "animation",
+      "mixamo",
+      "casual",
+      "map",
+      "rpg",
+      "action",
+      "adventure",
+      "mmorpg",
+      "tps",
+      "freeview"
     ]
   }
 ]
