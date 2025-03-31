@@ -36,6 +36,8 @@ interface PlayerProps {
   initState?: CharacterState;
   /** Reference to player controller for physics calculations */
   controllerRef?: React.RefObject<ControllerHandle>;
+  /** Target height for the character model */
+  targetHeight?: number;
 }
 
 /**
@@ -187,6 +189,7 @@ function usePlayerAnimations(
 export const Player: React.FC<PlayerProps> = ({
   initState: initAction = CharacterState.IDLE,
   controllerRef,
+  targetHeight = 1.6,
 }) => {
   const currentStateRef = useRef<CharacterState>(initAction);
   const [, get] = useKeyboardControls();
@@ -253,6 +256,7 @@ export const Player: React.FC<PlayerProps> = ({
       characterResource={characterResource}
       animationConfigMap={animationConfigMap}
       currentActionRef={currentStateRef}
+      targetHeight={targetHeight}
     />
   );
 };
