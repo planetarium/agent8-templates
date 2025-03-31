@@ -24,6 +24,7 @@ export function Experience() {
   }, []);
 
   const controllerRef = useRef<ControllerHandle>(null);
+  const targetHeight = 1.6;
   
   return (
     <>
@@ -53,13 +54,9 @@ export function Experience() {
           {/* player character with controller */}
           <FreeViewController
             ref={controllerRef}
-            camInitDis={4}
-            camMinDis={4}
-            camMaxDis={4}
-            capsuleRadius={0.3}
-            capsuleHeight={0.8}
+            targetHeight={targetHeight}
           >
-            <Player initState={CharacterState.IDLE} controllerRef={controllerRef} />
+            <Player initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={targetHeight} />
           </FreeViewController>
         </KeyboardControls>
 
