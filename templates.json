@@ -43,7 +43,7 @@
   {
     "name": "basic-3d-freeview",
     "label": "3D Character Freeview Template",
-    "description": "Template for implementing 3D game with map and character. Features character system and freeview camera system. Use for general 3D game with map and character.",
+    "description": "Template for implementing 3D game with map and character. Features character system and freeview camera system. Use for general and default 3D game with map and character.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-freeview",
     "tags": [
