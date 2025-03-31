@@ -2,7 +2,7 @@ import React, { useRef, useMemo } from "react";
 import * as THREE from "three";
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { CharacterState } from "../constants/character";
+import { CharacterState } from "../../constants/character";
 import {
   AnimationConfig,
   AnimationConfigMap,
@@ -10,7 +10,7 @@ import {
   CharacterResource,
   ControllerHandle,
 } from "vibe-starter-3d";
-import Assets from "../assets.json";
+import Assets from "../../assets.json";
 
 /**
  * Player input parameters for action determination

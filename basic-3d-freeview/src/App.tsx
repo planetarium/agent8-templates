@@ -1,14 +1,17 @@
 import React from 'react';
 import './App.css';
-import { KeyboardControls } from '@react-three/drei';
-
-import { keyboardMap } from './constants/controls.ts';
-import { GameScene } from './components/GameScene.tsx';
+import { UI } from './components/UI.tsx';
+import { R3F } from './components/R3F.tsx';
+import { GameScene } from './components/r3f/GameScene.tsx';
 
 const App: React.FC = () => {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <GameScene />
+      <R3F> 
+        <GameScene />
+      </R3F>
+      <UI>
+      </UI>
     </div>
   );
 };
