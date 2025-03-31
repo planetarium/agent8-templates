@@ -67,5 +67,35 @@
       "tps",
       "freeview"
     ]
+  },
+  {
+    "name": "basic-3d-multiplay",
+    "label": "3D Multiplay Template",
+    "description": "Template for implementing 3D game with map and character. Features character and freeview camera and multiplay system. Use for general 3D multiplay game with map and character.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-multiplay",
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "three.js",
+      "3d",
+      "character",
+      "glb",
+      "gltf",
+      "vrm",
+      "animation",
+      "mixamo",
+      "casual",
+      "map",
+      "rpg",
+      "action",
+      "adventure",
+      "mmorpg",
+      "tps",
+      "freeview",
+      "multiplay",
+      "lobby"
+    ]
   }
 ]
