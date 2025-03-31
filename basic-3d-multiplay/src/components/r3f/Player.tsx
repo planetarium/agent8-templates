@@ -343,6 +343,7 @@ export const Player: React.FC<PlayerProps> = ({
   });
 
   // Define the character resource with all animations based on characterKey prop
+  // !!IMPORTANT: This is a rerender operation, so it should be memoized
   const characterResource: CharacterResource = useMemo(() => {
     // Characters are directly keyed by filename in assets.json
     const characterData = (
