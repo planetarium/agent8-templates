@@ -22,17 +22,3 @@ export interface PlayerInputs {
   /** Current vertical velocity */
   currentVelY: number;
 }
-
-/**
- * Network sync constants
- */
-export const NETWORK_CONSTANTS = {
-  SYNC: {
-    /** Transmission interval (milliseconds) */
-    INTERVAL_MS: 100,
-    /** Position change threshold (meters) */
-    POSITION_CHANGE_THRESHOLD: 0.05,
-    /** Rotation change threshold (radians) */
-    ROTATION_CHANGE_THRESHOLD: 0.05,
-  },
-};

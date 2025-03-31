@@ -14,7 +14,21 @@ import Assets from "../../assets.json";
 import { GameServer } from "@agent8/gameserver";
 import { Vector3, Quaternion } from "three";
 import throttle from "lodash/throttle";
-import { NETWORK_CONSTANTS, PlayerInputs } from "../../types";
+import { PlayerInputs } from "../../types";
+
+/**
+ * Network sync constants
+ */
+const NETWORK_CONSTANTS = {
+  SYNC: {
+    /** Transmission interval (milliseconds) */
+    INTERVAL_MS: 100,
+    /** Position change threshold (meters) */
+    POSITION_CHANGE_THRESHOLD: 0.05,
+    /** Rotation change threshold (radians) */
+    ROTATION_CHANGE_THRESHOLD: 0.05,
+  },
+};
 
 /**
  * Player component props
