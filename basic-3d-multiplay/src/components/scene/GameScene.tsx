@@ -30,6 +30,11 @@ export const GameScene: React.FC<GameSceneProps> = ({
   // Get all user states from the server
   const userStates = useRoomAllUserStates() as UserState[];
 
+  // Filter only ready players
+  const readyUserStates = useMemo(() => {
+    return userStates.filter((user) => user.isReady);
+  }, [userStates]);
+
   // Find current user's state to get selected character
   const currentUser = useMemo(() => {
     return userStates.find((user) => user.account === server.account);
@@ -61,7 +66,7 @@ export const GameScene: React.FC<GameSceneProps> = ({
         <Suspense fallback={null}>
           <Experience
             server={server}
-            userStates={userStates}
+            userStates={readyUserStates}
             characterKey={characterKey}
             roomId={roomId}
           />

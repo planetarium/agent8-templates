@@ -13,6 +13,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
+  const [isUserReady, setIsUserReady] = useState(false);
+  const [hasSelectedCharacter, setHasSelectedCharacter] = useState(false);
 
   // Handle nickname setting
   const handleNicknameSet = (newNickname: string) => {
@@ -48,6 +50,8 @@ function App() {
       ]);
       setCurrentRoomId(joinedRoomId);
       setGameStarted(false); // Reset game state when joining a new room
+      setIsUserReady(false); // Reset ready status
+      setHasSelectedCharacter(false); // Reset character selection
     } catch (err) {
       setError(
         `Failed to join room: ${
@@ -69,6 +73,8 @@ function App() {
       await server.remoteFunction("leaveRoom", []);
       setCurrentRoomId(null);
       setGameStarted(false);
+      setIsUserReady(false);
+      setHasSelectedCharacter(false);
     } catch (err) {
       setError(
         `Failed to leave room: ${
@@ -89,6 +95,24 @@ function App() {
         setGameStarted(true);
       }
     });
+
+    return () => unsubscribe();
+  }, [connected, currentRoomId, server]);
+
+  // Subscribe to user state to check ready status and character selection
+  useEffect(() => {
+    if (!connected || !currentRoomId) return;
+
+    const unsubscribe = server.subscribeRoomUserState(
+      currentRoomId,
+      server.account,
+      (userState) => {
+        if (userState) {
+          setIsUserReady(userState.isReady);
+          setHasSelectedCharacter(!!userState.character);
+        }
+      }
+    );
 
     return () => unsubscribe();
   }, [connected, currentRoomId, server]);
@@ -128,9 +152,10 @@ function App() {
       );
     }
 
-    if (!gameStarted) {
+    // 게임이 시작되었고, 사용자가 레디 상태이며, 캐릭터도 선택했을 때만 게임 씬으로 전환
+    if (gameStarted && isUserReady && hasSelectedCharacter) {
       return (
-        <LobbyRoom
+        <GameScene
           roomId={currentRoomId}
           onLeaveRoom={handleLeaveRoom}
           server={server}
@@ -138,8 +163,9 @@ function App() {
       );
     }
 
+    // 그렇지 않으면 로비에 머무름
     return (
-      <GameScene
+      <LobbyRoom
         roomId={currentRoomId}
         onLeaveRoom={handleLeaveRoom}
         server={server}
@@ -147,15 +173,13 @@ function App() {
     );
   };
 
-  if (gameStarted && currentRoomId) {
+  // 게임 씬으로 전환해야 하는지 결정 (상단 리턴 조건 수정)
+  if (gameStarted && currentRoomId && isUserReady && hasSelectedCharacter) {
     return renderContent();
   }
 
   return (
     <div className="min-h-screen">
-      <div className="bg-gray-800 text-white p-4">
-        <h1 className="text-xl font-medium">3D Multiplay Template</h1>
-      </div>
       <div>{renderContent()}</div>
     </div>
   );

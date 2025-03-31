@@ -144,7 +144,7 @@ export function Experience({
   const otherPlayers = useMemo(() => {
     return Object.values(remotePlayersStateRef.current)
       .map((entry) => entry.state)
-      .filter((user) => user.character);
+      .filter((user) => user.character && user.isReady);
   }, [remotePlayersUpdate]); // remotePlayersUpdate가 변경될 때만 다시 계산
 
   return (

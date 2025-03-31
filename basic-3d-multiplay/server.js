@@ -2,8 +2,8 @@ class Server {
   // Join a room or create a new one if roomId is not provided
   async joinRoom(roomId, nickname) {
     try {
-      if (!nickname || nickname.trim() === '') {
-        throw new Error('닉네임을 입력해주세요');
+      if (!nickname || nickname.trim() === "") {
+        throw new Error("닉네임을 입력해주세요");
       }
 
       // If roomId is provided, join that specific room
@@ -32,20 +32,18 @@ class Server {
           lastActivity: Date.now(),
           userCount: (roomState.$users || []).length,
           gameStarted: false,
-          allReady: false,
         });
       } else {
         // Update room state to indicate a new user has joined
         await $room.updateRoomState({
           lastActivity: Date.now(),
           userCount: (roomState.$users || []).length,
-          allReady: false, // Reset allReady when a new user joins
         });
       }
 
       // Broadcast a system message that a new user has joined
-      await $room.broadcastToRoom('system-message', {
-        type: 'join',
+      await $room.broadcastToRoom("system-message", {
+        type: "join",
         account: $sender.account,
         nickname: nickname.trim(),
         timestamp: Date.now(),
@@ -64,8 +62,8 @@ class Server {
       const userState = await $room.getUserState($sender.account);
 
       // Broadcast a system message that the user is leaving
-      await $room.broadcastToRoom('system-message', {
-        type: 'leave',
+      await $room.broadcastToRoom("system-message", {
+        type: "leave",
         account: $sender.account,
         nickname: userState.nickname,
         timestamp: Date.now(),
@@ -88,8 +86,8 @@ class Server {
       });
 
       // Broadcast a system message that user has selected a character
-      await $room.broadcastToRoom('system-message', {
-        type: 'character-select',
+      await $room.broadcastToRoom("system-message", {
+        type: "character-select",
         account: $sender.account,
         character: character,
         timestamp: Date.now(),
@@ -106,7 +104,7 @@ class Server {
     try {
       // Validate transform data
       if (!transform || !transform.position || !transform.rotation) {
-        throw new Error('Invalid transform data');
+        throw new Error("Invalid transform data");
       }
 
       // Get the current user state
@@ -132,6 +130,11 @@ class Server {
       // Get current user state
       const userState = await $room.getUserState($sender.account);
 
+      // Don't allow toggling ready if not character is selected
+      if (!userState.character) {
+        throw new Error("Please select a character first");
+      }
+
       // Toggle ready status
       const newReadyStatus = !userState.isReady;
 
@@ -141,61 +144,49 @@ class Server {
         lastActive: Date.now(),
       });
 
-      // Check if all users are ready
-      await this.checkAllUsersReady();
+      // Get current room state
+      const roomState = await $room.getRoomState();
+
+      if (newReadyStatus) {
+        // If the user is now ready
+        if (!roomState.gameStarted) {
+          // If game hasn't started yet and this is the first ready user, start the game
+          const now = Date.now();
+          await $room.updateRoomState({
+            gameStarted: true,
+            gameStartTime: now,
+            lastActivity: now,
+          });
+
+          // Broadcast game start message
+          await $room.broadcastToRoom("system-message", {
+            type: "game-start",
+            timestamp: now,
+            message: "Game started!",
+          });
+        } else {
+          // If game is already started, player joins immediately
+          await $room.broadcastToRoom("system-message", {
+            type: "player-join-game",
+            account: $sender.account,
+            nickname: userState.nickname,
+            timestamp: Date.now(),
+            message: `${userState.nickname} joined the game!`,
+          });
+        }
+      }
 
       return newReadyStatus;
     } catch (error) {
-      throw new Error(`준비 상태 변경 실패: ${error.message}`);
-    }
-  }
-
-  // Check if all users in the room are ready
-  async checkAllUsersReady() {
-    try {
-      // Get all user states
-      const allUserStates = await $room.getAllUserStates();
-
-      // Check if all users have set a nickname and are ready
-      // Allow game to start even with just one player
-      const allReady = allUserStates.length > 0 && allUserStates.every((user) => user.nickname && user.isReady);
-
-      // Update room state
-      await $room.updateRoomState({
-        allReady,
-        lastActivity: Date.now(),
-      });
-
-      // If all users are ready, immediately start the game
-      if (allReady) {
-        const now = Date.now();
-
-        // Start the game immediately
-        await $room.updateRoomState({
-          gameStarted: true,
-          gameStartTime: now,
-        });
-
-        // Broadcast game start message
-        await $room.broadcastToRoom('system-message', {
-          type: 'game-start',
-          timestamp: now,
-          message: '게임이 시작되었습니다!',
-        });
-      }
-
-      return allReady;
-    } catch (error) {
-      console.error(`모든 사용자 준비 상태 확인 실패: ${error.message}`);
-      return false;
+      throw new Error(`Failed to change ready status: ${error.message}`);
     }
   }
 
   // Send a chat message to everyone in the room
   async sendMessage(message) {
     try {
-      if (!message || message.trim() === '') {
-        throw new Error('메시지를 입력해주세요');
+      if (!message || message.trim() === "") {
+        throw new Error("메시지를 입력해주세요");
       }
 
       // Get user state to include nickname in the message
@@ -207,7 +198,7 @@ class Server {
       });
 
       // Broadcast the message to all users in the room
-      await $room.broadcastToRoom('chat-message', {
+      await $room.broadcastToRoom("chat-message", {
         sender: $sender.account,
         senderNickname: userState.nickname || null,
         content: message,
@@ -224,7 +215,6 @@ class Server {
   async $roomTick(deltaMS, roomId) {
     try {
       // 주기적인 룸 상태 업데이트가 필요한 경우 여기에 추가
-      // 카운트다운 관련 코드 제거로 특별한 처리가 필요 없음
     } catch (error) {
       console.error(`Room tick error: ${error.message}`);
     }
