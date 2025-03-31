@@ -212,8 +212,7 @@ export const Player: React.FC<PlayerProps> = ({
   });
 
   /**
-   * Throttle the actual server transmission function
-   * - trailing: true to ensure the last call is guaranteed
+   * IMPORTANT:Should be memoized
    */
   const throttledSyncToNetwork = useMemo(
     () =>
@@ -250,8 +249,7 @@ export const Player: React.FC<PlayerProps> = ({
   );
 
   /**
-   * Server sync (network transmission) function
-   * - Only transmits when there is a meaningful change (Dirty Check)
+   * IMPORTANT: Should be useCallback
    */
   const syncToNetwork = useCallback(
     (position: Vector3, rotation: Quaternion, state: CharacterState) => {

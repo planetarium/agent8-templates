@@ -7,6 +7,7 @@ import {
   AnimationConfigMap,
   CharacterRenderer,
   CharacterResource,
+  DEFAULT_CONTROLLER_CONFIG,
 } from "vibe-starter-3d";
 import Assets from "../../assets.json";
 import { RigidBody, RapierRigidBody } from "@react-three/rapier";
@@ -236,11 +237,22 @@ export const RemotePlayer: React.FC<RemotePlayerProps> = ({
       userData={{ isRemotePlayer: true, account }}
     >
       <group ref={modelRef}>
-        <CharacterRenderer
-          characterResource={characterResource}
-          animationConfigMap={animationConfigMap}
-          currentActionRef={currentStateRef}
-        />
+        <group
+          position={[
+            0,
+            -(
+              DEFAULT_CONTROLLER_CONFIG.TARGET_HEIGHT / 2 +
+              DEFAULT_CONTROLLER_CONFIG.TARGET_HEIGHT / 5
+            ),
+            0,
+          ]}
+        >
+          <CharacterRenderer
+            characterResource={characterResource}
+            animationConfigMap={animationConfigMap}
+            currentActionRef={currentStateRef}
+          />
+        </group>
       </group>
 
       {/* Player nickname display */}
