@@ -8,8 +8,6 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import { keyboardMap } from '../../constants/controls';
 import { Floor } from './Floor';
-import { Vector3 } from 'three';
-import { Lights } from './Lights';
 export function Experience() {
   /**
    * Delay physics activate
@@ -25,7 +23,7 @@ export function Experience() {
 
   const controllerRef = useRef<ControllerHandle>(null);
   const targetHeight = 1.6;
-  
+
   return (
     <>
       {/* Grid */}
@@ -43,7 +41,7 @@ export function Experience() {
         userData={{ camExcludeCollision: true }} // this won't be collide by camera ray
       /> */}
 
-      <Lights />
+      <ambientLight intensity={0.7} />
 
       <Physics debug={false} paused={pausedPhysics}>
         {/* Keyboard preset */}
@@ -55,6 +53,10 @@ export function Experience() {
           <FreeViewController
             ref={controllerRef}
             targetHeight={targetHeight}
+            followLight={{
+              position: [20, 30, 10],
+              intensity: 1.2,
+            }}
           >
             <Player initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={targetHeight} />
           </FreeViewController>

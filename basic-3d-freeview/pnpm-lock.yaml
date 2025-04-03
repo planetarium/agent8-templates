@@ -39,8 +39,8 @@ importers:
         specifier: ^0.174.0
         version: 0.174.0
       vibe-starter-3d:
-        specifier: ^0.1.13
-        version: 0.1.13(a92eece785e0b03b52ac4436d1655e67)
+        specifier: ^0.1.14
+        version: 0.1.14(a92eece785e0b03b52ac4436d1655e67)
     devDependencies:
       '@types/react':
         specifier: ^18.3.1
@@ -1607,8 +1607,8 @@ packages:
   v8n@1.5.1:
     resolution: {integrity: sha512-LdabyT4OffkyXFCe9UT+uMkxNBs5rcTVuZClvxQr08D5TUgo1OFKkoT65qYRCsiKBl/usHjpXvP4hHMzzDRj3A==}
 
-  vibe-starter-3d@0.1.13:
-    resolution: {integrity: sha512-Mc/4OLv7D1yo19k+4FiIFj/EV7Fce1AZt0v0gwkMERUKzFqt3hg3OlUdZbKDkoZjre/u+JMewbnaMeIK/NMbYQ==}
+  vibe-starter-3d@0.1.14:
+    resolution: {integrity: sha512-kl75FetJepB/BCUlgKriPF0WtU+8ktr6vkJbG09POI/OuKY0YUJWysC62f6pdxvHnwDRr6Gkb0x92VIJVR4PnA==}
     peerDependencies:
       '@pixiv/three-vrm': ^3.3.6
       '@react-three/drei': ^9.122.0
@@ -3326,7 +3326,7 @@ snapshots:
 
   v8n@1.5.1: {}
 
-  vibe-starter-3d@0.1.13(a92eece785e0b03b52ac4436d1655e67):
+  vibe-starter-3d@0.1.14(a92eece785e0b03b52ac4436d1655e67):
     dependencies:
       '@pixiv/three-vrm': 3.3.6(three@0.174.0)
       '@react-three/drei': 9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.4.0(react@18.3.1))
