@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Physics } from '@react-three/rapier';
 import { Environment, Grid, KeyboardControls } from '@react-three/drei';
-import { Player } from './Player';
+import { Player, PlayerRef } from './Player';
 import { CharacterState } from '../../constants/character';
 import { FreeViewController, ControllerHandle } from 'vibe-starter-3d';
 import { useState } from 'react';
@@ -9,6 +9,10 @@ import { useEffect } from 'react';
 import { keyboardMap } from '../../constants/controls';
 import { Floor } from './Floor';
 export function Experience() {
+  const controllerRef = useRef<ControllerHandle>(null);
+  const playerRef = useRef<PlayerRef>(null);
+  const targetHeight = 1.6;
+
   /**
    * Delay physics activate
    */
@@ -21,13 +25,10 @@ export function Experience() {
     return () => clearTimeout(timeout);
   }, []);
 
-  const controllerRef = useRef<ControllerHandle>(null);
-  const targetHeight = 1.6;
-
   return (
     <>
       {/* Grid */}
-      {/* <Grid
+      <Grid
         args={[100, 100]}
         position={[0, 0.01, 0]}
         cellSize={1}
@@ -39,7 +40,7 @@ export function Experience() {
         fadeDistance={100}
         fadeStrength={1}
         userData={{ camExcludeCollision: true }} // this won't be collide by camera ray
-      /> */}
+      />
 
       <ambientLight intensity={0.7} />
 

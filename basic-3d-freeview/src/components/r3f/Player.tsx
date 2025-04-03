@@ -1,16 +1,11 @@
-import React, { useRef, useMemo } from "react";
-import * as THREE from "three";
-import { useKeyboardControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { CharacterState } from "../../constants/character";
-import {
-  AnimationConfig,
-  AnimationConfigMap,
-  CharacterRenderer,
-  CharacterResource,
-  ControllerHandle,
-} from "vibe-starter-3d";
-import Assets from "../../assets.json";
+import React, { useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
+import * as THREE from 'three';
+import { useKeyboardControls } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { CharacterState } from '../../constants/character';
+import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterResource, ControllerHandle } from 'vibe-starter-3d';
+import Assets from '../../assets.json';
+import { CharacterRendererRef } from 'vibe-starter-3d/dist/src/components/renderers/CharacterRenderer';
 
 /**
  * Player input parameters for action determination
@@ -24,6 +19,16 @@ interface PlayerInputs {
   isMoving: boolean;
   isRunning: boolean;
   currentVelY: number;
+}
+
+/**
+ * Player ref interface
+ */
+export interface PlayerRef {
+  /** Bounding box of the character model */
+  boundingBox: THREE.Box3 | null;
+  /** Size of the character model */
+  size: THREE.Vector3 | null;
 }
 
 /**
@@ -46,18 +51,7 @@ interface PlayerProps {
 function usePlayerStates() {
   // Function to determine player state based on inputs and current state
   const determinePlayerState = React.useCallback(
-    (
-      currentState: CharacterState,
-      {
-        isRevive,
-        isDying,
-        isPunching,
-        isHit,
-        isJumping,
-        isMoving,
-        isRunning,
-      }: PlayerInputs
-    ): CharacterState => {
+    (currentState: CharacterState, { isRevive, isDying, isPunching, isHit, isJumping, isMoving, isRunning }: PlayerInputs): CharacterState => {
       // Revival processing - transition from DIE to IDLE
       if (isRevive && currentState === CharacterState.DIE) {
         return CharacterState.IDLE;
@@ -101,7 +95,7 @@ function usePlayerStates() {
       // Default - maintain current action
       return currentState;
     },
-    []
+    [],
   );
 
   return { determinePlayerState: determinePlayerState };
@@ -110,9 +104,7 @@ function usePlayerStates() {
 /**
  * Hook for handling player animations
  */
-function usePlayerAnimations(
-  currentStateRef: React.MutableRefObject<CharacterState>
-) {
+function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterState>) {
   const handleAnimationComplete = React.useCallback(
     (state: CharacterState) => {
       console.log(`Animation ${state} completed`);
@@ -131,52 +123,51 @@ function usePlayerAnimations(
           break;
       }
     },
-    [currentStateRef]
+    [currentStateRef],
   );
 
   // Animation configuration
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> =
-    useMemo(
-      () => ({
-        [CharacterState.IDLE]: {
-          animationType: "IDLE",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.WALK]: {
-          animationType: "WALK",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.RUN]: {
-          animationType: "RUN",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.JUMP]: {
-          animationType: "JUMP",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.JUMP),
-        } as AnimationConfig,
-        [CharacterState.PUNCH]: {
-          animationType: "PUNCH",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-        } as AnimationConfig,
-        [CharacterState.HIT]: {
-          animationType: "HIT",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.HIT),
-        } as AnimationConfig,
-        [CharacterState.DIE]: {
-          animationType: "DIE",
-          loop: false,
-          duration: 10,
-          clampWhenFinished: true,
-        } as AnimationConfig,
-      }),
-      [handleAnimationComplete]
-    );
+  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
+    () => ({
+      [CharacterState.IDLE]: {
+        animationType: 'IDLE',
+        loop: true,
+      } as AnimationConfig,
+      [CharacterState.WALK]: {
+        animationType: 'WALK',
+        loop: true,
+      } as AnimationConfig,
+      [CharacterState.RUN]: {
+        animationType: 'RUN',
+        loop: true,
+      } as AnimationConfig,
+      [CharacterState.JUMP]: {
+        animationType: 'JUMP',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.JUMP),
+      } as AnimationConfig,
+      [CharacterState.PUNCH]: {
+        animationType: 'PUNCH',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
+      } as AnimationConfig,
+      [CharacterState.HIT]: {
+        animationType: 'HIT',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.HIT),
+      } as AnimationConfig,
+      [CharacterState.DIE]: {
+        animationType: 'DIE',
+        loop: false,
+        duration: 10,
+        clampWhenFinished: true,
+      } as AnimationConfig,
+    }),
+    [handleAnimationComplete],
+  );
 
   return { animationConfigMap };
 }
@@ -186,15 +177,27 @@ function usePlayerAnimations(
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-export const Player: React.FC<PlayerProps> = ({
-  initState: initAction = CharacterState.IDLE,
-  controllerRef,
-  targetHeight = 1.6,
-}) => {
+export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = CharacterState.IDLE, controllerRef, targetHeight = 1.6 }, ref) => {
   const currentStateRef = useRef<CharacterState>(initAction);
   const [, get] = useKeyboardControls();
   const { determinePlayerState: determinePlayerState } = usePlayerStates();
   const { animationConfigMap } = usePlayerAnimations(currentStateRef);
+
+  // CharacterRenderer ref
+  const characterRendererRef = useRef<CharacterRendererRef>(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      get boundingBox() {
+        return characterRendererRef.current?.boundingBox || null;
+      },
+      get size() {
+        return characterRendererRef.current?.size || null;
+      },
+    }),
+    [],
+  );
 
   // Update player action state based on inputs and physics
   useFrame(() => {
@@ -236,7 +239,7 @@ export const Player: React.FC<PlayerProps> = ({
   // Define the character resource with all animations
   const characterResource: CharacterResource = useMemo(
     () => ({
-      name: "Default Character",
+      name: 'Default Character',
       url: Assets.characters.player.url,
       animations: {
         IDLE: Assets.animations.idle.url,
@@ -248,15 +251,16 @@ export const Player: React.FC<PlayerProps> = ({
         DIE: Assets.animations.die.url,
       },
     }),
-    []
+    [],
   );
 
   return (
     <CharacterRenderer
+      ref={characterRendererRef}
       characterResource={characterResource}
       animationConfigMap={animationConfigMap}
       currentActionRef={currentStateRef}
       targetHeight={targetHeight}
     />
   );
-};
+});
