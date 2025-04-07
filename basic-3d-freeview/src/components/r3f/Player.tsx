@@ -256,7 +256,6 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initActio
       animationConfigMap={animationConfigMap}
       currentActionRef={currentStateRef}
       targetHeight={targetHeight}
-      autoScaleToModel={true}
     />
   );
 });
