@@ -27,8 +27,6 @@ interface PlayerInputs {
 export interface PlayerRef {
   /** Bounding box of the character model */
   boundingBox: THREE.Box3 | null;
-  /** Size of the character model */
-  size: THREE.Vector3 | null;
 }
 
 /**
@@ -192,9 +190,6 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initActio
       get boundingBox() {
         return characterRendererRef.current?.boundingBox || null;
       },
-      get size() {
-        return characterRendererRef.current?.size || null;
-      },
     }),
     [],
   );
@@ -261,6 +256,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initActio
       animationConfigMap={animationConfigMap}
       currentActionRef={currentStateRef}
       targetHeight={targetHeight}
+      autoScaleToModel={true}
     />
   );
 });
