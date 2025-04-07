@@ -1,13 +1,13 @@
 import { useRef } from 'react';
 import { Physics } from '@react-three/rapier';
 import { Environment, Grid, KeyboardControls } from '@react-three/drei';
-import { Player, PlayerRef } from './Player';
 import { CharacterState } from '../../constants/character';
 import { FreeViewController, ControllerHandle } from 'vibe-starter-3d';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { keyboardMap } from '../../constants/controls';
 import { Floor } from './Floor';
+import { Player, PlayerRef } from './Player';
 export function Experience() {
   const controllerRef = useRef<ControllerHandle>(null);
   const playerRef = useRef<PlayerRef>(null);
@@ -24,6 +24,16 @@ export function Experience() {
 
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    if (playerRef.current) {
+      const boundingBox = playerRef.current.boundingBox;
+
+      if (boundingBox) {
+        console.log('Player character size information updated:', boundingBox);
+      }
+    }
+  }, [playerRef.current?.boundingBox]);
 
   return (
     <>
@@ -59,7 +69,7 @@ export function Experience() {
               intensity: 1.2,
             }}
           >
-            <Player initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={targetHeight} />
+            <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={targetHeight} />
           </FreeViewController>
         </KeyboardControls>
 
