@@ -22,13 +22,10 @@
           );
         }
 
-        // 페이지 로드 완료 시 vibe로
         window.addEventListener('load', reportGameSize);
 
-        // 창 크기 변경 시 vibe로
         window.addEventListener('resize', reportGameSize);
 
-        // vibe에서 요청이 있을 때,,
         window.addEventListener('message', function (event) {
           if (event.data && event.data.type === 'REQUEST_GAME_SIZE') {
             reportGameSize();
