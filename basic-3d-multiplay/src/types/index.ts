@@ -1,5 +1,8 @@
 // User types
-export * from "./user";
+export * from './user';
 
-// Game common types
-export * from "./game";
+// Player types
+export * from './player';
+
+// Effect types
+export * from './effect';

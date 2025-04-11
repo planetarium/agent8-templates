@@ -1,9 +1,10 @@
-import React, { Suspense, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Experience } from "../r3f/Experience";
-import { GameServer, useRoomAllUserStates } from "@agent8/gameserver";
-import { UserState } from "../../types";
-
+import React, { Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { Physics } from '@react-three/rapier';
+import { Experience } from '../r3f/Experience';
+import { StatsGl } from '@react-three/drei';
+import { NetworkContainer } from '../r3f/NetworkContainer';
+import { EffectContainer } from '../r3f/EffectContainer';
 /**
  * Game scene props
  */
@@ -11,7 +12,7 @@ interface GameSceneProps {
   /** Current room ID */
   roomId: string;
   /** Game server instance */
-  server: GameServer;
+  //server: GameServer;
   /** Handler for leaving room */
   onLeaveRoom: () => Promise<void>;
 }
@@ -22,38 +23,32 @@ interface GameSceneProps {
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements.
  */
-export const GameScene: React.FC<GameSceneProps> = ({
-  roomId,
-  server,
-  onLeaveRoom,
-}) => {
-  // Get all user states from the server
-  const userStates = useRoomAllUserStates() as UserState[];
+export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => {
+  //const rtt = networkSyncStore((state) => state.rtt);
+  // const userStates = useRoomAllUserStates() as UserState[];
 
-  // Filter only ready players
-  const readyUserStates = useMemo(() => {
-    return userStates.filter((user) => user.isReady);
-  }, [userStates]);
+  // const currentUser = useMemo(() => {
+  //   return userStates.find((user) => user.account === server.account);
+  // }, [server.account, userStates]);
 
-  // Find current user's state to get selected character
-  const currentUser = useMemo(() => {
-    return userStates.find((user) => user.account === server.account);
-  }, [server.account, userStates]);
-
-  // Get character key from user state or use default
-  const characterKey = currentUser?.character || "avatarsample_d_darkness.vrm";
+  // const characterUrl = currentUser?.character;
+  // if (!characterUrl) {
+  //   return null;
+  // }
 
   return (
     <div className="relative w-full h-screen">
-      <div className="absolute z-10 w-full p-4 flex justify-between pointer-events-none">
-        <button
-          className="bg-black/50 text-white rounded px-4 py-2 pointer-events-auto"
-          onClick={onLeaveRoom}
-        >
-          Exit
+      <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10">
+        <button className="px-3 py-1 border border-gray-300 rounded text-sm bg-black/30 text-white hover:bg-black/50" onClick={onLeaveRoom}>
+          Leave Game
         </button>
-        <div className="bg-black/50 text-white rounded px-4 py-2 pointer-events-auto">
-          Room ID: {roomId}
+        <div className="flex items-center space-x-2">
+          <div className="px-3 py-1 bg-black/30 text-white rounded border border-gray-500 text-sm">
+            {/* Ping: <span className="font-semibold">{rtt !== null ? `${rtt.toFixed(0)}ms` : 'N/A'}</span> */}
+          </div>
+          <div className="px-3 py-1 bg-black/30 text-white rounded border border-gray-500 text-sm">
+            Room ID: <span className="font-semibold">{roomId}</span>
+          </div>
         </div>
       </div>
 
@@ -63,14 +58,14 @@ export const GameScene: React.FC<GameSceneProps> = ({
           (e.target as HTMLCanvasElement).requestPointerLock();
         }}
       >
-        <Suspense fallback={null}>
-          <Experience
-            server={server}
-            userStates={readyUserStates}
-            characterKey={characterKey}
-            roomId={roomId}
-          />
-        </Suspense>
+        <Physics debug={true}>
+          <Suspense fallback={null}>
+            <Experience characterUrl="solider.glb" />
+            <NetworkContainer />
+            <EffectContainer />
+          </Suspense>
+        </Physics>
+        <StatsGl showPanel={0} className="stats absolute bottom-0 left-0" />
       </Canvas>
     </div>
   );

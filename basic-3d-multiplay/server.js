@@ -2,8 +2,8 @@ class Server {
   // Join a room or create a new one if roomId is not provided
   async joinRoom(roomId, nickname) {
     try {
-      if (!nickname || nickname.trim() === "") {
-        throw new Error("닉네임을 입력해주세요");
+      if (!nickname || nickname.trim() === '') {
+        throw new Error('닉네임을 입력해주세요');
       }
 
       // If roomId is provided, join that specific room
@@ -18,6 +18,10 @@ class Server {
         isReady: false,
         nickname: nickname.trim(),
         character: null,
+        stats: {
+          maxHp: 100,
+          currentHp: 100,
+        },
       };
 
       await $room.updateUserState($sender.account, userState);
@@ -42,8 +46,8 @@ class Server {
       }
 
       // Broadcast a system message that a new user has joined
-      await $room.broadcastToRoom("system-message", {
-        type: "join",
+      await $room.broadcastToRoom('system-message', {
+        type: 'join',
         account: $sender.account,
         nickname: nickname.trim(),
         timestamp: Date.now(),
@@ -62,8 +66,8 @@ class Server {
       const userState = await $room.getUserState($sender.account);
 
       // Broadcast a system message that the user is leaving
-      await $room.broadcastToRoom("system-message", {
-        type: "leave",
+      await $room.broadcastToRoom('system-message', {
+        type: 'leave',
         account: $sender.account,
         nickname: userState.nickname,
         timestamp: Date.now(),
@@ -86,8 +90,8 @@ class Server {
       });
 
       // Broadcast a system message that user has selected a character
-      await $room.broadcastToRoom("system-message", {
-        type: "character-select",
+      await $room.broadcastToRoom('system-message', {
+        type: 'character-select',
         account: $sender.account,
         character: character,
         timestamp: Date.now(),
@@ -104,22 +108,22 @@ class Server {
     try {
       // Validate transform data
       if (!transform || !transform.position || !transform.rotation) {
-        throw new Error("Invalid transform data");
+        throw new Error('Invalid transform data');
       }
 
-      // Get the current user state
-      const userState = await $room.getUserState($sender.account);
+      // Get the current user state (optional)
+      // const userState = await $room.getUserState($sender.account);
 
-      // Update user's transform and state
+      // Update user's transform (original object) and state
       await $room.updateUserState($sender.account, {
-        transform,
+        transform: transform, // Use the original transform object
         state,
         lastActive: Date.now(),
       });
 
       return true;
     } catch (error) {
-      console.error(`플레이어 위치 업데이트 실패: ${error.message}`);
+      console.error(`Failed to update player transform: ${error.message}`);
       return false;
     }
   }
@@ -132,7 +136,7 @@ class Server {
 
       // Don't allow toggling ready if not character is selected
       if (!userState.character) {
-        throw new Error("Please select a character first");
+        throw new Error('Please select a character first');
       }
 
       // Toggle ready status
@@ -159,15 +163,15 @@ class Server {
           });
 
           // Broadcast game start message
-          await $room.broadcastToRoom("system-message", {
-            type: "game-start",
+          await $room.broadcastToRoom('system-message', {
+            type: 'game-start',
             timestamp: now,
-            message: "Game started!",
+            message: 'Game started!',
           });
         } else {
           // If game is already started, player joins immediately
-          await $room.broadcastToRoom("system-message", {
-            type: "player-join-game",
+          await $room.broadcastToRoom('system-message', {
+            type: 'player-join-game',
             account: $sender.account,
             nickname: userState.nickname,
             timestamp: Date.now(),
@@ -185,8 +189,8 @@ class Server {
   // Send a chat message to everyone in the room
   async sendMessage(message) {
     try {
-      if (!message || message.trim() === "") {
-        throw new Error("메시지를 입력해주세요");
+      if (!message || message.trim() === '') {
+        throw new Error('메시지를 입력해주세요');
       }
 
       // Get user state to include nickname in the message
@@ -198,7 +202,7 @@ class Server {
       });
 
       // Broadcast the message to all users in the room
-      await $room.broadcastToRoom("chat-message", {
+      await $room.broadcastToRoom('chat-message', {
         sender: $sender.account,
         senderNickname: userState.nickname || null,
         content: message,
@@ -208,6 +212,130 @@ class Server {
       return true;
     } catch (error) {
       throw new Error(`메시지 전송 실패: ${error.message}`);
+    }
+  }
+
+  // Send effect event to all users in the room (범용적인 효과 이벤트 전송 함수)
+  async sendEffectEvent(effectData) {
+    try {
+      // Get user state to include sender information
+      const userState = await $room.getUserState($sender.account);
+
+      // Validate effect data
+      if (!effectData || !effectData.type || !effectData.startPosition || !effectData.direction || !effectData.targetPosition) {
+        throw new Error('Invalid effect data');
+      }
+
+      // Update user's last active timestamp
+      await $room.updateUserState($sender.account, {
+        lastActive: Date.now(),
+      });
+
+      // Broadcast the effect event to all users in the room
+      await $room.broadcastToRoom('effect-event', {
+        sender: $sender.account,
+        effectData,
+        timestamp: Date.now(),
+      });
+
+      return true;
+    } catch (error) {
+      console.error(`효과 이벤트 전송 실패: ${error.message}`);
+      return false;
+    }
+  }
+
+  // Send fireball effect event to all users in the room (이전 버전 호환성 유지용)
+  async sendFireballEffect(startPosition, direction, targetPosition) {
+    // 객체 형태로 들어올 경우 배열로 변환
+    const convertToArray = (pos) => {
+      if (Array.isArray(pos)) return pos;
+      return [pos.x, pos.y, pos.z];
+    };
+
+    return this.sendEffectEvent({
+      type: 'FIREBALL',
+      startPosition: convertToArray(startPosition),
+      direction: convertToArray(direction),
+      targetPosition: convertToArray(targetPosition),
+    });
+  }
+
+  // Handle ping request from client for RTT calculation
+  async handlePing(clientPingTime) {
+    try {
+      const serverPongTime = Date.now(); // Get high-resolution timestamp
+      // console.log(`Received ping with clientTime: ${clientPingTime}, sending pong at: ${serverPongTime}`);
+      return {
+        clientPingTime, // Echo back the client's ping time
+        serverPongTime, // Send the server's pong time
+      };
+    } catch (error) {
+      console.error(`handlePing Error: ${error.message}`);
+      // In case of an error, return null or throw, depending on desired client handling
+      return {
+        clientPingTime: null, // Echo back the client's ping time
+        serverPongTime, // Send the server's pong time
+      };
+    }
+  }
+
+  // Apply damage to a target user
+  async applyDamage(targetAccount, damageAmount) {
+    try {
+      if (!targetAccount) {
+        throw new Error('대상 사용자를 지정해주세요');
+      }
+
+      if (!damageAmount || damageAmount <= 0) {
+        throw new Error('유효한 데미지 값을 입력해주세요');
+      }
+
+      // Get attacker info
+      const attackerState = await $room.getUserState($sender.account);
+
+      // Get target user state
+      const targetState = await $room.getUserState(targetAccount);
+
+      if (!targetState) {
+        throw new Error('대상 사용자를 찾을 수 없습니다');
+      }
+
+      // Initialize stats if they don't exist
+      if (!targetState.stats) {
+        targetState.stats = { maxHp: 100, currentHp: 100 };
+      } else if (targetState.stats.currentHp === undefined) {
+        targetState.stats.maxHp = 100;
+        targetState.stats.currentHp = 100;
+      }
+
+      // Calculate new HP
+      const newHp = Math.max(0, targetState.stats.currentHp - damageAmount);
+
+      // 상태 업데이트 객체 생성
+      const updateData = {
+        stats: {
+          ...targetState.stats,
+          currentHp: newHp,
+        },
+        lastActive: Date.now(),
+      };
+
+      // HP가 0이 되면 state를 DIE로 설정
+      if (newHp <= 0) {
+        updateData.state = 'DIE';
+      }
+
+      // Update target's HP and state if died
+      await $room.updateUserState(targetAccount, updateData);
+
+      return {
+        success: true,
+        targetAccount,
+        newHp,
+      };
+    } catch (error) {
+      throw new Error(`데미지 적용 실패: ${error.message}`);
     }
   }
 

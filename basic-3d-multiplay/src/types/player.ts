@@ -1,5 +1,5 @@
-import { Transform, UserState } from "./user";
-import * as THREE from "three";
+import { Transform, UserState } from './user';
+import * as THREE from 'three';
 
 /**
  * Player input parameters for action determination
@@ -21,4 +21,12 @@ export interface PlayerInputs {
   isRunning: boolean;
   /** Current vertical velocity */
   currentVelY: number;
+}
+
+/**
+ * Player ref interface
+ */
+export interface PlayerRef {
+  /** Bounding box of the character model */
+  boundingBox: THREE.Box3 | null;
 }

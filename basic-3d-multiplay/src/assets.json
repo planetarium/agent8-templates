@@ -1,92 +1,31 @@
 {
   "characters": {
-    "avatarsample_d_darkness.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/avatarsample_d_darkness.vrm",
-      "description": "Player Character"
-    },
-    "avatarsample_d.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/avatarsample_d.vrm",
-      "description": "Player Character"
-    },
-    "avatarsample_e.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/avatarsample_e.vrm",
-      "description": "Player Character"
-    },
-    "avatarsample_f.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/avatarsample_f.vrm",
-      "description": "Player Character"
-    },
-    "hairsample_female.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/hairsample_female.vrm",
-      "description": "Player Character"
-    },
-    "hairsample_male.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/hairsample_male.vrm",
-      "description": "Player Character"
-    },
-    "piwwos.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/piwwos.vrm",
-      "description": "Player Character"
-    },
-    "cel-blackgirl.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/cel-blackgirl.vrm",
-      "description": "Player Character"
-    },
-    "cel-rabbit.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/cel-rabbit.vrm",
-      "description": "Player Character"
-    },
-    "cel-robot.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/cel-robot.vrm",
-      "description": "Player Character"
-    },
-    "sakurada fumiriya.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/sakurada fumiriya.vrm",
-      "description": "Player Character"
-    },
-    "sendagaya shino.vrm": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/vrm/sendagaya shino.vrm",
-      "description": "Player Character"
-    },
-    "zombie.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/zombie.glb",
-      "description": "Player Character"
+    "solider.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/solider.glb"
     },
     "commando.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/commando.glb",
-      "description": "Player Character"
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/commando.glb"
     },
     "deadpool.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/deadpool.glb",
-      "description": "Player Character"
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/deadpool.glb"
     },
     "gunslinger.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/gunslinger.glb",
-      "description": "Player Character"
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/gunslinger.glb"
     },
     "knight.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/knight.glb",
-      "description": "Player Character"
-    },
-    "solider.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/solider.glb",
-      "description": "Player Character"
-    },
-    "space-marine.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/space-marine.glb",
-      "description": "Player Character"
-    },
-    "trump.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/trump.glb",
-      "description": "Player Character"
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/knight.glb"
     },
     "x-bot.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/x-bot.glb",
-      "description": "Player Character"
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/x-bot.glb"
     },
     "y-bot.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/y-bot.glb",
-      "description": "Player Character"
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/y-bot.glb"
+    },
+    "zombie.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/zombie.glb"
+    },
+    "ryu.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/ryu.glb"
     }
   },
   "animations": {

@@ -1,196 +1,119 @@
-import { useRef, createRef } from "react";
-import { Physics } from "@react-three/rapier";
-import {
-  Environment,
-  Grid,
-  KeyboardControls,
-  Billboard,
-  Text,
-} from "@react-three/drei";
-import { Player } from "./Player";
-import { RemotePlayer } from "./RemotePlayer";
-import { CharacterState } from "../../constants/character";
-import { FreeViewController, ControllerHandle } from "vibe-starter-3d";
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { keyboardMap } from "../../constants/controls";
-import { Floor } from "./Floor";
-import { Vector3 } from "three";
-import { Lights } from "./Lights";
-import { GameServer } from "@agent8/gameserver";
-import { useFrame } from "@react-three/fiber";
-import { UserState } from "../../types";
+import { useCallback, useEffect, useRef } from 'react';
+import { Environment, KeyboardControls } from '@react-three/drei';
+import { Player } from './Player';
+import { PlayerRef } from '../../types/player';
+import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
+import { keyboardMap } from '../../constants/controls';
+import { Floor } from './Floor';
+import { useGameServer } from '@agent8/gameserver';
+import { Vector3 } from 'three';
+import { useEffectStore } from '../../store/effectStore';
+import { ControllerHandle, FreeViewController } from 'vibe-starter-3d';
+import { useFrame } from '@react-three/fiber';
 
 /**
  * Experience component props
  */
 interface ExperienceProps {
-  /** Game server instance */
-  server: GameServer;
-  /** All user states in the room */
-  userStates: UserState[];
   /** Current player's character key */
-  characterKey: string;
-  /** Room ID */
-  roomId: string;
+  characterUrl: string;
 }
 
-// Remote players state - global reference for performance (avoid re-renders)
-export const remotePlayersStateRef = {
-  current: {} as Record<string, { state: UserState }>,
+// Utility to convert THREE.Vector3 to array (needed for store/server)
+const vecToArray = (vec: Vector3): [number, number, number] => {
+  return [vec.x, vec.y, vec.z];
 };
 
 /**
  * Main Experience component
  *
  * This component is responsible for setting up the 3D environment
- * including physics, lighting, and scene elements.
+ * including physics, lighting, and scene elements for the local player.
  */
-export function Experience({
-  server,
-  userStates,
-  characterKey,
-  roomId,
-}: ExperienceProps) {
-  /**
-   * Delay physics activate
-   */
-  const [pausedPhysics, setPausedPhysics] = useState(true);
-
-  // 렌더링 트리거를 위한 상태 (실제 데이터는 ref에 저장)
-  const [remotePlayersUpdate, setRemotePlayersUpdate] = useState(0);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setPausedPhysics(false);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, []);
-
+export function Experience({ characterUrl }: ExperienceProps) {
+  const { server, account } = useGameServer();
+  if (!server) return null;
+  if (!account) return null;
   const controllerRef = useRef<ControllerHandle>(null);
+  const playerRef = useRef<PlayerRef>(null);
 
-  // 최초 userStates에서 원격 플레이어 상태 초기화
-  useEffect(() => {
-    const newRemotePlayersState: Record<string, { state: UserState }> = {};
+  const prevTime = useRef(Date.now());
 
-    userStates.forEach((user) => {
-      if (user.account !== server.account) {
-        newRemotePlayersState[user.account] = {
-          state: user,
-        };
-      }
-    });
+  // Get addEffect action from the store
+  const addEffect = useEffectStore((state) => state.addEffect);
 
-    // 이전 상태에 있던 플레이어가 새 상태에 없으면 유지
-    const merged = { ...remotePlayersStateRef.current };
-
-    // 새 플레이어 상태 추가/업데이트
-    Object.keys(newRemotePlayersState).forEach((account) => {
-      merged[account] = newRemotePlayersState[account];
-    });
-
-    remotePlayersStateRef.current = merged;
-    setRemotePlayersUpdate((prev) => prev + 1); // 렌더링 트리거
-  }, [userStates, server.account]);
-
-  // 서버에서 사용자 상태 업데이트 구독
-  useEffect(() => {
-    if (!server || !roomId) return;
-
-    console.log(`[Experience] Subscribing to room users`);
-
-    // 모든 유저 상태 구독
-    const setupSubscription = async () => {
+  // Function to send effect event to the server
+  const sendEffectToServer = useCallback(
+    async (type: string, config?: { [key: string]: any }) => {
+      if (!server) return;
       try {
-        const unsubscribe = await server.subscribeRoomAllUserStates(
-          roomId,
-          (updatedUserStates: UserState[]) => {
-            // 현재 플레이어를 제외한 다른 플레이어 상태만 업데이트
-            const remoteUsers = updatedUserStates.filter(
-              (state) => state.account !== server.account
-            );
-
-            const newState = { ...remotePlayersStateRef.current };
-
-            remoteUsers.forEach((user) => {
-              newState[user.account] = {
-                state: user,
-              };
-            });
-
-            remotePlayersStateRef.current = newState;
-            setRemotePlayersUpdate((prev) => prev + 1); // 렌더링 트리거
-          }
-        );
-
-        return () => {
-          console.log(`[Experience] Unsubscribing from room`);
-          unsubscribe?.();
-        };
+        await server.remoteFunction('sendEffectEvent', [type, config]);
       } catch (error) {
-        console.error("[Experience] Failed to subscribe to room users:", error);
-        return () => {}; // 빈 cleanup 함수
+        console.error(`[${type}] Failed to send effect event:`, error);
       }
-    };
+    },
+    [server], // Dependency on server object
+  );
 
-    const cleanupFn = setupSubscription();
+  // Callback for Player to request a magic cast
+  const spawnEffect = useCallback(
+    async (type: string, config?: { [key: string]: any }) => {
+      // 1. Add effect locally via store
+      addEffect(type, account, config);
 
-    return () => {
-      cleanupFn.then((cleanup) => cleanup());
-    };
-  }, [server, roomId]);
+      console.log('[Experience] Cast magic:', type, config);
 
-  // Filter out other players (all users except current user)
-  const otherPlayers = useMemo(() => {
-    return Object.values(remotePlayersStateRef.current)
-      .map((entry) => entry.state)
-      .filter((user) => user.character && user.isReady);
-  }, [remotePlayersUpdate]); // remotePlayersUpdate가 변경될 때만 다시 계산
+      // 2. Send effect event to server
+      await sendEffectToServer(type, config);
+    },
+    [addEffect, sendEffectToServer], // Dependencies
+  );
+
+  useEffect(() => {
+    if (!account || !controllerRef.current?.rigidBodyRef.current) return;
+
+    const rigidBodyRef = controllerRef.current.rigidBodyRef.current;
+    if (rigidBodyRef.userData) {
+      rigidBodyRef.userData['account'] = account;
+    } else {
+      rigidBodyRef.userData = { account };
+    }
+  }, [account, controllerRef.current?.rigidBodyRef.current]);
+
+  useFrame(() => {
+    const now = Date.now();
+    prevTime.current = now;
+  });
 
   return (
     <>
-      <Lights />
+      {/* Keyboard preset */}
+      <KeyboardControls map={keyboardMap}>
+        {/* Environment */}
+        <Environment preset="sunset" background={false} />
 
-      <Physics debug={false} paused={pausedPhysics}>
-        {/* Keyboard preset */}
-        <KeyboardControls map={keyboardMap}>
-          {/* Environment */}
-          <Environment preset="sunset" background={false} />
+        {/* Local player character with controller */}
+        <FreeViewController
+          ref={controllerRef}
+          targetHeight={DEFAULT_HEIGHT}
+          followLight={{
+            position: [20, 30, 10],
+            intensity: 1.2,
+          }}
+        >
+          <Player
+            spawnEffect={spawnEffect}
+            initialState={CharacterState.IDLE}
+            controllerRef={controllerRef}
+            characterKey={characterUrl}
+            server={server}
+            ref={playerRef}
+          />
+        </FreeViewController>
+      </KeyboardControls>
 
-          {/* Local player character with controller */}
-          <FreeViewController
-            ref={controllerRef}
-            camInitDis={4}
-            camMinDis={4}
-            camMaxDis={4}
-          >
-            <Player
-              initState={CharacterState.IDLE}
-              controllerRef={controllerRef}
-              characterKey={characterKey}
-              server={server}
-            />
-          </FreeViewController>
-
-          {/* Other players */}
-          {otherPlayers.map(
-            (player) =>
-              player.character && (
-                <RemotePlayer
-                  key={player.account}
-                  account={player.account}
-                  characterKey={player.character}
-                  nickname={player.nickname}
-                  transform={player.transform}
-                  state={player.state}
-                />
-              )
-          )}
-        </KeyboardControls>
-
-        {/* Floor */}
-        <Floor />
-      </Physics>
+      {/* Floor */}
+      <Floor />
     </>
   );
 }
