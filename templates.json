@@ -136,7 +136,12 @@
       "pointToMove",
       "lol",
       "multiplay",
-      "lobby"
+      "lobby",
+      "leagueoflegends",
+      "topdown",
+      "topview",
+      "top-down",
+      "top-view"
     ]
   }
 ]
