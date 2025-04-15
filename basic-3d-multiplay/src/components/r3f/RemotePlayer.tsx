@@ -1,281 +1,163 @@
-import React, { useRef, useMemo, useEffect, useCallback } from "react";
-import * as THREE from "three";
-import { Billboard, Text } from "@react-three/drei";
-import { CharacterState } from "../../constants/character";
+import React, { useRef, useMemo, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { Billboard, Text } from '@react-three/drei';
+import { CharacterState } from '../../constants/character';
 import {
   AnimationConfig,
   AnimationConfigMap,
   CharacterRenderer,
+  CharacterRendererRef,
   CharacterResource,
-  DEFAULT_CONTROLLER_CONFIG,
-} from "vibe-starter-3d";
-import Assets from "../../assets.json";
-import { RigidBody, RapierRigidBody } from "@react-three/rapier";
-import { useFrame } from "@react-three/fiber";
-import { Vector3, Quaternion } from "three";
-import { remotePlayersStateRef } from "./Experience";
-import { Transform, UserState } from "../../types";
+  ControllerUtils,
+  NetworkObject,
+  NetworkObjectHandle,
+} from 'vibe-starter-3d';
+import Assets from '../../assets.json';
+import { CapsuleCollider } from '@react-three/rapier';
+import { Vector3, Quaternion } from '@react-three/fiber';
+import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
 
-/**
- * Remote player component props
- */
 interface RemotePlayerProps {
-  /** Player account ID */
   account: string;
-  /** Character key to use */
-  characterKey: string;
-  /** Player nickname */
+  characterUrl: string;
   nickname?: string;
-  /** Player transform data */
-  transform?: Transform;
-  /** Player character state */
-  state?: string;
+  position?: Vector3;
+  rotation?: Quaternion;
+  targetHeight?: number;
 }
 
-/**
- * Hook for handling player animations
- */
-function usePlayerAnimations(
-  currentStateRef: React.MutableRefObject<CharacterState>
-) {
+export interface RemotePlayerHandle {
+  syncState: (state: string, position: Vector3, quaternionRotation?: Quaternion) => void;
+}
+
+// Hook for managing character animations based on state
+const usePlayerAnimations = (currentStateRef: React.MutableRefObject<CharacterState>) => {
   const handleAnimationComplete = React.useCallback(
     (state: CharacterState) => {
       switch (state) {
         case CharacterState.JUMP:
         case CharacterState.PUNCH:
         case CharacterState.HIT:
-          currentStateRef.current = CharacterState.IDLE;
+          if (currentStateRef.current === state) {
+            currentStateRef.current = CharacterState.IDLE;
+          }
           break;
         default:
           break;
       }
     },
-    [currentStateRef]
+    [currentStateRef],
   );
 
-  // Animation configuration
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> =
-    useMemo(
-      () => ({
-        [CharacterState.IDLE]: {
-          animationType: "IDLE",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.WALK]: {
-          animationType: "WALK",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.RUN]: {
-          animationType: "RUN",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.JUMP]: {
-          animationType: "JUMP",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.JUMP),
-        } as AnimationConfig,
-        [CharacterState.PUNCH]: {
-          animationType: "PUNCH",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-        } as AnimationConfig,
-        [CharacterState.HIT]: {
-          animationType: "HIT",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.HIT),
-        } as AnimationConfig,
-        [CharacterState.DIE]: {
-          animationType: "DIE",
-          loop: false,
-          duration: 10,
-          clampWhenFinished: true,
-        } as AnimationConfig,
-      }),
-      [handleAnimationComplete]
-    );
+  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
+    () => ({
+      [CharacterState.IDLE]: { animationType: 'IDLE', loop: true } as AnimationConfig,
+      [CharacterState.WALK]: { animationType: 'WALK', loop: true } as AnimationConfig,
+      [CharacterState.RUN]: { animationType: 'RUN', loop: true } as AnimationConfig,
+      [CharacterState.JUMP]: {
+        animationType: 'JUMP',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.JUMP),
+      } as AnimationConfig,
+      [CharacterState.PUNCH]: {
+        animationType: 'PUNCH',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
+      } as AnimationConfig,
+      [CharacterState.HIT]: {
+        animationType: 'HIT',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.HIT),
+      } as AnimationConfig,
+      [CharacterState.DIE]: { animationType: 'DIE', loop: false, duration: 10, clampWhenFinished: true } as AnimationConfig,
+    }),
+    [handleAnimationComplete],
+  );
 
   return { animationConfigMap };
-}
+};
 
-/**
- * RemotePlayer component for rendering other players in the game
- */
-export const RemotePlayer: React.FC<RemotePlayerProps> = ({
-  account,
-  characterKey,
-  nickname,
-  transform: initialTransform,
-  state: initialState,
-}) => {
-  // Reference to remote player state
-  const getUserState = () => remotePlayersStateRef.current[account]?.state;
+// Remote player with interpolation/extrapolation movement
+export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
+  ({ account, characterUrl: characterKey, position = [0, 0, 0], rotation = [0, 0, 0, 1], targetHeight = 1.6, nickname }, ref) => {
+    const networkObjectRef = useRef<NetworkObjectHandle>(null);
+    const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
+    const { animationConfigMap } = usePlayerAnimations(currentStateRef);
 
-  // Default transform setting
-  const defaultTransform = {
-    position: [0, 0, 0] as [number, number, number],
-    rotation: [0, 0, 0, 1] as [number, number, number, number],
-  };
+    useImperativeHandle(
+      ref,
+      () => ({
+        syncState: (state: string, position: Vector3 = [0, 0, 0], quaternionRotation: Quaternion = [0, 0, 0, 1]) => {
+          currentStateRef.current = (state as CharacterState) || CharacterState.IDLE;
 
-  // Track current state
-  const currentStateRef = useRef<CharacterState>(
-    (getUserState()?.state as CharacterState) || CharacterState.IDLE
-  );
-  const { animationConfigMap } = usePlayerAnimations(currentStateRef);
-  const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const modelRef = useRef<THREE.Group>(null);
+          if (!networkObjectRef.current) return;
 
-  // Store target state for interpolation
-  const targetState = useRef({
-    position: new Vector3(),
-    rotation: new Quaternion(),
-  });
+          networkObjectRef.current.syncTransform(position, quaternionRotation);
+        },
+      }),
+      [],
+    );
 
-  // Interpolation settings
-  const INTERPOLATION_FACTOR = 0.2; // Interpolation speed (0~1)
+    useEffect(() => {
+      if (!networkObjectRef.current || !networkObjectRef.current.rigidBodyRef.current) return;
 
-  // Perform smooth interpolation and state updates each frame
-  useFrame(() => {
-    if (!rigidBodyRef.current) return;
+      networkObjectRef.current.rigidBodyRef.current.userData = { account };
+    }, [networkObjectRef.current]);
 
-    // Get latest user state
-    const userState = getUserState();
-    if (!userState) return;
+    // Character resource setup
+    const characterResource: CharacterResource = useMemo(() => {
+      const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
+      const characterUrl = characterData?.url;
+      return {
+        name: characterKey,
+        url: characterUrl,
+        animations: {
+          IDLE: Assets.animations.idle.url,
+          WALK: Assets.animations.walk.url,
+          RUN: Assets.animations.run.url,
+          JUMP: Assets.animations.jump.url,
+          PUNCH: Assets.animations.punch.url,
+          HIT: Assets.animations.hit.url,
+          DIE: Assets.animations.die.url,
+        },
+      };
+    }, [characterKey]);
 
-    // Update transform if needed
-    if (userState.transform) {
-      const transform = userState.transform;
+    // Renderer setup
+    const characterRendererRef = useRef<CharacterRendererRef>(null);
+    const nicknameOffsetY = targetHeight + 0.5;
 
-      // Update position
-      const [x, y, z] = transform.position;
-      targetState.current.position.set(x, y, z);
+    const capsuleRadius = ControllerUtils.capsuleRadius(targetHeight); // capsule collider radius
+    const capsuleHalfHeight = ControllerUtils.capsuleHalfHeight(targetHeight); // half height of capsule collider
 
-      // Update rotation
-      const [rx, ry, rz, rw] = transform.rotation;
-      targetState.current.rotation.set(rx, ry, rz, rw);
-    }
-
-    // Update state if needed
-    if (userState.state) {
-      currentStateRef.current = userState.state as CharacterState;
-    }
-
-    const currentPosition = rigidBodyRef.current.translation();
-    const currentRotation = rigidBodyRef.current.rotation();
-
-    // Position interpolation using Vector3.lerp
-    const newPosition = new Vector3(
-      currentPosition.x,
-      currentPosition.y,
-      currentPosition.z
-    ).lerp(targetState.current.position, INTERPOLATION_FACTOR);
-
-    // Rotation interpolation using Quaternion.slerp
-    const newRotation = new Quaternion(
-      currentRotation.x,
-      currentRotation.y,
-      currentRotation.z,
-      currentRotation.w
-    ).slerp(targetState.current.rotation, INTERPOLATION_FACTOR);
-
-    // Apply interpolated values to rigid body
-    rigidBodyRef.current.setTranslation(newPosition, true);
-    rigidBodyRef.current.setRotation(newRotation, true);
-  });
-
-  // Define the character resource with all animations
-  const characterResource: CharacterResource = useMemo(() => {
-    // Characters are directly keyed by filename in assets.json
-    const characterData = (
-      Assets.characters as Record<string, { url: string }>
-    )[characterKey];
-    const characterUrl =
-      characterData?.url ||
-      Assets.characters["avatarsample_d_darkness.vrm"].url;
-
-    return {
-      name: characterKey,
-      url: characterUrl,
-      animations: {
-        IDLE: Assets.animations.idle.url,
-        WALK: Assets.animations.walk.url,
-        RUN: Assets.animations.run.url,
-        JUMP: Assets.animations.jump.url,
-        PUNCH: Assets.animations.punch.url,
-        HIT: Assets.animations.hit.url,
-        DIE: Assets.animations.die.url,
-      },
-    };
-  }, [characterKey]);
-
-  // Initial position and rotation setup
-  useEffect(() => {
-    if (!rigidBodyRef.current) return;
-
-    // Get initial state
-    const userState = getUserState();
-    const transform = userState?.transform || defaultTransform;
-
-    const [x, y, z] = transform.position;
-    rigidBodyRef.current.setTranslation({ x, y, z }, true);
-
-    const [rx, ry, rz, rw] = transform.rotation;
-    rigidBodyRef.current.setRotation({ x: rx, y: ry, z: rz, w: rw }, true);
-
-    // Also set initial target state
-    targetState.current.position.set(x, y, z);
-    targetState.current.rotation.set(rx, ry, rz, rw);
-  }, []);
-
-  return (
-    <RigidBody
-      ref={rigidBodyRef}
-      type="kinematicPosition"
-      colliders="cuboid"
-      userData={{ isRemotePlayer: true, account }}
-    >
-      <group ref={modelRef}>
-        <group
-          position={[
-            0,
-            -(
-              DEFAULT_CONTROLLER_CONFIG.TARGET_HEIGHT / 2 +
-              DEFAULT_CONTROLLER_CONFIG.TARGET_HEIGHT / 5
-            ),
-            0,
-          ]}
-        >
-          <CharacterRenderer
-            characterResource={characterResource}
-            animationConfigMap={animationConfigMap}
-            currentActionRef={currentStateRef}
+    return (
+      <NetworkObject ref={networkObjectRef} position={position} rotation={rotation}>
+        <group position={[0, ControllerUtils.targetHeight(targetHeight) / 2, 0]}>
+          <CapsuleCollider
+            name="character-capsule-collider"
+            args={[capsuleHalfHeight, capsuleRadius]}
+            activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_KINEMATIC}
           />
         </group>
-      </group>
+        <CharacterRenderer
+          characterResource={characterResource}
+          animationConfigMap={animationConfigMap}
+          currentActionRef={currentStateRef}
+          targetHeight={targetHeight}
+          ref={characterRendererRef}
+        />
 
-      {/* Player nickname display */}
-      {nickname && (
-        <Billboard
-          position={[0, 2, 0]}
-          follow={true}
-          lockX={false}
-          lockY={false}
-          lockZ={false}
-        >
-          <Text
-            fontSize={0.5}
-            color="#ffffff"
-            anchorX="center"
-            anchorY="middle"
-            outlineWidth={0.05}
-            outlineColor="#000000"
-          >
-            {nickname}
-          </Text>
-        </Billboard>
-      )}
-    </RigidBody>
-  );
-};
+        {/* Render custom UI (e.g., nickname) */}
+        {nickname && (
+          <Billboard position={[0, nicknameOffsetY, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
+            <Text fontSize={0.5} color="#ffffff" anchorX="center" anchorY="middle" outlineWidth={0.05} outlineColor="#000000">
+              {nickname}
+            </Text>
+          </Billboard>
+        )}
+      </NetworkObject>
+    );
+  },
+);

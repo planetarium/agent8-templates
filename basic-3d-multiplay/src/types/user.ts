@@ -12,18 +12,19 @@ export interface UserState {
   /** Selected character model key */
   character?: string;
   /** User's transform data (position and rotation) */
-  transform?: Transform;
+  transform?: {
+    position: [number, number, number];
+    rotation: [number, number, number, number];
+  };
   /** Current character state/animation */
   state?: string;
-}
-
-/**
- * Transform interface
- * Represents position and rotation in 3D space
- */
-export interface Transform {
-  /** Position as [x, y, z] */
-  position: [number, number, number];
-  /** Rotation as [x, y, z, w] quaternion */
-  rotation: [number, number, number, number];
+  /** User stats for game mechanics */
+  stats: {
+    /** Maximum health points */
+    maxHp: number;
+    /** Current health points */
+    currentHp: number;
+    /** Additional stats can be added here */
+    [key: string]: number | boolean | string;
+  };
 }

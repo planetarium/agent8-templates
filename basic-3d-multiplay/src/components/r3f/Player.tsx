@@ -1,376 +1,316 @@
-import React, { useRef, useMemo, useCallback } from "react";
-import * as THREE from "three";
-import { useKeyboardControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { CharacterState } from "../../constants/character";
-import {
-  AnimationConfig,
-  AnimationConfigMap,
-  CharacterRenderer,
-  CharacterResource,
-  ControllerHandle,
-} from "vibe-starter-3d";
-import Assets from "../../assets.json";
-import { GameServer } from "@agent8/gameserver";
-import { Vector3, Quaternion } from "three";
-import throttle from "lodash/throttle";
-import { PlayerInputs } from "../../types";
+import React, { useRef, useMemo, useCallback, useImperativeHandle, forwardRef } from 'react';
+import * as THREE from 'three';
+import { useKeyboardControls } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { CharacterState } from '../../constants/character';
+import Assets from '../../assets.json';
+import { GameServer } from '@agent8/gameserver';
+import { Vector3, Quaternion } from 'three';
+import throttle from 'lodash/throttle';
+import { PlayerInputs, PlayerRef } from '../../types/player';
+import { EffectType } from '../../types';
+import { createFireBallEffectConfig } from './effects/FireBallEffectController';
+import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, ControllerHandle } from 'vibe-starter-3d';
 
 /**
- * Network sync constants
+ * Network synchronization constants.
  */
 const NETWORK_CONSTANTS = {
   SYNC: {
-    /** Transmission interval (milliseconds) */
+    /** Interval (in milliseconds) for sending updates to the server via throttle. */
     INTERVAL_MS: 100,
-    /** Position change threshold (meters) */
-    POSITION_CHANGE_THRESHOLD: 0.05,
-    /** Rotation change threshold (radians) */
-    ROTATION_CHANGE_THRESHOLD: 0.05,
+    /** Minimum position change (in meters) required to trigger a network update. */
+    POSITION_CHANGE_THRESHOLD: 0.01,
+    /** Minimum rotation change (in radians) required to trigger a network update. */
+    ROTATION_CHANGE_THRESHOLD: 0.01,
   },
 };
 
 /**
- * Player component props
+ * Props for the Player component.
  */
 interface PlayerProps {
-  /** Initial position of the player */
-  position?: THREE.Vector3 | [number, number, number];
-  /** Initial action for the character */
-  initState?: CharacterState;
-  /** Reference to player controller for physics calculations */
+  /** Initial animation state for the character. */
+  initialState?: CharacterState;
+  /** Reference to the PlayerController handle for accessing physics state. */
   controllerRef?: React.RefObject<ControllerHandle>;
-  /** Character key to use */
+  /** Target height for the character model */
+  targetHeight?: number;
+  /** Callback to request spawn effect */
+  spawnEffect?: (type: string, config?: { [key: string]: any }) => void;
+  /** Key identifying the character model/resources to use. */
   characterKey?: string;
-  /** Game server instance */
+  /** GameServer instance for network communication. */
   server?: GameServer;
 }
 
 /**
- * Hook for player state determination logic
+ * Hook containing the logic to determine the player's animation state based on inputs.
  */
 function usePlayerStates() {
-  // Function to determine player state based on inputs and current state
-  const determinePlayerState = React.useCallback(
-    (
-      currentState: CharacterState,
-      {
-        isRevive,
-        isDying,
-        isPunching,
-        isHit,
-        isJumping,
-        isMoving,
-        isRunning,
-      }: PlayerInputs
-    ): CharacterState => {
-      // Revival processing - transition from DIE to IDLE
-      if (isRevive && currentState === CharacterState.DIE) {
-        return CharacterState.IDLE;
-      }
+  // Determines the next character state based on current state and inputs.
+  const determinePlayerState = React.useCallback((currentState: CharacterState, inputs: PlayerInputs): CharacterState => {
+    const { isRevive, isDying, isPunching, isHit, isJumping, isMoving, isRunning } = inputs;
 
-      // Maintain death state
-      if (isDying || currentState === CharacterState.DIE) {
-        return CharacterState.DIE;
-      }
+    // State transition priority:
+    if (isRevive && currentState === CharacterState.DIE) return CharacterState.IDLE;
+    if (isDying || currentState === CharacterState.DIE) return CharacterState.DIE;
+    if (isHit) return CharacterState.HIT;
+    if (isPunching && currentState !== CharacterState.PUNCH && currentState !== CharacterState.JUMP && currentState !== CharacterState.HIT)
+      return CharacterState.PUNCH;
+    if (isJumping && currentState !== CharacterState.PUNCH && currentState !== CharacterState.HIT) return CharacterState.JUMP;
+    if (currentState === CharacterState.PUNCH) return CharacterState.PUNCH; // Maintain punch until animation finishes
 
-      // Punch animation - start only if not already punching
-      if (isPunching && currentState !== CharacterState.PUNCH) {
-        return CharacterState.PUNCH;
-      }
-
-      // Hit animation - immediately transition to HIT
-      if (isHit) {
-        return CharacterState.HIT;
-      }
-
-      // Jump animation (can't jump while punching)
-      if (isJumping && currentState !== CharacterState.PUNCH) {
-        return CharacterState.JUMP;
-      }
-
-      // Maintain punch animation until completion
-      if (currentState === CharacterState.PUNCH) {
-        return CharacterState.PUNCH;
-      }
-
-      // Idle state
-      if (!isMoving) {
-        return CharacterState.IDLE;
-      }
-
-      // Walk/Run animation
+    // Movement states (only if not in an interruptible state like jump/hit/punch)
+    if (currentState !== CharacterState.JUMP && currentState !== CharacterState.HIT && currentState !== CharacterState.PUNCH) {
       if (isMoving) {
         return isRunning ? CharacterState.RUN : CharacterState.WALK;
+      } else {
+        return CharacterState.IDLE;
       }
-
-      // Default - maintain current action
-      return currentState;
-    },
-    []
-  );
+    }
+    // Default: maintain current state
+    return currentState;
+  }, []);
 
   return { determinePlayerState };
 }
 
 /**
- * Hook for handling player animations
+ * Hook for managing player animations.
  */
-function usePlayerAnimations(
-  currentStateRef: React.MutableRefObject<CharacterState>
-) {
+function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterState>) {
+  // Callback triggered when a non-looping animation finishes.
   const handleAnimationComplete = React.useCallback(
-    (state: CharacterState) => {
-      console.log(`Animation ${state} completed`);
-
-      switch (state) {
-        case CharacterState.JUMP:
-          currentStateRef.current = CharacterState.IDLE;
-          break;
-        case CharacterState.PUNCH:
-          currentStateRef.current = CharacterState.IDLE;
-          break;
-        case CharacterState.HIT:
-          currentStateRef.current = CharacterState.IDLE;
-          break;
-        default:
-          break;
+    (completedState: CharacterState) => {
+      // Transition back to IDLE only if the state hasn't changed
+      if (currentStateRef.current === completedState) {
+        switch (completedState) {
+          case CharacterState.JUMP:
+          case CharacterState.PUNCH:
+          case CharacterState.HIT:
+            currentStateRef.current = CharacterState.IDLE;
+            break;
+          default:
+            break;
+        }
       }
     },
-    [currentStateRef]
+    [currentStateRef],
   );
 
-  // Animation configuration
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> =
-    useMemo(
-      () => ({
-        [CharacterState.IDLE]: {
-          animationType: "IDLE",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.WALK]: {
-          animationType: "WALK",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.RUN]: {
-          animationType: "RUN",
-          loop: true,
-        } as AnimationConfig,
-        [CharacterState.JUMP]: {
-          animationType: "JUMP",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.JUMP),
-        } as AnimationConfig,
-        [CharacterState.PUNCH]: {
-          animationType: "PUNCH",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-        } as AnimationConfig,
-        [CharacterState.HIT]: {
-          animationType: "HIT",
-          loop: false,
-          clampWhenFinished: true,
-          onComplete: () => handleAnimationComplete(CharacterState.HIT),
-        } as AnimationConfig,
-        [CharacterState.DIE]: {
-          animationType: "DIE",
-          loop: false,
-          duration: 10,
-          clampWhenFinished: true,
-        } as AnimationConfig,
-      }),
-      [handleAnimationComplete]
-    );
+  // Memoized map of animation configurations.
+  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
+    () => ({
+      [CharacterState.IDLE]: { animationType: 'IDLE', loop: true } as AnimationConfig,
+      [CharacterState.WALK]: { animationType: 'WALK', loop: true } as AnimationConfig,
+      [CharacterState.RUN]: { animationType: 'RUN', loop: true } as AnimationConfig,
+      [CharacterState.JUMP]: {
+        animationType: 'JUMP',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.JUMP),
+      } as AnimationConfig,
+      [CharacterState.PUNCH]: {
+        animationType: 'PUNCH',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
+      } as AnimationConfig,
+      [CharacterState.HIT]: {
+        animationType: 'HIT',
+        loop: false,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.HIT),
+      } as AnimationConfig,
+      [CharacterState.DIE]: { animationType: 'DIE', loop: false, duration: 10, clampWhenFinished: true } as AnimationConfig,
+    }),
+    [handleAnimationComplete],
+  );
 
   return { animationConfigMap };
 }
 
 /**
- * Player component that manages character model and animations
- *
- * Handles player state management and delegates rendering to CharacterRenderer.
- * This component is specifically for the local player.
+ * Player component - Represents the local player character.
+ * Manages inputs, state transitions, animations, and network synchronization.
  */
-export const Player: React.FC<PlayerProps> = ({
-  initState: initAction = CharacterState.IDLE,
-  controllerRef,
-  characterKey = "avatarsample_d_darkness.vrm",
-  server,
-}) => {
-  const currentStateRef = useRef<CharacterState>(initAction);
-  const [, get] = useKeyboardControls();
-  const { determinePlayerState } = usePlayerStates();
-  const { animationConfigMap } = usePlayerAnimations(currentStateRef);
-
-  // Store previous state to check change amount for dirty checking
-  const prevState = useRef({
-    position: new Vector3(),
-    rotation: new Quaternion(),
-    state: initAction,
-  });
-
-  /**
-   * IMPORTANT:Should be memoized
-   */
-  const throttledSyncToNetwork = useMemo(
-    () =>
-      throttle(
-        async (
-          position: Vector3,
-          rotation: Quaternion,
-          state: CharacterState
-        ) => {
-          if (!server) return;
-          try {
-            await server.remoteFunction(
-              "updatePlayerTransform",
-              [
-                {
-                  position: [position.x, position.y, position.z],
-                  rotation: [rotation.x, rotation.y, rotation.z, rotation.w],
-                },
-                state,
-              ],
-              {
-                needResponse: false,
-                throttle: 50,
-              }
-            );
-          } catch (error) {
-            console.error(`[Player] Network sync failed:`, error);
-          }
-        },
-        NETWORK_CONSTANTS.SYNC.INTERVAL_MS,
-        { trailing: true }
-      ),
-    [server]
-  );
-
-  /**
-   * IMPORTANT: Should be useCallback
-   */
-  const syncToNetwork = useCallback(
-    (position: Vector3, rotation: Quaternion, state: CharacterState) => {
-      if (!server) return;
-
-      // 1) Check change amount (skip if almost identical to previous)
-      const positionDiff = position.distanceTo(prevState.current.position);
-      const rotationDiff = rotation.angleTo(prevState.current.rotation);
-      const stateDiff = state !== prevState.current.state;
-
-      // Skip if change is too minimal and state is the same
-      if (
-        !stateDiff &&
-        positionDiff < NETWORK_CONSTANTS.SYNC.POSITION_CHANGE_THRESHOLD &&
-        rotationDiff < NETWORK_CONSTANTS.SYNC.ROTATION_CHANGE_THRESHOLD
-      )
-        return;
-
-      // If there are changes, call throttledSyncToNetwork
-      throttledSyncToNetwork(position, rotation, state);
-
-      // Update previous state
-      prevState.current = {
-        position: position.clone(),
-        rotation: rotation.clone(),
-        state,
-      };
-    },
-    [server]
-  );
-
-  // Update player action state based on inputs and physics and sync to server
-  useFrame(() => {
-    if (!controllerRef?.current?.rigidBodyRef?.current) return;
-
-    const rigidBodyRef = controllerRef.current.rigidBodyRef;
-    const {
-      forward,
-      backward,
-      leftward,
-      rightward,
-      run: isRunning,
-      jump: isJumping,
-      action1: isPunching,
-      action2: isHit,
-      action3: isDying,
-      action4: isRevive,
-    } = get();
-
-    const currentVel = rigidBodyRef.current.linvel?.() || { y: 0 };
-
-    // Check if player is moving
-    const isMoving = forward || backward || leftward || rightward;
-
-    // Call action determination logic
-    const newState = determinePlayerState(currentStateRef.current, {
-      isRevive,
-      isDying,
-      isPunching,
-      isHit,
-      isJumping,
-      isMoving,
-      isRunning,
-      currentVelY: currentVel.y,
+export const Player = forwardRef<PlayerRef, PlayerProps>(
+  (
+    { initialState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, spawnEffect: onCastMagic, characterKey = 'avatarsample_d_darkness.vrm', server },
+    ref,
+  ) => {
+    const currentStateRef = useRef<CharacterState>(initialState);
+    const [, getKeyboardInputs] = useKeyboardControls();
+    const { determinePlayerState } = usePlayerStates();
+    const { animationConfigMap } = usePlayerAnimations(currentStateRef);
+    const characterRendererRef = useRef<CharacterRendererRef>(null);
+    const magicTriggeredRef = useRef(false);
+    // Ref to store the previously *sent* state for dirty checking
+    const prevSentStateRef = useRef({
+      position: new Vector3(),
+      rotation: new Quaternion(),
+      state: initialState,
     });
 
-    // 상태 업데이트
-    currentStateRef.current = newState;
+    useImperativeHandle(
+      ref,
+      () => ({
+        get boundingBox() {
+          return characterRendererRef.current?.boundingBox || null;
+        },
+      }),
+      [],
+    );
 
-    // 현재 위치와 회전 가져오기
-    const position = new Vector3();
-    const rotation = new Quaternion();
+    // Optimized network synchronization function
+    const throttledSyncToNetwork = useMemo(
+      () =>
+        throttle(
+          async (position: Vector3, rotation: Quaternion, state: CharacterState) => {
+            if (!server) return;
 
-    if (rigidBodyRef.current) {
-      const translation = rigidBodyRef.current.translation();
-      position.set(translation.x, translation.y, translation.z);
+            try {
+              //console.log('syncToNetwork', position, rotation, state);
+              server.remoteFunction(
+                'updatePlayerTransform',
+                [{ position: [position.x, position.y, position.z], rotation: [rotation.x, rotation.y, rotation.z, rotation.w] }, state],
+                { needResponse: false, throttle: 50 },
+              );
+            } catch (error) {
+              console.error(`[Player] Network sync failed:`, error);
+            }
+          },
+          NETWORK_CONSTANTS.SYNC.INTERVAL_MS,
+          { leading: true, trailing: true },
+        ),
+      [server],
+    );
 
-      const quatRotation = rigidBodyRef.current.rotation();
-      rotation.set(
-        quatRotation.x,
-        quatRotation.y,
-        quatRotation.z,
-        quatRotation.w
-      );
-    }
+    // Simplified network synchronization logic
+    const syncToNetwork = useCallback(
+      async (currentPosition: Vector3, currentRotation: Quaternion, currentState: CharacterState) => {
+        if (!server) return;
 
-    // 변화량 체크 및 네트워크 동기화
-    syncToNetwork(position, rotation, newState);
-  });
+        // Efficient dirty checking
+        const positionDiff = currentPosition.distanceTo(prevSentStateRef.current.position);
+        const rotationDiff = currentRotation.angleTo(prevSentStateRef.current.rotation);
+        const stateChanged = currentState !== prevSentStateRef.current.state;
 
-  // Define the character resource with all animations based on characterKey prop
-  // !!IMPORTANT: This is a rerender operation, so it should be memoized
-  const characterResource: CharacterResource = useMemo(() => {
-    // Characters are directly keyed by filename in assets.json
-    const characterData = (
-      Assets.characters as Record<string, { url: string }>
-    )[characterKey];
-    const characterUrl =
-      characterData?.url ||
-      Assets.characters["avatarsample_d_darkness.vrm"].url;
+        // Network update only when there's sufficient change
+        if (
+          stateChanged ||
+          positionDiff >= NETWORK_CONSTANTS.SYNC.POSITION_CHANGE_THRESHOLD ||
+          rotationDiff >= NETWORK_CONSTANTS.SYNC.ROTATION_CHANGE_THRESHOLD
+        ) {
+          // Update state before network call to prevent duplicate calls
+          prevSentStateRef.current.position.copy(currentPosition);
+          prevSentStateRef.current.rotation.copy(currentRotation);
+          prevSentStateRef.current.state = currentState;
 
-    return {
-      name: characterKey,
-      url: characterUrl,
-      animations: {
-        IDLE: Assets.animations.idle.url,
-        WALK: Assets.animations.walk.url,
-        RUN: Assets.animations.run.url,
-        JUMP: Assets.animations.jump.url,
-        PUNCH: Assets.animations.punch.url,
-        HIT: Assets.animations.hit.url,
-        DIE: Assets.animations.die.url,
+          // Async call without await to avoid blocking frame rendering
+          throttledSyncToNetwork(currentPosition, currentRotation, currentState);
+        }
       },
-    };
-  }, [characterKey]);
+      [server, throttledSyncToNetwork],
+    );
 
-  return (
-    <CharacterRenderer
-      characterResource={characterResource}
-      animationConfigMap={animationConfigMap}
-      currentActionRef={currentStateRef}
-    />
-  );
-};
+    // Magic casting logic extracted as a separate function
+    const handleMagicCast = useCallback(() => {
+      if (!controllerRef?.current?.rigidBodyRef?.current) return;
+
+      console.log('Magic key pressed - Requesting cast!');
+
+      // Call callback provided by parent component
+      if (onCastMagic) {
+        // Calculate magic direction (direction character is facing)
+        const rigidBody = controllerRef.current.rigidBodyRef.current;
+        const position = rigidBody.translation();
+        const startPosition = new THREE.Vector3(position.x, position.y, position.z);
+        const rotation = rigidBody.rotation();
+        const quaternion = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+        const direction = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion).normalize();
+        onCastMagic(EffectType.FIREBALL, createFireBallEffectConfig(startPosition, direction));
+      } else {
+        console.warn('Player tried to cast magic, but onCastMagic prop is missing!');
+      }
+    }, [controllerRef, onCastMagic]);
+
+    // Main update loop
+    useFrame(() => {
+      const rigidBody = controllerRef?.current?.rigidBodyRef?.current;
+      if (!rigidBody) return;
+
+      // 1. Process inputs
+      const inputs = getKeyboardInputs();
+      const { forward, backward, leftward, rightward, run, jump, action1, action2, action3, action4, magic } = inputs;
+
+      // 2. Handle magic trigger
+      const triggerMagic = magic && !magicTriggeredRef.current;
+      if (triggerMagic) {
+        handleMagicCast();
+      }
+      magicTriggeredRef.current = magic;
+
+      // 3. Calculate movement state
+      const isMoving = forward || backward || leftward || rightward;
+      const currentVel = rigidBody.linvel() || { y: 0 };
+
+      // 4. Determine player state
+      const playerInputs: PlayerInputs = {
+        isRevive: action4,
+        isDying: action3,
+        isPunching: action1,
+        isHit: action2,
+        isJumping: jump,
+        isMoving,
+        isRunning: run,
+        currentVelY: currentVel.y,
+      };
+      const newState = determinePlayerState(currentStateRef.current, playerInputs);
+      currentStateRef.current = newState;
+
+      // 5. Get current transform information
+      const translation = rigidBody.translation();
+      const quatRotation = rigidBody.rotation();
+
+      const offsetY = controllerRef.current.offsetY;
+      // Reuse cached Vector3 and Quaternion objects to reduce garbage collection overhead
+      const currentPosition = new Vector3(translation.x, translation.y - offsetY, translation.z);
+      const currentRotation = new Quaternion(quatRotation.x, quatRotation.y, quatRotation.z, quatRotation.w);
+
+      // 6. Network synchronization
+      syncToNetwork(currentPosition, currentRotation, newState);
+    });
+
+    // Memoized character resource loading.
+    const characterResource: CharacterResource = useMemo(() => {
+      const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
+      const characterUrl = characterData?.url || Assets.characters['avatarsample_d_darkness.vrm'].url;
+      return {
+        name: characterKey,
+        url: characterUrl,
+        animations: {
+          IDLE: Assets.animations.idle.url,
+          WALK: Assets.animations.walk.url,
+          RUN: Assets.animations.run.url,
+          JUMP: Assets.animations.jump.url,
+          PUNCH: Assets.animations.punch.url,
+          HIT: Assets.animations.hit.url,
+          DIE: Assets.animations.die.url,
+        },
+      };
+    }, [characterKey]);
+
+    // Render the character model and animations
+    return (
+      <CharacterRenderer
+        ref={characterRendererRef}
+        characterResource={characterResource}
+        animationConfigMap={animationConfigMap}
+        currentActionRef={currentStateRef}
+        targetHeight={targetHeight}
+      />
+    );
+  },
+);
