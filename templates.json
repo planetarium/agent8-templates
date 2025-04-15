@@ -110,7 +110,7 @@
     "label": "3D Character Quarterview Multiplay Template",
     "description": "Template for implementing 3D game with map and character. Features character system and quareeview camera system. Use for general and default 3D game with map and character.",
     "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-quarterview-multiplay",
+    "path": "basic-quarterview-multiplay",
     "tags": [
       "vite",
       "react",
@@ -137,7 +137,7 @@
       "lol",
       "multiplay",
       "lobby",
-      "leagueoflegends",
+      "League of Legends,",
       "topdown",
       "topview",
       "top-down",
