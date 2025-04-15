@@ -9,6 +9,7 @@ import { keyboardMap } from '../../constants/controls';
 import { Player, PlayerRef } from './Player';
 import { Floor } from './Floor';
 import { QuarterViewController } from 'vibe-starter-3d';
+import { TargetingSystem } from './TargetingSystem';
 
 export function Experience() {
   const controllerRef = useRef<ControllerHandle>(null);
@@ -79,6 +80,9 @@ export function Experience() {
 
         {/* Floor */}
         <Floor />
+
+        {/* 새로운 타겟팅 시스템 - 지형과 독립적으로 동작 */}
+        <TargetingSystem />
       </Physics>
     </>
   );

@@ -33,6 +33,7 @@ Key technologies:
 - Keyboard and mouse control options
 - 3D model rendering with animations
 - Interactive ground plane for navigation
+- Independent targeting system (decoupled from terrain)
 
 ## File Structure Overview
 
@@ -88,9 +89,16 @@ Key technologies:
 - Handles animations, movement, and state transitions
 - Implements character controller and input handling
 
+### src/components/r3f/TargetingSystem.tsx
+
+- Targeting system that operates independently from terrain
+- Detects click positions and sets movement points
+- Handles click effect animations
+- Manages interactions through an invisible interaction layer
+- !! Important: essential component. must be included
+
 ### src/components/r3f/Floor.tsx
 
 - Ground plane with physics properties
 - Provides surface for character movement
-- Contains mouse event handler for click-to-move functionality
-- Handles raycasting for player movement targeting
+- Handles collision detection for character
