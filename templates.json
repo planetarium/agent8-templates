@@ -16,24 +16,6 @@
     "tags": ["vite", "react", "typescript", "phaser", "platformer"]
   },
   {
-    "name": "basic-3d-character-animation",
-    "label": "3D Character Animation Template",
-    "description": "Template for implementing 3D rigged(mixamo) character with animations using Three.js. Features GLTF, VRM model loading, animation system for creating interactive 3D character models.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-character-animation",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "three.js",
-      "3d",
-      "character",
-      "glb",
-      "animation",
-      "mixamo"
-    ]
-  },
-  {
     "name": "basic-3d-freeview",
     "label": "3D Character Freeview Template",
     "description": "Template for implementing 3D game with map and character. Features character system and freeview camera system. Use for general and default 3D game with map and character.",
