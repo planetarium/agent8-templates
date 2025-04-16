@@ -82,7 +82,7 @@ Key technologies:
 - Floor plane with physics properties
 - Provides surface for character movement
 - Represents a generally flat floor. (It is recommended to use the settings applied to the RigidBody component as they are.)
-- Import: Do not modify the code in this file unless requested by the user.
+- Critical Important: Do not modify the code in this file unless requested by the user.
 
 ### src/components/scene/GameScene.tsx
 
