@@ -45,8 +45,7 @@ Key technologies:
 ### src/App.tsx
 
 - Main application component
-- Integrates R3F and UI components
-- Configures the root layout
+- Manages the scene.
 
 ### src/assets.json
 
@@ -62,22 +61,6 @@ Key technologies:
 
 - Defines keyboard control mappings
 - Sets up input configuration for player movement
-
-### src/components/R3F.tsx
-
-- React Three Fiber wrapper component
-- Provides 3D environment setup
-
-### src/components/UI.tsx
-
-- User interface component
-- Renders game UI elements
-
-### src/components/r3f/GameScene.tsx
-
-- Sets up the Canvas for rendering 3D content
-- Implements pointer lock for immersive control
-- Includes Experience component with Suspense
 
 ### src/components/r3f/Experience.tsx
 
@@ -98,3 +81,11 @@ Key technologies:
 
 - Floor plane with physics properties
 - Provides surface for character movement
+- Represents a generally flat floor. (It is recommended to use the settings applied to the RigidBody component as they are.)
+
+### src/components/scene/GameScene.tsx
+
+- Sets up the Canvas for rendering 3D content
+- Implements pointer lock for immersive control
+- Includes Experience component with Suspense
+- It is recommended to use the Canvas component settings as they are without making any changes.

@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Experience } from './Experience';
+import { Experience } from '../r3f/Experience';
 
 /**
  * Main game scene component
