@@ -2,37 +2,38 @@
 
 ## Project Summary
 
-This project is a basic 3D viewer that allows users to freely view 3D objects. It provides functionality to rotate around objects in 3D space, zoom in/out, and move using the mouse. Users can explore 3D models from various angles.
+This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, and hit reactions. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space.
 
 ## Implementation Strategy
 
 This project uses a **Three.js-based 3D approach** because:
 
-- Free rotation and manipulation of 3D objects is required
+- It requires real-time 3D character animation and control
 - Three.js provides efficient 3D rendering in web browsers
 - React Three Fiber simplifies integration with React components
-- Intuitive controls can be implemented for camera manipulation and interaction
+- The vibe-starter-3d library provides essential character rendering and animation tools
 
 Key technologies:
 
 - Three.js for 3D rendering
 - React Three Fiber for React integration
-- @react-three/drei for useful Three.js helper components
-- Responsive design to support various screen sizes
-- State management for storing camera positions and object settings
+- @react-three/rapier for physics simulation
+- @react-three/drei for useful Three.js helpers
+- vibe-starter-3d for character rendering and animation
+- Tailwind CSS for styling
 
 ## Implemented Features
 
-- Free orbit camera controls
-- Zoom functionality
-- 3D object rotation and movement
-- Various lighting settings
-- Object wireframe mode toggle
-- Different background options
-- Basic 3D model loading
-- Intuitive user interface
-- Camera position presets saving and loading
-- Screenshot capture functionality
+- Keyboard-controlled character movement (WASD/Arrow keys)
+- Character animations (idle, walk, run, jump, punch, hit, die)
+- Free view camera that follows the character
+- Physics-based character movement with collision detection
+- Character state management system
+- 3D environment with grid floor
+- Directional and ambient lighting
+- Animation system with support for looping and one-shot animations
+- Character bounding box calculations
+- Pointer lock for immersive control
 
 ## File Structure Overview
 
@@ -44,12 +45,23 @@ Key technologies:
 ### src/App.tsx
 
 - Main application component
+- Integrates R3F and UI components
 - Configures the root layout
 
 ### src/assets.json
 
-- Defines assets like 3D models and textures
-- Maps resource URLs
+- Defines character model and animation resources
+- Maps animation types to their respective URLs
+
+### src/constants/character.ts
+
+- Defines character states (IDLE, WALK, RUN, JUMP, PUNCH, HIT, DIE)
+- Exports type definitions for character states
+
+### src/constants/controls.ts
+
+- Defines keyboard control mappings
+- Sets up input configuration for player movement
 
 ### src/components/R3F.tsx
 
@@ -59,34 +71,30 @@ Key technologies:
 ### src/components/UI.tsx
 
 - User interface component
-- Renders control panels and option menus
+- Renders game UI elements
 
-### src/components/r3f/Scene.tsx
+### src/components/r3f/GameScene.tsx
 
-- Main 3D scene component
-- Sets up environment and lighting
-- Integrates 3D objects
+- Sets up the Canvas for rendering 3D content
+- Implements pointer lock for immersive control
+- Includes Experience component with Suspense
 
-### src/components/r3f/Controls.tsx
+### src/components/r3f/Experience.tsx
 
-- Camera control logic
-- Handles mouse and touch events
-- Implements zoom, rotation, and movement functionality
+- Main game scene component with physics
+- Sets up environment, lighting, and physics
+- Includes player character with controller
+- Configures grid and floor components
 
-### src/components/r3f/Model.tsx
+### src/components/r3f/Player.tsx
 
-- Loads and renders 3D models
-- Sets up model materials and properties
-- Supports wireframe and texture modes
+- Player character with control logic
+- Implements character state management
+- Handles animations based on player inputs
+- Uses CharacterRenderer from vibe-starter-3d
+- Exposes bounding box information
 
-### src/components/r3f/Lighting.tsx
+### src/components/r3f/Floor.tsx
 
-- Provides various lighting settings
-- Configures ambient, directional, and point lights
-- Sets up shadows
-
-### src/components/r3f/Environment.tsx
-
-- Background and environment-related settings
-- Supports HDRI backgrounds
-- Solid color and gradient background options
+- Floor plane with physics properties
+- Provides surface for character movement
