@@ -187,9 +187,33 @@
   {
     "name": "basic-3d-sideview-multiplay",
     "label": "3D Character Sideview Multiplay Template",
-    "description": "Three.js top-down game template inspired by Super Mario. Players control characters from above, with horizontal movement and attack functionality in a multiplayer environment. This templates ready to use, camera system, character system, and map system.",
+    "description": "Three.js multiplayer sideview game template. Features character control from a side view orthographic camera with horizontal movement and keyboard controls.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-sideview-multiplay",
     "tags": ["vite", "react", "typescript", "three.js", "3d", "character", "animation", "map", "rpg", "action", "multiplay", "sideview", "mario", "platformer"]
+  },
+  {
+    "name": "basic-3d-minecraft",
+    "label": "3D Character Minecraft Template",
+    "description": "Three.js fixed camera game template inspired by Minecraft. Players control characters from above, with horizontal movement and attack functionality in a multiplayer environment. This templates ready to use, camera system, character system, and map system.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-minecraft",
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "three.js",
+      "3d",
+      "character",
+      "animation",
+      "map",
+      "rpg",
+      "action",
+      "single-player",
+      "minecraft",
+      "block",
+      "building",
+      "survival"
+    ]
   }
 ]
