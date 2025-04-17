@@ -69,7 +69,7 @@
   {
     "name": "basic-3d-quarterview",
     "label": "3D Character Quarterview Template",
-    "description": "Three.js single-player top-down game template similar to League of Legends. Features character control from a quarter view perspective with click-to-move functionality and keyboard controls.",
+    "description": "Three.js single-player top-down game template similar to League of Legends. Features character control from a quarter view orthographic camera with click-to-move functionality and keyboard controls.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-quarterview",
     "tags": [
@@ -160,5 +160,36 @@
       "Pieter Levels",
       "ace-combat"
     ]
+  },
+  {
+    "name": "basic-3d-sideview",
+    "label": "3D Character Sideview Template",
+    "description": "Three.js single-player sideview game template. Features character control from a side view orthographic camera with horizontal movement and keyboard controls.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-sideview",
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "three.js",
+      "3d",
+      "character",
+      "animation",
+      "map",
+      "rpg",
+      "action",
+      "single-player",
+      "sideview",
+      "mario",
+      "platformer"
+    ]
+  },
+  {
+    "name": "basic-3d-sideview-multiplay",
+    "label": "3D Character Sideview Multiplay Template",
+    "description": "Three.js top-down game template inspired by Super Mario. Players control characters from above, with horizontal movement and attack functionality in a multiplayer environment. This templates ready to use, camera system, character system, and map system.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-sideview-multiplay",
+    "tags": ["vite", "react", "typescript", "three.js", "3d", "character", "animation", "map", "rpg", "action", "multiplay", "sideview", "mario", "platformer"]
   }
 ]
