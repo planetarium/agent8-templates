@@ -1,0 +1,77 @@
+{
+  "characters": {
+    "solider.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/solider.glb"
+    },
+    "commando.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/commando.glb"
+    },
+    "deadpool.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/deadpool.glb"
+    },
+    "gunslinger.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/gunslinger.glb"
+    },
+    "knight.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/knight.glb"
+    },
+    "x-bot.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/x-bot.glb"
+    },
+    "y-bot.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/y-bot.glb"
+    },
+    "zombie.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/zombie.glb"
+    },
+    "ryu.glb": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/ryu.glb"
+    }
+  },
+  "animations": {
+    "idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb",
+      "description": "Idle"
+    },
+    "walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+      "description": "Walk"
+    },
+    "run": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run.glb",
+      "description": "Run"
+    },
+    "jump": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/fall-idle.glb",
+      "description": "Jump"
+    },
+    "punch": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch.glb",
+      "description": "Punch"
+    },
+    "melee_attack": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
+      "description": "Melee Attack"
+    },
+    "aim": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/aimming.glb",
+      "description": "Aim"
+    },
+    "shoot": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot.glb",
+      "description": "Shoot"
+    },
+    "aim_run": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot-run.glb",
+      "description": "Aim Run"
+    },
+    "hit": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit.glb",
+      "description": "Hit"
+    },
+    "die": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death.glb",
+      "description": "Die"
+    }
+  }
+}
