@@ -1,19 +1,25 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Physics } from '@react-three/rapier';
 import { Environment, Grid, KeyboardControls } from '@react-three/drei';
 import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
 import { ControllerHandle } from 'vibe-starter-3d';
-import { useState } from 'react';
 import { useEffect } from 'react';
 import { keyboardMap } from '../../constants/controls';
 import { Player, PlayerRef } from './Player';
 import { Floor } from './Floor';
 import { QuarterViewController } from 'vibe-starter-3d';
 import { TargetingSystem } from './TargetingSystem';
+import { Box } from './Box';
+import { Vector3 } from 'three';
 
 export function Experience() {
   const controllerRef = useRef<ControllerHandle>(null);
   const playerRef = useRef<PlayerRef>(null);
+  const [targetObject, setTargetObject] = useState<string | null>(null);
+  const [targetPosition, setTargetPosition] = useState<Vector3 | null>(null);
+
+  // Box position setup
+  const boxPosition: [number, number, number] = [5, 0.5, 5];
 
   /**
    * Delay physics activate
@@ -36,6 +42,20 @@ export function Experience() {
       }
     }
   }, [playerRef.current?.boundingBox]);
+
+  // Box left-click handler
+  const handleBoxClick = () => {
+    setTargetObject('box');
+    setTargetPosition(new Vector3(boxPosition[0], boxPosition[1], boxPosition[2]));
+    console.log('Box clicked - attacking target');
+  };
+
+  // Box right-click handler
+  const handleBoxRightClick = () => {
+    setTargetObject('box');
+    setTargetPosition(new Vector3(boxPosition[0], boxPosition[1], boxPosition[2]));
+    console.log('Box right-clicked - attacking target');
+  };
 
   return (
     <>
@@ -74,15 +94,18 @@ export function Experience() {
               intensity: 1.2,
             }}
           >
-            <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={DEFAULT_HEIGHT} />
+            <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={DEFAULT_HEIGHT} isAttacking={!!targetObject} />
           </QuarterViewController>
         </KeyboardControls>
 
         {/* Floor */}
         <Floor />
 
-        {/* 새로운 타겟팅 시스템 - 지형과 독립적으로 동작 */}
-        <TargetingSystem />
+        {/* Attack target box */}
+        <Box position={boxPosition} size={[1, 1, 1]} color="red" onClick={handleBoxClick} onRightClick={handleBoxRightClick} />
+
+        {/* Targeting system */}
+        <TargetingSystem targetObject={targetObject} setTargetObject={setTargetObject} targetPosition={targetPosition} />
       </Physics>
     </>
   );

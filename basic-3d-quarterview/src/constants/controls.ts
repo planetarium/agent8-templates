@@ -1,14 +1,20 @@
 import { KeyboardControlsEntry } from '@react-three/drei';
 
+/**
+ * Keyboard control mapping
+ *
+ * Key definitions for each action
+ */
 export const keyboardMap: KeyboardControlsEntry[] = [
   { name: 'up', keys: ['ArrowUp', 'KeyW'] },
   { name: 'down', keys: ['ArrowDown', 'KeyS'] },
   { name: 'left', keys: ['ArrowLeft', 'KeyA'] },
   { name: 'right', keys: ['ArrowRight', 'KeyD'] },
+  { name: 'run', keys: ['ShiftLeft', 'ShiftRight'] },
   { name: 'jump', keys: ['Space'] },
-  { name: 'run', keys: ['Shift'] },
-  { name: 'action1', keys: ['1'] },
-  { name: 'action2', keys: ['2'] },
-  { name: 'action3', keys: ['3'] },
-  { name: 'action4', keys: ['4'] },
+  { name: 'action1', keys: ['KeyQ'] }, // Attack action
+  { name: 'action2', keys: ['KeyE'] }, // Hit action
+  { name: 'action3', keys: ['KeyR'] }, // Death action
+  { name: 'action4', keys: ['KeyF'] }, // Revival action
+  { name: 'magic', keys: ['KeyF'] }, // Magic action
 ];

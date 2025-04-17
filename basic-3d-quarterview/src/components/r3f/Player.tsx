@@ -42,6 +42,8 @@ interface PlayerProps {
   controllerRef?: React.RefObject<ControllerHandle>;
   /** Target height for the character model */
   targetHeight?: number;
+  /** Whether the player is currently attacking */
+  isAttacking?: boolean;
 }
 
 /**
@@ -170,7 +172,7 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.IDLE, controllerRef, targetHeight = 1.6 }, ref) => {
+export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, isAttacking = false }, ref) => {
   const currentStateRef = useRef<CharacterState>(initState);
   const [, getKeyboardInputs] = useKeyboardControls();
   const { determinePlayerState } = usePlayerStates();
@@ -201,11 +203,14 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
     const isRunning = run || isPointMoving;
     const currentVel = rigidBody.linvel() || { y: 0 };
 
+    // 타겟 공격 체크 (action1 버튼이나 isAttacking이 true일 때)
+    const isPunching = action1 || isAttacking;
+
     // 4. Determine player state
     const playerInputs: PlayerInputs = {
       isRevive: action4,
       isDying: action3,
-      isPunching: action1,
+      isPunching: isPunching,
       isHit: action2,
       isJumping: jump,
       isMoving,
