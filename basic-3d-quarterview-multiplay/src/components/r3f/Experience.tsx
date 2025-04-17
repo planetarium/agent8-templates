@@ -8,6 +8,7 @@ import { Floor } from './Floor';
 import { useGameServer } from '@agent8/gameserver';
 import { useEffectStore } from '../../store/effectStore';
 import { ControllerHandle, FreeViewController, QuarterViewController } from 'vibe-starter-3d';
+import { TargetingSystem } from './TargetingSystem';
 
 /**
  * Experience component props
@@ -103,6 +104,9 @@ export function Experience({ characterUrl }: ExperienceProps) {
 
       {/* Floor */}
       <Floor />
+
+      {/* Targeting System */}
+      <TargetingSystem />
     </>
   );
 }
