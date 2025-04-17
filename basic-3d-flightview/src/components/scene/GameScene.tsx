@@ -3,6 +3,9 @@ import { Canvas } from '@react-three/fiber';
 import { Experience } from '../r3f/Experience';
 import { FlightViewControllerHandle } from 'vibe-starter-3d';
 import { StatusDisplay } from '../ui/StatusDisplay';
+import { KeyboardControls } from '@react-three/drei';
+import { keyboardMap } from '../../constants/controls';
+import { EffectContainer } from '../r3f/EffectContainer';
 
 /**
  * Main game scene component
@@ -15,21 +18,23 @@ export const GameScene: React.FC = () => {
 
   return (
     <>
-      {/* UI Overlay */}
-      <StatusDisplay controllerRef={controllerRef} />
+      <KeyboardControls map={keyboardMap}>
+        {/* UI Overlay */}
+        <StatusDisplay controllerRef={controllerRef} />
 
-      <Canvas
-        shadows
-        camera={{ far: 5000 }}
-        onPointerDown={(e) => {
-          (e.target as HTMLCanvasElement).requestPointerLock();
-        }}
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} // Ensure canvas doesn't overlap UI
-      >
-        <Suspense fallback={null}>
-          <Experience controllerRef={controllerRef} />
-        </Suspense>
-      </Canvas>
+        <Canvas
+          shadows
+          camera={{ far: 5000 }}
+          onPointerDown={(e) => {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }}
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} // Ensure canvas doesn't overlap UI
+        >
+          <Suspense fallback={null}>
+            <Experience controllerRef={controllerRef} />
+          </Suspense>
+        </Canvas>
+      </KeyboardControls>
     </>
   );
 };

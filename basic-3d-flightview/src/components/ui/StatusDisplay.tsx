@@ -1,4 +1,4 @@
-import React, { useState, useEffect, RefObject } from 'react';
+import React, { useState, useEffect, RefObject, useRef } from 'react';
 import { FlightViewControllerHandle } from 'vibe-starter-3d';
 
 interface StatusDisplayProps {
@@ -8,16 +8,24 @@ interface StatusDisplayProps {
 export const StatusDisplay: React.FC<StatusDisplayProps> = ({ controllerRef }) => {
   const [speed, setSpeed] = useState(0);
   const [altitude, setAltitude] = useState(0);
+  const animationId = useRef<number | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateStatus = () => {
       if (controllerRef.current) {
-        setSpeed(parseFloat(controllerRef.current.speed.toFixed(1)));
+        // Convert speed from m/s to km/h
+        setSpeed(parseFloat((controllerRef.current.speed * 3.6).toFixed(1)));
         setAltitude(parseFloat(controllerRef.current.position.y.toFixed(1)));
       }
-    }, 100); // Update UI every 100ms
 
-    return () => clearInterval(interval);
+      animationId.current = requestAnimationFrame(updateStatus);
+    };
+
+    animationId.current = requestAnimationFrame(updateStatus);
+
+    return () => {
+      cancelAnimationFrame(animationId.current);
+    };
   }, [controllerRef]); // Dependency array includes controllerRef
 
   return (
@@ -34,8 +42,8 @@ export const StatusDisplay: React.FC<StatusDisplayProps> = ({ controllerRef }) =
         zIndex: 1, // Ensure UI is on top of the canvas
       }}
     >
-      <div>Speed: {speed.toFixed(1)}</div>
-      <div>Altitude: {altitude.toFixed(1)}</div>
+      <div>Speed: {speed.toFixed(1)} km/h</div>
+      <div>Altitude: {altitude.toFixed(1)} m</div>
       <hr style={{ margin: '5px 0' }} />
       <div>Controls:</div>
       <div>W/S: Speed</div>

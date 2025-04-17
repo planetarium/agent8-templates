@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
-import { RigidBody } from '@react-three/rapier';
+import { interactionGroups, RigidBody } from '@react-three/rapier';
+import { CollisionGroup } from 'vibe-starter-3d';
 
 type SimpleObject = {
   position: THREE.Vector3;
@@ -100,6 +101,13 @@ export const Ground = () => {
           <meshStandardMaterial color={obj.color} roughness={0.8} metalness={0.1} />
         </mesh>
       ))}
+
+      {/* <RigidBody name="BOX" type="fixed" colliders={'cuboid'} collisionGroups={interactionGroups(CollisionGroup.Environment)}>
+        <mesh receiveShadow position={[0, 1, -10]} scale={[2, 2, 2]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
+        </mesh>
+      </RigidBody> */}
     </>
   );
 };
