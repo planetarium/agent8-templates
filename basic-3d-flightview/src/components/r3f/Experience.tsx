@@ -5,8 +5,6 @@ import { BulletManager } from './BulletManager';
 import FloatingShapes from './FloatingShapes';
 import { Ground } from './Ground';
 import { CollisionPayload, Physics } from '@react-three/rapier';
-import { EffectComposer } from '@react-three/postprocessing';
-import { MotionBlur } from './MotionBlur';
 import { FlightViewController, FlightViewControllerHandle } from 'vibe-starter-3d';
 
 interface ExperienceProps {
@@ -35,10 +33,6 @@ export function Experience({ controllerRef }: ExperienceProps) {
 
         <Ground />
         <FloatingShapes />
-
-        <EffectComposer>
-          <MotionBlur controllerRef={controllerRef} />
-        </EffectComposer>
       </Physics>
     </>
   );
