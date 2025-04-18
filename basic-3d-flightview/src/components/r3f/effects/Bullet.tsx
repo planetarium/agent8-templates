@@ -7,7 +7,7 @@ import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
 
 const DEFAULT_SIZE = new THREE.Vector3(0.5, 0.5, 1);
 const DEFAULT_MEMBERSHIP_COLLISION_GROUP = CollisionGroup.Projectile;
-const DEFAULT_EXCLUDE_COLLISION_GROUP = [];
+const DEFAULT_EXCLUDE_COLLISION_GROUP = [CollisionGroup.LocalPlayer];
 
 export interface BulletProps {
   startPosition: THREE.Vector3;
