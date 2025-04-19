@@ -112,8 +112,8 @@ export function useCubeRaycaster() {
     }
   }, [camera, raycaster, scene]);
 
-  // Create throttled version of handleRaycast function (runs only once every 100ms)
-  const throttledRaycast = useRef(throttle(handleRaycast, 100, { leading: true, trailing: true })).current;
+  // Create throttled version of handleRaycast function (runs only once every 150ms)
+  const throttledRaycast = useRef(throttle(handleRaycast, 150, { leading: true, trailing: true })).current;
 
   // Cube action handler (always operates in builder mode)
   const handleCubeAction = useCallback(() => {
