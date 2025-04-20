@@ -162,6 +162,38 @@
     ]
   },
   {
+    "name": "basic-3d-firstpersonview",
+    "label": "3D First Person View (FPS) Template",
+    "description": "Three.js single-player first-person view (FPS) game template. Control your character through a first-person camera perspective, simulating the player's own eyes, with movement and keyboard controls.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-firstpersonview",
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "three.js",
+      "3d",
+      "fps",
+      "FPS",
+      "first-person",
+      "firstperson",
+      "first-person-view",
+      "firstpersonview",
+      "first-person-camera",
+      "firstpersoncamera",
+      "action",
+      "single-player",
+      "keyboard-controls",
+      "Call of Duty",
+      "Counter-Strike",
+      "Doom",
+      "Overwatch",
+      "Valorant",
+      "PUBG",
+      "PlayerUnknown's Battlegrounds"
+    ]
+  },
+  {
     "name": "basic-3d-sideview",
     "label": "3D Character Sideview Template",
     "description": "Three.js single-player sideview game template. Features character control from a side view orthographic camera with horizontal movement and keyboard controls.",
