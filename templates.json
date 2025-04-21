@@ -227,7 +227,7 @@
   {
     "name": "basic-3d-minecraft",
     "label": "3D Character Minecraft Template",
-    "description": "Three.js fixed camera game template inspired by Minecraft. Players control characters from above, with horizontal movement and attack functionality in a multiplayer environment. This templates ready to use, camera system, character system, and map system.",
+    "description": "Three.js fixed camera game template inspired by Minecraft. A voxel-style 3D Minecraft example is implemented. Players control characters from above, with horizontal movement and attack functionality in a multiplayer environment. This templates ready to use, camera system, character system, and map system.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-minecraft",
     "tags": [
@@ -235,6 +235,7 @@
       "react",
       "typescript",
       "three.js",
+      "voxel",
       "3d",
       "character",
       "animation",
