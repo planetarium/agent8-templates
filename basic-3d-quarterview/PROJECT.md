@@ -101,4 +101,3 @@ Key technologies:
 
 - Ground plane with physics properties
 - Provides surface for character movement
-- Handles collision detection for character

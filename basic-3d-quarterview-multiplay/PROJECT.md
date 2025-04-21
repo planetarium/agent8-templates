@@ -119,11 +119,18 @@ Key technologies:
 - Representation of other players in the game
 - Renders network-synchronized character models
 
+### src/components/r3f/TargetingSystem.tsx
+
+- Targeting system that operates independently from terrain
+- Detects click positions and sets movement points
+- Handles click effect animations
+- Manages interactions through an invisible interaction layer
+- !! Important: essential component. must be included
+
 ### src/components/r3f/Floor.tsx
 
 - Ground plane with physics properties
 - Provides surface for character movement
-- !!Important: Contains mouse event handler for movement. It must be included.
 
 ### src/components/r3f/NetworkContainer.tsx
 
