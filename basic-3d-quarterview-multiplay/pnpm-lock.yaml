@@ -45,11 +45,11 @@ importers:
         specifier: ^0.174.0
         version: 0.174.0
       vibe-starter-3d:
-        specifier: ^0.2.12
-        version: 0.2.12(@types/react@18.3.20)(@types/three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))(vibe-starter-3d-ctrl@0.0.2(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))
+        specifier: ^0.2.16
+        version: 0.2.16(@types/react@18.3.20)(@types/three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))(vibe-starter-3d-ctrl@0.0.4(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))
       vibe-starter-3d-ctrl:
-        specifier: ^0.0.2
-        version: 0.0.2(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))
+        specifier: ^0.0.4
+        version: 0.0.4(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))
       zustand:
         specifier: ^5.0.3
         version: 5.0.3(@types/react@18.3.20)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
@@ -1628,20 +1628,20 @@ packages:
   v8n@1.5.1:
     resolution: {integrity: sha512-LdabyT4OffkyXFCe9UT+uMkxNBs5rcTVuZClvxQr08D5TUgo1OFKkoT65qYRCsiKBl/usHjpXvP4hHMzzDRj3A==}
 
-  vibe-starter-3d-ctrl@0.0.2:
-    resolution: {integrity: sha512-uXoEjyneNoZGJhEP1HAwE7hNRgzJoz225A598B7xs62NYxnfTTNL2o/y7ZI017Pd6HrnqzCILbe2nOyIQWRncw==}
+  vibe-starter-3d-ctrl@0.0.4:
+    resolution: {integrity: sha512-oNDD7uoxyO7W7Ivpll2xoszuq4PCb9gx9TV87+G4rHz5y1kMpk9ALBWQ/U3JXiiRqA8MCi0p5J6KKs3/q0xkxg==}
     peerDependencies:
-      '@react-three/drei': '>=9.0'
-      '@react-three/fiber': '>=8.0'
-      '@react-three/rapier': '>=1.5.0'
-      react: '>=18'
-      react-dom: '>=18.0'
+      '@react-three/drei': ^9.122.0
+      '@react-three/fiber': ^8.18.0
+      '@react-three/rapier': ^1.5.0
+      react: ^18.3.1
+      react-dom: ^18.3.1
       three: ^0.174.0
 
-  vibe-starter-3d@0.2.12:
-    resolution: {integrity: sha512-rsoidyj4503+wIV6ANdEbvJn4GaiyJ4o3ZURaFRayV5+WVDMyBXACkOY5G/sdmWMOzMJwM59k8YdlV47XppSmQ==}
+  vibe-starter-3d@0.2.16:
+    resolution: {integrity: sha512-1ptw/4Gg6+UMOIYWJDdw+5BLw5J8ODfCAJsMQU+MX5Bndw42IKngbR6YiLK6iTB5eV9bUcvOTCeKcSmT+/WlkQ==}
     peerDependencies:
-      vibe-starter-3d-ctrl: ^0.0.2
+      vibe-starter-3d-ctrl: ^0.0.4
 
   vite@6.3.1:
     resolution: {integrity: sha512-kkzzkqtMESYklo96HKKPE5KKLkC1amlsqt+RjFMlX2AvbRB/0wghap19NdBxxwGZ+h/C6DLCrcEphPIItlGrRQ==}
@@ -3338,7 +3338,7 @@ snapshots:
 
   v8n@1.5.1: {}
 
-  vibe-starter-3d-ctrl@0.0.2(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)):
+  vibe-starter-3d-ctrl@0.0.4(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)):
     dependencies:
       '@react-spring/three': 9.7.5(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0)
       '@react-three/drei': 9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))
@@ -3355,8 +3355,9 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  vibe-starter-3d@0.2.12(@types/react@18.3.20)(@types/three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))(vibe-starter-3d-ctrl@0.0.2(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))):
+  vibe-starter-3d@0.2.16(@types/react@18.3.20)(@types/three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))(vibe-starter-3d-ctrl@0.0.4(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))):
     dependencies:
+      '@dimforge/rapier3d-compat': 0.15.1
       '@pixiv/three-vrm': 3.4.0(three@0.174.0)
       '@react-three/drei': 9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))
       '@react-three/fiber': 8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)
@@ -3365,7 +3366,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       three: 0.174.0
       three-stdlib: 2.35.15(three@0.174.0)
-      vibe-starter-3d-ctrl: 0.0.2(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))
+      vibe-starter-3d-ctrl: 0.0.4(@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(@types/three@0.174.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1)))(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(@react-three/rapier@1.5.0(@react-three/fiber@8.18.0(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0))(react@18.3.1)(three@0.174.0))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.174.0)(use-sync-external-store@1.5.0(react@18.3.1))
     transitivePeerDependencies:
       - '@types/react'
       - '@types/three'

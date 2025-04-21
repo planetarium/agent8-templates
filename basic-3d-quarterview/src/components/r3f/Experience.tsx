@@ -43,20 +43,6 @@ export function Experience() {
     }
   }, [playerRef.current?.boundingBox]);
 
-  // Box left-click handler
-  const handleBoxClick = () => {
-    setTargetObject('box');
-    setTargetPosition(new Vector3(boxPosition[0], boxPosition[1], boxPosition[2]));
-    console.log('Box clicked - attacking target');
-  };
-
-  // Box right-click handler
-  const handleBoxRightClick = () => {
-    setTargetObject('box');
-    setTargetPosition(new Vector3(boxPosition[0], boxPosition[1], boxPosition[2]));
-    console.log('Box right-clicked - attacking target');
-  };
-
   return (
     <>
       {/* Grid */}
@@ -101,11 +87,8 @@ export function Experience() {
         {/* Floor */}
         <Floor />
 
-        {/* Attack target box */}
-        <Box position={boxPosition} size={[1, 1, 1]} color="red" onClick={handleBoxClick} onRightClick={handleBoxRightClick} />
-
         {/* Targeting system */}
-        <TargetingSystem targetObject={targetObject} setTargetObject={setTargetObject} targetPosition={targetPosition} />
+        <TargetingSystem />
       </Physics>
     </>
   );
