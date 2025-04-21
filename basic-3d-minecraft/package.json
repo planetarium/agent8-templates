@@ -22,8 +22,9 @@
     "react-dom": "^18.3.1",
     "simplex-noise": "^4.0.3",
     "three": "^0.174.0",
-    "vibe-starter-3d": "^0.2.12",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "vibe-starter-3d": "^0.2.14",
+    "vibe-starter-3d-ctrl": "^0.0.2"
   },
   "devDependencies": {
     "@dimforge/rapier3d-compat": "^0.15.0",
