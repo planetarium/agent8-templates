@@ -76,7 +76,7 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, chara
       </div>
 
       <Canvas shadows>
-        <Physics debug={true}>
+        <Physics debug={false}>
           <Suspense fallback={null}>
             <Experience characterUrl={characterUrl} inputMode={inputMode} />
             <NetworkContainer />
