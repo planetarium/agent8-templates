@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-This project is a single-player game where you can control and fly an airplane in a 3D space. It is built using Three.js and React Three Fiber.
+This project is a multi-player game where you can control and fly an aircraft in a 3D space. It is built using Three.js and React Three Fiber.
 
 ## Implementation Strategy
 
@@ -20,63 +20,80 @@ Key technologies:
 - @react-three/rapier for physics simulation
 - @react-three/drei for useful Three.js helpers
 - vibe-starter-3d for character rendering and animation
+- @agent8/gameserver for multiplayer functionality
+- Zustand for state management
 - Tailwind CSS for styling
 
 ## Implemented Features
 
-- Keyboard-controlled character movement (WASD/Arrow keys)
+- Keyboard-controlled character movement (WASD/Arrow keys) and attack (Spacebar)
 - Free view camera that follows the character
-- Physics-based character movement with collision detection
-- 3D environment with grid floor
-- Directional and ambient lighting
 - Pointer lock for immersive control
 
 ## File Structure Overview
 
+This overview details the key files and directories within the `src/` directory.
+
 ### `src/main.tsx`
 
-- Entry point for the application.
+- Entry point for the React application.
 - Sets up React rendering and mounts the `App` component.
 
 ### `src/App.tsx`
 
 - Main application component.
-- Configures the overall layout and includes the `GameScene` and UI component (`StatusDisplay`).
+- Configures the overall layout, routing (likely using `RoomManager`), and includes UI components.
 
 ### `src/App.css`
 
-- Defines the main styles for the `App` component and its child UI elements.
+- Styles specific to the `App` component.
 
 ### `src/index.css`
 
-- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
+- Global styles, including Tailwind CSS directives and base styles.
 
 ### `src/assets.json`
 
-- File for managing asset metadata. (Currently empty)
+- Metadata for assets (currently may be unused or planned for future use).
 
 ### `src/constants/`
 
 - Directory defining constant values used throughout the application.
-  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
+  - **`controls.ts`**: Maps keyboard inputs to game actions (e.g., movement, firing).
+
+### `src/store/`
+
+- State management logic (using Zustand).
+  - **`effectStore.ts`**: Manages state related to visual effects (bullets, explosions).
+
+### `src/types/`
+
+- TypeScript type definitions.
+  - **`effect.ts`**: Defines types for effects.
+  - **`index.ts`**: Exports types from the directory.
 
 ### `src/components/`
 
-- Directory managing React components categorized by function.
+- React components categorized by function.
 
-  - **`r3f/`**: Contains 3D components related to React Three Fiber.
+  - **`r3f/`**: React Three Fiber components for the 3D scene.
 
-    - **`Airplane.tsx`**: Component handling the logic related to the player-controlled airplane model (movement, rotation, bullet firing).
-    - **`Bullet.tsx`**: Component defining the visual representation and behavior of bullets fired from the airplane.
-    - **`BulletManager.tsx`**: Component managing the entire bullet system, including creation, state updates, and recycling (Object Pooling).
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Airplane`), floor (`Ground`), floating shapes (`FloatingShapes`), bullet management (`BulletManager`), and manages physics engine settings.
-    - **`FloatingShapes.tsx`**: Component generating and managing various 3D shapes floating randomly in the scene.
-    - **`Ground.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
-    - **`MotionBlur.tsx`**: Post-processing component applying a motion blur effect to the screen.
+    - **`Airplane.tsx`**: Logic for the player-controlled airplane (movement, rotation, firing).
+    - **`Experience.tsx`**: Main 3D game experience setup (lighting, environment, physics, player, objects, effects). Loaded by `GameScene.tsx`.
+    - **`FloatingShapes.tsx`**: Manages floating 3D shapes in the scene.
+    - **`Ground.tsx`**: Defines the ground plane with physical properties.
+    - **`EffectContainer.tsx`**: Manages visual effects rendering.
+    - **`effects/`**: Specific visual effect components.
+      - **`Bullet.tsx`**: Visual representation and behavior of bullets.
+      - **`BulletEffectController.tsx`**: Manages bullet effect creation and lifecycle (potential for object pooling).
+      - **`MuzzleFlash.tsx`**: Represents the muzzle flash effect.
 
-  - **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Components managing different application scenes or stages.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`RoomManager.tsx`**: Likely handles routing or switching between different rooms/scenes like Lobby, Game, etc., based on game state.
+    - **`LobbyRoom.tsx`**: Component representing the game lobby UI and logic (e.g., player list, room selection).
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` for the main 3D game, implements Pointer Lock, and loads the `Experience` component.
+    - **`NicknameSetup.tsx`**: Component for players to set up their nickname before entering the lobby or game.
 
-  - **`ui/`**: Contains components related to the user interface (UI).
-    - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) on the screen.
+  - **`ui/`**: General user interface components.
+    - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) during gameplay.

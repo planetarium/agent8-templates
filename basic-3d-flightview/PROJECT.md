@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-This project is a single-player game where you can control and fly an airplane in a 3D space. It is built using Three.js and React Three Fiber.
+This project is a single-player game where you can control and fly an aircraft in a 3D space. It is built using Three.js and React Three Fiber.
 
 ## Implementation Strategy
 
@@ -20,15 +20,14 @@ Key technologies:
 - @react-three/rapier for physics simulation
 - @react-three/drei for useful Three.js helpers
 - vibe-starter-3d for character rendering and animation
+- @agent8/gameserver for multiplayer functionality
+- Zustand for state management
 - Tailwind CSS for styling
 
 ## Implemented Features
 
-- Keyboard-controlled character movement (WASD/Arrow keys)
+- Keyboard-controlled character movement (WASD/Arrow keys) and attack (Spacebar)
 - Free view camera that follows the character
-- Physics-based character movement with collision detection
-- 3D environment with grid floor
-- Directional and ambient lighting
 - Pointer lock for immersive control
 
 ## File Structure Overview
@@ -60,19 +59,32 @@ Key technologies:
 - Directory defining constant values used throughout the application.
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
 
+### `src/store/`
+
+- Directory containing state management logic (e.g., Zustand).
+  - **`effectStore.ts`**: Store for managing effect-related state (e.g., bullets, explosions).
+
+### `src/types/`
+
+- Directory containing TypeScript type definitions.
+  - **`effect.ts`**: Defines effect-related types.
+  - **`index.ts`**: Exports types from the `types` directory.
+
 ### `src/components/`
 
 - Directory managing React components categorized by function.
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Airplane.tsx`**: Component handling the logic related to the player-controlled airplane model (movement, rotation, bullet firing).
-    - **`Bullet.tsx`**: Component defining the visual representation and behavior of bullets fired from the airplane.
-    - **`BulletManager.tsx`**: Component managing the entire bullet system, including creation, state updates, and recycling (Object Pooling).
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Airplane`), floor (`Ground`), floating shapes (`FloatingShapes`), bullet management (`BulletManager`), and manages physics engine settings.
+    - **`Airplane.tsx`**: Component handling the logic related to the player-controlled airplane model (movement, rotation, bullet firing trigger).
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Airplane`), floor (`Ground`), floating shapes (`FloatingShapes`), effect container (`EffectContainer`), and manages physics engine settings.
     - **`FloatingShapes.tsx`**: Component generating and managing various 3D shapes floating randomly in the scene.
     - **`Ground.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
-    - **`MotionBlur.tsx`**: Post-processing component applying a motion blur effect to the screen.
+    - **`EffectContainer.tsx`**: Container component managing and rendering various visual effects like bullet firing and hit effects.
+    - **`effects/`**: Directory containing specific visual effect components.
+      - **`Bullet.tsx`**: Component defining the visual representation and individual behavior (movement, collision detection) of bullets fired from the airplane.
+      - **`BulletEffectController.tsx`**: Controller component responsible for creating and managing bullet-related effects (e.g., firing, collision). (Potential for Object Pooling usage)
+      - **`MuzzleFlash.tsx`**: Component representing the muzzle flash effect.
 
   - **`scene/`**: Contains components related to 3D scene setup.
 

@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, and hit reactions. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space.
+This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, and hit reactions. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space. This project is intended for single-player gameplay.
 
 ## Implementation Strategy
 
@@ -37,56 +37,46 @@ Key technologies:
 
 ## File Structure Overview
 
-### src/main.tsx
+### `src/main.tsx`
 
-- Entry point for the application
-- Sets up React rendering
+- Entry point for the application.
+- Sets up React rendering and mounts the `App` component.
 
-### src/App.tsx
+### `src/App.tsx`
 
-- Main application component
-- Manages the scene.
+- Main application component.
+- Configures the overall layout and includes the `GameScene` component.
 
-### src/assets.json
+### `src/App.css`
 
-- Defines character model and animation resources
-- Maps animation types to their respective URLs
+- Defines the main styles for the `App` component and its child UI elements.
 
-### src/constants/character.ts
+### `src/index.css`
 
-- Defines character states (IDLE, WALK, RUN, JUMP, PUNCH, HIT, DIE)
-- Exports type definitions for character states
+- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
 
-### src/constants/controls.ts
+### `src/assets.json`
 
-- Defines keyboard control mappings
-- Sets up input configuration for player movement
+- File for managing asset metadata. Includes character model and animation information.
 
-### src/components/r3f/Experience.tsx
+### `src/constants/`
 
-- Main game scene component with physics
-- Sets up environment, lighting, and physics
-- Includes player character with controller
-- Configures grid and floor components
+- Directory defining constant values used throughout the application.
+  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
+  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
 
-### src/components/r3f/Player.tsx
+### `src/components/`
 
-- Player character with control logic
-- Implements character state management
-- Handles animations based on player inputs
-- Uses CharacterRenderer from vibe-starter-3d
-- Exposes bounding box information
+- Directory managing React components categorized by function.
 
-### src/components/r3f/Floor.tsx
+  - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-- Floor plane with physics properties
-- Provides surface for character movement
-- Represents a generally flat floor. (It is recommended to use the settings applied to the RigidBody component as they are.)
-- Critical Important: Do not modify the code in this file unless requested by the user.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Player`), floor (`Floor`), and manages physics engine settings.
+    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
 
-### src/components/scene/GameScene.tsx
+  - **`scene/`**: Contains components related to 3D scene setup.
 
-- Sets up the Canvas for rendering 3D content
-- Implements pointer lock for immersive control
-- Includes Experience component with Suspense
-- It is recommended to use the Canvas component settings as they are without making any changes.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+
+  - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
