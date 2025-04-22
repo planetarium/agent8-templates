@@ -28,7 +28,7 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, chara
   return (
     <div className="absolute top-0 left-0 w-full h-screen">
       <Canvas shadows>
-        <Physics debug={true}>
+        <Physics debug={false}>
           <Suspense fallback={null}>
             <Experience characterUrl={characterUrl} />
             <NetworkContainer />

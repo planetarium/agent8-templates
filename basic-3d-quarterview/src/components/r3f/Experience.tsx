@@ -62,7 +62,7 @@ export function Experience() {
 
       <ambientLight intensity={0.7} />
 
-      <Physics debug={true} paused={pausedPhysics}>
+      <Physics debug={false} paused={pausedPhysics}>
         {/* Keyboard preset */}
         <KeyboardControls map={keyboardMap}>
           {/* Environment */}

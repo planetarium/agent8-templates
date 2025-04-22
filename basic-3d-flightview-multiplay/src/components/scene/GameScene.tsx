@@ -52,7 +52,7 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
         }}
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} // Ensure canvas doesn't overlap UI
       >
-        <Physics debug={true}>
+        <Physics debug={false}>
           <Suspense fallback={null}>
             <Experience controllerRef={controllerRef} />
             <NetworkContainer />
