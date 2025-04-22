@@ -18,7 +18,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.174.0",
-    "vibe-starter-3d": "^0.2.9"
+    "vibe-starter-3d": "^0.2.16",
+    "vibe-starter-3d-ctrl": "^0.0.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",

@@ -22,9 +22,9 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.174.0",
-    "zustand": "^5.0.3",
-    "vibe-starter-3d": "^0.2.14",
-    "vibe-starter-3d-ctrl": "^0.0.2"
+    "vibe-starter-3d": "^0.2.16",
+    "vibe-starter-3d-ctrl": "^0.0.4",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
