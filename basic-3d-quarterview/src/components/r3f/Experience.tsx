@@ -9,17 +9,25 @@ import { Player, PlayerRef } from './Player';
 import { Floor } from './Floor';
 import { QuarterViewController } from 'vibe-starter-3d';
 import { TargetingSystem } from './TargetingSystem';
-import { Box } from './Box';
-import { Vector3 } from 'three';
+import { Enemy } from './Enemy';
+import { Vector3, Group } from 'three';
 
-export function Experience() {
+type ExperienceProps = {
+  inputMode: 'keyboard' | 'pointToMove';
+};
+
+export function Experience({ inputMode }: ExperienceProps) {
   const controllerRef = useRef<ControllerHandle>(null);
   const playerRef = useRef<PlayerRef>(null);
+  const enemyRef = useRef<Group>(null);
   const [targetObject, setTargetObject] = useState<string | null>(null);
   const [targetPosition, setTargetPosition] = useState<Vector3 | null>(null);
+  const [hoveredEnemyId, setHoveredEnemyId] = useState<string | null>(null);
 
   // Box position setup
   const boxPosition: [number, number, number] = [5, 0.5, 5];
+  // Enemy positions
+  const enemyPosition: [number, number, number] = [5, 0, 5];
 
   /**
    * Delay physics activate
@@ -42,6 +50,17 @@ export function Experience() {
       }
     }
   }, [playerRef.current?.boundingBox]);
+
+  // Handle enemy hover
+  const handleEnemyHover = (id: string, isHovered: boolean) => {
+    if (isHovered) {
+      setHoveredEnemyId(id);
+      console.log('Enemy hovered:', id);
+    } else if (hoveredEnemyId === id) {
+      setHoveredEnemyId(null);
+      console.log('Enemy unhovered:', id);
+    }
+  };
 
   return (
     <>
@@ -71,7 +90,7 @@ export function Experience() {
           {/* player character with controller */}
           <QuarterViewController
             cameraMode="orthographic"
-            inputMode="pointToMove"
+            inputMode={inputMode}
             followCharacter={true}
             ref={controllerRef}
             targetHeight={DEFAULT_HEIGHT}
@@ -86,6 +105,23 @@ export function Experience() {
 
         {/* Floor */}
         <Floor />
+
+        {/* Visual container for the enemy with ref for outline */}
+        <group ref={enemyRef}>
+          {/* Enemy character */}
+          <Enemy position={enemyPosition} characterKey="zombie.glb" id="enemy-1" onHover={handleEnemyHover} />
+
+          {/* Outline effect when hovered */}
+          {hoveredEnemyId && (
+            <>
+              {/* Glowing circle under enemy */}
+              <mesh position={[enemyPosition[0], 0.05, enemyPosition[2]]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.8, 1.1, 32]} />
+                <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
+              </mesh>
+            </>
+          )}
+        </group>
 
         {/* Targeting system */}
         <TargetingSystem />

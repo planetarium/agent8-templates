@@ -16,6 +16,8 @@ import { TargetingSystem } from './TargetingSystem';
 interface ExperienceProps {
   /** Current player's character key */
   characterUrl: string;
+  /** Input mode for character control */
+  inputMode: 'keyboard' | 'pointToMove';
 }
 
 /**
@@ -24,7 +26,7 @@ interface ExperienceProps {
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements for the local player.
  */
-export function Experience({ characterUrl }: ExperienceProps) {
+export function Experience({ characterUrl, inputMode }: ExperienceProps) {
   const { server, account } = useGameServer();
   if (!server) return null;
   if (!account) return null;
@@ -81,7 +83,7 @@ export function Experience({ characterUrl }: ExperienceProps) {
 
         {/* Local player character with controller */}
         <QuarterViewController
-          inputMode="pointToMove"
+          inputMode={inputMode}
           followCharacter={false}
           ref={controllerRef}
           targetHeight={DEFAULT_HEIGHT}
