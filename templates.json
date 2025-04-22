@@ -40,11 +40,11 @@
     ]
   },
   {
-    "name": "basic-3d-multiplay",
+    "name": "basic-3d-freeview-multiplay",
     "label": "3D Multiplay Template",
     "description": "Three.js multiplayer 3D game template with free camera control. Enables players to interact in a shared 3D environment with flexible camera positioning.",
     "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-multiplay",
+    "path": "basic-3d-freeview-multiplay",
     "tags": [
       "vite",
       "react",
