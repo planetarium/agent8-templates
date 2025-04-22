@@ -68,7 +68,7 @@ Key technologies:
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets and muzzle flash.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Player`), floor (`Floor`), effect container (`EffectContainer`), and manages physics engine settings.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes the crucial `FirstPersonViewController`, lighting, environmental elements, floor (`Floor`), effect container (`EffectContainer`), and manages physics engine settings.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
     - **`effects/`**: Sub-directory containing components related to visual effects.
       - **`Bullet.tsx`**: Component defining the visual representation and behavior of bullets fired from the player.
