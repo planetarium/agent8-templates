@@ -5,7 +5,7 @@ import { PlayerRef } from '../../types/player';
 import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
 import { keyboardMap } from '../../constants/controls';
 import { Floor } from './Floor';
-import { useGameServer } from '@agent8/gameserver';
+import { useGameServer, useRoomState } from '@agent8/gameserver';
 import { useEffectStore } from '../../store/effectStore';
 import { ControllerHandle, SideViewController } from 'vibe-starter-3d';
 
@@ -25,6 +25,7 @@ interface ExperienceProps {
  */
 export function Experience({ characterUrl }: ExperienceProps) {
   const { server, account } = useGameServer();
+  const { roomId } = useRoomState();
   if (!server) return null;
   if (!account) return null;
   const controllerRef = useRef<ControllerHandle>(null);
@@ -100,7 +101,7 @@ export function Experience({ characterUrl }: ExperienceProps) {
       </KeyboardControls>
 
       {/* Floor */}
-      <Floor />
+      <Floor seed={roomId} />
     </>
   );
 }

@@ -41,7 +41,7 @@ export function Experience() {
       {/* Grid */}
       <Grid
         args={[100, 100]}
-        position={[0, 0.01, 0]}
+        rotation={[Math.PI / 2, 0, 0]}
         cellSize={1}
         cellThickness={0.5}
         cellColor="#6f6f6f"
@@ -75,7 +75,7 @@ export function Experience() {
         </KeyboardControls>
 
         {/* Floor */}
-        <Floor />
+        <Floor seed={Math.floor(Math.random() * 10000)} />
       </Physics>
     </>
   );

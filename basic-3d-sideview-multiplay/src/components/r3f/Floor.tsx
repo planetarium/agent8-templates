@@ -1,15 +1,26 @@
 import { useRef, useState, useEffect } from 'react';
-import { useGame } from 'vibe-starter-3d-ctrl';
 import { RigidBody, CuboidCollider } from '@react-three/rapier';
-import { Mesh, Vector3 } from 'three';
+import { Mesh } from 'three';
 import { useFrame } from '@react-three/fiber';
 
 // Seed-based random number generator class
 class SeededRandom {
   private seed: number;
 
-  constructor(seed: number) {
-    this.seed = seed;
+  constructor(seed: string | number) {
+    // 문자열 seed를 숫자로 변환
+    if (typeof seed === 'string') {
+      // 문자열을 숫자 해시로 변환
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) {
+        const char = seed.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash; // 32비트 정수로 변환
+      }
+      this.seed = Math.abs(hash);
+    } else {
+      this.seed = seed;
+    }
   }
 
   // Generate random number between 0~1 (replaces Math.random())
@@ -24,14 +35,8 @@ class SeededRandom {
   }
 }
 
-export const Floor = () => {
-  // Set default seed value (can be shared via network later)
-  const [seed, setSeed] = useState<number>(12345);
+export const Floor = ({ seed }: { seed: string | number }) => {
   const [rng, setRng] = useState<SeededRandom | null>(null);
-
-  const date = useRef(Date.now());
-  const setMoveToPoint = useGame((state) => state.setMoveToPoint);
-  const circleRef = useRef<Mesh>(null);
 
   // Initialize RNG
   useEffect(() => {
@@ -40,7 +45,6 @@ export const Floor = () => {
 
   // State variables for click effect
   const [clickEffect, setClickEffect] = useState(false);
-  const [clickPosition, setClickPosition] = useState<Vector3 | null>(null);
   const [effectScale, setEffectScale] = useState(1);
   const effectRingRef = useRef<Mesh>(null);
 
@@ -71,8 +75,6 @@ export const Floor = () => {
 
     // Set block size and count
     const blockWidth = 4;
-    const blockDepth = 2;
-    const blockHeight = 0.5;
     const totalBlocks = 15;
     const blocks = [];
 
@@ -96,7 +98,7 @@ export const Floor = () => {
       const posY = -randomHeight / 2 + randomYOffset;
 
       blocks.push(
-        <RigidBody key={i} type="fixed" position={[posX, posY, 0]} colliders={false} collisionGroups={(0x00000004 << 16) | 0x00000003}>
+        <RigidBody key={i} type="fixed" position={[posX, posY, 0]} colliders={false}>
           <CuboidCollider args={[currentBlockWidth / 2, randomHeight / 2, randomDepth / 2]} />
           <mesh receiveShadow>
             <boxGeometry args={[currentBlockWidth, randomHeight, randomDepth]} />
@@ -112,25 +114,5 @@ export const Floor = () => {
     return blocks;
   };
 
-  return (
-    <>
-      {/* Minimal click effect ring */}
-      {clickEffect && clickPosition && (
-        <mesh ref={effectRingRef} position={[clickPosition.x, clickPosition.y + 0.01, clickPosition.z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.3, 0.35]} /> {/* Thinner ring */}
-          <meshBasicMaterial color="#e0e0e0" transparent opacity={0.4 * effectScale} />
-        </mesh>
-      )}
-
-      {/* Seed change test (will be replaced with network sync later) */}
-      {/* <button 
-        onClick={() => setSeed(Math.floor(Math.random() * 10000))} 
-        style={{ position: 'absolute', top: 10, right: 10 }}
-      >
-        Generate New Terrain
-      </button> */}
-
-      {renderFloorBlocks()}
-    </>
-  );
+  return <>{renderFloorBlocks()}</>;
 };

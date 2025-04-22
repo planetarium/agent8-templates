@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
-import { useGame } from 'vibe-starter-3d-ctrl';
 import { RigidBody, CuboidCollider } from '@react-three/rapier';
-import { Mesh, Vector3 } from 'three';
+import { Mesh } from 'three';
 import { useFrame } from '@react-three/fiber';
 
 // Seed-based random number generator class
@@ -24,14 +23,8 @@ class SeededRandom {
   }
 }
 
-export const Floor = () => {
-  // Set default seed value (can be shared via network later)
-  const [seed, setSeed] = useState<number>(12345);
+export const Floor = ({ seed }: { seed: number }) => {
   const [rng, setRng] = useState<SeededRandom | null>(null);
-
-  const date = useRef(Date.now());
-  const setMoveToPoint = useGame((state) => state.setMoveToPoint);
-  const circleRef = useRef<Mesh>(null);
 
   // Initialize RNG
   useEffect(() => {
@@ -40,7 +33,6 @@ export const Floor = () => {
 
   // State variables for click effect
   const [clickEffect, setClickEffect] = useState(false);
-  const [clickPosition, setClickPosition] = useState<Vector3 | null>(null);
   const [effectScale, setEffectScale] = useState(1);
   const effectRingRef = useRef<Mesh>(null);
 
@@ -71,8 +63,6 @@ export const Floor = () => {
 
     // Set block size and count
     const blockWidth = 4;
-    const blockDepth = 2;
-    const blockHeight = 0.5;
     const totalBlocks = 15;
     const blocks = [];
 
@@ -112,25 +102,5 @@ export const Floor = () => {
     return blocks;
   };
 
-  return (
-    <>
-      {/* Minimal click effect ring */}
-      {clickEffect && clickPosition && (
-        <mesh ref={effectRingRef} position={[clickPosition.x, clickPosition.y + 0.01, clickPosition.z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.3, 0.35]} /> {/* Thinner ring */}
-          <meshBasicMaterial color="#e0e0e0" transparent opacity={0.4 * effectScale} />
-        </mesh>
-      )}
-
-      {/* Seed change test (will be replaced with network sync later) */}
-      {/* <button 
-        onClick={() => setSeed(Math.floor(Math.random() * 10000))} 
-        style={{ position: 'absolute', top: 10, right: 10 }}
-      >
-        Generate New Terrain
-      </button> */}
-
-      {renderFloorBlocks()}
-    </>
-  );
+  return <>{renderFloorBlocks()}</>;
 };
