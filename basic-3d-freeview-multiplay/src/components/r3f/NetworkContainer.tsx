@@ -1,9 +1,10 @@
-import { useRef, useEffect, useMemo } from 'react';
-import { useGameServer, useRoomAllUserStates, useRoomState } from '@agent8/gameserver';
+import { useRef, useEffect, useState } from 'react';
+import { useGameServer, useRoomState } from '@agent8/gameserver';
 import { UserState } from '../../types';
 import React from 'react';
 import { RemotePlayer, RemotePlayerHandle } from './RemotePlayer';
 import { DEFAULT_HEIGHT } from '../../constants/character';
+import { UnsubscribeFunction } from '@agent8/gameserver/dist/src/server/GameServer';
 
 /**
  * Main Experience component
@@ -13,65 +14,70 @@ import { DEFAULT_HEIGHT } from '../../constants/character';
  */
 export function NetworkContainer() {
   const { connected, server, account } = useGameServer();
+  if (!server) return null;
   if (!connected) return null;
   const { roomId } = useRoomState();
-  const userStates = useRoomAllUserStates() as UserState[];
-
-  const otherReadyPlayers = useMemo(() => {
-    return userStates.filter((user) => user.account !== account && user.isReady && user.transform);
-  }, [server.account, userStates]);
+  const [otherReadyPlayers, setUserStates] = useState<{ [account: string]: UserState }>({});
 
   const playerRefs = useRef<Record<string, React.RefObject<RemotePlayerHandle>>>({});
 
   useEffect(() => {
-    const currentAccounts = new Set(otherReadyPlayers.map((p) => p.account));
-    const existingAccounts = new Set(Object.keys(playerRefs.current));
+    if (!server || !connected || !roomId || !account) return;
 
-    otherReadyPlayers.forEach((player) => {
-      if (!existingAccounts.has(player.account)) {
-        console.log(`[GameScene RefMgmt] Creating ref for player: ${player.account}`);
-        playerRefs.current[player.account] = React.createRef<RemotePlayerHandle>();
-      }
-    });
+    const unsubscribes: UnsubscribeFunction[] = [];
 
-    existingAccounts.forEach((account) => {
-      if (!currentAccounts.has(account)) {
-        console.log(`[GameScene RefMgmt] Removing ref for player: ${account}`);
-        delete playerRefs.current[account];
-      }
-    });
-  }, [otherReadyPlayers]);
-
-  useEffect(() => {
-    if (!roomId || !server) return;
-
-    console.log(`[GameScene Sub] Subscribing to room user states for room: ${roomId}`);
-
-    const unsubscribe = server.subscribeRoomAllUserStates(roomId, (allUserStates: Record<string, UserState | null>) => {
-      Object.values(allUserStates).forEach((playerState) => {
-        if (playerState && playerState.account !== account) {
-          const playerRef = playerRefs.current[playerState.account];
-          if (playerRef?.current && playerState.transform && playerState.state && playerState.isReady) {
-            playerRef.current.syncState(playerState.state, playerState.transform.position, playerState.transform.rotation);
+    unsubscribes.push(
+      server.subscribeRoomState(roomId, (roomState) => {
+        for (const account in otherReadyPlayers) {
+          if (!roomState.$users.includes(account)) {
+            delete playerRefs.current[account];
+            delete otherReadyPlayers[account];
           }
         }
-      });
-    });
+
+        setUserStates(otherReadyPlayers);
+      }),
+    );
+
+    unsubscribes.push(
+      server.subscribeRoomAllUserStates(roomId, (allUserStates: Record<string, UserState | null>) => {
+        let needUpdateUserStates = false;
+        Object.values(allUserStates).forEach((playerState) => {
+          if (playerState && playerState.account !== account && playerState.isReady && playerState.transform) {
+            if (!otherReadyPlayers[playerState.account]) {
+              otherReadyPlayers[playerState.account] = playerState;
+              playerRefs.current[playerState.account] = React.createRef<RemotePlayerHandle>();
+              needUpdateUserStates = true;
+            }
+
+            const playerRef = playerRefs.current[playerState.account];
+            if (playerRef?.current) {
+              playerRef.current.syncState(playerState.state, playerState.transform.position, playerState.transform.rotation);
+            }
+          }
+        });
+
+        if (needUpdateUserStates) {
+          setUserStates({ ...otherReadyPlayers });
+        }
+      }),
+    );
 
     return () => {
-      console.log(`[GameScene Sub] Unsubscribing from room user states for room: ${roomId}`);
-      unsubscribe();
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
-  }, [roomId, server]);
+  }, [server, connected, roomId, account]);
 
   return (
     <>
-      {otherReadyPlayers.map(
+      {Object.values(otherReadyPlayers).map(
         (player) =>
           player.character && (
             <RemotePlayer
               key={player.account}
               ref={playerRefs.current[player.account]}
+              position={player.transform?.position}
+              rotation={player.transform?.rotation}
               account={player.account}
               characterUrl={player.character}
               nickname={player.nickname}

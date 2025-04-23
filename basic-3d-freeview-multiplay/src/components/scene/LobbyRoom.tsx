@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useRoomState, useRoomAllUserStates, GameServer } from '@agent8/gameserver';
+import { useRoomAllUserStates, GameServer } from '@agent8/gameserver';
 import Assets from '../../assets.json';
 import { UserState } from '../../types';
 import { Canvas } from '@react-three/fiber';
@@ -21,6 +21,7 @@ interface LobbyRoomProps {
 
 const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) => {
   const userStates = useRoomAllUserStates() as UserState[];
+  const [isStarted, setIsStarted] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +29,10 @@ const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) =>
 
   const availableCharacters = Object.keys(Assets.characters);
   const currentUserState = userStates.find((user) => user.account === server.account);
+
+  useEffect(() => {
+    setIsStarted(true);
+  }, []);
 
   const handleToggleReady = async () => {
     if (isLoading || !selectedCharacter) return;
@@ -58,11 +63,12 @@ const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) =>
   };
 
   useEffect(() => {
-    if (currentUserState?.isReady !== undefined) {
-      setIsReady(currentUserState.isReady);
-    }
-    if (currentUserState?.character) {
-      setSelectedCharacter(currentUserState.character);
+    if (currentUserState && selectedCharacter) {
+      setIsReady(currentUserState.isReady ?? false);
+      setSelectedCharacter(currentUserState.character || null);
+    } else {
+      setIsReady(false);
+      setSelectedCharacter(null);
     }
   }, [currentUserState]);
 
@@ -88,7 +94,7 @@ const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) =>
                 <div className="font-medium text-lg">{currentUserState?.nickname || 'Player'}</div>
                 <button
                   onClick={handleToggleReady}
-                  disabled={isLoading || !selectedCharacter}
+                  disabled={isLoading || !selectedCharacter || !isStarted}
                   className={`px-4 py-1.5 text-sm font-medium rounded shadow-sm border disabled:opacity-50 disabled:cursor-not-allowed ${
                     isReady ? 'bg-green-500 hover:bg-green-600 text-white border-green-600' : 'bg-blue-500 hover:bg-blue-600 text-white border-blue-600'
                   }`}
@@ -105,7 +111,7 @@ const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) =>
                     <li
                       key={character}
                       className={`px-3 py-2 flex items-center cursor-pointer hover:bg-gray-100 ${
-                        selectedCharacter === character ? 'bg-blue-50 font-semibold' : ''
+                        isStarted && selectedCharacter === character ? 'bg-blue-50 font-semibold' : ''
                       }`}
                       onClick={() => handleCharacterSelect(character)}
                     >

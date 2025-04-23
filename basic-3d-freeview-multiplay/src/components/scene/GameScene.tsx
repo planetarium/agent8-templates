@@ -5,16 +5,18 @@ import { Experience } from '../r3f/Experience';
 import { StatsGl } from '@react-three/drei';
 import { NetworkContainer } from '../r3f/NetworkContainer';
 import { EffectContainer } from '../r3f/EffectContainer';
+import { RTT } from '../ui/RTT';
+
 /**
  * Game scene props
  */
 interface GameSceneProps {
   /** Current room ID */
   roomId: string;
-  /** Game server instance */
-  //server: GameServer;
   /** Handler for leaving room */
   onLeaveRoom: () => Promise<void>;
+  /** Current player's character key */
+  characterUrl: string;
 }
 
 /**
@@ -23,19 +25,7 @@ interface GameSceneProps {
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements.
  */
-export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => {
-  //const rtt = networkSyncStore((state) => state.rtt);
-  // const userStates = useRoomAllUserStates() as UserState[];
-
-  // const currentUser = useMemo(() => {
-  //   return userStates.find((user) => user.account === server.account);
-  // }, [server.account, userStates]);
-
-  // const characterUrl = currentUser?.character;
-  // if (!characterUrl) {
-  //   return null;
-  // }
-
+export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, characterUrl }) => {
   return (
     <div className="relative w-full h-screen">
       <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10">
@@ -43,9 +33,7 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
           Leave Game
         </button>
         <div className="flex items-center space-x-2">
-          <div className="px-3 py-1 bg-black/30 text-white rounded border border-gray-500 text-sm">
-            {/* Ping: <span className="font-semibold">{rtt !== null ? `${rtt.toFixed(0)}ms` : 'N/A'}</span> */}
-          </div>
+          <RTT />
           <div className="px-3 py-1 bg-black/30 text-white rounded border border-gray-500 text-sm">
             Room ID: <span className="font-semibold">{roomId}</span>
           </div>
@@ -58,9 +46,9 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
           (e.target as HTMLCanvasElement).requestPointerLock();
         }}
       >
-        <Physics debug={false}>
+        <Physics debug={true}>
           <Suspense fallback={null}>
-            <Experience characterUrl="solider.glb" />
+            <Experience characterUrl={characterUrl} />
             <NetworkContainer />
             <EffectContainer />
           </Suspense>

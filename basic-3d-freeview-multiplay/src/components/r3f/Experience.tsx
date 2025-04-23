@@ -6,10 +6,8 @@ import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
 import { keyboardMap } from '../../constants/controls';
 import { Floor } from './Floor';
 import { useGameServer } from '@agent8/gameserver';
-import { Vector3 } from 'three';
 import { useEffectStore } from '../../store/effectStore';
 import { ControllerHandle, FreeViewController } from 'vibe-starter-3d';
-import { useFrame } from '@react-three/fiber';
 
 /**
  * Experience component props
@@ -18,11 +16,6 @@ interface ExperienceProps {
   /** Current player's character key */
   characterUrl: string;
 }
-
-// Utility to convert THREE.Vector3 to array (needed for store/server)
-const vecToArray = (vec: Vector3): [number, number, number] => {
-  return [vec.x, vec.y, vec.z];
-};
 
 /**
  * Main Experience component
@@ -36,8 +29,6 @@ export function Experience({ characterUrl }: ExperienceProps) {
   if (!account) return null;
   const controllerRef = useRef<ControllerHandle>(null);
   const playerRef = useRef<PlayerRef>(null);
-
-  const prevTime = useRef(Date.now());
 
   // Get addEffect action from the store
   const addEffect = useEffectStore((state) => state.addEffect);
@@ -79,11 +70,6 @@ export function Experience({ characterUrl }: ExperienceProps) {
       rigidBodyRef.userData = { account };
     }
   }, [account, controllerRef.current?.rigidBodyRef.current]);
-
-  useFrame(() => {
-    const now = Date.now();
-    prevTime.current = now;
-  });
 
   return (
     <>
