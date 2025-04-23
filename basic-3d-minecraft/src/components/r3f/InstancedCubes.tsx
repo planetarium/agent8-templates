@@ -1,24 +1,20 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
-import { InstancedRigidBodies, InstancedRigidBodyProps } from '@react-three/rapier';
+import { CuboidCollider, RigidBody, TrimeshCollider } from '@react-three/rapier';
 import { useCubeStore } from '../../store/cubeStore';
 import { getTileCoordinates, getSpriteInfo } from '../../utils/tileTextureLoader';
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
 
 // Maximum number of cube instances
-const MAX_INSTANCES = 10000;
+const MAX_INSTANCES = 1000000;
 
 // Chunk size definition
-const CHUNK_SIZE = 3;
+const CHUNK_SIZE = 8;
 // Active chunk radius
-const ACTIVE_CHUNKS_RADIUS = 1;
-
-// Define CubeInfo interface
-interface CubeInfo {
-  position: [number, number, number];
-  tileIndex: number;
-}
+const ACTIVE_CHUNKS_RADIUS = 3;
+// Maximum active chunks limit
+const MAX_ACTIVE_CHUNKS = 27; // 3x3x3 area
 
 // Shader code
 const vertexShader = `
@@ -61,10 +57,38 @@ const getChunkKey = (chunkCoords: [number, number, number]): string => {
   return `${chunkCoords[0]},${chunkCoords[1]},${chunkCoords[2]}`;
 };
 
+// Type for cube data
+type Cube = {
+  position: [number, number, number];
+  tileIndex: number;
+  chunkKey: string;
+};
+
+// Type for chunk data
+type Chunk = {
+  key: string;
+  coords: [number, number, number];
+  cubes: Cube[];
+  isActive: boolean;
+  distance: number; // Distance from camera
+  // Collision mesh data
+  vertices?: Float32Array;
+  indices?: Uint32Array;
+};
+
 export function InstancedCubes() {
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
-  const rigidBodiesRef = useRef<any>(null);
   const { camera } = useThree();
+  const prevCameraChunkRef = useRef<string | null>(null);
+  const frameCountRef = useRef(0);
+  // Previous active chunks ref
+  const prevActiveChunksRef = useRef<Set<string>>(new Set());
+
+  // Camera chunk change detection state
+  const [cameraChunkTrigger, setCameraChunkTrigger] = useState<string | null>(null);
+
+  // RigidBody pooling state
+  const [rigidBodiesPool] = useState(() => new Map<string, boolean>());
 
   // Get necessary data from the cube store
   const cubes = useCubeStore((state) => state.cubes);
@@ -95,83 +119,276 @@ export function InstancedCubes() {
     return { material, texture };
   }, [spriteInfo.url]);
 
-  // Calculate active chunks based on camera position
+  // Get current camera chunk (used in useFrame)
+  const getCurrentCameraChunk = useCallback(() => {
+    if (!camera) return null;
+    const cameraPosition = camera.position;
+    const chunkCoords = getChunkCoords([cameraPosition.x, cameraPosition.y, cameraPosition.z]);
+    return getChunkKey(chunkCoords);
+  }, [camera]);
+
+  // Distance-based chunk sorting function
+  const sortChunksByDistance = useCallback((chunks: Chunk[], cameraPosition: THREE.Vector3): Chunk[] => {
+    return [...chunks].sort((a, b) => {
+      const centerA = new THREE.Vector3(
+        a.coords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        a.coords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        a.coords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
+      );
+
+      const centerB = new THREE.Vector3(
+        b.coords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        b.coords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        b.coords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
+      );
+
+      const distA = centerA.distanceTo(cameraPosition);
+      const distB = centerB.distanceTo(cameraPosition);
+
+      return distA - distB;
+    });
+  }, []);
+
+  // Monitor camera position and trigger only when crossing chunk boundaries
+  useFrame(() => {
+    const currentChunk = getCurrentCameraChunk();
+
+    // Update trigger only when chunk changes
+    if (currentChunk !== prevCameraChunkRef.current) {
+      prevCameraChunkRef.current = currentChunk;
+      setCameraChunkTrigger(currentChunk);
+    }
+
+    // Update only every 3 frames (reduce unnecessary calculations)
+    frameCountRef.current = (frameCountRef.current + 1) % 3;
+  });
+
+  // Calculate active chunks based on camera position - optimized version
   const activeChunks = useMemo(() => {
-    if (!camera) return new Set<string>();
+    if (!camera || !cameraChunkTrigger) return new Set<string>();
 
     const cameraPosition = camera.position;
     const centerChunk = getChunkCoords([cameraPosition.x, cameraPosition.y, cameraPosition.z]);
-
     const activeChunkSet = new Set<string>();
 
-    // Activate chunks around the camera
-    for (let x = -ACTIVE_CHUNKS_RADIUS; x <= ACTIVE_CHUNKS_RADIUS; x++) {
-      for (let y = -ACTIVE_CHUNKS_RADIUS; y <= ACTIVE_CHUNKS_RADIUS; y++) {
-        for (let z = -ACTIVE_CHUNKS_RADIUS; z <= ACTIVE_CHUNKS_RADIUS; z++) {
+    // Distance calculation for spherical activation area (using squared distance to avoid sqrt)
+    const radius = ACTIVE_CHUNKS_RADIUS;
+    const maxDistSq = radius * CHUNK_SIZE * (radius * CHUNK_SIZE);
+
+    // Activate base area
+    for (let x = -radius; x <= radius; x++) {
+      for (let y = -radius; y <= radius; y++) {
+        for (let z = -radius; z <= radius; z++) {
           const chunkCoords: [number, number, number] = [centerChunk[0] + x, centerChunk[1] + y, centerChunk[2] + z];
-          activeChunkSet.add(getChunkKey(chunkCoords));
+
+          // Distance-based activation: exclude corner chunks too far from center
+          const chunkCenter = new THREE.Vector3(
+            chunkCoords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+            chunkCoords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
+            chunkCoords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
+          );
+
+          const distSq = chunkCenter.distanceToSquared(cameraPosition);
+          if (distSq <= maxDistSq) {
+            activeChunkSet.add(getChunkKey(chunkCoords));
+          }
         }
       }
     }
 
+    // Store calculated result
+    prevActiveChunksRef.current = activeChunkSet;
     return activeChunkSet;
-  }, [camera?.position.x, camera?.position.y, camera?.position.z]);
+  }, [camera, cameraChunkTrigger]); // Recalculate only when camera chunk changes
 
-  // Generate instance data for all cubes (previous method)
-  const instances = useMemo<InstancedRigidBodyProps[]>(() => {
-    console.log(`Generating ${cubes.length} cube instances`);
-    return cubes.map((cube, i) => {
-      // Determine which chunk each cube belongs to
+  // Organize cubes into chunks - optimized version
+  const chunks = useMemo(() => {
+    const chunkMap = new Map<string, Chunk>();
+    const cameraPosition = camera?.position || new THREE.Vector3();
+
+    // Construct chunk data
+    cubes.forEach((cube) => {
       const chunkCoords = getChunkCoords(cube.position);
       const chunkKey = getChunkKey(chunkCoords);
       const isActive = activeChunks.has(chunkKey);
 
+      if (!chunkMap.has(chunkKey)) {
+        // Calculate chunk center
+        const chunkCenter = new THREE.Vector3(
+          chunkCoords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+          chunkCoords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
+          chunkCoords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        );
+
+        // Calculate distance from camera
+        const distance = chunkCenter.distanceTo(cameraPosition);
+
+        chunkMap.set(chunkKey, {
+          key: chunkKey,
+          coords: chunkCoords,
+          cubes: [],
+          isActive,
+          distance,
+        });
+      }
+
+      chunkMap.get(chunkKey)!.cubes.push({
+        ...cube,
+        chunkKey,
+      });
+    });
+
+    // Return distance-sorted chunk array
+    const allChunks = Array.from(chunkMap.values());
+    const sortedChunks = sortChunksByDistance(allChunks, cameraPosition);
+
+    // Activate only nearby chunks and generate mesh data to limit RigidBody count
+    const finalChunks = sortedChunks.map((chunk, index) => {
+      const isActiveChunk = index < MAX_ACTIVE_CHUNKS ? activeChunks.has(chunk.key) : false;
+
+      // Generate collision mesh data only for active chunks
+      let vertices: Float32Array | undefined;
+      let indices: Uint32Array | undefined;
+
+      if (isActiveChunk && chunk.cubes.length > 0) {
+        // Optimization: Create cube position map for fast lookups
+        const cubePositionMap = new Map<string, boolean>();
+        chunk.cubes.forEach((cube) => {
+          const key = `${Math.floor(cube.position[0])},${Math.floor(cube.position[1])},${Math.floor(cube.position[2])}`;
+          cubePositionMap.set(key, true);
+        });
+
+        // Single cube vertex data (cube center at origin)
+        const cubeVertices = new Float32Array([
+          -0.5,
+          -0.5,
+          -0.5, // 0
+          0.5,
+          -0.5,
+          -0.5, // 1
+          0.5,
+          0.5,
+          -0.5, // 2
+          -0.5,
+          0.5,
+          -0.5, // 3
+          -0.5,
+          -0.5,
+          0.5, // 4
+          0.5,
+          -0.5,
+          0.5, // 5
+          0.5,
+          0.5,
+          0.5, // 6
+          -0.5,
+          0.5,
+          0.5, // 7
+        ]);
+
+        // Face-based index data - defined by face to add only necessary faces
+        const faceIndices = [
+          [0, 1, 2, 0, 2, 3], // Front face (z-)
+          [1, 5, 6, 1, 6, 2], // Right face (x+)
+          [5, 4, 7, 5, 7, 6], // Back face (z+)
+          [4, 0, 3, 4, 3, 7], // Left face (x-)
+          [3, 2, 6, 3, 6, 7], // Top face (y+)
+          [4, 5, 1, 4, 1, 0], // Bottom face (y-)
+        ];
+
+        // Temporary arrays (add only actually used data here)
+        const tempVertices: number[] = [];
+        const tempIndices: number[] = [];
+
+        let vertexOffset = 0; // Current vertex index offset
+
+        chunk.cubes.forEach((cube) => {
+          const [x, y, z] = [Math.floor(cube.position[0]), Math.floor(cube.position[1]), Math.floor(cube.position[2])];
+
+          // Check which faces are hidden by other cubes
+          const hiddenFaces = [
+            cubePositionMap.has(`${x},${y},${z - 1}`), // Front face
+            cubePositionMap.has(`${x + 1},${y},${z}`), // Right face
+            cubePositionMap.has(`${x},${y},${z + 1}`), // Back face
+            cubePositionMap.has(`${x - 1},${y},${z}`), // Left face
+            cubePositionMap.has(`${x},${y + 1},${z}`), // Top face
+            cubePositionMap.has(`${x},${y - 1},${z}`), // Bottom face
+          ];
+
+          // Add all vertices for this cube
+          for (let j = 0; j < cubeVertices.length; j += 3) {
+            tempVertices.push(cubeVertices[j] + cube.position[0], cubeVertices[j + 1] + cube.position[1], cubeVertices[j + 2] + cube.position[2]);
+          }
+
+          // Add indices only for visible faces
+          for (let faceIdx = 0; faceIdx < 6; faceIdx++) {
+            if (!hiddenFaces[faceIdx]) {
+              // This face is visible, add indices
+              for (const idx of faceIndices[faceIdx]) {
+                tempIndices.push(idx + vertexOffset);
+              }
+            }
+          }
+
+          vertexOffset += 8; // 8 vertices per cube
+        });
+
+        // Convert optimized data to Float32Array and Uint32Array
+        vertices = new Float32Array(tempVertices);
+        indices = new Uint32Array(tempIndices);
+      }
+
       return {
-        key: `cube_${i}`,
-        position: cube.position,
-        rotation: [0, 0, 0] as [number, number, number],
-        userData: {
-          type: 'cube',
-          tileIndex: cube.tileIndex,
-          chunkKey,
-          isActiveChunk: isActive,
-        },
+        ...chunk,
+        isActive: isActiveChunk,
+        vertices,
+        indices,
       };
     });
-  }, [cubes, activeChunks]);
 
-  // Calculate the number of active and inactive chunks (for logging)
+    return finalChunks;
+  }, [cubes, activeChunks, camera, sortChunksByDistance, cameraChunkTrigger]); // Recalculate only when camera chunk changes
+
+  // Calculate number of active and inactive chunks (for logging)
   useEffect(() => {
-    const activeCount = instances.filter((i) => i.userData?.isActiveChunk).length;
-    const inactiveCount = instances.length - activeCount;
-    console.log(`Active cubes: ${activeCount}, Inactive cubes: ${inactiveCount}`);
-  }, [instances]);
+    const activeChunksCount = chunks.filter((chunk) => chunk.isActive).length;
+    const activeCount = chunks.filter((chunk) => chunk.isActive).reduce((acc, chunk) => acc + chunk.cubes.length, 0);
+    const inactiveCount = cubes.length - activeCount;
 
-  // Manage RigidBody sleep state based on camera movement
-  useFrame(() => {
-    if (!rigidBodiesRef.current) return;
+    // Current camera chunk info
+    const cameraChunkInfo = camera
+      ? `Camera chunk: ${getChunkKey(getChunkCoords([camera.position.x, camera.position.y, camera.position.z]))}`
+      : 'No camera info';
 
-    // Update the sleep state of each RigidBody
-    for (let i = 0; i < instances.length; i++) {
-      const instance = instances[i];
-      const rigidBody = rigidBodiesRef.current[i];
+    // Calculate average cubes per chunk
+    const avgCubesPerChunk = chunks.length > 0 ? (cubes.length / chunks.length).toFixed(1) : 0;
 
-      if (!rigidBody) continue;
-
-      // Wake up only cubes in active chunks, keep others in sleep state
-      if (instance.userData?.isActiveChunk) {
-        // Wake up cubes in active chunks
-        if (rigidBody.isSleeping()) {
-          rigidBody.wakeUp();
-        }
-      } else {
-        // Switch cubes in inactive chunks to sleep state
-        if (!rigidBody.isSleeping()) {
-          rigidBody.sleep();
-        }
-      }
+    // Limit log frequency
+    if (frameCountRef.current === 0) {
+      console.log(
+        `📊 Terrain stats:\n` +
+          `- Active chunks: ${activeChunksCount}/${chunks.length} (${((activeChunksCount / chunks.length) * 100).toFixed(1)}%)\n` +
+          `- Active cubes: ${activeCount}/${cubes.length} (${((activeCount / cubes.length) * 100).toFixed(1)}%)\n` +
+          `- Avg cubes per chunk: ${avgCubesPerChunk}\n` +
+          `- ${cameraChunkInfo}`,
+      );
     }
-  });
+
+    // RigidBody pooling logic
+    chunks.forEach((chunk) => {
+      const key = chunk.key;
+      const isActive = chunk.isActive;
+
+      // Track newly activated chunks
+      if (isActive && !rigidBodiesPool.has(key)) {
+        rigidBodiesPool.set(key, true);
+      }
+      // Track deactivated chunks
+      else if (!isActive && rigidBodiesPool.has(key)) {
+        rigidBodiesPool.delete(key);
+      }
+    });
+  }, [chunks, cubes.length, rigidBodiesPool, camera, frameCountRef.current]);
 
   // UV attribute update optimization
   useEffect(() => {
@@ -180,7 +397,10 @@ export function InstancedCubes() {
     const mesh = instancedMeshRef.current;
     const count = Math.min(cubes.length, MAX_INSTANCES);
 
-    console.log(`Updating UV attributes for ${count} cubes`);
+    // Limited logging (performance improvement)
+    if (count % 100 === 0 || count < 100) {
+      console.log(`Updating UV attributes for ${count} cubes`);
+    }
 
     // Performance optimization: Create Float32Array only once
     const uvOffsetScaleArray = new Float32Array(MAX_INSTANCES * 4);
@@ -225,7 +445,7 @@ export function InstancedCubes() {
   // Cube click event handler
   const handleCubeClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    if (typeof e.instanceId !== 'number' || !rigidBodiesRef.current) return;
+    if (typeof e.instanceId !== 'number') return;
 
     const clickedCube = cubes[e.instanceId];
     if (!clickedCube) return;
@@ -253,28 +473,35 @@ export function InstancedCubes() {
     return null;
   }
 
+  // Memoize active chunks to prevent unnecessary rendering
+  const activeChunksArray = useMemo(() => {
+    return chunks.filter((chunk) => chunk.isActive);
+  }, [chunks]);
+
   return (
-    <InstancedRigidBodies
-      instances={instances}
-      ref={rigidBodiesRef}
-      type="fixed"
-      colliders="cuboid"
-      linearDamping={0}
-      angularDamping={0}
-      activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
-    >
+    <>
+      {/* InstancedMesh for rendering all cubes */}
       <instancedMesh
         ref={instancedMeshRef}
-        args={[undefined, undefined, instances.length]}
+        args={[undefined, undefined, cubes.length]}
         castShadow
         receiveShadow
-        frustumCulled={false}
+        frustumCulled={true} // Optimization: Don't render cubes outside view
         onClick={handleCubeClick}
         userData={{ isCube: true }}
       >
         <boxGeometry args={[1, 1, 1]} />
         {material && <primitive object={material} />}
       </instancedMesh>
-    </InstancedRigidBodies>
+
+      {/* Create one TrimeshCollider per active chunk */}
+      {activeChunksArray
+        .filter((chunk) => chunk.vertices && chunk.indices)
+        .map((chunk) => (
+          <RigidBody key={chunk.key} type="fixed" colliders={false} userData={{ type: 'cubeChunk', chunkKey: chunk.key }}>
+            <TrimeshCollider args={[chunk.vertices!, chunk.indices!]} />
+          </RigidBody>
+        ))}
+    </>
   );
 }

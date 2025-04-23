@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { generateTerrain } from '../utils/terrainGenerator';
+import { generateTerrain, TILE_TYPES } from '../utils/terrainGenerator';
 
 // Edit mode enum
 export enum EditMode {
@@ -9,6 +9,12 @@ export enum EditMode {
 // Seed value constant
 export const DEFAULT_SEED = 'minecraft123';
 
+// Single terrain configuration value
+export const TERRAIN_CONFIG = {
+  width: 160,
+  depth: 160,
+};
+
 // Cube information interface
 interface CubeInfo {
   position: [number, number, number]; // Cube position
@@ -16,13 +22,14 @@ interface CubeInfo {
 }
 
 interface CubeStore {
-  cubes: CubeInfo[]; // Changed to an array of cube information
-  seed: string; // Seed to use for terrain generation
-  regenerateTerrain: (newSeed?: string) => void; // Function to regenerate the terrain
-  addCube: (x: number, y: number, z: number, tileIndex: number) => void;
-  removeCube: (x: number, y: number, z: number) => void; // Added cube removal function
-  selectedTile: number;
-  setSelectedTile: (index: number) => void;
+  cubes: CubeInfo[]; // Cube information array
+  seed: string; // Terrain generation seed
+  regenerateTerrain: (newSeed?: string) => void; // Terrain regeneration function
+  addCube: (x: number, y: number, z: number, tileIndex: number) => void; // Add cube
+  removeCube: (x: number, y: number, z: number) => void; // Remove cube
+  selectedTile: number; // Selected tile
+  setSelectedTile: (index: number) => void; // Tile selection function
+  tileTypes: typeof TILE_TYPES; // Tile type constants
 }
 
 // Helper function to check if two positions are the same
@@ -32,37 +39,16 @@ const isSamePosition = (pos1: [number, number, number], pos2: [number, number, n
 
 // Initial terrain generation function
 const createInitialTerrain = (seed: string): CubeInfo[] => {
-  // Procedural terrain generation (optimized settings)
-  const terrainOptions = {
-    scale: 0.08,
-    // Noise scale (lower means smoother terrain)
-    amplitude: 3,
-    // Height magnitude (lower means flatter)
-    persistence: 0.5,
-    // Amplitude reduction rate for each octave
-    lacunarity: 2.0,
-    // Frequency increase rate for each octave
-    octaves: 3,
-    // Number of noise octaves (lower means less calculation)
-    baseHeight: -1,
-    // Base height (negative means below water)
-  };
-
-  // Terrain size reduction (reduced to 16x16)
-  return generateTerrain(seed, 16, 16, terrainOptions);
+  return generateTerrain(seed, TERRAIN_CONFIG.width, TERRAIN_CONFIG.depth);
 };
 
-/**
- * Optimization: Version that renders only surface cubes
- * Generate only the surface without filling the interior (not yet implemented)
- */
-
 export const useCubeStore = create<CubeStore>((set) => ({
-  // Initial seed setting and terrain generation
+  // Initial setup
   seed: DEFAULT_SEED,
   cubes: createInitialTerrain(DEFAULT_SEED),
+  tileTypes: TILE_TYPES,
 
-  // Terrain regeneration function
+  // Terrain regeneration function (simplified)
   regenerateTerrain: (newSeed) =>
     set((state) => {
       const seed = newSeed || state.seed;
@@ -72,16 +58,18 @@ export const useCubeStore = create<CubeStore>((set) => ({
       };
     }),
 
-  // Modified addCube function: Save tile index as well
+  // Add cube
   addCube: (x, y, z, tileIndex) =>
     set((state) => ({
       cubes: [...state.cubes, { position: [x, y, z], tileIndex }],
     })),
-  // Added removeCube function: Remove cube at a specific position
+
+  // Remove cube
   removeCube: (x, y, z) =>
     set((state) => ({
       cubes: state.cubes.filter((cube) => !isSamePosition(cube.position, [x, y, z])),
     })),
-  selectedTile: 0, // Default tile (the first tile)
+
+  selectedTile: 0, // Default tile
   setSelectedTile: (index) => set({ selectedTile: index }),
 }));

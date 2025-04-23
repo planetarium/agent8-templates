@@ -74,7 +74,7 @@ export function Experience() {
         </div>
       </Html>
 
-      <Physics debug={false} paused={pausedPhysics}>
+      <Physics paused={pausedPhysics} timeStep={'vary'}>
         {/* Environment */}
         <Environment preset="sunset" background={false} />
         <Sky sunPosition={[100, 20, 100]} />
