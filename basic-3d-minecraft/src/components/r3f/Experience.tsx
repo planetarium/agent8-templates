@@ -1,10 +1,9 @@
 import { useRef, useState } from 'react';
 import { Physics } from '@react-three/rapier';
-import { Environment, Grid, KeyboardControls, Sky, Html } from '@react-three/drei';
-import { CharacterState } from '../../constants/character';
-import { FreeViewController, ControllerHandle } from 'vibe-starter-3d';
+import { Environment, Sky, Html } from '@react-three/drei';
+import { ControllerHandle, FirstPersonViewController } from 'vibe-starter-3d';
 import { useEffect } from 'react';
-import { Player, PlayerRef } from './Player';
+import { PlayerRef } from './Player';
 import { Floor } from './Floor';
 import { InstancedCubes } from './InstancedCubes';
 import { CubePreview } from './CubePreview';
@@ -80,7 +79,7 @@ export function Experience() {
         <Sky sunPosition={[100, 20, 100]} />
 
         {/* player character with controller */}
-        <FreeViewController
+        <FirstPersonViewController
           ref={controllerRef}
           targetHeight={targetHeight}
           followLight={{
@@ -88,9 +87,7 @@ export function Experience() {
             intensity: 1.2,
           }}
           position={[0, 10, 0]}
-        >
-          <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={targetHeight} />
-        </FreeViewController>
+        ></FirstPersonViewController>
 
         {/* Ground */}
         <Floor />

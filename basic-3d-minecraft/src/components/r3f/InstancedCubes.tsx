@@ -10,7 +10,7 @@ import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
 const MAX_INSTANCES = 1000000;
 
 // Chunk size definition
-const CHUNK_SIZE = 8;
+const CHUNK_SIZE = 10;
 // Active chunk radius
 const ACTIVE_CHUNKS_RADIUS = 3;
 // Maximum active chunks limit
