@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-This project is a First Person View (FPV) 3D FPS game built using Three.js and React Three Fiber.
+This project is a single-player First Person View (FPV) 3D FPS game built using Three.js and React Three Fiber.
 
 ## Implementation Strategy
 
