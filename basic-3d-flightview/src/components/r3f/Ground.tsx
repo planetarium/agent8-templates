@@ -61,10 +61,12 @@ export const Ground = () => {
         </mesh>
       </RigidBody>
 
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} scale={[1000, 1000, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
-      </mesh>
+      <RigidBody name="GROUND" type="fixed" colliders={'cuboid'}>
+        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} scale={[1000, 1000, 1]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
+        </mesh>
+      </RigidBody>
 
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} scale={[6, 1000, 1]}>
         <planeGeometry args={[1, 1]} />

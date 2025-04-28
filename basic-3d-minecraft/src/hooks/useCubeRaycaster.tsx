@@ -5,7 +5,7 @@ import { useCubeStore } from '../store/cubeStore';
 import throttle from 'lodash/throttle';
 
 // Raycast distance limit constants
-const MIN_RAYCAST_DISTANCE = 4;
+const MIN_RAYCAST_DISTANCE = 2;
 const MAX_RAYCAST_DISTANCE = 15;
 
 export function useCubeRaycaster() {

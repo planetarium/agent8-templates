@@ -136,10 +136,7 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
  * Manages inputs, state transitions, animations, and network synchronization.
  */
 export const Player = forwardRef<PlayerRef, PlayerProps>(
-  (
-    { initialState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, spawnEffect: onCastMagic, characterKey = 'avatarsample_d_darkness.vrm', server },
-    ref,
-  ) => {
+  ({ initialState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, spawnEffect: onCastMagic, characterKey = 'y-bot.glb', server }, ref) => {
     const currentStateRef = useRef<CharacterState>(initialState);
     const [, getKeyboardInputs] = useKeyboardControls();
     const { determinePlayerState } = usePlayerStates();
@@ -286,7 +283,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
     // Memoized character resource loading.
     const characterResource: CharacterResource = useMemo(() => {
       const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
-      const characterUrl = characterData?.url || Assets.characters['avatarsample_d_darkness.vrm'].url;
+      const characterUrl = characterData?.url || Assets.characters['y-bot.glb'].url;
       return {
         name: characterKey,
         url: characterUrl,

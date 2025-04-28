@@ -42,7 +42,6 @@ function App() {
     if (!server || !connected || !currentRoomId) return;
 
     const unsubscribe = server.subscribeRoomMyState(currentRoomId, (roomMyState) => {
-      console.log('roomMyState', roomMyState);
       setIsReady(roomMyState.isReady ?? false);
     });
 

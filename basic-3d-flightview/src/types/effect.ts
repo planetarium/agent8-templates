@@ -3,6 +3,7 @@
  */
 export enum EffectType {
   BULLET = 'BULLET',
+  EXPLOSION = 'EXPLOSION',
 }
 
 /**

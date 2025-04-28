@@ -10,7 +10,7 @@ function App() {
           onClick={() => setCount((count) => count + 1)}
           className="bg-blue-500 text-white p-2 rounded-md"
         >
-          count is {count}
+          Count is {count}
         </button>
       </div>
     </>

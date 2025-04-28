@@ -140,7 +140,7 @@
   {
     "name": "basic-3d-flightview",
     "label": "3D Airplane Flightview Template",
-    "description": "Three.js single-player flight airplane game template inspired by Pieter Levels game, with a low-poly plane flying over a procedurally generated landscape",
+    "description": "A Three.js single-player flight airplane game template inspired by Pieter Levels' game, featuring a low-poly plane flying freely.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-flightview",
     "tags": [
@@ -166,7 +166,7 @@
   {
     "name": "basic-3d-flightview-multiplay",
     "label": "3D Airplane Flightview Multiplay Template",
-    "description": "Three.js multiplayer flight airplane game template inspired by Pieter Levels game, with a low-poly plane flying over a procedurally generated landscape",
+    "description": "A Three.js multiplayer flight airplane game template inspired by Pieter Levels' game, featuring a low-poly plane flying freely.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-flightview-multiplay",
     "tags": [
@@ -223,6 +223,44 @@
       "Valorant",
       "PUBG",
       "PlayerUnknown's Battlegrounds"
+    ]
+  },
+  {
+    "name": "basic-3d-firstpersonview-multiplay",
+    "label": "3D First Person View (FPS) Multiplay Template",
+    "description": "Three.js multiplayer first-person view (FPS) game template. Control your character through a first-person camera perspective, simulating the player's own eyes, with movement and keyboard controls.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-firstpersonview-multiplay",
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "three.js",
+      "3d",
+      "fps",
+      "FPS",
+      "first-person",
+      "firstperson",
+      "first-person-view",
+      "firstpersonview",
+      "first-person-camera",
+      "firstpersoncamera",
+      "action",
+      "single-player",
+      "keyboard-controls",
+      "Call of Duty",
+      "Counter-Strike",
+      "Doom",
+      "Overwatch",
+      "Valorant",
+      "PUBG",
+      "PlayerUnknown's Battlegrounds",
+      "multiplay",
+      "lobby",
+      "multiplayer",
+      "multi-player",
+      "networking",
+      "real-time"
     ]
   },
   {

@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { Bullet } from './Bullet';
 import { MuzzleFlash } from './MuzzleFlash';
-import { IntersectionEnterPayload } from '@react-three/rapier';
-import { toVector3, toVector3Array } from 'vibe-starter-3d';
+import { Collider, InteractionGroups, RigidBody } from '@dimforge/rapier3d-compat';
 type Primitive = string | number | boolean | null | undefined | symbol | bigint;
 type PrimitiveOrArray = Primitive | Primitive[];
 
@@ -14,7 +13,9 @@ const DEFAULT_FLASH_DURATION = 100;
 
 export interface BulletEffectControllerProps {
   config: { [key: string]: PrimitiveOrArray };
-  onHit?: (other: IntersectionEnterPayload, pos?: THREE.Vector3) => boolean;
+  collisionGroups?: InteractionGroups;
+  owner?: RigidBody;
+  onHit?: (pos?: THREE.Vector3, rigidBody?: RigidBody, collider?: Collider) => void;
   onComplete?: () => void;
 }
 
@@ -30,29 +31,29 @@ export interface BulletEffectConfig {
 
 export const createBulletEffectConfig = (config: BulletEffectConfig): { [key: string]: PrimitiveOrArray } => {
   return {
-    startPosition: toVector3Array(config.startPosition),
-    direction: toVector3Array(config.direction),
+    startPosition: config.startPosition.toArray(),
+    direction: config.direction.toArray(),
     speed: config.speed || DEFAULT_SPEED,
     duration: config.duration || DEFAULT_DURATION,
     scale: config.scale || DEFAULT_SCALE,
     color: config.color,
-    flashDuration: config.flashDuration || DEFAULT_MUZZLE_FLASH_DURATION,
+    flashDuration: config.flashDuration === undefined ? DEFAULT_MUZZLE_FLASH_DURATION : config.flashDuration,
   };
 };
 
 const parseConfig = (config: { [key: string]: any }) => {
   return {
-    startPosition: toVector3(config.startPosition),
-    direction: toVector3(config.direction),
+    startPosition: new THREE.Vector3(...config.startPosition),
+    direction: new THREE.Vector3(...config.direction),
     speed: (config.speed as number) || DEFAULT_SPEED,
     duration: (config.duration as number) || DEFAULT_DURATION,
     scale: (config.scale as number) || DEFAULT_SCALE,
     color: config.color,
-    flashDuration: (config.flashDuration as number) || DEFAULT_FLASH_DURATION,
+    flashDuration: config.flashDuration === undefined ? DEFAULT_FLASH_DURATION : config.flashDuration,
   };
 };
 
-export const BulletEffectController: React.FC<BulletEffectControllerProps> = ({ config, onHit, onComplete }) => {
+export const BulletEffectController: React.FC<BulletEffectControllerProps> = ({ config, collisionGroups, owner, onHit, onComplete }) => {
   const { startPosition, direction, speed, duration, scale, flashDuration, color } = parseConfig(config);
   if (!startPosition || !direction || !speed || !duration) {
     console.error('[BulletEffectController] Missing required config properties');
@@ -67,22 +68,24 @@ export const BulletEffectController: React.FC<BulletEffectControllerProps> = ({ 
       <Bullet
         startPosition={calcStartPosition}
         direction={direction}
+        color={color}
         scale={scale}
         speed={speed}
         duration={duration}
-        color={color}
+        collisionGroups={collisionGroups}
+        owner={owner}
         onHit={onHit}
         onComplete={onComplete}
       />
-      {
+      {flashDuration > 0 && (
         <MuzzleFlash
           config={{
-            position: toVector3Array(calcStartPosition),
-            direction: toVector3Array(direction),
+            position: calcStartPosition.toArray(),
+            direction: direction.toArray(),
             duration: flashDuration,
           }}
         />
-      }
+      )}
     </>
   );
 };

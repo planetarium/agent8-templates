@@ -69,19 +69,18 @@ export function NetworkContainer() {
 
   return (
     <>
-      {Object.values(otherReadyPlayers).map(
-        (player) =>
-          <RemotePlayer
-            key={player.account}
-            ref={playerRefs.current[player.account]}
-            position={player.transform?.position}
-            rotation={player.transform?.rotation}
-            account={player.account}
-            nickname={player.nickname}
-            bodyLength={3}
-            hitBodySize={[1, 0.6, 3]}
-          />
-      )}
+      {Object.values(otherReadyPlayers).map((player) => (
+        <RemotePlayer
+          key={player.account}
+          ref={playerRefs.current[player.account]}
+          position={player.transform?.position}
+          rotation={player.transform?.rotation}
+          account={player.account}
+          nickname={player.nickname}
+          bodyLength={3}
+          hitBodySize={[1, 0.6, 3]}
+        />
+      ))}
     </>
   );
 }

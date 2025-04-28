@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useGameServer, useRoomState, useRoomUserState } from '@agent8/gameserver';
+import { useState, useEffect, useRef } from 'react';
+import { useGameServer } from '@agent8/gameserver';
 import './App.css';
 import NicknameSetup from './components/scene/NicknameSetup';
 import RoomManager from './components/scene/RoomManager';
@@ -8,14 +8,15 @@ import { GameScene } from './components/scene/GameScene';
 import { networkSyncStore } from './store/networkSyncStore';
 
 function App() {
-  const { connected, server, account } = useGameServer();
+  const { connected, server } = useGameServer();
   const [nickname, setNickname] = useState<string | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [roomStarted, setRoomStarted] = useState(false);
-  //const roomState = useRoomState(); // Room state from the server
-  // const roomUserState = useRoomUserState(account); // Current user's state in the room
+  const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Loading state for async operations
   const [error, setError] = useState<string | null>(null); // Error message state
+
+  const characterUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     console.log('server', server.account);
@@ -32,6 +33,19 @@ function App() {
 
     const unsubscribe = server.subscribeRoomState(currentRoomId, (roomState) => {
       setRoomStarted(roomState.gameStarted);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [server, connected, currentRoomId]);
+
+  useEffect(() => {
+    if (!server || !connected || !currentRoomId) return;
+
+    const unsubscribe = server.subscribeRoomMyState(currentRoomId, (roomMyState) => {
+      characterUrlRef.current = roomMyState.character ?? null;
+      setIsReady(roomMyState.isReady ?? false);
     });
 
     return () => {
@@ -120,19 +134,14 @@ function App() {
 
     // Show game scene if the game has started and the user is ready
     // Note: Character selection check might be needed here or handled within GameScene/LobbyRoom
-    // if (roomState?.gameStarted && roomUserState?.isReady) {
-    //   return <GameScene roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} server={server} />;
-    // }
-    // if (roomState?.gameStarted && roomUserState?.isReady) {
-    //   return <GameScene roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} />;
-    // }
-
-    if (roomStarted) {
-      return <GameScene roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} />;
+    if (roomStarted && isReady) {
+      return <GameScene roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} characterUrl={characterUrlRef.current} />;
     }
 
     // Otherwise, show the lobby room
-    return <LobbyRoom roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} server={server} />;
+    if (currentRoomId && !isReady) {
+      return <LobbyRoom roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} server={server} />;
+    }
   };
 
   return (
