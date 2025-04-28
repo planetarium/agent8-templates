@@ -3,9 +3,10 @@ import { useGameServer, useRoomState } from '@agent8/gameserver';
 import * as THREE from 'three';
 import { ActiveEffect, EffectType } from '../../types/effect';
 import { useEffectStore, useActiveEffects } from '../../store/effectStore';
-import { IntersectionEnterPayload } from '@react-three/rapier';
 import { BulletEffectController } from './effects/BulletEffectController';
 import { createExplosionEffectConfig, Explosion } from './effects/Explosion';
+import { Collider, RigidBody } from '@dimforge/rapier3d-compat';
+import { usePlayerStore } from '../../store/playerStore';
 
 /**
  * Effect container component using Zustand store for effect management.
@@ -14,6 +15,7 @@ export function EffectContainer() {
   // Call ALL hooks unconditionally at the top
   const { connected, server, account } = useGameServer();
   const { roomId } = useRoomState();
+  const { getPlayerRef } = usePlayerStore();
 
   // Get state and actions from the Zustand store
   const activeEffects = useActiveEffects();
@@ -43,13 +45,14 @@ export function EffectContainer() {
   );
 
   // Handler for when an effect hits something (logic might be needed here)
-  const handleBulletffectHit = useCallback((other: IntersectionEnterPayload, pos?: THREE.Vector3, sender?: string) => {
-    let targetAccount = other.rigidBody?.userData?.['account'];
+  const handleEffectHit = useCallback((type: EffectType, pos?: THREE.Vector3, rigidBody?: RigidBody, collider?: Collider, sender?: string): boolean => {
+    const targetAccount = rigidBody?.userData?.['account'];
+    console.log('[EffectContainer] Effect hit:', targetAccount, sender);
     if (sender && targetAccount) {
       if (targetAccount === sender) return false;
-      
+
       if (sender === account) {
-        sendDamageToServer(targetAccount, 30);
+        sendDamageToServer(targetAccount, 1);
       }
     }
 
@@ -58,7 +61,7 @@ export function EffectContainer() {
     }
 
     return true;
-  }, []);
+  }, [account, addEffect, sendDamageToServer]);
 
   // Subscribe to effect events from other players
   useEffect(() => {
@@ -77,7 +80,7 @@ export function EffectContainer() {
     return () => {
       unsubscribe();
     };
-  }, [connected,server, account, roomId, addEffect]);
+  }, [connected, server, account, roomId, addEffect]);
 
   // Function to render individual effects based on their type
   const renderEffect = useCallback(
@@ -90,30 +93,30 @@ export function EffectContainer() {
             <BulletEffectController
               key={effect.key}
               config={effect.effectData.config}
-              onHit={(other, pos) => handleBulletffectHit(other, pos, effect.sender)}
+              owner={getPlayerRef(effect.sender)?.current}
+              onHit={(pos, rigidBody, collider) => handleEffectHit(type, pos, rigidBody, collider, effect.sender)}
               onComplete={() => {
                 handleEffectComplete(effect.key);
               }}
             />
           );
         case EffectType.EXPLOSION:
-        return (
-          <Explosion
-            key={effect.key}
-            config={effect.effectData.config}
-            onComplete={() => {
-              handleEffectComplete(effect.key);
-              console.log('[EffectContainer] Explosion effect complete:', effect.key);
-            }}
-          />
-        );
+          return (
+            <Explosion
+              key={effect.key}
+              config={effect.effectData.config}
+              onComplete={() => {
+                handleEffectComplete(effect.key);
+              }}
+            />
+          );
         // Add cases for other effect types here
         default:
           console.warn(`[EffectContainer] Unknown effect type: ${type}`);
           return null;
       }
     },
-    [handleBulletffectHit, handleEffectComplete],
+    [handleEffectHit, handleEffectComplete, getPlayerRef],
   );
 
   // Render all active effects from the store

@@ -2,10 +2,11 @@ import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Billboard, Text } from '@react-three/drei';
 import { CuboidCollider, interactionGroups } from '@react-three/rapier';
 import { Vector3, Quaternion } from '@react-three/fiber';
-import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
+import { ActiveCollisionTypes, RigidBody } from '@dimforge/rapier3d-compat';
 import { NetworkObject, NetworkObjectHandle, CollisionGroup, toVector3 } from 'vibe-starter-3d';
 import { Aircraft } from './Aircraft';
 import { AircraftState } from '../../constants/aircraft';
+import { usePlayerStore } from '../../store/playerStore';
 
 interface RemotePlayerProps {
   account: string;
@@ -17,17 +18,21 @@ interface RemotePlayerProps {
 }
 
 export interface RemotePlayerHandle {
+  rigidBodyRef: React.RefObject<RigidBody>;
   syncState: (state: string, position: Vector3, quaternionRotation?: Quaternion) => void;
 }
 
 export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
   ({ account, nickname, position = [0, 0, 0], rotation = [0, 0, 0, 1], bodyLength = 3, hitBodySize = [1, 0.6, 3] }, ref) => {
+    const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
+
     const networkObjectRef = useRef<NetworkObjectHandle>(null);
     const currentStateRef = useRef<AircraftState>(AircraftState.IDLE);
 
     useImperativeHandle(
       ref,
       () => ({
+        rigidBodyRef: networkObjectRef.current?.rigidBodyRef,
         syncState: (state: string, position: Vector3 = [0, 0, 0], quaternionRotation: Quaternion = [0, 0, 0, 1]) => {
           currentStateRef.current = (state as AircraftState) || AircraftState.IDLE;
 
@@ -38,6 +43,15 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
       }),
       [],
     );
+
+    useEffect(() => {
+      if (!account || !networkObjectRef.current) return;
+
+      registerPlayerRef(account, networkObjectRef.current.rigidBodyRef);
+      return () => {
+        unregisterPlayerRef(account);
+      };
+    }, [account, networkObjectRef.current]);
 
     useEffect(() => {
       if (!networkObjectRef.current || !networkObjectRef.current.rigidBodyRef.current) return;

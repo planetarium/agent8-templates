@@ -42,7 +42,7 @@ This overview details the key files and directories within the `src/` directory.
 ### `src/App.tsx`
 
 - Main application component.
-- Configures the overall layout, routing (likely using `RoomManager`), and includes UI components.
+- Configures the overall layout, routing (using `RoomManager`), and includes UI components.
 
 ### `src/App.css`
 
@@ -59,17 +59,22 @@ This overview details the key files and directories within the `src/` directory.
 ### `src/constants/`
 
 - Directory defining constant values used throughout the application.
+  - **`aircraft.ts`**: Defines constants related to aircraft properties.
   - **`controls.ts`**: Maps keyboard inputs to game actions (e.g., movement, firing).
 
 ### `src/store/`
 
 - State management logic (using Zustand).
+  - **`playerStore.ts`**: Manages state related to the local player.
   - **`effectStore.ts`**: Manages state related to visual effects (bullets, explosions).
+  - **`networkSyncStore.ts`**: Manages state synchronization for multiplayer functionality.
 
 ### `src/types/`
 
 - TypeScript type definitions.
-  - **`effect.ts`**: Defines types for effects.
+  - **`effect.ts`**: Defines types for visual effects.
+  - **`user.ts`**: Defines types related to users/players.
+  - **`player.ts`**: Defines types specific to player data.
   - **`index.ts`**: Exports types from the directory.
 
 ### `src/components/`
@@ -78,22 +83,31 @@ This overview details the key files and directories within the `src/` directory.
 
   - **`r3f/`**: React Three Fiber components for the 3D scene.
 
-    - **`Airplane.tsx`**: Logic for the player-controlled airplane (movement, rotation, firing).
+    - **`Player.tsx`**: Logic for the player-controlled character (movement, animation, potentially includes aircraft logic).
+    - **`Aircraft.tsx`**: Logic for the player-controlled airplane model and behavior (movement, rotation, firing).
+    - **`RemotePlayer.tsx`**: Logic for rendering and synchronizing remote players.
     - **`Experience.tsx`**: Main 3D game experience setup (lighting, environment, physics, player, objects, effects). Loaded by `GameScene.tsx`.
     - **`FloatingShapes.tsx`**: Manages floating 3D shapes in the scene.
     - **`Ground.tsx`**: Defines the ground plane with physical properties.
     - **`EffectContainer.tsx`**: Manages visual effects rendering.
+    - **`NetworkContainer.tsx`**: Handles network-related logic within the 3D scene.
     - **`effects/`**: Specific visual effect components.
       - **`Bullet.tsx`**: Visual representation and behavior of bullets.
       - **`BulletEffectController.tsx`**: Manages bullet effect creation and lifecycle (potential for object pooling).
       - **`MuzzleFlash.tsx`**: Represents the muzzle flash effect.
+      - **`Explosion.tsx`**: Represents the explosion effect.
 
   - **`scene/`**: Components managing different application scenes or stages.
 
-    - **`RoomManager.tsx`**: Likely handles routing or switching between different rooms/scenes like Lobby, Game, etc., based on game state.
+    - **`RoomManager.tsx`**: Handles routing or switching between different rooms/scenes like Lobby, Game, etc., based on game state.
     - **`LobbyRoom.tsx`**: Component representing the game lobby UI and logic (e.g., player list, room selection).
     - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` for the main 3D game, implements Pointer Lock, and loads the `Experience` component.
     - **`NicknameSetup.tsx`**: Component for players to set up their nickname before entering the lobby or game.
 
   - **`ui/`**: General user interface components.
     - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) during gameplay.
+    - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).
+
+### `src/hooks/`
+
+- Custom React hooks (currently empty, potential for future use).

@@ -10,6 +10,7 @@ import { useEffectStore } from '../../store/effectStore';
 import { useFrame } from '@react-three/fiber';
 import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { EffectType } from '../../types';
+import { usePlayerStore } from '../../store/playerStore';
 
 const SHOOT_COOLDOWN = 200;
 
@@ -40,6 +41,7 @@ interface PlayerProps {
 export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 }) => {
   const { server, connected, account } = useGameServer();
   const { roomId } = useRoomState();
+  const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const [, getKeyboardInputs] = useKeyboardControls();
   if (!server || !account) return null;
 
@@ -49,9 +51,26 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
 
   // Ref to store the previously *sent* state for dirty checking
   const prevSentTransformRef = useRef({
-    position: new THREE.Vector3(),
+    position: new THREE.Vector3(0, Number.MAX_VALUE, 0),
     rotation: new THREE.Quaternion(),
   });
+
+  useEffect(() => {
+    if (!account || !controllerRef.current?.rigidBodyRef.current) return;
+
+    const rigidBody = controllerRef.current.rigidBodyRef.current;
+    if (rigidBody.userData) {
+      rigidBody.userData['account'] = account;
+    } else {
+      rigidBody.userData = { account };
+    }
+
+    registerPlayerRef(account, controllerRef.current.rigidBodyRef);
+
+    return () => {
+      unregisterPlayerRef(account);
+    };
+  }, [account, controllerRef, registerPlayerRef, unregisterPlayerRef]);
 
   useEffect(() => {
     if (!server || !connected || !roomId) return;
@@ -186,7 +205,7 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
       const startPosition = currentState.position.clone().add(offset);
       spawnEffect(
         EffectType.BULLET,
-        createBulletEffectConfig({ startPosition, direction: forward, speed: bulletSpeed, duration: 2000, scale: 3, flashDuration: 30, color: 'black' }),
+        createBulletEffectConfig({ startPosition, direction: forward, speed: bulletSpeed, duration: 500, scale: 3, flashDuration: 30, color: 'black' }),
       );
     }
 

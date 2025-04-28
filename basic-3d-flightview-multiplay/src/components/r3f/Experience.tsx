@@ -2,7 +2,6 @@ import { KeyboardControls, Sky } from '@react-three/drei';
 import FloatingShapes from './FloatingShapes';
 import { Ground } from './Ground';
 import { CollisionPayload } from '@react-three/rapier';
-import { useEffect } from 'react';
 import { useGameServer } from '@agent8/gameserver';
 import { FlightViewController, FlightViewControllerHandle } from 'vibe-starter-3d';
 import { Player } from './Player';
@@ -17,17 +16,6 @@ export function Experience({ controllerRef }: ExperienceProps) {
   const { server, account } = useGameServer();
   if (!server) return null;
   if (!account) return null;
-
-  useEffect(() => {
-    if (!account || !controllerRef.current?.rigidBodyRef.current) return;
-
-    const rigidBodyRef = controllerRef.current.rigidBodyRef.current;
-    if (rigidBodyRef.userData) {
-      rigidBodyRef.userData['account'] = account;
-    } else {
-      rigidBodyRef.userData = { account };
-    }
-  }, [account, controllerRef.current?.rigidBodyRef.current]);
 
   const handleIntersectionEnter = (event: CollisionPayload) => {
     console.log('Collision detected!', event.colliderObject?.name, event.other.rigidBodyObject?.name);
