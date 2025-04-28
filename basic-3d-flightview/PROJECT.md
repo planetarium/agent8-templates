@@ -50,19 +50,17 @@ Key technologies:
 
 - Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
 
-### `src/assets.json`
-
-- File for managing asset metadata. (Currently empty)
-
 ### `src/constants/`
 
 - Directory defining constant values used throughout the application.
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
+  - **`aircraft.ts`**: Defines constant values related to the aircraft, such as speed, rotation limits, etc.
 
 ### `src/store/`
 
 - Directory containing state management logic (e.g., Zustand).
   - **`effectStore.ts`**: Store for managing effect-related state (e.g., bullets, explosions).
+  - **`playerStore.ts`**: Store for managing player-related state (e.g., position, status).
 
 ### `src/types/`
 
@@ -76,8 +74,9 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Airplane.tsx`**: Component handling the logic related to the player-controlled airplane model (movement, rotation, bullet firing trigger).
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Airplane`), floor (`Ground`), floating shapes (`FloatingShapes`), effect container (`EffectContainer`), and manages physics engine settings.
+    - **`Aircraft.tsx`**: Component handling the logic related to the player-controlled aircraft model (movement, rotation, bullet firing trigger).
+    - **`Player.tsx`**: Component representing the player character in the 3D scene, potentially encompassing the aircraft and other player-specific elements.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Player`), floor (`Ground`), floating shapes (`FloatingShapes`), effect container (`EffectContainer`), and manages physics engine settings.
     - **`FloatingShapes.tsx`**: Component generating and managing various 3D shapes floating randomly in the scene.
     - **`Ground.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
     - **`EffectContainer.tsx`**: Container component managing and rendering various visual effects like bullet firing and hit effects.

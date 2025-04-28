@@ -3,14 +3,13 @@ import { useFrame, GroupProps } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Trail } from '@react-three/drei';
 import { FlightViewControllerHandle } from 'vibe-starter-3d';
-
-interface AirplaneProps extends GroupProps {
+interface AircraftProps extends GroupProps {
   bodyLength?: number;
   bodyColor?: string;
-  controllerRef: React.RefObject<FlightViewControllerHandle>;
+  controllerRef?: React.RefObject<FlightViewControllerHandle>;
 }
 
-export function Airplane({ bodyLength = 3, bodyColor = '#f5f5f5', controllerRef, ...props }: AirplaneProps) {
+export function Aircraft({ bodyLength = 3, bodyColor = '#f5f5f5', controllerRef, ...props }: AircraftProps) {
   const helixMeshRef = useRef<THREE.Mesh>(null!);
   const tip1Ref = useRef<THREE.Object3D>(null!);
   const tip2Ref = useRef<THREE.Object3D>(null!);
