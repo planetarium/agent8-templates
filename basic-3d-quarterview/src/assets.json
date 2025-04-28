@@ -64,7 +64,7 @@
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch.glb",
       "description": "Punch"
     },
-    "melee-attack": {
+    "melee_attack": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
       "description": "Melee Attack"
     },
@@ -76,7 +76,7 @@
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot.glb",
       "description": "Shoot"
     },
-    "aim-run": {
+    "aim_run": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot-run.glb",
       "description": "Aim Run"
     },
