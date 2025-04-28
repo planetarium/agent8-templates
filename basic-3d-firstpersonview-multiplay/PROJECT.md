@@ -41,7 +41,7 @@ Key technologies:
 ### `src/App.tsx`
 
 - Main application component.
-- Configures the overall layout and includes the `GameScene` component.
+- Configures the overall layout and includes the `RoomManager` component.
 
 ### `src/App.css`
 
@@ -67,28 +67,39 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets and muzzle flash.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes the crucial `FirstPersonViewController`, lighting, environmental elements, floor (`Floor`), effect container (`EffectContainer`), and manages physics engine settings.
+    - **`CharacterPreview.tsx`**: Component for displaying a character preview in the UI.
+    - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets, muzzle flash, and explosions.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, floor (`Floor`), effect container (`EffectContainer`), network container (`NetworkContainer`), and manages physics engine settings.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
+    - **`NetworkContainer.tsx`**: Manages the local player (`Player`) and remote players (`RemotePlayer`) within the scene.
+    - **`Player.tsx`**: Represents the local player's character, handling movement, camera, and interactions based on user input and network state. Implements FirstPersonViewController logic.
+    - **`RemotePlayer.tsx`**: Represents other players in the game, synchronizing their state based on network updates.
     - **`effects/`**: Sub-directory containing components related to visual effects.
       - **`Bullet.tsx`**: Component defining the visual representation and behavior of bullets fired from the player.
       - **`BulletEffectController.tsx`**: Manages the entire bullet effect system, including creation, state updates, and recycling (Object Pooling).
+      - **`Explosion.tsx`**: Component generating visual explosion effects.
       - **`MuzzleFlash.tsx`**: Component that generates and manages the flash effect occurring at the muzzle when firing a gun.
 
   - **`scene/`**: Contains components related to 3D scene setup and game state.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component using `Suspense` to initialize the 3D rendering environment. Can receive the Colyseus Room instance and pass it to `Experience`.
-    - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component using `Suspense` to initialize the 3D rendering environment. Receives the Colyseus Room instance and passes it to `Experience`.
     - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
+    - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character, utilizing `CharacterPreview`.
     - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
+
+  - **`ui/`**: Contains general UI components. (Currently empty or not detailed in provided structure)
 
 ### `src/store/`
 
 - Directory containing Zustand stores for application state management.
-  - **`effectStore.ts`**: Store that manages the state of visual effects like bullets (e.g., creation, active/inactive).
+  - **`effectStore.ts`**: Store that manages the state of visual effects like bullets and explosions (e.g., creation, active/inactive).
+  - **`networkSyncStore.ts`**: Store that manages network-related state synchronization, including player data and room status.
+  - **`playerStore.ts`**: Store that manages the local player's state, such as nickname, character selection, and input actions.
 
 ### `src/types/`
 
 - Directory containing TypeScript type definitions.
   - **`effect.ts`**: Defines types related to visual effects (Effect).
   - **`index.ts`**: Exports types from within the `types` directory.
+  - **`player.ts`**: Defines types related to player data and state.
+  - **`user.ts`**: Defines types related to user information (e.g., session ID, nickname).

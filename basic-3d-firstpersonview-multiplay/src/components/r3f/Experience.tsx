@@ -1,19 +1,12 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
-import { interactionGroups } from '@react-three/rapier';
+import { useRef, useEffect } from 'react';
 import { Environment, Grid } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
 import { Player } from './Player';
 import { PlayerRef } from '../../types/player';
 import { Floor } from './Floor';
-import { ControllerHandle, FirstPersonViewController, useMouseControls } from 'vibe-starter-3d';
-import * as THREE from 'three';
-import { useEffectStore } from '../../store/effectStore';
+import { ControllerHandle, FirstPersonViewController } from 'vibe-starter-3d';
 import { useGameServer } from '@agent8/gameserver';
-import { EffectType } from '../../types';
-import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { CharacterState } from '../../constants/character';
 
-const SHOOT_COOLDOWN = 200;
 const targetHeight = 1.6;
 
 /**
@@ -26,28 +19,12 @@ interface ExperienceProps {
 
 export function Experience({ characterUrl }: ExperienceProps) {
   const { server, account } = useGameServer();
-  const { camera } = useThree();
-  const getMouseInputs = useMouseControls();
 
   if (!server) return null;
   if (!account) return null;
 
   const controllerRef = useRef<ControllerHandle>(null);
   const playerRef = useRef<PlayerRef>(null);
-  const shootTimestamp = useRef(0);
-  const leftPressedLastFrame = useRef(false);
-
-  /**
-   * Delay physics activate
-   */
-  const [pausedPhysics, setPausedPhysics] = useState(true);
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setPausedPhysics(false);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, []);
 
   useEffect(() => {
     if (playerRef.current) {
@@ -58,53 +35,6 @@ export function Experience({ characterUrl }: ExperienceProps) {
       }
     }
   }, [playerRef.current?.boundingBox]);
-
-  useEffect(() => {
-    if (!controllerRef.current?.rigidBodyRef.current) return;
-
-    const rigidBodyRef = controllerRef.current.rigidBodyRef.current;
-    const colliderCount = rigidBodyRef.numColliders();
-    if (colliderCount <= 0) return;
-
-    for (let i = 0; i < colliderCount; i++) {
-      const collider = rigidBodyRef.collider(i);
-      collider.setCollisionGroups(interactionGroups([1, 2]));
-    }
-  }, [controllerRef.current?.rigidBodyRef.current]);
-
-  const addEffect = useEffectStore((state) => state.addEffect);
-
-  // Callback for Player to request a cast
-  const spawnEffect = useCallback(
-    async (type: string, config?: { [key: string]: any }) => {
-      // Add effect locally via store
-      addEffect(type, account, config);
-    },
-    [addEffect],
-  );
-
-  useFrame((_, delta) => {
-    const currentState = controllerRef.current;
-    const { left } = getMouseInputs();
-    const now = Date.now();
-
-    const leftJustPressed = left && !leftPressedLastFrame.current;
-    leftPressedLastFrame.current = left;
-
-    if (currentState && leftJustPressed && now > shootTimestamp.current) {
-      shootTimestamp.current = now + SHOOT_COOLDOWN;
-
-      const direction = new THREE.Vector3();
-      camera.getWorldDirection(direction);
-
-      const bulletSpeed = 200;
-
-      const cameraPosition = new THREE.Vector3();
-      camera.getWorldPosition(cameraPosition);
-      const startPosition = cameraPosition.add(direction.clone().multiplyScalar(1.5));
-      spawnEffect(EffectType.BULLET, createBulletEffectConfig({ startPosition, direction, speed: bulletSpeed, duration: 1000, scale: 1, flashDuration: 0 }));
-    }
-  });
 
   return (
     <>

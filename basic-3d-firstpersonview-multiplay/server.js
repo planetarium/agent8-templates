@@ -80,6 +80,25 @@ class Server {
     }
   }
 
+  async revive() {
+    try {
+      // Update user's state
+      await $room.updateUserState($sender.account, {
+        state: 'IDLE',
+        stats: {
+          maxHp: 100,
+          currentHp: 100,
+        },
+        lastActive: Date.now(),
+      });
+
+      return true;
+    } catch (error) {
+      console.error(`Failed to update player state: ${error.message}`);
+      return false;
+    }
+  }
+
   // Set character for the current user
   async setCharacter(character) {
     try {

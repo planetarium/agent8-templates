@@ -1,10 +1,10 @@
-import React, { useRef, useMemo, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, { useRef, useMemo, useCallback, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
 import Assets from '../../assets.json';
-import { GameServer, useGameServer } from '@agent8/gameserver';
+import { useGameServer, useRoomState } from '@agent8/gameserver';
 import throttle from 'lodash/throttle';
 import { PlayerInputs, PlayerRef } from '../../types/player';
 import {
@@ -15,7 +15,12 @@ import {
   CharacterRendererRef,
   CharacterResource,
   toVector3Array,
+  useMouseControls,
 } from 'vibe-starter-3d';
+import { usePlayerStore } from '../../store/playerStore';
+import { createBulletEffectConfig } from './effects/BulletEffectController';
+import { EffectType } from '../../types';
+import { useEffectStore } from '../../store/effectStore';
 
 /**
  * Network synchronization constants.
@@ -30,6 +35,8 @@ const NETWORK_CONSTANTS = {
     ROTATION_CHANGE_THRESHOLD: 0.01,
   },
 };
+
+const SHOOT_COOLDOWN = 200;
 
 /**
  * Props for the Player component.
@@ -139,18 +146,28 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
  * Manages inputs, state transitions, animations, and network synchronization.
  */
 export const Player = forwardRef<PlayerRef, PlayerProps>(
-  ({ initialState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, spawnEffect: onCastMagic, characterKey = 'y-bot.glb' }, ref) => {
-    const { server } = useGameServer();
-
-    const currentStateRef = useRef<CharacterState>(initialState);
+  ({ initialState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, characterKey = 'y-bot.glb' }, ref) => {
+    const { server, connected, account } = useGameServer();
+    const { roomId } = useRoomState();
+    const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
+    const getMouseInputs = useMouseControls();
     const [, getKeyboardInputs] = useKeyboardControls();
     const { determinePlayerState } = usePlayerStates();
+    if (!server || !account) return null;
+
+    const [die, setDie] = useState(false);
+    const latestState = useRef(CharacterState.IDLE);
+    const shootTimestamp = useRef(0);
+    const leftPressedLastFrame = useRef(false);
+
+    const currentStateRef = useRef<CharacterState>(initialState);
     const { animationConfigMap } = usePlayerAnimations(currentStateRef);
+
     const characterRendererRef = useRef<CharacterRendererRef>(null);
-    const magicTriggeredRef = useRef(false);
+
     // Ref to store the previously *sent* state for dirty checking
     const prevSentStateRef = useRef({
-      position: new THREE.Vector3(),
+      position: new THREE.Vector3(0, Number.MAX_VALUE, 0),
       rotation: new THREE.Quaternion(),
       state: initialState,
     });
@@ -164,6 +181,63 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
       }),
       [],
     );
+
+    // Get addEffect action from the store
+    const addEffect = useEffectStore((state) => state.addEffect);
+
+    // Callback for Player to request a cast
+    const spawnEffect = useCallback(
+      async (type: string, config?: { [key: string]: any }) => {
+        // Add effect locally via store
+        addEffect(type, account, config);
+
+        console.log('[Experience] Cast:', type, config);
+      },
+      [addEffect],
+    );
+
+    useEffect(() => {
+      if (!account || !controllerRef.current?.rigidBodyRef.current) return;
+
+      const rigidBody = controllerRef.current.rigidBodyRef.current;
+      if (rigidBody.userData) {
+        rigidBody.userData['account'] = account;
+      } else {
+        rigidBody.userData = { account };
+      }
+
+      registerPlayerRef(account, controllerRef.current.rigidBodyRef);
+
+      return () => {
+        unregisterPlayerRef(account);
+      };
+    }, [account, controllerRef, registerPlayerRef, unregisterPlayerRef]);
+
+    useEffect(() => {
+      if (!server || !connected || !roomId) return;
+
+      const unsubscribe = server.subscribeRoomMyState(roomId, (roomMyState) => {
+        if (latestState.current !== CharacterState.DIE && roomMyState.state === CharacterState.DIE) {
+          latestState.current = CharacterState.DIE;
+          setDie(true);
+        } else if (latestState.current === CharacterState.DIE && roomMyState.state !== CharacterState.DIE) {
+          latestState.current = roomMyState.state;
+          setDie(false);
+        }
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    }, [server, connected, roomId]);
+
+    useEffect(() => {
+      if (!server || !connected || !roomId) return;
+
+      if (die) {
+        server.remoteFunction('revive', []);
+      }
+    }, [server, connected, roomId, die]);
 
     // Optimized network synchronization function
     const throttledSyncToNetwork = useMemo(
@@ -216,48 +290,52 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
       [server, throttledSyncToNetwork],
     );
 
-    // Magic casting logic extracted as a separate function
-    const handleMagicCast = useCallback(() => {
-      if (!controllerRef?.current?.rigidBodyRef?.current) return;
+    // cast bullet
+    useFrame(({ camera }, delta) => {
+      if (latestState.current === CharacterState.DIE) return;
+      const rigidBody = controllerRef.current?.rigidBodyRef?.current;
+      if (!rigidBody) return;
 
-      console.log('Magic key pressed - Requesting cast!');
+      const { left } = getMouseInputs();
 
-      // Call callback provided by parent component
-      if (onCastMagic) {
-        // Calculate magic direction (direction character is facing)
-        const rigidBody = controllerRef.current.rigidBodyRef.current;
-        const position = rigidBody.translation();
-        const startPosition = new THREE.Vector3(position.x, position.y, position.z);
-        const rotation = rigidBody.rotation();
-        const quaternion = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-        const direction = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion).normalize();
-        //onCastMagic(EffectType.FIREBALL, createFireBallEffectConfig(startPosition, direction));
-      } else {
-        console.warn('Player tried to cast magic, but onCastMagic prop is missing!');
+      const now = Date.now();
+      const leftJustPressed = left && !leftPressedLastFrame.current;
+      leftPressedLastFrame.current = left;
+
+      if (leftJustPressed && now > shootTimestamp.current) {
+        shootTimestamp.current = now + SHOOT_COOLDOWN;
+
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+
+        const bulletSpeed = 200;
+
+        const cameraPosition = new THREE.Vector3();
+        camera.getWorldPosition(cameraPosition);
+        const startPosition = cameraPosition.add(direction.clone().multiplyScalar(1.5));
+
+        spawnEffect(
+          EffectType.BULLET,
+          createBulletEffectConfig({ startPosition, direction, speed: bulletSpeed, duration: 500, scale: 3, flashDuration: 30, color: 'black' }),
+        );
       }
-    }, [controllerRef, onCastMagic]);
+    });
 
     // Main update loop
     useFrame(() => {
+      if (latestState.current === CharacterState.DIE) return;
       const rigidBody = controllerRef?.current?.rigidBodyRef?.current;
       if (!rigidBody) return;
 
       // 1. Process inputs
       const inputs = getKeyboardInputs();
-      const { forward, backward, leftward, rightward, run, jump, action1, action2, action3, action4, magic } = inputs;
+      const { forward, backward, leftward, rightward, run, jump, action1, action2, action3, action4 } = inputs;
 
-      // 2. Handle magic trigger
-      const triggerMagic = magic && !magicTriggeredRef.current;
-      if (triggerMagic) {
-        handleMagicCast();
-      }
-      magicTriggeredRef.current = magic;
-
-      // 3. Calculate movement state
+      // 2. Calculate movement state
       const isMoving = forward || backward || leftward || rightward;
       const currentVel = rigidBody.linvel() || { y: 0 };
 
-      // 4. Determine player state
+      // 3. Determine player state
       const playerInputs: PlayerInputs = {
         isRevive: action4,
         isDying: action3,
@@ -271,7 +349,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
       const newState = determinePlayerState(currentStateRef.current, playerInputs);
       currentStateRef.current = newState;
 
-      // 5. Get current transform information
+      // 4. Get current transform information
       const translation = rigidBody.translation();
       const quatRotation = rigidBody.rotation();
 
@@ -280,7 +358,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
       const currentPosition = new THREE.Vector3(translation.x, translation.y - offsetY, translation.z);
       const currentRotation = new THREE.Quaternion(quatRotation.x, quatRotation.y, quatRotation.z, quatRotation.w);
 
-      // 6. Network synchronization
+      // 5. Network synchronization
       syncToNetwork(currentPosition, currentRotation, newState);
     });
 
