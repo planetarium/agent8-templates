@@ -19,4 +19,7 @@ export const CharacterState: { [key: string]: AnimationType } = {
 
 export type CharacterState = (typeof CharacterState)[keyof typeof CharacterState];
 
-export const DEFAULT_HEIGHT = 1.6;
+/**
+ * Default character height definition
+ */
+export const DEFAULT_HEIGHT = 1.7;

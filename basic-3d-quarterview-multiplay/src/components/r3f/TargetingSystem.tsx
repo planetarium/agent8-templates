@@ -1,8 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { useGame } from 'vibe-starter-3d-ctrl';
 import { Mesh, Vector3, Raycaster, Vector2, Object3D } from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useMouseControls } from 'vibe-starter-3d';
+import { useMouseControls, useGame } from 'vibe-starter-3d';
 import * as THREE from 'three';
 
 // Development mode flag
