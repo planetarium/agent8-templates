@@ -200,7 +200,7 @@ export interface GeneratedCube {
  * @param width Terrain width
  * @param depth Terrain depth
  */
-export function generateTerrain(seed: string, width: number = 200, depth: number = 200): GeneratedCube[] {
+export function generateTerrain(seed: string, width: number = 160, depth: number = 160): GeneratedCube[] {
   // Generate seed-based noise
   const noise = createNoise(seed);
 

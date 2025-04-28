@@ -40,9 +40,9 @@ export function CubePreview({ position }: CubePreviewProps) {
     <mesh ref={meshRef} visible={!!position}>
       <boxGeometry args={[1.03, 1.03, 1.03]} />
       {texture ? (
-        <meshStandardMaterial map={texture} transparent={true} opacity={0.5} depthWrite={false} side={THREE.DoubleSide} color="deepskyblue" />
+        <meshStandardMaterial map={texture} transparent={true} opacity={0.5} side={THREE.DoubleSide} color="deepskyblue" />
       ) : (
-        <meshBasicMaterial color="deepskyblue" transparent={true} opacity={0.3} depthWrite={false} />
+        <meshBasicMaterial color="deepskyblue" transparent={true} opacity={0.3} />
       )}
     </mesh>
   );

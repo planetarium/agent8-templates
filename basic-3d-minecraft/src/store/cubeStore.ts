@@ -7,7 +7,7 @@ export enum EditMode {
 }
 
 // Seed value constant
-export const DEFAULT_SEED = 'minecraft123';
+export const DEFAULT_SEED = import.meta.env.VITE_AGENT8_VERSE || 'minecraft123';
 
 // Single terrain configuration value
 export const TERRAIN_CONFIG = {
