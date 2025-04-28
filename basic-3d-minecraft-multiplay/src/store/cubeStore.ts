@@ -7,16 +7,16 @@ export enum EditMode {
 }
 
 // Seed value constant
-export const DEFAULT_SEED = import.meta.env.VITE_AGENT8_VERSE || 'minecraft123';
+export const DEFAULT_SEED = (import.meta as any).env?.VITE_AGENT8_VERSE || 'minecraft123';
 
 // Single terrain configuration value
 export const TERRAIN_CONFIG = {
-  width: 160,
-  depth: 160,
+  width: 80,
+  depth: 80,
 };
 
 // Cube information interface
-interface CubeInfo {
+export interface CubeInfo {
   position: [number, number, number]; // Cube position
   tileIndex: number; // Tile index
 }
@@ -27,6 +27,7 @@ interface CubeStore {
   regenerateTerrain: (newSeed?: string) => void; // Terrain regeneration function
   addCube: (x: number, y: number, z: number, tileIndex: number) => void; // Add cube
   removeCube: (x: number, y: number, z: number) => void; // Remove cube
+  updateCubes: (cubes: CubeInfo[]) => void; // Update cubes
   selectedTile: number; // Selected tile
   setSelectedTile: (index: number) => void; // Tile selection function
   tileTypes: typeof TILE_TYPES; // Tile type constants
@@ -45,7 +46,7 @@ const createInitialTerrain = (seed: string): CubeInfo[] => {
 export const useCubeStore = create<CubeStore>((set) => ({
   // Initial setup
   seed: DEFAULT_SEED,
-  cubes: createInitialTerrain(DEFAULT_SEED),
+  cubes: [],
   tileTypes: TILE_TYPES,
 
   // Terrain regeneration function (simplified)
@@ -63,6 +64,8 @@ export const useCubeStore = create<CubeStore>((set) => ({
     set((state) => ({
       cubes: [...state.cubes, { position: [x, y, z], tileIndex }],
     })),
+
+  updateCubes: (cubes: CubeInfo[]) => set((state) => ({ cubes })),
 
   // Remove cube
   removeCube: (x, y, z) =>

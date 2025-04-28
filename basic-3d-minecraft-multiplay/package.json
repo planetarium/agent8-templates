@@ -1,5 +1,5 @@
 {
-  "name": "basic-3d-sideview",
+  "name": "basic-3d-freeview",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,20 +10,25 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@agent8/gameserver": "^1.5.1",
+    "@dimforge/rapier3d-compat": "^0.15.0",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@react-three/postprocessing": "^2.16.6",
     "@react-three/rapier": "^1.5.0",
-    "@dimforge/rapier3d-compat": "^0.15.0",
+    "dotenv": "^16.5.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.482.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "simplex-noise": "^4.0.3",
     "three": "^0.174.0",
-    "zustand": "^5.0.3",
-    "vibe-starter-3d": "0.2.26"
+    "vibe-starter-3d": "^0.2.19",
+    "vibe-starter-3d-ctrl": "^0.0.4",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.174.0",

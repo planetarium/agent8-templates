@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useCubeStore } from '../../store/cubeStore';
 import { getTileTexture } from '../../utils/tileTextureLoader';
+import { useCubeStore } from '../../store/cubeStore';
 
 interface CubePreviewProps {
   position: [number, number, number] | null;

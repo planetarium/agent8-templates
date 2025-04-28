@@ -3,14 +3,14 @@ import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
+import Assets from '../../assets.json';
 import { GameServer } from '@agent8/gameserver';
 import { Vector3, Quaternion } from 'three';
 import throttle from 'lodash/throttle';
 import { PlayerInputs, PlayerRef } from '../../types/player';
 import { EffectType } from '../../types';
 import { createFireBallEffectConfig } from './effects/FireBallEffectController';
-import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, ControllerHandle, useGame } from 'vibe-starter-3d';
-import Assets from '../../assets.json';
+import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, ControllerHandle } from 'vibe-starter-3d';
 
 /**
  * Network synchronization constants.
@@ -136,13 +136,15 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
  * Manages inputs, state transitions, animations, and network synchronization.
  */
 export const Player = forwardRef<PlayerRef, PlayerProps>(
-  ({ initialState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, spawnEffect: onCastMagic, characterKey = 'y-bot.glb', server }, ref) => {
+  (
+    { initialState = CharacterState.IDLE, controllerRef, targetHeight = 1.6, spawnEffect: onCastMagic, characterKey = 'avatarsample_d_darkness.vrm', server },
+    ref,
+  ) => {
     const currentStateRef = useRef<CharacterState>(initialState);
     const [, getKeyboardInputs] = useKeyboardControls();
     const { determinePlayerState } = usePlayerStates();
     const { animationConfigMap } = usePlayerAnimations(currentStateRef);
     const characterRendererRef = useRef<CharacterRendererRef>(null);
-    const isPointMoving = useGame((state) => state.isPointMoving);
     const magicTriggeredRef = useRef(false);
     // Ref to store the previously *sent* state for dirty checking
     const prevSentStateRef = useRef({
@@ -241,7 +243,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
 
       // 1. Process inputs
       const inputs = getKeyboardInputs();
-      const { up, down, left, right, run, jump, action1, action2, action3, action4, magic } = inputs;
+      const { forward, backward, leftward, rightward, run, jump, action1, action2, action3, action4, magic } = inputs;
 
       // 2. Handle magic trigger
       const triggerMagic = magic && !magicTriggeredRef.current;
@@ -251,8 +253,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
       magicTriggeredRef.current = magic;
 
       // 3. Calculate movement state
-      const isMoving = up || down || left || right || isPointMoving;
-      const isRunning = run || isPointMoving;
+      const isMoving = forward || backward || leftward || rightward;
       const currentVel = rigidBody.linvel() || { y: 0 };
 
       // 4. Determine player state
@@ -263,7 +264,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
         isHit: action2,
         isJumping: jump,
         isMoving,
-        isRunning,
+        isRunning: run,
         currentVelY: currentVel.y,
       };
       const newState = determinePlayerState(currentStateRef.current, playerInputs);
@@ -285,7 +286,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
     // Memoized character resource loading.
     const characterResource: CharacterResource = useMemo(() => {
       const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
-      const characterUrl = characterData?.url || Assets.characters['y-bot.glb'].url;
+      const characterUrl = characterData?.url || Assets.characters['avatarsample_d_darkness.vrm'].url;
       return {
         name: characterKey,
         url: characterUrl,
@@ -303,13 +304,15 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(
 
     // Render the character model and animations
     return (
-      <CharacterRenderer
-        ref={characterRendererRef}
-        characterResource={characterResource}
-        animationConfigMap={animationConfigMap}
-        currentActionRef={currentStateRef}
-        targetHeight={targetHeight}
-      />
+      <group visible={false}>
+        <CharacterRenderer
+          ref={characterRendererRef}
+          characterResource={characterResource}
+          animationConfigMap={animationConfigMap}
+          currentActionRef={currentStateRef}
+          targetHeight={targetHeight}
+        />
+      </group>
     );
   },
 );
