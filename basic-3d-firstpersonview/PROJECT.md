@@ -70,9 +70,11 @@ Key technologies:
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets and muzzle flash.
     - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes the crucial `FirstPersonViewController`, lighting, environmental elements, floor (`Floor`), effect container (`EffectContainer`), and manages physics engine settings.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
+    - **`Player.tsx`**: Component defining the player character model, animations, and basic physics interactions.
     - **`effects/`**: Sub-directory containing components related to visual effects.
       - **`Bullet.tsx`**: Component defining the visual representation and behavior of bullets fired from the player.
       - **`BulletEffectController.tsx`**: Manages the entire bullet effect system, including creation, state updates, and recycling (Object Pooling).
+      - **`Explosion.tsx`**: Component that creates and manages explosion visual effects.
       - **`MuzzleFlash.tsx`**: Component that generates and manages the flash effect occurring at the muzzle when firing a gun.
 
   - **`scene/`**: Contains components related to 3D scene setup.
@@ -82,6 +84,7 @@ Key technologies:
 
 - Directory containing Zustand stores for application state management.
   - **`effectStore.ts`**: Store that manages the state of visual effects like bullets (e.g., creation, active/inactive).
+  - **`playerStore.ts`**: Store that manages the player's state, such as health, ammo, etc.
 
 ### `src/types/`
 
