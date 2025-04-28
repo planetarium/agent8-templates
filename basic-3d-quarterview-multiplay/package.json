@@ -1,5 +1,5 @@
 {
-  "name": "basic-3d-freeview",
+  "name": "basic-3d-quarterview-multiplay",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,7 +16,6 @@
     "@react-three/postprocessing": "^2.16.6",
     "@react-three/rapier": "^1.5.0",
     "@dimforge/rapier3d-compat": "0.14.0",
-    "@types/lodash": "^4.17.16",
     "lodash": "^4.17.21",
     "lucide-react": "^0.482.0",
     "react": "^18.3.1",
@@ -26,6 +25,7 @@
     "vibe-starter-3d": "^0.2.26"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.174.0",
