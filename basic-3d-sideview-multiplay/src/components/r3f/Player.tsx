@@ -9,8 +9,7 @@ import throttle from 'lodash/throttle';
 import { PlayerInputs, PlayerRef } from '../../types/player';
 import { EffectType } from '../../types';
 import { createFireBallEffectConfig } from './effects/FireBallEffectController';
-import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, ControllerHandle } from 'vibe-starter-3d';
-import { useGame } from 'vibe-starter-3d-ctrl';
+import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, ControllerHandle, useGame } from 'vibe-starter-3d';
 import Assets from '../../assets.json';
 
 /**
