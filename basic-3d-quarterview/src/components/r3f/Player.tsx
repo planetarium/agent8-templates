@@ -224,7 +224,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
   const characterResource: CharacterResource = useMemo(
     () => ({
       name: 'Default Character',
-      url: Assets.characters['y-bot.glb'].url,
+      url: Assets.characters['knight'].url,
       animations: {
         IDLE: Assets.animations.idle.url,
         WALK: Assets.animations.walk.url,
