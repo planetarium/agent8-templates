@@ -109,7 +109,7 @@ export function Experience({ inputMode }: ExperienceProps) {
         {/* Visual container for the enemy with ref for outline */}
         <group ref={enemyRef}>
           {/* Enemy character */}
-          <Enemy position={enemyPosition} characterKey="zombie.glb" id="enemy-1" onHover={handleEnemyHover} />
+          <Enemy position={enemyPosition} characterKey="zombie" id="enemy-1" onHover={handleEnemyHover} />
 
           {/* Outline effect when hovered */}
           {hoveredEnemyId && (
