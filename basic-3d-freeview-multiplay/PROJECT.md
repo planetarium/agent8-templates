@@ -78,7 +78,7 @@ Key technologies:
 
 - Directory defining reusable React hooks (e.g., `useKeyboardControls`).
 
-### `src/store/`
+### `src/stores/`
 
 - Directory containing state management logic (e.g., Zustand).
   - **`playerStore.ts`**: Manages player-related state (nickname, selected character, etc.).
@@ -101,7 +101,7 @@ Key technologies:
 
   - **`scene/`**: Contains components related to 3D scene setup and game state.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component using `Suspense` to initialize the 3D rendering environment. Can receive the Colyseus Room instance and pass it to `Experience`.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character.
     - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
     - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.

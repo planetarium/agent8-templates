@@ -5,6 +5,8 @@ import { FlightViewControllerHandle } from 'vibe-starter-3d';
 import { StatusDisplay } from '../ui/StatusDisplay';
 import { Physics } from '@react-three/rapier';
 import { EffectContainer } from '../r3f/EffectContainer';
+import { KeyboardControls } from '@react-three/drei';
+import { keyboardMap } from '../../constants/controls';
 
 /**
  * Main game scene component
@@ -20,20 +22,23 @@ export const GameScene: React.FC = () => {
       {/* UI Overlay */}
       <StatusDisplay controllerRef={controllerRef} />
 
-      <Canvas
-        shadows
-        camera={{ far: 5000 }}
-        onPointerDown={(e) => {
-          (e.target as HTMLCanvasElement).requestPointerLock();
-        }}
-      >
-        <Physics debug={false}>
-          <Suspense fallback={null}>
-            <Experience controllerRef={controllerRef} />
-            <EffectContainer />
-          </Suspense>
-        </Physics>
-      </Canvas>
+      {/* Keyboard preset */}
+      <KeyboardControls map={keyboardMap}>
+        <Canvas
+          shadows
+          camera={{ far: 5000 }}
+          onPointerDown={(e) => {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }}
+        >
+          <Physics debug={false}>
+            <Suspense fallback={null}>
+              <Experience controllerRef={controllerRef} />
+              <EffectContainer />
+            </Suspense>
+          </Physics>
+        </Canvas>
+      </KeyboardControls>
     </div>
   );
 };

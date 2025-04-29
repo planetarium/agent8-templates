@@ -5,7 +5,7 @@ import NicknameSetup from './components/scene/NicknameSetup';
 import RoomManager from './components/scene/RoomManager';
 import LobbyRoom from './components/scene/LobbyRoom';
 import { GameScene } from './components/scene/GameScene';
-import { networkSyncStore } from './store/networkSyncStore';
+import { networkSyncStore } from './stores/networkSyncStore';
 
 function App() {
   const { connected, server } = useGameServer();

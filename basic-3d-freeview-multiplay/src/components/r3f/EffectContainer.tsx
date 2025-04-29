@@ -3,7 +3,7 @@ import { useGameServer, useRoomState } from '@agent8/gameserver';
 import { Vector3 } from 'three';
 import { FireBallEffectController } from './effects/FireBallEffectController';
 import { ActiveEffect, EffectType } from '../../types/effect';
-import { useEffectStore, useActiveEffects } from '../../store/effectStore';
+import { useEffectStore, useActiveEffects } from '../../stores/effectStore';
 import { IntersectionEnterPayload } from '@react-three/rapier';
 import { createExplosionEffectConfig, Explosion } from './effects/Explosion';
 

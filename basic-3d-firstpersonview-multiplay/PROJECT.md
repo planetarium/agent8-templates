@@ -82,14 +82,14 @@ Key technologies:
 
   - **`scene/`**: Contains components related to 3D scene setup and game state.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component using `Suspense` to initialize the 3D rendering environment. Receives the Colyseus Room instance and passes it to `Experience`.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
     - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character, utilizing `CharacterPreview`.
     - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
 
   - **`ui/`**: Contains general UI components. (Currently empty or not detailed in provided structure)
 
-### `src/store/`
+### `src/stores/`
 
 - Directory containing Zustand stores for application state management.
   - **`effectStore.ts`**: Store that manages the state of visual effects like bullets and explosions (e.g., creation, active/inactive).

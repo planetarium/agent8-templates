@@ -56,7 +56,7 @@ Key technologies:
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
   - **`aircraft.ts`**: Defines constant values related to the aircraft, such as speed, rotation limits, etc.
 
-### `src/store/`
+### `src/stores/`
 
 - Directory containing state management logic (e.g., Zustand).
   - **`effectStore.ts`**: Store for managing effect-related state (e.g., bullets, explosions).
@@ -87,7 +87,7 @@ Key technologies:
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
 
   - **`ui/`**: Contains components related to the user interface (UI).
     - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) on the screen.

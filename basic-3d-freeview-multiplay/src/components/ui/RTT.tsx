@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { networkSyncStore } from '../../store/networkSyncStore';
+import { networkSyncStore } from '../../stores/networkSyncStore';
 
 export const RTT: React.FC<{}> = () => {
   const rtt = networkSyncStore((state) => state.rtt);

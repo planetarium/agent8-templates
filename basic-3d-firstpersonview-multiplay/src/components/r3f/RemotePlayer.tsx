@@ -15,7 +15,7 @@ import {
   NetworkObject,
 } from 'vibe-starter-3d';
 import Assets from '../../assets.json';
-import { usePlayerStore } from '../../store/playerStore';
+import { usePlayerStore } from '../../stores/playerStore';
 
 interface RemotePlayerProps {
   account: string;

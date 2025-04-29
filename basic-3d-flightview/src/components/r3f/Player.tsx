@@ -4,11 +4,11 @@ import { Aircraft } from './Aircraft';
 import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
-import { useEffectStore } from '../../store/effectStore';
+import { useEffectStore } from '../../stores/effectStore';
 import { useFrame } from '@react-three/fiber';
 import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { EffectType } from '../../types';
-import { usePlayerStore } from '../../store/playerStore';
+import { usePlayerStore } from '../../stores/playerStore';
 
 const SHOOT_COOLDOWN = 200;
 
@@ -74,10 +74,7 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
 
       const bulletSpeed = 200;
 
-      const offset = forward
-        .clone()
-        .multiplyScalar(2)
-        .add(new THREE.Vector3(0, 0.5, 0));
+      const offset = forward.clone().multiplyScalar(2).add(new THREE.Vector3(0, 0.5, 0));
       const startPosition = currentState.position.clone().add(offset);
       spawnEffect(
         EffectType.BULLET,

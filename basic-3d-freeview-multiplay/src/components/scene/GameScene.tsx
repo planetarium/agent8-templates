@@ -2,10 +2,11 @@ import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import { Experience } from '../r3f/Experience';
-import { StatsGl } from '@react-three/drei';
+import { KeyboardControls, StatsGl } from '@react-three/drei';
 import { NetworkContainer } from '../r3f/NetworkContainer';
 import { EffectContainer } from '../r3f/EffectContainer';
 import { RTT } from '../ui/RTT';
+import { keyboardMap } from '../../constants/controls';
 
 /**
  * Game scene props
@@ -40,21 +41,24 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, chara
         </div>
       </div>
 
-      <Canvas
-        shadows
-        onPointerDown={(e) => {
-          (e.target as HTMLCanvasElement).requestPointerLock();
-        }}
-      >
-        <Physics debug={true}>
-          <Suspense fallback={null}>
-            <Experience characterUrl={characterUrl} />
-            <NetworkContainer />
-            <EffectContainer />
-          </Suspense>
-        </Physics>
-        <StatsGl showPanel={0} className="stats absolute bottom-0 left-0" />
-      </Canvas>
+      {/* Keyboard preset */}
+      <KeyboardControls map={keyboardMap}>
+        <Canvas
+          shadows
+          onPointerDown={(e) => {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }}
+        >
+          <Physics>
+            <Suspense fallback={null}>
+              <Experience characterUrl={characterUrl} />
+              <NetworkContainer />
+              <EffectContainer />
+            </Suspense>
+          </Physics>
+          <StatsGl showPanel={0} className="stats absolute bottom-0 left-0" />
+        </Canvas>
+      </KeyboardControls>
     </div>
   );
 };

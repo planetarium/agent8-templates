@@ -1,6 +1,9 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Experience } from '../r3f/Experience';
+import { KeyboardControls } from '@react-three/drei';
+import { keyboardMap } from '../../constants/controls';
+import { Physics } from '@react-three/rapier';
 
 /**
  * Main game scene component
@@ -9,18 +12,35 @@ import { Experience } from '../r3f/Experience';
  * including physics, lighting, and scene elements.
  */
 export const GameScene: React.FC = () => {
+  /**
+   * Delay physics activate
+   */
+  const [pausedPhysics, setPausedPhysics] = useState(true);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPausedPhysics(false);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
-    <>
-      <Canvas
-        shadows
-        onPointerDown={(e) => {
-          (e.target as HTMLCanvasElement).requestPointerLock();
-        }}
-      >
-        <Suspense fallback={null}>
-          <Experience />
-        </Suspense>
-      </Canvas>
-    </>
+    <div className="relative w-full h-screen">
+      {/* Keyboard preset */}
+      <KeyboardControls map={keyboardMap}>
+        <Canvas
+          shadows
+          onPointerDown={(e) => {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }}
+        >
+          <Physics debug={false} paused={pausedPhysics}>
+            <Suspense fallback={null}>
+              <Experience />
+            </Suspense>
+          </Physics>
+        </Canvas>
+      </KeyboardControls>
+    </div>
   );
 };

@@ -62,7 +62,7 @@ This overview details the key files and directories within the `src/` directory.
   - **`aircraft.ts`**: Defines constants related to aircraft properties.
   - **`controls.ts`**: Maps keyboard inputs to game actions (e.g., movement, firing).
 
-### `src/store/`
+### `src/stores/`
 
 - State management logic (using Zustand).
   - **`playerStore.ts`**: Manages state related to the local player.
@@ -101,7 +101,7 @@ This overview details the key files and directories within the `src/` directory.
 
     - **`RoomManager.tsx`**: Handles routing or switching between different rooms/scenes like Lobby, Game, etc., based on game state.
     - **`LobbyRoom.tsx`**: Component representing the game lobby UI and logic (e.g., player list, room selection).
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` for the main 3D game, implements Pointer Lock, and loads the `Experience` component.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`NicknameSetup.tsx`**: Component for players to set up their nickname before entering the lobby or game.
 
   - **`ui/`**: General user interface components.

@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { ControllerHandle, useMouseControls } from 'vibe-starter-3d';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
-import { useEffectStore } from '../../store/effectStore';
+import { useEffectStore } from '../../stores/effectStore';
 import { useFrame } from '@react-three/fiber';
 import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { EffectType } from '../../types';
-import { usePlayerStore } from '../../store/playerStore';
+import { usePlayerStore } from '../../stores/playerStore';
 
 const SHOOT_COOLDOWN = 200;
 

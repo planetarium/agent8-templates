@@ -6,7 +6,7 @@ import { ActiveCollisionTypes, RigidBody } from '@dimforge/rapier3d-compat';
 import { NetworkObject, NetworkObjectHandle, CollisionGroup, toVector3 } from 'vibe-starter-3d';
 import { Aircraft } from './Aircraft';
 import { AircraftState } from '../../constants/aircraft';
-import { usePlayerStore } from '../../store/playerStore';
+import { usePlayerStore } from '../../stores/playerStore';
 
 interface RemotePlayerProps {
   account: string;

@@ -7,6 +7,8 @@ import { RTT } from '../ui/RTT';
 import { Physics } from '@react-three/rapier';
 import { NetworkContainer } from '../r3f/NetworkContainer';
 import { EffectContainer } from '../r3f/EffectContainer';
+import { KeyboardControls } from '@react-three/drei';
+import { keyboardMap } from '../../constants/controls';
 
 /**
  * Game scene props
@@ -44,21 +46,24 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
       {/* UI Overlay */}
       <StatusDisplay controllerRef={controllerRef} />
 
-      <Canvas
-        shadows
-        camera={{ far: 5000 }}
-        onPointerDown={(e) => {
-          (e.target as HTMLCanvasElement).requestPointerLock();
-        }}
-      >
-        <Physics debug={false}>
-          <Suspense fallback={null}>
-            <Experience controllerRef={controllerRef} />
-            <NetworkContainer />
-            <EffectContainer />
-          </Suspense>
-        </Physics>
-      </Canvas>
+      {/* Keyboard preset */}
+      <KeyboardControls map={keyboardMap}>
+        <Canvas
+          shadows
+          camera={{ far: 5000 }}
+          onPointerDown={(e) => {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }}
+        >
+          <Physics debug={false}>
+            <Suspense fallback={null}>
+              <Experience controllerRef={controllerRef} />
+              <NetworkContainer />
+              <EffectContainer />
+            </Suspense>
+          </Physics>
+        </Canvas>
+      </KeyboardControls>
     </div>
   );
 };

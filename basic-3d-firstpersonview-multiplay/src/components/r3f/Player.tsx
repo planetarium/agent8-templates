@@ -17,10 +17,10 @@ import {
   toVector3Array,
   useMouseControls,
 } from 'vibe-starter-3d';
-import { usePlayerStore } from '../../store/playerStore';
+import { usePlayerStore } from '../../stores/playerStore';
 import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { EffectType } from '../../types';
-import { useEffectStore } from '../../store/effectStore';
+import { useEffectStore } from '../../stores/effectStore';
 
 /**
  * Network synchronization constants.

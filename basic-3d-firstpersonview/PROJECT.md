@@ -78,9 +78,9 @@ Key technologies:
       - **`MuzzleFlash.tsx`**: Component that generates and manages the flash effect occurring at the muzzle when firing a gun.
 
   - **`scene/`**: Contains components related to 3D scene setup.
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
 
-### `src/store/`
+### `src/stores/`
 
 - Directory containing Zustand stores for application state management.
   - **`effectStore.ts`**: Store that manages the state of visual effects like bullets (e.g., creation, active/inactive).

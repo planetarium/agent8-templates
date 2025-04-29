@@ -2,11 +2,11 @@ import { useCallback } from 'react';
 import { useGameServer } from '@agent8/gameserver';
 import * as THREE from 'three';
 import { ActiveEffect, EffectType } from '../../types/effect';
-import { useEffectStore, useActiveEffects } from '../../store/effectStore';
+import { useEffectStore, useActiveEffects } from '../../stores/effectStore';
 import { BulletEffectController } from './effects/BulletEffectController';
 import { Collider, RigidBody } from '@dimforge/rapier3d-compat';
 import { createExplosionEffectConfig, Explosion } from './effects/Explosion';
-import { usePlayerStore } from '../../store/playerStore';
+import { usePlayerStore } from '../../stores/playerStore';
 
 /**
  * Effect container component using Zustand store for effect management.
