@@ -62,7 +62,7 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
       >
         <Physics debug={true}>
           <Suspense fallback={null}>
-            <Experience characterUrl="solider.glb" />
+            <Experience characterUrl="solider" />
             <NetworkContainer />
             <EffectContainer />
           </Suspense>
