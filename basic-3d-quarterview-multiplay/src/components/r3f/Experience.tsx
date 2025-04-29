@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Environment, Grid, KeyboardControls } from '@react-three/drei';
+import { Environment, KeyboardControls } from '@react-three/drei';
 import { Player } from './Player';
 import { PlayerRef } from '../../types/player';
 import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
@@ -7,7 +7,7 @@ import { keyboardMap } from '../../constants/controls';
 import { Floor } from './Floor';
 import { useGameServer } from '@agent8/gameserver';
 import { useEffectStore } from '../../store/effectStore';
-import { ControllerHandle, FreeViewController, QuarterViewController } from 'vibe-starter-3d';
+import { ControllerHandle, QuarterViewController } from 'vibe-starter-3d';
 import { TargetingSystem } from './TargetingSystem';
 
 /**

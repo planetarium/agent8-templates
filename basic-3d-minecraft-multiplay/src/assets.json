@@ -1,31 +1,46 @@
 {
   "characters": {
-    "solider.glb": {
+    "solider": {
       "url": "https://agent8-games.verse8.io/assets/3d/characters/human/solider.glb"
     },
-    "commando.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/commando.glb"
-    },
-    "deadpool.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/deadpool.glb"
-    },
-    "gunslinger.glb": {
+    "gunslinger": {
       "url": "https://agent8-games.verse8.io/assets/3d/characters/human/gunslinger.glb"
     },
-    "knight.glb": {
+    "knight": {
       "url": "https://agent8-games.verse8.io/assets/3d/characters/human/knight.glb"
     },
-    "x-bot.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/x-bot.glb"
-    },
-    "y-bot.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/y-bot.glb"
-    },
-    "zombie.glb": {
+    "zombie": {
       "url": "https://agent8-games.verse8.io/assets/3d/characters/human/zombie.glb"
     },
-    "ryu.glb": {
-      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/ryu.glb"
+    "trump": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/trump.glb"
+    },
+    "space-marine": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/space-marine.glb"
+    },
+    "fallen-angel": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/fallen-angel.glb"
+    },
+    "fantasy-thief": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/fantasy-thief.glb"
+    },
+    "medical-android": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/medical-android.glb"
+    },
+    "necromancer": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/necromancer.glb"
+    },
+    "spartan-soldier": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/spartan-soldier.glb"
+    },
+    "steampunk-inventor": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/steampunk-inventor.glb"
+    },
+    "valkyrie-warrior": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/valkyrie-warrior.glb"
+    },
+    "sd-northern-soldier": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/sd-northern-soldier.glb"
     }
   },
   "animations": {

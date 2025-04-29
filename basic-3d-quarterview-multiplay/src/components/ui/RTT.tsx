@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { networkSyncStore } from '../../store/networkSyncStore';
 
 export const RTT: React.FC<{}> = () => {

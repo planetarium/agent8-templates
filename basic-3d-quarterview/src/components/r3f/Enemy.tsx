@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useState } from 'react';
 import * as THREE from 'three';
-import { Vector3, ThreeEvent } from '@react-three/fiber';
+import { ThreeEvent } from '@react-three/fiber';
 import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
 import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterResource } from 'vibe-starter-3d';
 import { CharacterRendererRef } from 'vibe-starter-3d/dist/src/components/renderers/CharacterRenderer';

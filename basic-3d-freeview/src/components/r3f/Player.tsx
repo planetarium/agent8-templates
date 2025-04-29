@@ -235,7 +235,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initActio
   const characterResource: CharacterResource = useMemo(
     () => ({
       name: 'Default Character',
-      url: Assets.characters.player.url,
+      url: Assets.characters['knight'].url,
       animations: {
         IDLE: Assets.animations.idle.url,
         WALK: Assets.animations.walk.url,

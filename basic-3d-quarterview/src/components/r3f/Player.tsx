@@ -3,9 +3,8 @@ import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterResource, ControllerHandle } from 'vibe-starter-3d';
+import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterResource, ControllerHandle, useGame } from 'vibe-starter-3d';
 import { CharacterRendererRef } from 'vibe-starter-3d/dist/src/components/renderers/CharacterRenderer';
-import { useGame } from 'vibe-starter-3d-ctrl';
 import Assets from '../../assets.json';
 
 /**
@@ -225,7 +224,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
   const characterResource: CharacterResource = useMemo(
     () => ({
       name: 'Default Character',
-      url: Assets.characters['y-bot.glb'].url,
+      url: Assets.characters['knight'].url,
       animations: {
         IDLE: Assets.animations.idle.url,
         WALK: Assets.animations.walk.url,
