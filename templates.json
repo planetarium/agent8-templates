@@ -40,33 +40,6 @@
     ]
   },
   {
-    "name": "basic-3d-freeview-multiplay",
-    "label": "3D Multiplay Template",
-    "description": "Three.js multiplayer 3D game template with free camera control. Enables players to interact in a shared 3D environment with flexible camera positioning.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-freeview-multiplay",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "three.js",
-      "3d",
-      "character",
-      "animation",
-      "map",
-      "rpg",
-      "action",
-      "freeview",
-      "multiplay",
-      "lobby",
-      "free-camera",
-      "third-person",
-      "multiplayer",
-      "networking",
-      "social"
-    ]
-  },
-  {
     "name": "basic-3d-quarterview",
     "label": "3D Character Quarterview Template",
     "description": "Three.js single-player top-down game template similar to League of Legends. Features character control from a quarter view orthographic camera with click-to-move functionality and keyboard controls.",
@@ -99,45 +72,6 @@
     ]
   },
   {
-    "name": "basic-3d-quarterview-multiplay",
-    "label": "3D Character Quarterview Multiplay Template",
-    "description": "Three.js top-down game template inspired by League of Legends. Players control characters from above, with click-to-move and attack functionality in a multiplayer environment. This templates ready to use, camera system, character system, and map system.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-quarterview-multiplay",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "three.js",
-      "3d",
-      "character",
-      "animation",
-      "map",
-      "rpg",
-      "action",
-      "top-down",
-      "quarterview",
-      "point-and-click",
-      "League of Legends",
-      "MOBA",
-      "multiplay",
-      "lobby",
-      "attack",
-      "strategy",
-      "abilities",
-      "champion",
-      "skills",
-      "team-based",
-      "competitive",
-      "PvP",
-      "real-time",
-      "arena",
-      "lanes",
-      "minions",
-      "towers"
-    ]
-  },
-  {
     "name": "basic-3d-flightview",
     "label": "3D Airplane Flightview Template",
     "description": "A Three.js single-player flight airplane game template inspired by Pieter Levels' game, featuring a low-poly plane flying freely.",
@@ -161,36 +95,6 @@
       "keyboard-controls",
       "Pieter Levels",
       "ace-combat"
-    ]
-  },
-  {
-    "name": "basic-3d-flightview-multiplay",
-    "label": "3D Airplane Flightview Multiplay Template",
-    "description": "A Three.js multiplayer flight airplane game template inspired by Pieter Levels' game, featuring a low-poly plane flying freely.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-flightview-multiplay",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "three.js",
-      "3d",
-      "flight",
-      "flying",
-      "sky",
-      "aircraft",
-      "airplane",
-      "shooting",
-      "action",
-      "keyboard-controls",
-      "Pieter Levels",
-      "ace-combat",
-      "multiplay",
-      "lobby",
-      "multiplayer",
-      "multi-player",
-      "networking",
-      "real-time"
     ]
   },
   {
@@ -226,44 +130,6 @@
     ]
   },
   {
-    "name": "basic-3d-firstpersonview-multiplay",
-    "label": "3D First Person View (FPS) Multiplay Template",
-    "description": "Three.js multiplayer first-person view (FPS) game template. Control your character through a first-person camera perspective, simulating the player's own eyes, with movement and keyboard controls.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-firstpersonview-multiplay",
-    "tags": [
-      "vite",
-      "react",
-      "typescript",
-      "three.js",
-      "3d",
-      "fps",
-      "FPS",
-      "first-person",
-      "firstperson",
-      "first-person-view",
-      "firstpersonview",
-      "first-person-camera",
-      "firstpersoncamera",
-      "action",
-      "single-player",
-      "keyboard-controls",
-      "Call of Duty",
-      "Counter-Strike",
-      "Doom",
-      "Overwatch",
-      "Valorant",
-      "PUBG",
-      "PlayerUnknown's Battlegrounds",
-      "multiplay",
-      "lobby",
-      "multiplayer",
-      "multi-player",
-      "networking",
-      "real-time"
-    ]
-  },
-  {
     "name": "basic-3d-sideview",
     "label": "3D Character Sideview Template",
     "description": "Three.js single-player sideview game template. Features character control from a side view orthographic camera with horizontal movement and keyboard controls.",
@@ -285,14 +151,6 @@
       "mario",
       "platformer"
     ]
-  },
-  {
-    "name": "basic-3d-sideview-multiplay",
-    "label": "3D Character Sideview Multiplay Template",
-    "description": "Three.js multiplayer sideview game template. Features character control from a side view orthographic camera with horizontal movement and keyboard controls.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "basic-3d-sideview-multiplay",
-    "tags": ["vite", "react", "typescript", "three.js", "3d", "character", "animation", "map", "rpg", "action", "multiplay", "sideview", "mario", "platformer"]
   },
   {
     "name": "basic-3d-minecraft",
