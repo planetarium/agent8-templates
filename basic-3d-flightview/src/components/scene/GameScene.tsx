@@ -26,7 +26,6 @@ export const GameScene: React.FC = () => {
         onPointerDown={(e) => {
           (e.target as HTMLCanvasElement).requestPointerLock();
         }}
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} // Ensure canvas doesn't overlap UI
       >
         <Physics debug={false}>
           <Suspense fallback={null}>
