@@ -1,14 +1,11 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Physics } from '@react-three/rapier';
-import { Environment, Grid, KeyboardControls } from '@react-three/drei';
-import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
-import { ControllerHandle } from 'vibe-starter-3d';
+import { Environment, Grid } from '@react-three/drei';
+import { CharacterState } from '../../constants/character';
 import { useState } from 'react';
-import { useEffect } from 'react';
-import { keyboardMap } from '../../constants/controls';
 import { Player, PlayerRef } from './Player';
 import { Floor } from './Floor';
-import { SideViewController } from 'vibe-starter-3d';
+import { ControllerHandle, SideViewController } from 'vibe-starter-3d';
 
 export function Experience() {
   const controllerRef = useRef<ControllerHandle>(null);
@@ -41,7 +38,7 @@ export function Experience() {
       {/* Grid */}
       <Grid
         args={[100, 100]}
-        rotation={[Math.PI / 2, 0, 0]}
+        position={[0, 0.01, 0]}
         cellSize={1}
         cellThickness={0.5}
         cellColor="#6f6f6f"
@@ -55,27 +52,17 @@ export function Experience() {
 
       <ambientLight intensity={0.7} />
 
-      <Physics debug={false} paused={pausedPhysics}>
-        {/* Keyboard preset */}
-        <KeyboardControls map={keyboardMap}>
-          {/* Environment */}
-          <Environment preset="sunset" background={false} />
+      <Physics debug={true} paused={pausedPhysics}>
+        {/* Environment */}
+        <Environment preset="sunset" background={false} />
 
-          {/* player character with controller */}
-          <SideViewController
-            ref={controllerRef}
-            targetHeight={DEFAULT_HEIGHT}
-            followLight={{
-              position: [20, 30, 10],
-              intensity: 1.2,
-            }}
-          >
-            <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={DEFAULT_HEIGHT} />
-          </SideViewController>
-        </KeyboardControls>
+        {/* player character with controller */}
+        <SideViewController cameraMode="perspective" followCharacter={true} ref={controllerRef} zoom={1}>
+          <Player ref={playerRef} initState={CharacterState.IDLE_00} controllerRef={controllerRef} />
+        </SideViewController>
 
         {/* Floor */}
-        <Floor seed={Math.floor(Math.random() * 10000)} />
+        <Floor seed={12345} />
       </Physics>
     </>
   );

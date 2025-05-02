@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Experience } from './Experience';
+import { keyboardMap } from '../../constants/controls';
+import { KeyboardControls } from '@react-three/drei';
 
 /**
  * Main game scene component
@@ -13,7 +15,9 @@ export const GameScene: React.FC = () => {
     <>
       <Canvas shadows>
         <Suspense fallback={null}>
-          <Experience />
+          <KeyboardControls map={keyboardMap}>
+            <Experience />
+          </KeyboardControls>
         </Suspense>
       </Canvas>
     </>
