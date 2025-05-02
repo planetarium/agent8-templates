@@ -79,11 +79,11 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
     (state: CharacterState) => {
       setEnableInput(true);
       switch (state) {
-        case CharacterState.PUNCH_00:
+        case CharacterState.PUNCH:
         case CharacterState.PUNCH_01:
           currentStateRef.current = CharacterState.IDLE_01;
           break;
-        case CharacterState.KICK_00:
+        case CharacterState.KICK:
         case CharacterState.KICK_01:
         case CharacterState.KICK_02:
           currentStateRef.current = CharacterState.IDLE_01;
@@ -98,7 +98,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
           currentStateRef.current = CharacterState.IDLE_01;
           break;
         case CharacterState.DANCE:
-          currentStateRef.current = CharacterState.IDLE_00;
+          currentStateRef.current = CharacterState.IDLE;
           break;
         default:
           break;
@@ -109,8 +109,8 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
 
   const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
     () => ({
-      [CharacterState.IDLE_00]: {
-        animationType: 'IDLE_00',
+      [CharacterState.IDLE]: {
+        animationType: 'IDLE',
         loop: true,
       } as AnimationConfig,
       [CharacterState.IDLE_01]: {
@@ -134,12 +134,12 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
         loop: true,
         clampWhenFinished: true,
       } as AnimationConfig,
-      [CharacterState.PUNCH_00]: {
-        animationType: 'PUNCH_00',
+      [CharacterState.PUNCH]: {
+        animationType: 'PUNCH',
         loop: false,
         duration: 0.5,
         clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.PUNCH_00),
+        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
       } as AnimationConfig,
       [CharacterState.PUNCH_01]: {
         animationType: 'PUNCH_01',
@@ -148,12 +148,12 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
         clampWhenFinished: true,
         onComplete: () => handleAnimationComplete(CharacterState.PUNCH_01),
       } as AnimationConfig,
-      [CharacterState.KICK_00]: {
-        animationType: 'KICK_00',
+      [CharacterState.KICK]: {
+        animationType: 'KICK',
         loop: false,
         duration: 0.75,
         clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.KICK_00),
+        onComplete: () => handleAnimationComplete(CharacterState.KICK),
       } as AnimationConfig,
       [CharacterState.KICK_01]: {
         animationType: 'KICK_01',
@@ -218,29 +218,29 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
       // Punch animation - start only if not already punching
       if (
         isPunching &&
-        [CharacterState.IDLE_00, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
           currentState,
         )
       ) {
         setEnableInput(false);
-        return CharacterState.PUNCH_00;
+        return CharacterState.PUNCH;
       }
 
       // Kick animation - start only if not already punching
       if (
         isKicking &&
-        [CharacterState.IDLE_00, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
           currentState,
         )
       ) {
         setEnableInput(false);
-        return CharacterState.KICK_00;
+        return CharacterState.KICK;
       }
 
       // Melee attack animation - start only if not already punching or kicking
       if (
         isMeleeAttack &&
-        [CharacterState.IDLE_00, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
           currentState,
         )
       ) {
@@ -251,7 +251,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
       // Cast animation - start only if not already punching or kicking
       if (
         isCasting &&
-        [CharacterState.IDLE_00, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
           currentState,
         )
       ) {
@@ -262,7 +262,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
       // Jump animation (can't jump while punching)
       if (
         isJumping &&
-        [CharacterState.IDLE_00, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
           currentState,
         )
       ) {
@@ -271,7 +271,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
 
       // Moving state
       if (
-        [CharacterState.IDLE_00, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
           currentState,
         )
       ) {
@@ -283,7 +283,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
           }
         } else {
           if (currentState != CharacterState.IDLE_01) {
-            return CharacterState.IDLE_00;
+            return CharacterState.IDLE;
           }
         }
       }
@@ -338,7 +338,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
       url: Assets.characters['knight'].url,
       animations: {
         // Idle animations
-        IDLE_00: Assets.animations['idle-00'].url,
+        IDLE: Assets.animations['idle-00'].url,
         IDLE_01: Assets.animations['idle-01'].url,
         RIFLE_IDLE: Assets.animations['rifle-idle'].url,
         PISTOL_IDLE: Assets.animations['pistol-idle'].url,
@@ -353,9 +353,9 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
         SWIM: Assets.animations['swim'].url,
 
         // Attack animations
-        PUNCH_00: Assets.animations['punch-00'].url,
+        PUNCH: Assets.animations['punch-00'].url,
         PUNCH_01: Assets.animations['punch-01'].url,
-        KICK_00: Assets.animations['kick-00'].url,
+        KICK: Assets.animations['kick-00'].url,
         KICK_01: Assets.animations['kick-01'].url,
         KICK_02: Assets.animations['kick-02'].url,
         MELEE_ATTACK: Assets.animations['melee-attack'].url,

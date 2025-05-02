@@ -67,7 +67,7 @@ export function Experience() {
             intensity: 2,
           }}
         >
-          <Player ref={playerRef} initState={CharacterState.IDLE_00} controllerRef={controllerRef} />
+          <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} />
         </PointToMoveController>
         <TargetingSystem />
         {/* Floor */}
