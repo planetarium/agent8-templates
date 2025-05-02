@@ -87,6 +87,7 @@ Key technologies:
 - Configures lighting, camera, and scene objects
 - Activates physics engine
 - Uses SideViewController for side-scrolling camera perspective
+  - SideViewController provides adjustable zoom functionality within a range of 1 to 3
 - Links the player character with the controller
 
 ##### `src/components/r3f/Player.tsx`

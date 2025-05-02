@@ -84,6 +84,7 @@ Key technologies:
 - Configures lighting, camera, and scene objects
 - Activates physics engine
 - Configures quarter view camera controller
+  - QuarterViewController provides adjustable zoom functionality within a range of 1 to 3
 
 ##### `src/components/r3f/Player.tsx`
 

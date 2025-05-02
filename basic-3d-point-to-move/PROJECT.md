@@ -87,6 +87,7 @@ Key technologies:
 - Configures lighting, camera, and scene objects
 - Activates physics engine
 - Uses PointToMoveController for character movement
+  - PointToMoveController provides adjustable zoom functionality within a range of 1 to 3
 - Integrates the targeting system for click-to-move functionality
 
 ##### `src/components/r3f/Player.tsx`
