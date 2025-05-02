@@ -1,33 +1,15 @@
-import { useRef, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { Physics } from '@react-three/rapier';
-import { Environment, Grid, KeyboardControls } from '@react-three/drei';
-import { CharacterState, DEFAULT_HEIGHT } from '../../constants/character';
-import { ControllerHandle } from 'vibe-starter-3d';
-import { useEffect } from 'react';
-import { keyboardMap } from '../../constants/controls';
+import { Environment, Grid } from '@react-three/drei';
+import { CharacterState } from '../../constants/character';
+import { useState } from 'react';
 import { Player, PlayerRef } from './Player';
 import { Floor } from './Floor';
-import { QuarterViewController } from 'vibe-starter-3d';
-import { TargetingSystem } from './TargetingSystem';
-import { Enemy } from './Enemy';
-import { Vector3, Group } from 'three';
+import { QuarterViewController, ControllerHandle } from 'vibe-starter-3d';
 
-type ExperienceProps = {
-  inputMode: 'keyboard' | 'pointToMove';
-};
-
-export function Experience({ inputMode }: ExperienceProps) {
+export function Experience() {
   const controllerRef = useRef<ControllerHandle>(null);
   const playerRef = useRef<PlayerRef>(null);
-  const enemyRef = useRef<Group>(null);
-  const [targetObject, setTargetObject] = useState<string | null>(null);
-  const [targetPosition, setTargetPosition] = useState<Vector3 | null>(null);
-  const [hoveredEnemyId, setHoveredEnemyId] = useState<string | null>(null);
-
-  // Box position setup
-  const boxPosition: [number, number, number] = [5, 0.5, 5];
-  // Enemy positions
-  const enemyPosition: [number, number, number] = [5, 0, 5];
 
   /**
    * Delay physics activate
@@ -51,17 +33,6 @@ export function Experience({ inputMode }: ExperienceProps) {
     }
   }, [playerRef.current?.boundingBox]);
 
-  // Handle enemy hover
-  const handleEnemyHover = (id: string, isHovered: boolean) => {
-    if (isHovered) {
-      setHoveredEnemyId(id);
-      console.log('Enemy hovered:', id);
-    } else if (hoveredEnemyId === id) {
-      setHoveredEnemyId(null);
-      console.log('Enemy unhovered:', id);
-    }
-  };
-
   return (
     <>
       {/* Grid */}
@@ -81,50 +52,26 @@ export function Experience({ inputMode }: ExperienceProps) {
 
       <ambientLight intensity={0.7} />
 
-      <Physics debug={false} paused={pausedPhysics}>
-        {/* Keyboard preset */}
-        <KeyboardControls map={keyboardMap}>
-          {/* Environment */}
-          <Environment preset="sunset" background={false} />
+      <Physics debug={true} paused={pausedPhysics}>
+        {/* Environment */}
+        <Environment preset="sunset" background={false} />
 
-          {/* player character with controller */}
-          <QuarterViewController
-            cameraMode="orthographic"
-            inputMode={inputMode}
-            followCharacter={true}
-            ref={controllerRef}
-            targetHeight={DEFAULT_HEIGHT}
-            followLight={{
-              position: [20, 30, 10],
-              intensity: 1.2,
-            }}
-          >
-            <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={DEFAULT_HEIGHT} isAttacking={!!targetObject} />
-          </QuarterViewController>
-        </KeyboardControls>
+        {/* player character with controller */}
+        <QuarterViewController
+          cameraMode="orthographic"
+          zoom={1}
+          followCharacter={true}
+          ref={controllerRef}
+          followLight={{
+            position: [0.6, 1, 0.3],
+            intensity: 2,
+          }}
+        >
+          <Player ref={playerRef} initState={CharacterState.IDLE_00} controllerRef={controllerRef} />
+        </QuarterViewController>
 
         {/* Floor */}
         <Floor />
-
-        {/* Visual container for the enemy with ref for outline */}
-        <group ref={enemyRef}>
-          {/* Enemy character */}
-          <Enemy position={enemyPosition} characterKey="zombie" id="enemy-1" onHover={handleEnemyHover} />
-
-          {/* Outline effect when hovered */}
-          {hoveredEnemyId && (
-            <>
-              {/* Glowing circle under enemy */}
-              <mesh position={[enemyPosition[0], 0.05, enemyPosition[2]]} rotation={[-Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[0.8, 1.1, 32]} />
-                <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
-              </mesh>
-            </>
-          )}
-        </group>
-
-        {/* Targeting system */}
-        <TargetingSystem />
       </Physics>
     </>
   );
