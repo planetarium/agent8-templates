@@ -252,11 +252,10 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = Chara
           if (!server) return;
 
           try {
-            server.remoteFunction(
-              'updateMyState',
-              [{ position: toVector3Array(position), rotation: toQuaternionArray(rotation), state }],
-              { needResponse: false, throttle: 50 },
-            );
+            server.remoteFunction('updateMyState', [{ position: toVector3Array(position), rotation: toQuaternionArray(rotation), state }], {
+              needResponse: false,
+              throttle: 50,
+            });
           } catch (error) {
             console.error(`[Player] Network sync failed:`, error);
           }
@@ -385,15 +384,17 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = Chara
   if (!server || !account) return null;
 
   return (
-    <group visible={false}>
-      <CharacterRenderer
-        ref={characterRendererRef}
-        characterResource={characterResource}
-        animationConfigMap={animationConfigMap}
-        currentActionRef={currentStateRef}
-        targetHeight={targetHeight}
-      />
-      ;
-    </group>
+    <CharacterRenderer
+      ref={characterRendererRef}
+      /**
+       * IMPORTANT: In First Person View (FPS), the player's own character should not be visible,
+       * so the visible property is set to false. This setting is crucial for the FPS implementation.
+       */
+      visible={false}
+      characterResource={characterResource}
+      animationConfigMap={animationConfigMap}
+      currentActionRef={currentStateRef}
+      targetHeight={targetHeight}
+    />
   );
 });
