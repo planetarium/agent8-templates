@@ -41,13 +41,13 @@ const FloatingObject = ({ data }: { data: FloatingObjectData }) => {
 
     const t = state.clock.elapsedTime;
     const { movementType, movementParams } = data;
-    let nextPosition = new THREE.Vector3();
+    const nextPosition = new THREE.Vector3();
 
     const currentPositionVec = rigidBodyRef.current.translation();
     nextPosition.set(currentPositionVec.x, currentPositionVec.y, currentPositionVec.z);
 
     switch (movementType) {
-      case 'circle':
+      case 'circle': {
         const speed = movementParams.speed || 0.2;
         const radius = movementParams.radius || 15;
         angleRef.current += speed * delta;
@@ -55,6 +55,7 @@ const FloatingObject = ({ data }: { data: FloatingObjectData }) => {
         nextPosition.z = initialPosition.z + Math.sin(angleRef.current) * radius;
         nextPosition.y = initialPosition.y + Math.sin(t * (movementParams.speed || 0.2) * 0.5 + initialPosition.x) * (movementParams.amplitude || 3);
         break;
+      }
 
       case 'drift':
         nextPosition.set(
@@ -65,12 +66,13 @@ const FloatingObject = ({ data }: { data: FloatingObjectData }) => {
         break;
 
       case 'oscillate':
-      default:
+      default: {
         const amplitude = movementParams.amplitude || 5;
         nextPosition.y = initialPosition.y + Math.sin(t * (movementParams.speed || 0.5) + initialPosition.x) * amplitude;
         nextPosition.x = currentPositionVec.x;
         nextPosition.z = currentPositionVec.z;
         break;
+      }
     }
     // Check if translation() and setNextKinematicTranslation() methods exist (use any if not)
     rigidBodyRef.current.setNextKinematicTranslation(nextPosition);

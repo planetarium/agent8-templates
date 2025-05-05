@@ -2,23 +2,24 @@ import { useRef } from 'react';
 import { useFrame, GroupProps } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Trail } from '@react-three/drei';
-import { FlightViewControllerHandle } from 'vibe-starter-3d';
+import { useControllerState } from 'vibe-starter-3d';
 interface AircraftProps extends GroupProps {
+  localPlayer?: boolean;
   bodyLength?: number;
   bodyColor?: string;
-  controllerRef?: React.RefObject<FlightViewControllerHandle>;
 }
 
-export function Aircraft({ bodyLength = 3, bodyColor = '#f5f5f5', controllerRef, ...props }: AircraftProps) {
-  const helixMeshRef = useRef<THREE.Mesh>(null!);
-  const tip1Ref = useRef<THREE.Object3D>(null!);
-  const tip2Ref = useRef<THREE.Object3D>(null!);
+export function Aircraft({ localPlayer = false, bodyLength = 3, bodyColor = '#f5f5f5', ...props }: AircraftProps) {
+  const helixMeshRef = useRef<THREE.Mesh>(null);
+  const tip1Ref = useRef<THREE.Object3D>(null);
+  const tip2Ref = useRef<THREE.Object3D>(null);
+  const { userData } = useControllerState();
 
   useFrame((_, delta) => {
     if (helixMeshRef.current) {
       let rotZ: number;
-      if (controllerRef?.current) {
-        rotZ = 1.0 * delta * Math.min(60, controllerRef.current.speed);
+      if (localPlayer && userData.speed !== undefined) {
+        rotZ = 1.0 * delta * Math.min(60, userData.speed);
       } else {
         rotZ = 1.0 * delta * 60;
       }
