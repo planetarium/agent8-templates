@@ -3,9 +3,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
-type Primitive = string | number | boolean | null | undefined | symbol | bigint;
-type PrimitiveOrArray = Primitive | Primitive[];
-
 // --- Muzzle Flash Configuration ---
 const FLASH_PETAL_COUNT = 5; // Number of flame petals
 const FLASH_PETAL_LENGTH = 0.4; // Length of each petal
@@ -15,18 +12,13 @@ const FLASH_TILT_ANGLE = Math.PI / 4; // Tilt angle of flame petals (45 degrees)
 const FLASH_INNER_GLOW_SIZE = 0.08; // Size of the center glow
 const FLASH_COLOR = "#FFA500"; // Orange color
 const FLASH_INNER_COLOR = "#FFFF55"; // Brighter yellow for center
-const DEFAULT_DURATION = 100; // Default duration
+const FLASH_DEFAULT_DURATION = 100; // Default duration
 // ------------------------
 
 interface MuzzleFlashProps {
-  config: { [key: string]: PrimitiveOrArray };
+  config: { [key: string]: any };
   onComplete?: () => void;
 }
-
-// Utility to convert THREE.Vector3 to array (needed for store/server)
-const vecToArray = (vec: THREE.Vector3): [number, number, number] => {
-  return [vec.x, vec.y, vec.z];
-};
 
 // Utility to convert Vector3 array to THREE.Vector3 (needed for rendering)
 const arrayToVec = (arr?: [number, number, number]): THREE.Vector3 => {
@@ -37,23 +29,11 @@ const arrayToVec = (arr?: [number, number, number]): THREE.Vector3 => {
   return new THREE.Vector3(arr[0], arr[1], arr[2]);
 };
 
-export const createMuzzleFlashConfig = (
-  position: THREE.Vector3,
-  direction: THREE.Vector3,
-  duration: number
-): { [key: string]: PrimitiveOrArray } => {
-  return {
-    position: vecToArray(position),
-    direction: vecToArray(direction),
-    duration,
-  };
-};
-
 const parseConfig = (config: { [key: string]: any }) => {
   return {
     position: arrayToVec(config.position as [number, number, number]),
     direction: arrayToVec(config.direction as [number, number, number]),
-    duration: (config.duration as number) || DEFAULT_DURATION,
+    duration: (config.duration as number) || FLASH_DEFAULT_DURATION,
   };
 };
 

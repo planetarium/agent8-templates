@@ -1,12 +1,13 @@
 import { useCallback } from 'react';
 import { useGameServer } from '@agent8/gameserver';
 import * as THREE from 'three';
-import { ActiveEffect, EffectType } from '../../types/effect';
+import { ActiveEffect, EffectType } from '../../types';
 import { useEffectStore, useActiveEffects } from '../../stores/effectStore';
 import { BulletEffectController } from './effects/BulletEffectController';
 import { Collider, RigidBody } from '@dimforge/rapier3d-compat';
-import { createExplosionEffectConfig, Explosion } from './effects/Explosion';
+import { Explosion } from './effects/Explosion';
 import { usePlayerStore } from '../../stores/playerStore';
+import { createExplosionEffectConfig } from '../../utils/effectUtils';
 
 /**
  * Effect container component using Zustand store for effect management.
@@ -24,7 +25,6 @@ export function EffectContainer() {
   // Callback to remove completed effects using the store action
   const handleEffectComplete = useCallback(
     (keyToRemove: number) => {
-      console.log('[EffectContainer] Effect complete:', keyToRemove);
       removeEffect(keyToRemove);
     },
     [removeEffect],
@@ -50,6 +50,7 @@ export function EffectContainer() {
   // Function to render individual effects based on their type
   const renderEffect = useCallback(
     (effect: ActiveEffect) => {
+      const playerRef = getPlayerRef(effect.sender)?.current;
       const type = effect.effectData.type;
 
       switch (type) {

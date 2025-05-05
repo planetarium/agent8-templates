@@ -8,11 +8,6 @@ import { Player } from './Player';
 const targetHeight = 1.6;
 
 export function Experience() {
-  const { account } = useGameServer();
-  if (!account) return null;
-
-  const controllerRef = useRef<ControllerHandle>(null);
-
   return (
     <>
       {/* Grid */}
@@ -36,16 +31,8 @@ export function Experience() {
       <Environment preset="sunset" background={false} />
 
       {/* player with controller */}
-      <FirstPersonViewController
-        ref={controllerRef}
-        camInitDis={-5}
-        targetHeight={targetHeight}
-        followLight={{
-          position: [20, 30, 10],
-          intensity: 1.2,
-        }}
-      >
-        <Player controllerRef={controllerRef} />
+      <FirstPersonViewController targetHeight={targetHeight}>
+        <Player />
       </FirstPersonViewController>
 
       {/* Floor */}
