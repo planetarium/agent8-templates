@@ -1,11 +1,8 @@
-import { useRef, useEffect } from 'react';
 import { Environment, Grid } from '@react-three/drei';
 import { Player } from './Player';
-import { PlayerRef } from '../../types/player';
 import { Floor } from './Floor';
-import { ControllerHandle, FirstPersonViewController } from 'vibe-starter-3d';
-import { useGameServer } from '@agent8/gameserver';
 import { CharacterState } from '../../constants/character';
+import { FirstPersonViewController } from 'vibe-starter-3d';
 
 const targetHeight = 1.6;
 
@@ -18,24 +15,6 @@ interface ExperienceProps {
 }
 
 export function Experience({ characterUrl }: ExperienceProps) {
-  const { server, account } = useGameServer();
-
-  if (!server) return null;
-  if (!account) return null;
-
-  const controllerRef = useRef<ControllerHandle>(null);
-  const playerRef = useRef<PlayerRef>(null);
-
-  useEffect(() => {
-    if (playerRef.current) {
-      const boundingBox = playerRef.current.boundingBox;
-
-      if (boundingBox) {
-        console.log('Character size information updated:', boundingBox);
-      }
-    }
-  }, [playerRef.current?.boundingBox]);
-
   return (
     <>
       {/* Grid */}
@@ -59,16 +38,8 @@ export function Experience({ characterUrl }: ExperienceProps) {
       <Environment preset="sunset" background={false} />
 
       {/* player character with controller */}
-      <FirstPersonViewController
-        ref={controllerRef}
-        camInitDis={-5}
-        targetHeight={targetHeight}
-        followLight={{
-          position: [20, 30, 10],
-          intensity: 1.2,
-        }}
-      >
-        <Player ref={playerRef} targetHeight={targetHeight} initialState={CharacterState.IDLE} controllerRef={controllerRef} characterKey={characterUrl} />
+      <FirstPersonViewController targetHeight={targetHeight}>
+        <Player targetHeight={targetHeight} initialState={CharacterState.IDLE} characterKey={characterUrl} />
       </FirstPersonViewController>
 
       {/* Floor */}

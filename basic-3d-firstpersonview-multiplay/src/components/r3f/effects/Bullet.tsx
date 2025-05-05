@@ -58,7 +58,7 @@ export const Bullet: React.FC<BulletProps> = ({
     timeRef.current = 0;
     startTime.current = Date.now();
     setActive(true);
-  });
+  }, [setActive]);
 
   useFrame((_, delta) => {
     if (!active) return;

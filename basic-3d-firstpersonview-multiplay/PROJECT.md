@@ -69,7 +69,7 @@ Key technologies:
 
     - **`CharacterPreview.tsx`**: Component for displaying a character preview in the UI.
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets, muzzle flash, and explosions.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, floor (`Floor`), effect container (`EffectContainer`), network container (`NetworkContainer`), and manages physics engine settings.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements and the floor (`Floor`).
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
     - **`NetworkContainer.tsx`**: Manages the local player (`Player`) and remote players (`RemotePlayer`) within the scene.
     - **`Player.tsx`**: Represents the local player's character, handling movement, camera, and interactions based on user input and network state. Implements FirstPersonViewController logic.
@@ -82,7 +82,7 @@ Key technologies:
 
   - **`scene/`**: Contains components related to 3D scene setup and game state.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, manages physics engine settings, includes the network container (`NetworkContainer`), effect container (`EffectContainer`) and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
     - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character, utilizing `CharacterPreview`.
     - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
@@ -95,6 +95,11 @@ Key technologies:
   - **`effectStore.ts`**: Store that manages the state of visual effects like bullets and explosions (e.g., creation, active/inactive).
   - **`networkSyncStore.ts`**: Store that manages network-related state synchronization, including player data and room status.
   - **`playerStore.ts`**: Store that manages the local player's state, such as nickname, character selection, and input actions.
+
+### `src/utils/`
+
+- Directory containing utility functions used across the application.
+  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.
 
 ### `src/types/`
 
