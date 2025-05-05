@@ -9,11 +9,10 @@ export interface UserState {
   nickname?: string;
   /** Whether the user is ready to start the game */
   isReady?: boolean;
-  /** User's transform data (position and rotation) */
-  transform?: {
-    position: [number, number, number];
-    rotation: [number, number, number, number];
-  };
+  /** User's position */
+  position?: [number, number, number];
+  /** User's rotation */
+  rotation?: [number, number, number, number];
   /** Current character state/animation */
   state?: string;
   /** User stats for game mechanics */

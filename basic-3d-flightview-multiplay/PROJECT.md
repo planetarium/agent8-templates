@@ -62,21 +62,6 @@ This overview details the key files and directories within the `src/` directory.
   - **`aircraft.ts`**: Defines constants related to aircraft properties.
   - **`controls.ts`**: Maps keyboard inputs to game actions (e.g., movement, firing).
 
-### `src/stores/`
-
-- State management logic (using Zustand).
-  - **`playerStore.ts`**: Manages state related to the local player.
-  - **`effectStore.ts`**: Manages state related to visual effects (bullets, explosions).
-  - **`networkSyncStore.ts`**: Manages state synchronization for multiplayer functionality.
-
-### `src/types/`
-
-- TypeScript type definitions.
-  - **`effect.ts`**: Defines types for visual effects.
-  - **`user.ts`**: Defines types related to users/players.
-  - **`player.ts`**: Defines types specific to player data.
-  - **`index.ts`**: Exports types from the directory.
-
 ### `src/components/`
 
 - React components categorized by function.
@@ -86,7 +71,7 @@ This overview details the key files and directories within the `src/` directory.
     - **`Player.tsx`**: Logic for the player-controlled character (movement, animation, potentially includes aircraft logic).
     - **`Aircraft.tsx`**: Logic for the player-controlled airplane model and behavior (movement, rotation, firing).
     - **`RemotePlayer.tsx`**: Logic for rendering and synchronizing remote players.
-    - **`Experience.tsx`**: Main 3D game experience setup (lighting, environment, physics, player, objects, effects). Loaded by `GameScene.tsx`.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. It sets up the sky environment using `Sky` from `@react-three/drei` and provides basic lighting with `ambientLight`. It utilizes `FlightViewController` from `vibe-starter-3d` to wrap the `Player` component, handling flight control logic. It also includes the `Ground` and `FloatingShapes` components to complete the scene.
     - **`FloatingShapes.tsx`**: Manages floating 3D shapes in the scene.
     - **`Ground.tsx`**: Defines the ground plane with physical properties.
     - **`EffectContainer.tsx`**: Manages visual effects rendering.
@@ -99,15 +84,32 @@ This overview details the key files and directories within the `src/` directory.
 
   - **`scene/`**: Components managing different application scenes or stages.
 
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the network container `NetworkContainer`, effect container `EffectContainer` and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`RoomManager.tsx`**: Handles routing or switching between different rooms/scenes like Lobby, Game, etc., based on game state.
     - **`LobbyRoom.tsx`**: Component representing the game lobby UI and logic (e.g., player list, room selection).
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`NicknameSetup.tsx`**: Component for players to set up their nickname before entering the lobby or game.
 
   - **`ui/`**: General user interface components.
     - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) during gameplay.
     - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).
 
-### `src/hooks/`
+### `src/stores/`
 
-- Custom React hooks (currently empty, potential for future use).
+- State management logic (using Zustand).
+  - **`playerStore.ts`**: Manages state related to the local player.
+  - **`effectStore.ts`**: Manages state related to visual effects (bullets, explosions).
+  - **`networkSyncStore.ts`**: Manages state synchronization for multiplayer functionality.
+
+### `src/types/`
+
+- TypeScript type definitions.
+
+  - **`effect.ts`**: Defines types for visual effects.
+  - **`user.ts`**: Defines types related to users/players.
+  - **`player.ts`**: Defines types specific to player data.
+  - **`index.ts`**: Exports types from the directory.
+
+### `src/utils/`
+
+- Directory containing utility functions used across the application.
+  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.

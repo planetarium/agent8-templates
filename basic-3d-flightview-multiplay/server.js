@@ -100,25 +100,8 @@ class Server {
     }
   }
 
-  // Update player transform
-  async updatePlayerTransform(transform) {
-    try {
-      // Validate transform data
-      if (!transform || !transform.position || !transform.rotation) {
-        throw new Error('Invalid transform data');
-      }
-
-      // Update user's transform (original object)
-      await $room.updateUserState($sender.account, {
-        transform: transform, // Use the original transform object
-        lastActive: Date.now(),
-      });
-
-      return true;
-    } catch (error) {
-      console.error(`Failed to update player transform: ${error.message}`);
-      return false;
-    }
+  async updateMyState(state) {
+    return await $room.updateMyState(state);
   }
 
   // Toggle ready status for the current user

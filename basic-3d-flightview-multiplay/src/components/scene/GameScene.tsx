@@ -1,8 +1,7 @@
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Experience } from '../r3f/Experience';
 import { StatusDisplay } from '../ui/StatusDisplay';
-import { FlightViewControllerHandle } from 'vibe-starter-3d';
 import { RTT } from '../ui/RTT';
 import { Physics } from '@react-three/rapier';
 import { NetworkContainer } from '../r3f/NetworkContainer';
@@ -27,8 +26,6 @@ interface GameSceneProps {
  * including physics, lighting, and scene elements.
  */
 export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => {
-  const controllerRef = useRef<FlightViewControllerHandle>(null);
-
   return (
     <div className="relative w-full h-screen">
       <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10">
@@ -44,7 +41,7 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
       </div>
 
       {/* UI Overlay */}
-      <StatusDisplay controllerRef={controllerRef} />
+      <StatusDisplay />
 
       {/* Keyboard preset */}
       <KeyboardControls map={keyboardMap}>
@@ -55,9 +52,9 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
             (e.target as HTMLCanvasElement).requestPointerLock();
           }}
         >
-          <Physics>
+          <Physics debug={true}>
             <Suspense fallback={null}>
-              <Experience controllerRef={controllerRef} />
+              <Experience />
               <NetworkContainer />
               <EffectContainer />
             </Suspense>
