@@ -1,25 +1,12 @@
-import { useRef } from 'react';
 import { Environment, Grid } from '@react-three/drei';
 import { CharacterState } from '../../constants/character';
-import { FreeViewController, ControllerHandle } from 'vibe-starter-3d';
-import { useEffect } from 'react';
+import { FreeViewController } from 'vibe-starter-3d';
 import { Floor } from './Floor';
-import { Player, PlayerRef } from './Player';
+import { Player } from './Player';
+
+const targetHeight = 1.6;
+
 export function Experience() {
-  const controllerRef = useRef<ControllerHandle>(null);
-  const playerRef = useRef<PlayerRef>(null);
-  const targetHeight = 1.6;
-
-  useEffect(() => {
-    if (playerRef.current) {
-      const boundingBox = playerRef.current.boundingBox;
-
-      if (boundingBox) {
-        console.log('Player character size information updated:', boundingBox);
-      }
-    }
-  }, [playerRef.current?.boundingBox]);
-
   return (
     <>
       {/* Grid */}
@@ -43,15 +30,8 @@ export function Experience() {
       <Environment preset="sunset" background={false} />
 
       {/* player character with controller */}
-      <FreeViewController
-        ref={controllerRef}
-        targetHeight={targetHeight}
-        followLight={{
-          position: [20, 30, 10],
-          intensity: 1.2,
-        }}
-      >
-        <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} targetHeight={targetHeight} />
+      <FreeViewController targetHeight={targetHeight}>
+        <Player initState={CharacterState.IDLE} targetHeight={targetHeight} />
       </FreeViewController>
 
       {/* Floor */}
