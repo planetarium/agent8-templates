@@ -1,4 +1,3 @@
-import { Transform, UserState } from './user';
 import * as THREE from 'three';
 
 /**
