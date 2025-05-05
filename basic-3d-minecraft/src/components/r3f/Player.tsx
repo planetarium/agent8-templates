@@ -76,20 +76,20 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
       [CharacterState.IDLE]: {
         animationType: 'IDLE',
         loop: true,
-      } as AnimationConfig,
+      },
       [CharacterState.WALK]: {
         animationType: 'WALK',
         loop: true,
-      } as AnimationConfig,
+      },
       [CharacterState.RUN]: {
         animationType: 'RUN',
         loop: true,
-      } as AnimationConfig,
+      },
       [CharacterState.JUMP]: {
         animationType: 'JUMP',
         loop: true,
         clampWhenFinished: false,
-      } as AnimationConfig,
+      },
     }),
     [],
   );

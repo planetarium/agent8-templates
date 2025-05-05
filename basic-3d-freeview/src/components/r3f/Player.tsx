@@ -122,38 +122,38 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
       [CharacterState.IDLE]: {
         animationType: 'IDLE',
         loop: true,
-      } as AnimationConfig,
+      },
       [CharacterState.WALK]: {
         animationType: 'WALK',
         loop: true,
-      } as AnimationConfig,
+      },
       [CharacterState.RUN]: {
         animationType: 'RUN',
         loop: true,
-      } as AnimationConfig,
+      },
       [CharacterState.JUMP]: {
         animationType: 'JUMP',
         loop: true,
         clampWhenFinished: false,
-      } as AnimationConfig,
+      },
       [CharacterState.PUNCH]: {
         animationType: 'PUNCH',
         loop: false,
         clampWhenFinished: true,
         onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-      } as AnimationConfig,
+      },
       [CharacterState.HIT]: {
         animationType: 'HIT',
         loop: false,
         clampWhenFinished: true,
         onComplete: () => handleAnimationComplete(CharacterState.HIT),
-      } as AnimationConfig,
+      },
       [CharacterState.DIE]: {
         animationType: 'DIE',
         loop: false,
         duration: 10,
         clampWhenFinished: true,
-      } as AnimationConfig,
+      },
     }),
     [handleAnimationComplete],
   );
