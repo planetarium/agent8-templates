@@ -52,7 +52,7 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom }) => 
             (e.target as HTMLCanvasElement).requestPointerLock();
           }}
         >
-          <Physics debug={true}>
+          <Physics>
             <Suspense fallback={null}>
               <Experience />
               <NetworkContainer />

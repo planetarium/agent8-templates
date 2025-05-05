@@ -40,7 +40,7 @@ Key technologies:
 ### `src/App.tsx`
 
 - Main application component.
-- Configures the overall layout and includes the `GameScene` and UI component (`StatusDisplay`).
+- Configures the overall layout and includes the `GameScene` and UI component `StatusDisplay`.
 
 ### `src/App.css`
 
@@ -56,23 +56,6 @@ Key technologies:
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
   - **`aircraft.ts`**: Defines constant values related to the aircraft, such as speed, rotation limits, etc.
 
-### `src/stores/`
-
-- Directory containing state management logic (e.g., Zustand).
-  - **`effectStore.ts`**: Store for managing effect-related state (e.g., bullets, explosions).
-  - **`playerStore.ts`**: Store for managing player-related state (e.g., position, status).
-
-### `src/utils/`
-
-- Directory containing utility functions used across the application.
-  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.
-
-### `src/types/`
-
-- Directory containing TypeScript type definitions.
-  - **`effect.ts`**: Defines effect-related types.
-  - **`index.ts`**: Exports types from the `types` directory.
-
 ### `src/components/`
 
 - Directory managing React components categorized by function.
@@ -81,7 +64,7 @@ Key technologies:
 
     - **`Aircraft.tsx`**: Component handling the logic related to the player-controlled aircraft model (movement, rotation, bullet firing trigger).
     - **`Player.tsx`**: Component representing the player character in the 3D scene, potentially encompassing the aircraft and other player-specific elements.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, player (`Player`), floor (`Ground`), and floating shapes (`FloatingShapes`).
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. It sets up the sky environment using `Sky` from `@react-three/drei` and provides basic lighting with `ambientLight`. It utilizes `FlightViewController` from `vibe-starter-3d` to wrap the `Player` component, handling flight control logic. It also includes the `Ground` and `FloatingShapes` components to complete the scene.
     - **`FloatingShapes.tsx`**: Component generating and managing various 3D shapes floating randomly in the scene.
     - **`Ground.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
     - **`EffectContainer.tsx`**: Container component managing and rendering various visual effects like bullet firing and hit effects.
@@ -92,7 +75,24 @@ Key technologies:
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `<Physics>` component from `@react-three/rapier`, includes the `EffectContainer`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the `EffectContainer`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
 
   - **`ui/`**: Contains components related to the user interface (UI).
     - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) on the screen.
+
+### `src/stores/`
+
+- Directory containing state management logic (e.g., Zustand).
+  - **`effectStore.ts`**: Store for managing effect-related state (e.g., bullets, explosions).
+  - **`playerStore.ts`**: Store for managing player-related state (e.g., position, status).
+
+### `src/types/`
+
+- Directory containing TypeScript type definitions.
+  - **`effect.ts`**: Defines effect-related types.
+  - **`index.ts`**: Exports types from the `types` directory.
+
+### `src/utils/`
+
+- Directory containing utility functions used across the application.
+  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.

@@ -28,7 +28,7 @@ export const GameScene: React.FC = () => {
             (e.target as HTMLCanvasElement).requestPointerLock();
           }}
         >
-          <Physics debug={true}>
+          <Physics>
             <Suspense fallback={null}>
               <Experience />
               <EffectContainer />

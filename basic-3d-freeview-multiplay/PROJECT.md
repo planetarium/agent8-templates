@@ -29,7 +29,7 @@ Key technologies:
 - Free view camera that follows the character
 - Physics-based character movement with collision detection
 - Character state management system
-- 3D environment with grid floor
+- 3D environment with floor
 - Directional and ambient lighting
 - Animation system with support for looping and one-shot animations
 - Character bounding box calculations
