@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useCubeStore } from '../store/cubeStore';
+import { useCubeStore } from '../stores/cubeStore';
 import { getTotalTileCount, getTileCoordinates, getSpriteInfo } from '../utils/tileTextureLoader';
 
 // Sprite URL

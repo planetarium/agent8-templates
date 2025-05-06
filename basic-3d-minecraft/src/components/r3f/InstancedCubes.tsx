@@ -1,10 +1,9 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
-import { CuboidCollider, RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useCubeStore } from '../../store/cubeStore';
+import { RigidBody, TrimeshCollider } from '@react-three/rapier';
+import { useCubeStore } from '../../stores/cubeStore';
 import { getTileCoordinates, getSpriteInfo } from '../../utils/tileTextureLoader';
-import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
 
 // Maximum number of cube instances
 const MAX_INSTANCES = 1000000;

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { useThree, useFrame } from '@react-three/fiber';
-import { useCubeStore } from '../store/cubeStore';
+import { useCubeStore } from '../stores/cubeStore';
 import throttle from 'lodash/throttle';
 
 // Raycast distance limit constants

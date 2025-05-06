@@ -1,5 +1,5 @@
 import { useTexture } from '@react-three/drei';
-import { CuboidCollider, RigidBody } from '@react-three/rapier';
+import { RigidBody } from '@react-three/rapier';
 import { RepeatWrapping } from 'three';
 import Assets from '../../assets.json';
 

@@ -1,13 +1,11 @@
-import { useRef } from 'react';
 import { Environment, Sky } from '@react-three/drei';
-import { ControllerHandle, FirstPersonViewController } from 'vibe-starter-3d';
+import { FirstPersonViewController } from 'vibe-starter-3d';
 import { Floor } from './Floor';
 import { InstancedCubes } from './InstancedCubes';
 import { CubePreview } from './CubePreview';
 import { useCubeRaycaster } from '../../hooks/useCubeRaycaster';
 
 export function Experience() {
-  const controllerRef = useRef<ControllerHandle>(null);
   const targetHeight = 1.6;
   const { previewPosition } = useCubeRaycaster();
 
@@ -21,7 +19,6 @@ export function Experience() {
 
       {/* player character with controller */}
       <FirstPersonViewController
-        ref={controllerRef}
         targetHeight={targetHeight}
         followLight={{
           position: [20, 30, 10],
