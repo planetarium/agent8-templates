@@ -1,24 +1,21 @@
-import React, { useRef, useMemo, useImperativeHandle, forwardRef, useCallback } from 'react';
+import { useRef, useMemo, useImperativeHandle, forwardRef, useCallback, useEffect } from 'react';
 import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import {
-  AnimationConfig,
-  AnimationConfigMap,
-  CharacterRenderer,
-  CharacterRendererRef,
-  CharacterResource,
-  ControllerHandle,
-  useControllerState,
-} from 'vibe-starter-3d';
+import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, useMouseControls, useControllerState } from 'vibe-starter-3d';
 
 import Assets from '../../assets.json';
+import { RapierRigidBody } from '@react-three/rapier';
+import { useGameServer } from '@agent8/gameserver';
+import { usePlayerStore } from '../../stores/playerStore';
 
 /**
  * Player input parameters for action determination
  */
 interface PlayerInputs {
+  isRevive: boolean;
+  isDying: boolean;
   isPunching: boolean;
   isKicking: boolean;
   isMeleeAttack: boolean;
@@ -45,8 +42,6 @@ interface PlayerProps {
   position?: Vector3;
   /** Initial action for the character */
   initState?: CharacterState;
-  /** Reference to player controller for physics calculations */
-  controllerRef?: React.RefObject<ControllerHandle>;
   /** Target height for the character model */
   targetHeight?: number;
 }
@@ -56,12 +51,17 @@ interface PlayerProps {
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.IDLE, controllerRef, targetHeight = 1.6 }, ref) => {
+export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.IDLE, targetHeight = 1.6 }, ref) => {
+  const { account } = useGameServer();
+  const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const currentStateRef = useRef<CharacterState>(initState);
   const [, getKeyboardInputs] = useKeyboardControls();
-
-  const characterRendererRef = useRef<CharacterRendererRef>(null);
+  const getMouseInputs = useMouseControls();
   const { setEnableInput, setMoveToPoint, isPointMoving } = useControllerState();
+
+  const { rigidBody } = useControllerState();
+  const playerRef = useRef<RapierRigidBody>(null);
+  const characterRendererRef = useRef<CharacterRendererRef>(null);
 
   useImperativeHandle(
     ref,
@@ -73,18 +73,42 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
     [],
   );
 
+  // IMPORTANT: Update player reference
+  useEffect(() => {
+    playerRef.current = rigidBody;
+  }, [rigidBody]);
+
+  // IMPORTANT: Register player reference
+  useEffect(() => {
+    if (!account) return;
+
+    registerPlayerRef(account, playerRef);
+
+    return () => {
+      unregisterPlayerRef(account);
+    };
+  }, [account, registerPlayerRef, unregisterPlayerRef]);
+
   const handleAnimationComplete = useCallback(
     (state: CharacterState) => {
       setEnableInput(true);
       switch (state) {
         case CharacterState.PUNCH:
         case CharacterState.PUNCH_01:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
         case CharacterState.KICK:
         case CharacterState.KICK_01:
         case CharacterState.KICK_02:
-        case CharacterState.MELEE_ATTACK:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
         case CharacterState.CAST:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
         case CharacterState.HIT:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.MELEE_ATTACK:
           currentStateRef.current = CharacterState.IDLE_01;
           break;
         case CharacterState.DANCE:
@@ -199,9 +223,15 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
   );
 
   const determinePlayerState = useCallback(
-    (currentState: CharacterState, { isPunching, isKicking, isMeleeAttack, isCasting, isJumping, isMoving, isSprinting }: PlayerInputs): CharacterState => {
+    (
+      currentState: CharacterState,
+      { isRevive, isDying, isPunching, isKicking, isMeleeAttack, isCasting, isJumping, isMoving, isSprinting }: PlayerInputs,
+    ): CharacterState => {
+      if (isRevive && currentState === CharacterState.DIE) {
+        return CharacterState.IDLE;
+      }
       // Maintain death state
-      if (currentState === CharacterState.DIE) {
+      if (isDying || currentState === CharacterState.DIE) {
         return CharacterState.DIE;
       }
 
@@ -290,7 +320,6 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
 
   // Update player action state based on inputs and physics
   useFrame(() => {
-    const rigidBody = controllerRef?.current?.rigidBodyRef?.current;
     if (!rigidBody) return;
 
     // 2. Calculate keyboard state
@@ -311,6 +340,8 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
 
     // 5. Determine player state
     currentStateRef.current = determinePlayerState(currentStateRef.current, {
+      isRevive: false,
+      isDying: false,
       isPunching,
       isKicking,
       isMeleeAttack,

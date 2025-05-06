@@ -6,9 +6,6 @@ import { Floor } from './Floor';
 import { PointToMoveController, ControllerHandle } from 'vibe-starter-3d';
 import { PointSystem } from './PointSystem';
 export function Experience() {
-  const controllerRef = useRef<ControllerHandle>(null);
-  const playerRef = useRef<PlayerRef>(null);
-
   return (
     <>
       {/* Ambient light */}
@@ -21,13 +18,12 @@ export function Experience() {
       <PointToMoveController
         cameraMode="orthographic"
         followCharacter={true}
-        ref={controllerRef}
         followLight={{
           position: [0.6, 1, 0.3],
           intensity: 2,
         }}
       >
-        <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} />
+        <Player initState={CharacterState.IDLE} />
       </PointToMoveController>
       <PointSystem />
       {/* Floor */}
