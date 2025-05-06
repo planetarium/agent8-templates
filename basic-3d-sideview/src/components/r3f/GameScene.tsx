@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { Experience } from './Experience';
 import { keyboardMap } from '../../constants/controls';
 import { KeyboardControls } from '@react-three/drei';
+import { Physics } from '@react-three/rapier';
 
 /**
  * Main game scene component
@@ -12,14 +13,22 @@ import { KeyboardControls } from '@react-three/drei';
  */
 export const GameScene: React.FC = () => {
   return (
-    <>
-      <Canvas shadows>
-        <Suspense fallback={null}>
-          <KeyboardControls map={keyboardMap}>
-            <Experience />
-          </KeyboardControls>
-        </Suspense>
-      </Canvas>
-    </>
+    <div className="relative w-full h-screen">
+      {/* Keyboard preset */}
+      <KeyboardControls map={keyboardMap}>
+        <Canvas
+          shadows
+          onPointerDown={(e) => {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }}
+        >
+          <Physics>
+            <Suspense fallback={null}>
+              <Experience />
+            </Suspense>
+          </Physics>
+        </Canvas>
+      </KeyboardControls>
+    </div>
   );
 };
