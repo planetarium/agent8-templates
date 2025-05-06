@@ -57,7 +57,7 @@ export function Experience() {
         <Environment preset="sunset" background={false} />
 
         {/* player character with controller */}
-        <SideViewController cameraMode="perspective" followCharacter={true} ref={controllerRef} zoom={1}>
+        <SideViewController cameraMode="perspective" followCharacter={true} ref={controllerRef}>
           <Player ref={playerRef} initState={CharacterState.IDLE} controllerRef={controllerRef} />
         </SideViewController>
 
