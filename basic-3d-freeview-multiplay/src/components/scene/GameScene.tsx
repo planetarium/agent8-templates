@@ -4,10 +4,8 @@ import { Physics } from '@react-three/rapier';
 import { Experience } from '../r3f/Experience';
 import { KeyboardControls, StatsGl } from '@react-three/drei';
 import { NetworkContainer } from '../r3f/NetworkContainer';
-import { EffectContainer } from '../r3f/EffectContainer';
 import { RTT } from '../ui/RTT';
 import { keyboardMap } from '../../constants/controls';
-
 /**
  * Game scene props
  */
@@ -53,9 +51,9 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, chara
             <Suspense fallback={null}>
               <Experience characterUrl={characterUrl} />
               <NetworkContainer />
-              <EffectContainer />
             </Suspense>
           </Physics>
+          {/* For debugging purposes only */}
           <StatsGl showPanel={0} className="stats absolute bottom-0 left-0" />
         </Canvas>
       </KeyboardControls>

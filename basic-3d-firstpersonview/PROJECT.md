@@ -28,7 +28,7 @@ Key technologies:
 - Attack by clicking the left mouse button
 - First person view camera that follows the character
 - Physics-based character movement with collision detection
-- 3D environment with grid floor
+- 3D environment with floor
 - Pointer lock for immersive control
 
 ## File Structure Overview
@@ -68,7 +68,7 @@ Key technologies:
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets and muzzle flash.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes the crucial `FirstPersonViewController`, lighting, environmental elements, floor (`Floor`), effect container (`EffectContainer`), and manages physics engine settings.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes the crucial `FirstPersonViewController`, lighting, environmental elements, and floor `Floor`.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
     - **`Player.tsx`**: Component defining the player character model, animations, and basic physics interactions.
     - **`effects/`**: Sub-directory containing components related to visual effects.
@@ -78,7 +78,7 @@ Key technologies:
       - **`MuzzleFlash.tsx`**: Component that generates and manages the flash effect occurring at the muzzle when firing a gun.
 
   - **`scene/`**: Contains components related to 3D scene setup.
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the `EffectContainer`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
 
 ### `src/stores/`
 
@@ -91,3 +91,8 @@ Key technologies:
 - Directory containing TypeScript type definitions.
   - **`effect.ts`**: Defines types related to visual effects (Effect).
   - **`index.ts`**: Exports types from within the `types` directory.
+
+### `src/utils/`
+
+- Directory containing utility functions used throughout the application.
+  - **`effectUtils.ts`**: Provides utility functions for creating effect configurations, such as bullet and explosion effects.

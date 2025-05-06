@@ -1,49 +1,41 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { ControllerHandle, useMouseControls } from 'vibe-starter-3d';
+import { useControllerState, useMouseControls } from 'vibe-starter-3d';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
 import { useEffectStore } from '../../stores/effectStore';
 import { useFrame } from '@react-three/fiber';
-import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { EffectType } from '../../types';
 import { usePlayerStore } from '../../stores/playerStore';
+import { RapierRigidBody } from '@react-three/rapier';
+import { createBulletEffectConfig } from '../../utils/effectUtils';
 
 const SHOOT_COOLDOWN = 200;
 
-/**
- * Props for the Player component.
- */
-interface PlayerProps {
-  /** Reference to the PlayerController handle for accessing physics state. */
-  controllerRef?: React.RefObject<ControllerHandle>;
-}
-
-export const Player: React.FC<PlayerProps> = ({ controllerRef }) => {
-  const { server, connected, account } = useGameServer();
+export const Player: React.FC = () => {
+  const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const getMouseInputs = useMouseControls();
+  const { rigidBody: controllerRigidBody } = useControllerState();
 
-  if (!server || !account) return null;
-
+  const playerRef = useRef<RapierRigidBody>(null);
   const shootTimestamp = useRef(0);
   const leftPressedLastFrame = useRef(false);
 
+  // IMPORTANT: Update player reference
   useEffect(() => {
-    if (!account || !controllerRef.current?.rigidBodyRef.current) return;
+    playerRef.current = controllerRigidBody;
+  }, [controllerRigidBody]);
 
-    const rigidBody = controllerRef.current.rigidBodyRef.current;
-    if (rigidBody.userData) {
-      rigidBody.userData['account'] = account;
-    } else {
-      rigidBody.userData = { account };
-    }
+  // IMPORTANT: Register player reference
+  useEffect(() => {
+    if (!account) return;
 
-    registerPlayerRef(account, controllerRef.current.rigidBodyRef);
+    registerPlayerRef(account, playerRef);
 
     return () => {
       unregisterPlayerRef(account);
     };
-  }, [account, controllerRef, registerPlayerRef, unregisterPlayerRef]);
+  }, [account, registerPlayerRef, unregisterPlayerRef]);
 
   // Get addEffect action from the store
   const addEffect = useEffectStore((state) => state.addEffect);
@@ -51,17 +43,17 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef }) => {
   // Callback for Player to request a cast
   const spawnEffect = useCallback(
     async (type: string, config?: { [key: string]: any }) => {
+      if (!account) return;
+      
       // Add effect locally via store
       addEffect(type, account, config);
-
-      console.log('[Experience] Cast:', type, config);
     },
-    [addEffect],
+    [addEffect, account],
   );
 
-  useFrame(({ camera }, delta) => {
-    const rigidBody = controllerRef.current?.rigidBodyRef?.current;
-    if (!rigidBody) return;
+  // useFrame hook for handling shooting logic
+  useFrame(({ camera }) => {
+    if (!controllerRigidBody) return;
 
     const { left } = getMouseInputs();
 
@@ -87,4 +79,6 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef }) => {
       );
     }
   });
+
+  return null;
 };

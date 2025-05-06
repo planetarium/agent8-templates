@@ -107,16 +107,17 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
       if (!account || !networkObjectRef.current) return;
 
       registerPlayerRef(account, networkObjectRef.current.rigidBodyRef);
+      
       return () => {
         unregisterPlayerRef(account);
       };
-    }, [account, networkObjectRef.current]);
+    }, [account, networkObjectRef, registerPlayerRef, unregisterPlayerRef]);
 
     useEffect(() => {
       if (!networkObjectRef.current || !networkObjectRef.current.rigidBodyRef.current) return;
 
       networkObjectRef.current.rigidBodyRef.current.userData = { account };
-    }, [networkObjectRef.current]);
+    }, [account, networkObjectRef]);
 
     // Character resource setup
     const characterResource: CharacterResource = useMemo(() => {

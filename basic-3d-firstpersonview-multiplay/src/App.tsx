@@ -19,7 +19,6 @@ function App() {
   const characterUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    console.log('server', server.account);
     if (server && connected) {
       networkSyncStore.getState().setServer(server);
     }

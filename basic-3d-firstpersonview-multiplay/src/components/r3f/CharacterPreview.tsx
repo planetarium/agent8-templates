@@ -47,7 +47,7 @@ export const CharacterPreview: React.FC<CharacterPreviewProps> = ({ characterUrl
     const vector3 = new Vector3();
     characterRendererRef.current?.boundingBox?.getSize(vector3);
     return vector3.y;
-  }, [characterRendererRef.current]);
+  }, [characterRendererRef]);
 
   return (
     <group position={[0, -(characterHeight || 0) / 2, 0]}>

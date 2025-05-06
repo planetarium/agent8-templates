@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { FlightViewControllerHandle } from 'vibe-starter-3d';
+import { useControllerState } from 'vibe-starter-3d';
 import { Aircraft } from './Aircraft';
 import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
 import { useEffectStore } from '../../stores/effectStore';
 import { useFrame } from '@react-three/fiber';
-import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { EffectType } from '../../types';
 import { usePlayerStore } from '../../stores/playerStore';
+import { RapierRigidBody } from '@react-three/rapier';
+import { createBulletEffectConfig } from '../../utils/effectUtils';
 
 const SHOOT_COOLDOWN = 200;
 
@@ -16,36 +17,49 @@ const SHOOT_COOLDOWN = 200;
  * Props for the Player component.
  */
 interface PlayerProps {
-  /** Reference to the PlayerController handle for accessing physics state. */
-  controllerRef?: React.RefObject<FlightViewControllerHandle>;
   /** Target body length for the aircraft */
   bodyLength?: number;
 }
 
-export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 }) => {
-  const { server, connected, account } = useGameServer();
+export const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
+  const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
-  const [, getKeyboardInputs] = useKeyboardControls();
-  if (!server || !account) return null;
+  const [subscribeKeys, getKeyboardInputs] = useKeyboardControls();
+  const { rigidBody: controllerRigidBody, setPosition, setRotation, setVelocity } = useControllerState();
 
+  const playerRef = useRef<RapierRigidBody>(null);
   const shootTimestamp = useRef(0);
+  const canReset = useRef(true);
 
+  // IMPORTANT: Update player reference
   useEffect(() => {
-    if (!account || !controllerRef.current?.rigidBodyRef.current) return;
+    playerRef.current = controllerRigidBody;
+  }, [controllerRigidBody]);
 
-    const rigidBody = controllerRef.current.rigidBodyRef.current;
-    if (rigidBody.userData) {
-      rigidBody.userData['account'] = account;
-    } else {
-      rigidBody.userData = { account };
-    }
+  // IMPORTANT: Register player reference
+  useEffect(() => {
+    if (!account) return;
 
-    registerPlayerRef(account, controllerRef.current.rigidBodyRef);
+    registerPlayerRef(account, playerRef);
 
     return () => {
       unregisterPlayerRef(account);
     };
-  }, [account, controllerRef, registerPlayerRef, unregisterPlayerRef]);
+  }, [account, registerPlayerRef, unregisterPlayerRef]);
+
+  useEffect(() => {
+    return subscribeKeys((state) => {
+      if (!state.reset && !canReset.current) {
+        canReset.current = true;
+      }
+    });
+  }, [subscribeKeys]);
+
+  const reset = useCallback(() => {
+    setPosition(new THREE.Vector3(0, 0, 0));
+    setRotation(new THREE.Quaternion());
+    setVelocity(new THREE.Vector3(0, 0, 0));
+  }, [setPosition, setRotation, setVelocity]);
 
   // Get addEffect action from the store
   const addEffect = useEffectStore((state) => state.addEffect);
@@ -55,27 +69,37 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
     async (type: string, config?: { [key: string]: any }) => {
       // Add effect locally via store
       addEffect(type, account, config);
-
-      console.log('[Experience] Cast:', type, config);
     },
-    [addEffect],
+    [account, addEffect],
   );
 
-  useFrame((_, delta) => {
-    const currentState = controllerRef.current;
+  useFrame(() => {
+    if (!controllerRigidBody) return;
+
     const inputs = getKeyboardInputs();
     const now = Date.now();
-    if (currentState && inputs.attack && now > shootTimestamp.current) {
+    if (inputs.attack && now > shootTimestamp.current) {
       shootTimestamp.current = now + SHOOT_COOLDOWN;
 
+      const position = new THREE.Vector3(controllerRigidBody.translation().x, controllerRigidBody.translation().y, controllerRigidBody.translation().z);
+      const rotation = new THREE.Quaternion(
+        controllerRigidBody.rotation().x,
+        controllerRigidBody.rotation().y,
+        controllerRigidBody.rotation().z,
+        controllerRigidBody.rotation().w,
+      );
+
       const forward = new THREE.Vector3(0, 0, -1);
-      forward.applyQuaternion(currentState.orientation);
+      forward.applyQuaternion(rotation);
       forward.normalize();
 
       const bulletSpeed = 200;
 
-      const offset = forward.clone().multiplyScalar(2).add(new THREE.Vector3(0, 0.5, 0));
-      const startPosition = currentState.position.clone().add(offset);
+      const offset = forward
+        .clone()
+        .multiplyScalar(2)
+        .add(new THREE.Vector3(0, 0.5, 0));
+      const startPosition = position.clone().add(offset);
       spawnEffect(
         EffectType.BULLET,
         createBulletEffectConfig({ startPosition, direction: forward, speed: bulletSpeed, duration: 500, scale: 3, flashDuration: 30, color: 'black' }),
@@ -83,5 +107,17 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
     }
   });
 
-  return <Aircraft bodyLength={bodyLength} controllerRef={controllerRef} />;
+  useFrame(() => {
+    if (!controllerRigidBody || !canReset.current) return;
+
+    const inputs = getKeyboardInputs();
+    if (inputs.reset) {
+      reset();
+      canReset.current = false;
+    }
+  });
+
+  if (!account) return null;
+
+  return <Aircraft bodyLength={bodyLength} localPlayer={true} />;
 };

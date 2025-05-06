@@ -1,7 +1,6 @@
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Experience } from '../r3f/Experience';
-import { FlightViewControllerHandle } from 'vibe-starter-3d';
 import { StatusDisplay } from '../ui/StatusDisplay';
 import { Physics } from '@react-three/rapier';
 import { EffectContainer } from '../r3f/EffectContainer';
@@ -15,12 +14,10 @@ import { keyboardMap } from '../../constants/controls';
  * including physics, lighting, and scene elements.
  */
 export const GameScene: React.FC = () => {
-  const controllerRef = useRef<FlightViewControllerHandle>(null);
-
   return (
     <div className="relative w-full h-screen">
       {/* UI Overlay */}
-      <StatusDisplay controllerRef={controllerRef} />
+      <StatusDisplay />
 
       {/* Keyboard preset */}
       <KeyboardControls map={keyboardMap}>
@@ -33,7 +30,7 @@ export const GameScene: React.FC = () => {
         >
           <Physics>
             <Suspense fallback={null}>
-              <Experience controllerRef={controllerRef} />
+              <Experience />
               <EffectContainer />
             </Suspense>
           </Physics>

@@ -29,7 +29,7 @@ Key technologies:
 - Free view camera that follows the character
 - Physics-based character movement with collision detection
 - Character state management system
-- 3D environment with grid floor
+- 3D environment with floor
 - Directional and ambient lighting
 - Animation system with support for looping and one-shot animations
 - Character bounding box calculations
@@ -60,10 +60,6 @@ Key technologies:
 
 - File for managing asset metadata. Includes character model and animation information.
 
-### `src/vite-env.d.ts`
-
-- Type definition file related to Vite.
-
 ### `src/constants/`
 
 - Directory defining constant values used throughout the application.
@@ -90,7 +86,7 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, the local player (`Player`), remote players (`NetworkContainer`), the floor (`Floor`), and manages physics engine settings.
+    - **`Experience.tsx`**: Main component responsible for setting up the 3D environment. Includes lighting `ambientLight`, environmental elements `Environment`, the local player `Player` wrapped in `FreeViewController`, and the floor `Floor`.
     - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
     - **`Player.tsx`**: Component handling the logic related to the local player character model (movement, rotation, animation state management, input processing, and sending to the server).
     - **`RemotePlayer.tsx`**: Component rendering remote player character models, animations, positions, etc., based on the state received from the server.
@@ -101,9 +97,10 @@ Key technologies:
 
   - **`scene/`**: Contains components related to 3D scene setup and game state.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the network container `NetworkContainer` and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character.
     - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
     - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
 
-  - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
+  - **`ui/`**: Contains general UI components.
+    - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).

@@ -28,7 +28,7 @@ Key technologies:
 - Attack by clicking the left mouse button
 - First person view camera that follows the character
 - Physics-based character movement with collision detection
-- 3D environment with grid floor
+- 3D environment with floor
 - Pointer lock for immersive control
 
 ## File Structure Overview
@@ -69,9 +69,9 @@ Key technologies:
 
     - **`CharacterPreview.tsx`**: Component for displaying a character preview in the UI.
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets, muzzle flash, and explosions.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, floor (`Floor`), effect container (`EffectContainer`), network container (`NetworkContainer`), and manages physics engine settings.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environment `Environment`, and the floor `Floor` component. It also renders the `Player` component within the `FirstPersonViewController`.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
-    - **`NetworkContainer.tsx`**: Manages the local player (`Player`) and remote players (`RemotePlayer`) within the scene.
+    - **`NetworkContainer.tsx`**: Manages the local player `Player` and remote players `RemotePlayer` within the scene.
     - **`Player.tsx`**: Represents the local player's character, handling movement, camera, and interactions based on user input and network state. Implements FirstPersonViewController logic.
     - **`RemotePlayer.tsx`**: Represents other players in the game, synchronizing their state based on network updates.
     - **`effects/`**: Sub-directory containing components related to visual effects.
@@ -82,12 +82,13 @@ Key technologies:
 
   - **`scene/`**: Contains components related to 3D scene setup and game state.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the network container `NetworkContainer`, effect container `EffectContainer` and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
     - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character, utilizing `CharacterPreview`.
     - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
 
-  - **`ui/`**: Contains general UI components. (Currently empty or not detailed in provided structure)
+  - **`ui/`**: Contains general UI components.
+    - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).
 
 ### `src/stores/`
 
@@ -103,3 +104,8 @@ Key technologies:
   - **`index.ts`**: Exports types from within the `types` directory.
   - **`player.ts`**: Defines types related to player data and state.
   - **`user.ts`**: Defines types related to user information (e.g., session ID, nickname).
+
+### `src/utils/`
+
+- Directory containing utility functions used across the application.
+  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.

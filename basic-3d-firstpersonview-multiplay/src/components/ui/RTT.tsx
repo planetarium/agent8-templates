@@ -1,7 +1,7 @@
 import React from 'react';
 import { networkSyncStore } from '../../stores/networkSyncStore';
 
-export const RTT: React.FC<{}> = () => {
+export const RTT: React.FC = () => {
   const rtt = networkSyncStore((state) => state.rtt);
 
   return (

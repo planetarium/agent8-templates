@@ -70,7 +70,7 @@ const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) =>
       setIsReady(false);
       setSelectedCharacter(null);
     }
-  }, [currentUserState]);
+  }, [currentUserState, selectedCharacter]);
 
   return (
     <div className="relative w-full h-screen bg-gray-100 flex items-center justify-center p-4">

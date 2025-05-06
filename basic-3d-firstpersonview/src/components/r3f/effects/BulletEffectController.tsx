@@ -2,17 +2,14 @@ import * as THREE from 'three';
 import { Bullet } from './Bullet';
 import { MuzzleFlash } from './MuzzleFlash';
 import { Collider, InteractionGroups, RigidBody } from '@dimforge/rapier3d-compat';
-type Primitive = string | number | boolean | null | undefined | symbol | bigint;
-type PrimitiveOrArray = Primitive | Primitive[];
 
 const DEFAULT_SPEED = 100;
-const DEFAULT_DURATION = 2000;
-const DEFAULT_MUZZLE_FLASH_DURATION = 100;
+const DEFAULT_DURATION = 1000;
 const DEFAULT_SCALE = 1;
 const DEFAULT_FLASH_DURATION = 100;
 
 export interface BulletEffectControllerProps {
-  config: { [key: string]: PrimitiveOrArray };
+  config: { [key: string]: any };
   collisionGroups?: InteractionGroups;
   owner?: RigidBody;
   onHit?: (pos?: THREE.Vector3, rigidBody?: RigidBody, collider?: Collider) => void;
@@ -28,18 +25,6 @@ export interface BulletEffectConfig {
   color?: string;
   flashDuration?: number;
 }
-
-export const createBulletEffectConfig = (config: BulletEffectConfig): { [key: string]: PrimitiveOrArray } => {
-  return {
-    startPosition: config.startPosition.toArray(),
-    direction: config.direction.toArray(),
-    speed: config.speed || DEFAULT_SPEED,
-    duration: config.duration || DEFAULT_DURATION,
-    scale: config.scale || DEFAULT_SCALE,
-    color: config.color,
-    flashDuration: config.flashDuration === undefined ? DEFAULT_MUZZLE_FLASH_DURATION : config.flashDuration,
-  };
-};
 
 const parseConfig = (config: { [key: string]: any }) => {
   return {

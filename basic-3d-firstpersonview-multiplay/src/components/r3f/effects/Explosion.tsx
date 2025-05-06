@@ -2,20 +2,12 @@ import * as THREE from 'three';
 import React, { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 
-type Primitive = string | number | boolean | null | undefined | symbol | bigint;
-type PrimitiveOrArray = Primitive | Primitive[];
-
 const DEFAULT_SCALE = 1;
 
 interface ExplosionProps {
-  config: { [key: string]: PrimitiveOrArray };
+  config: { [key: string]: any };
   onComplete?: () => void;
 }
-
-// Utility to convert THREE.Vector3 to array (needed for store/server)
-const vecToArray = (vec: THREE.Vector3): [number, number, number] => {
-  return [vec.x, vec.y, vec.z];
-};
 
 // Utility to convert Vector3 array to THREE.Vector3 (needed for rendering)
 const arrayToVec = (arr?: [number, number, number]): THREE.Vector3 => {
@@ -24,13 +16,6 @@ const arrayToVec = (arr?: [number, number, number]): THREE.Vector3 => {
     return new THREE.Vector3();
   }
   return new THREE.Vector3(arr[0], arr[1], arr[2]);
-};
-
-export const createExplosionEffectConfig = (position: THREE.Vector3, scale?: number): { [key: string]: PrimitiveOrArray } => {
-  return {
-    position: vecToArray(position),
-    scale: scale || DEFAULT_SCALE,
-  };
 };
 
 const parseConfig = (config: { [key: string]: any }) => {
@@ -65,11 +50,6 @@ export const Explosion: React.FC<ExplosionProps> = ({ config, onComplete }) => {
   const startTime = useRef(performance.now());
 
   const { position, scale } = parseConfig(config);
-  if (!position || !scale) {
-    console.error('[Explosion] Missing required config properties');
-    onComplete?.();
-    return null;
-  }
 
   useFrame(() => {
     const elapsed = performance.now() - startTime.current;
@@ -103,6 +83,12 @@ export const Explosion: React.FC<ExplosionProps> = ({ config, onComplete }) => {
       onComplete?.();
     }
   });
+
+  if (!position || !scale) {
+    console.error('[Explosion] Missing required config properties');
+    onComplete?.();
+    return null;
+  }
 
   return (
     <group ref={groupRef} position={position} scale={scale}>

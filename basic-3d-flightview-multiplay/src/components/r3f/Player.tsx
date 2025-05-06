@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlightViewControllerHandle } from 'vibe-starter-3d';
+import { useControllerState } from 'vibe-starter-3d';
 import { Aircraft } from './Aircraft';
 import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -8,9 +8,10 @@ import { useGameServer, useRoomState } from '@agent8/gameserver';
 import { AircraftState } from '../../constants/aircraft';
 import { useEffectStore } from '../../stores/effectStore';
 import { useFrame } from '@react-three/fiber';
-import { createBulletEffectConfig } from './effects/BulletEffectController';
 import { EffectType } from '../../types';
 import { usePlayerStore } from '../../stores/playerStore';
+import { RapierRigidBody } from '@react-three/rapier';
+import { createBulletEffectConfig } from '../../utils/effectUtils';
 
 const SHOOT_COOLDOWN = 200;
 
@@ -32,22 +33,37 @@ const NETWORK_CONSTANTS = {
  * Props for the Player component.
  */
 interface PlayerProps {
-  /** Reference to the PlayerController handle for accessing physics state. */
-  controllerRef?: React.RefObject<FlightViewControllerHandle>;
   /** Target body length for the aircraft */
   bodyLength?: number;
 }
 
-export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 }) => {
+export const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
   const { server, connected, account } = useGameServer();
   const { roomId } = useRoomState();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const [, getKeyboardInputs] = useKeyboardControls();
-  if (!server || !account) return null;
+  const { rigidBody: controllerRigidBody, setPosition, setRotation, setVelocity } = useControllerState();
 
   const [die, setDie] = useState(false);
+  const playerRef = useRef<RapierRigidBody>(null);
   const latestState = useRef(AircraftState.ACTIVE);
   const shootTimestamp = useRef(0);
+
+  // IMPORTANT: Update player reference
+  useEffect(() => {
+    playerRef.current = controllerRigidBody;
+  }, [controllerRigidBody]);
+
+  // IMPORTANT: Register player reference
+  useEffect(() => {
+    if (!account) return;
+
+    registerPlayerRef(account, playerRef);
+
+    return () => {
+      unregisterPlayerRef(account);
+    };
+  }, [account, registerPlayerRef, unregisterPlayerRef]);
 
   // Ref to store the previously *sent* state for dirty checking
   const prevSentTransformRef = useRef({
@@ -55,22 +71,11 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
     rotation: new THREE.Quaternion(),
   });
 
-  useEffect(() => {
-    if (!account || !controllerRef.current?.rigidBodyRef.current) return;
-
-    const rigidBody = controllerRef.current.rigidBodyRef.current;
-    if (rigidBody.userData) {
-      rigidBody.userData['account'] = account;
-    } else {
-      rigidBody.userData = { account };
-    }
-
-    registerPlayerRef(account, controllerRef.current.rigidBodyRef);
-
-    return () => {
-      unregisterPlayerRef(account);
-    };
-  }, [account, controllerRef, registerPlayerRef, unregisterPlayerRef]);
+  const reset = useCallback(() => {
+    setPosition(new THREE.Vector3(0, 0, 0));
+    setRotation(new THREE.Quaternion());
+    setVelocity(new THREE.Vector3(0, 0, 0));
+  }, [setPosition, setRotation, setVelocity]);
 
   useEffect(() => {
     if (!server || !connected || !roomId) return;
@@ -89,7 +94,7 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
     return () => {
       unsubscribe();
     };
-  }, [server, connected, roomId]);
+  }, [server, connected, roomId, reset]);
 
   useEffect(() => {
     if (!server || !connected || !roomId) return;
@@ -99,15 +104,6 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
     }
   }, [server, connected, roomId, die]);
 
-  const reset = useCallback(() => {
-    const currentState = controllerRef.current;
-    if (currentState) {
-      currentState.position = new THREE.Vector3(0, 0, 0);
-      currentState.orientation = new THREE.Quaternion();
-      currentState.speed = 0;
-    }
-  }, [controllerRef]);
-
   // Optimized network synchronization function
   const throttledSyncToNetworkTransform = useMemo(
     () =>
@@ -116,11 +112,7 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
           if (!server) return;
 
           try {
-            //console.log('syncToNetwork', position, rotation, state);
-            server.remoteFunction('updatePlayerTransform', [{ position: position.toArray(), rotation: rotation.toArray() }], {
-              needResponse: false,
-              throttle: 50,
-            });
+            server.remoteFunction('updateMyState', [{ position: position.toArray(), rotation: rotation.toArray() }], { needResponse: false, throttle: 50 });
           } catch (error) {
             console.error(`[Player] Network sync failed:`, error);
           }
@@ -175,43 +167,49 @@ export const Player: React.FC<PlayerProps> = ({ controllerRef, bodyLength = 3 })
       // 1. Add effect locally via store
       addEffect(type, account, config);
 
-      console.log('[Experience] Cast:', type, config);
-
       // 2. Send effect event to server
       await sendEffectToServer(type, config);
     },
-    [addEffect, sendEffectToServer],
+    [account, addEffect, sendEffectToServer],
   );
 
-  useFrame((_, delta) => {
+  useFrame(() => {
+    if (!controllerRigidBody) return;
     if (latestState.current === AircraftState.DIE) return;
 
-    const currentState = controllerRef.current;
+    const position = new THREE.Vector3(controllerRigidBody.translation().x, controllerRigidBody.translation().y, controllerRigidBody.translation().z);
+    const rotation = new THREE.Quaternion(
+      controllerRigidBody.rotation().x,
+      controllerRigidBody.rotation().y,
+      controllerRigidBody.rotation().z,
+      controllerRigidBody.rotation().w,
+    );
     const inputs = getKeyboardInputs();
     const now = Date.now();
-    if (currentState && inputs.attack && now > shootTimestamp.current) {
+    if (inputs.attack && now > shootTimestamp.current) {
       shootTimestamp.current = now + SHOOT_COOLDOWN;
 
       const forward = new THREE.Vector3(0, 0, -1);
-      forward.applyQuaternion(currentState.orientation);
+      forward.applyQuaternion(rotation);
       forward.normalize();
 
       const bulletSpeed = 200;
 
-      const offset = forward.clone().multiplyScalar(2).add(new THREE.Vector3(0, 0.5, 0));
-      const startPosition = currentState.position.clone().add(offset);
+      const offset = forward
+        .clone()
+        .multiplyScalar(2)
+        .add(new THREE.Vector3(0, 0.5, 0));
+      const startPosition = position.clone().add(offset);
       spawnEffect(
         EffectType.BULLET,
         createBulletEffectConfig({ startPosition, direction: forward, speed: bulletSpeed, duration: 500, scale: 3, flashDuration: 30, color: 'black' }),
       );
     }
 
-    syncToNetworkTransform(currentState.position, currentState.orientation);
+    syncToNetworkTransform(position, rotation);
   });
 
-  return (
-    <>
-      (!die && <Aircraft bodyLength={bodyLength} controllerRef={controllerRef} />)
-    </>
-  );
+  if (!server || !account) return null;
+
+  return <>{!die && <Aircraft bodyLength={bodyLength} localPlayer={true} />}</>;
 };

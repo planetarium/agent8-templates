@@ -10,6 +10,7 @@ export const keyboardMap: KeyboardControlsEntry[] = [
   { name: 'rollLeft', keys: ['ArrowLeft'] },
   { name: 'rollRight', keys: ['ArrowRight'] },
   { name: 'attack', keys: ['Space'] },
+  { name: 'reset', keys: ['KeyR'] },
   { name: 'action1', keys: ['1'] },
   { name: 'action2', keys: ['2'] },
   { name: 'action3', keys: ['3'] },
