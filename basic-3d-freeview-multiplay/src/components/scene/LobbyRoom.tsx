@@ -4,8 +4,8 @@ import Assets from '../../assets.json';
 import { UserState } from '../../types';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { CharacterPreview } from '../r3f/CharacterPreview';
 import { Suspense } from 'react';
+import CharacterPreview from '../r3f/CharacterPreview';
 
 /**
  * Lobby room props

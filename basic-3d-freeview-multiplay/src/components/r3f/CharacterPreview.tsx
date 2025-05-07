@@ -25,7 +25,7 @@ const idleAnimationConfigMap: Partial<AnimationConfigMap<CharacterState>> = {
 /**
  * CharacterPreview component for rendering a static character preview in IDLE state
  */
-export const CharacterPreview: React.FC<CharacterPreviewProps> = ({ characterUrl }) => {
+const CharacterPreview: React.FC<CharacterPreviewProps> = ({ characterUrl }) => {
   // State is always IDLE for preview
   const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
 
@@ -59,3 +59,5 @@ export const CharacterPreview: React.FC<CharacterPreviewProps> = ({ characterUrl
     </group>
   );
 };
+
+export default CharacterPreview;

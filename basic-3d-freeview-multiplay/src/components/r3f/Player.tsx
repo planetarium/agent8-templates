@@ -7,7 +7,6 @@ import { useGameServer } from '@agent8/gameserver';
 import throttle from 'lodash/throttle';
 import { PlayerInputs, PlayerRef } from '../../types/player';
 import {
-  AnimationConfig,
   AnimationConfigMap,
   CharacterRenderer,
   CharacterRendererRef,
@@ -151,7 +150,7 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
  * Player component - Represents the local player character.
  * Manages inputs, state transitions, animations, and network synchronization.
  */
-export const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterState.IDLE, targetHeight = 1.6, characterKey = 'y-bot.glb' }, ref) => {
+const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterState.IDLE, targetHeight = 1.6, characterKey = 'y-bot.glb' }, ref) => {
   const { server, connected, account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const [, getKeyboardInputs] = useKeyboardControls();
@@ -316,3 +315,5 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = Chara
     />
   );
 });
+
+export default Player;

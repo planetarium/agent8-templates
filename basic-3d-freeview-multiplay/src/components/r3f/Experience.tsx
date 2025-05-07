@@ -1,8 +1,9 @@
 import { Environment, Grid } from '@react-three/drei';
-import { Player } from './Player';
 import { CharacterState } from '../../constants/character';
-import { Floor } from './Floor';
+import { useGameServer } from '@agent8/gameserver';
 import { FreeViewController } from 'vibe-starter-3d';
+import Floor from './Floor';
+import Player from './Player';
 
 const targetHeight = 1.6;
 
@@ -20,7 +21,11 @@ interface ExperienceProps {
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements for the local player.
  */
-export function Experience({ characterUrl }: ExperienceProps) {
+function Experience({ characterUrl }: ExperienceProps) {
+  const { server, connected } = useGameServer();
+
+  if (!server || !connected) return null;
+
   return (
     <>
       <ambientLight intensity={0.7} />
@@ -38,3 +43,5 @@ export function Experience({ characterUrl }: ExperienceProps) {
     </>
   );
 }
+
+export default Experience;
