@@ -5,7 +5,6 @@ import { CapsuleCollider } from '@react-three/rapier';
 import { Vector3, Quaternion } from '@react-three/fiber';
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
 import {
-  AnimationConfig,
   AnimationConfigMap,
   CharacterResource,
   CharacterRenderer,
@@ -51,28 +50,42 @@ const usePlayerAnimations = (currentStateRef: React.MutableRefObject<CharacterSt
 
   const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
     () => ({
-      [CharacterState.IDLE]: { animationType: 'IDLE', loop: true } as AnimationConfig,
-      [CharacterState.WALK]: { animationType: 'WALK', loop: true } as AnimationConfig,
-      [CharacterState.RUN]: { animationType: 'RUN', loop: true } as AnimationConfig,
+      [CharacterState.IDLE]: {
+        animationType: 'IDLE',
+        loop: true,
+      },
+      [CharacterState.WALK]: {
+        animationType: 'WALK',
+        loop: true,
+      },
+      [CharacterState.RUN]: {
+        animationType: 'RUN',
+        loop: true,
+      },
       [CharacterState.JUMP]: {
         animationType: 'JUMP',
         loop: false,
         clampWhenFinished: true,
         onComplete: () => handleAnimationComplete(CharacterState.JUMP),
-      } as AnimationConfig,
+      },
       [CharacterState.PUNCH]: {
         animationType: 'PUNCH',
         loop: false,
         clampWhenFinished: true,
         onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-      } as AnimationConfig,
+      },
       [CharacterState.HIT]: {
         animationType: 'HIT',
         loop: false,
         clampWhenFinished: true,
         onComplete: () => handleAnimationComplete(CharacterState.HIT),
-      } as AnimationConfig,
-      [CharacterState.DIE]: { animationType: 'DIE', loop: false, duration: 10, clampWhenFinished: true } as AnimationConfig,
+      },
+      [CharacterState.DIE]: {
+        animationType: 'DIE',
+        loop: false,
+        duration: 10,
+        clampWhenFinished: true,
+      },
     }),
     [handleAnimationComplete],
   );
@@ -81,7 +94,7 @@ const usePlayerAnimations = (currentStateRef: React.MutableRefObject<CharacterSt
 };
 
 // Remote player with interpolation/extrapolation movement
-export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
+const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
   ({ account, characterUrl: characterKey, position = [0, 0, 0], rotation = [0, 0, 0, 1], targetHeight = 1.6, nickname }, ref) => {
     const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
 
@@ -107,7 +120,7 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
       if (!account || !networkObjectRef.current) return;
 
       registerPlayerRef(account, networkObjectRef.current.rigidBodyRef);
-      
+
       return () => {
         unregisterPlayerRef(account);
       };
@@ -174,3 +187,5 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
     );
   },
 );
+
+export default RemotePlayer;

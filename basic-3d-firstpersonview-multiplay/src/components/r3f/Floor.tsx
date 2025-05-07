@@ -1,6 +1,6 @@
 import { RigidBody } from '@react-three/rapier';
 
-export function Floor() {
+function Floor() {
   return (
     <RigidBody type="fixed" colliders="cuboid">
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -1, 0]}>
@@ -10,3 +10,5 @@ export function Floor() {
     </RigidBody>
   );
 }
+
+export default Floor;
