@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-This project is a 3D game where players control a character from a quarter view perspective. The game features character animations, physics-based movement, and a 3D environment. Players can control the character using keyboard and mouse to perform various actions (walking, running, jumping, attacking, etc.). This project is intended for single-player gameplay with an emphasis on character control and animation.
+This project is a 3D game where players control a character from a quarter view perspective. The game features character animations, physics-based movement, and a 3D environment. Players can control the character using keyboard to perform various actions (idle, running, jumping, attacking, etc.). This project is intended for single-player gameplay with an emphasis on character control and animation.
 
 ## Implementation Strategy
 
@@ -24,12 +24,12 @@ Key technologies:
 
 ## Implemented Features
 
-- Character animations (idle, walk, run, jump, attack, etc.)
-- Various character state management (IDLE, WALK, RUN, JUMP, PUNCH, KICK, etc.)
+- Character animations (idle, run, sprint, jump, punch, kick, normal_attack, cast etc.)
+- Various character state management (IDLE, RUN, SPRINT, JUMP, PUNCH, KICK, NORMAL_ATTACK, CAST, etc.)
 - Physics-based character movement
 - Quarter view camera perspective
 - Environmental collision detection
-- Keyboard and mouse control options
+- Keyboard controls (WASD for moving, QERF for actions)
 - 3D model rendering with animations
 - Interactive ground plane
 - Animation system with support for looping and one-shot animations
@@ -38,64 +38,68 @@ Key technologies:
 
 ## File Structure Overview
 
-### Core Files
-
 #### `src/main.tsx`
 
-- Entry point for the application
-- Sets up React rendering
+- Entry point for the application.
+- Sets up React rendering and mounts the `App` component.
 
 #### `src/App.tsx`
 
-- Main application component
-- Configures the root layout
+- Main application component.
+- Configures the overall layout and includes the `GameScene` component.
+
+### `src/App.css`
+
+- Defines the main styles for the `App` component and its child UI elements.
+
+### `src/index.css`
+
+- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
 
 #### `src/assets.json`
 
-- Defines game assets including character models and animations
-- Maps animation types to resource URLs
+- File for managing asset metadata. Includes character model and animation information.
 
-### Constants
+### `src/constants/`
 
-#### `src/constants/character.ts`
+- Directory defining constant values used throughout the application.
+  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
+  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
 
-- Defines character states (idle, walk, run, etc.)
-- Provides enum values for animation system
+### `src/components/`
 
-#### `src/constants/controls.ts`
+- Directory managing React components categorized by function.
 
-- Defines keyboard and mouse control mappings
-- Sets up input configuration for player movement
+  - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-### Components
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `QuarterViewController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
+    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
 
-#### 3D Components (`src/components/r3f/`)
+  - **`scene/`**: Contains components related to 3D scene setup.
 
-##### `src/components/r3f/GameScene.tsx`
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
 
-- Main game scene component
-- Sets up physics and environment
-- Integrates player and floor components
-- Configures keyboard controls
+  - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
 
-##### `src/components/r3f/Experience.tsx`
+### Key Libraries & Components from External Sources
 
-- Sets up the 3D world environment
-- Configures lighting, camera, and scene objects
-- Activates physics engine
-- Configures quarter view camera controller
-  - QuarterViewController provides adjustable zoom functionality within a range of 1 to 3
+- **`vibe-starter-3d`**: A library providing foundational 3D game components and utilities.
+  - **`QuarterViewController`**: Wraps the player character and manages quarter view navigation by implementing a character controller with physics. It handles character movement, rotation, and camera following with a fixed quarter-view perspective.
+  - **`CharacterRenderer`**: Renders 3D character models with animations from glTF/GLB files. Manages animation states and transitions based on player actions.
+  - **`useControllerState`**: A React hook that provides control state management for the character, including:
+    - `setEnableInput`: Function to enable/disable player input controls
+    - `rigidBody`: Reference to the physics body for the character
+  - **`useMouseControls`**: A React hook that provides access to mouse input state (left/right buttons and positions).
 
-##### `src/components/r3f/Player.tsx`
+### Quarter View System Implementation
 
-- Player character with control logic
-- Handles animations, movement, and state transitions
-- Implements character controller and input handling
-- Configures various character actions and animations
-- Manages character bounding box calculations
+The quarter view control system is implemented through a combination of components:
 
-##### `src/components/r3f/Floor.tsx`
+1. **Controller System**: `QuarterViewController` from the vibe-starter-3d library handles the physics-based movement of the character based on keyboard inputs, maintaining a fixed camera angle that provides the quarter view perspective.
 
-- Ground plane with physics properties
-- Provides surface for character movement
-- Includes collision detection
+2. **Input Management**: Keyboard inputs are captured through React Three Fiber's `useKeyboardControls` hook, which maps WASD/arrow keys to movement, and additional keys (Q/E/R/F) to character actions.
+
+3. **State Management**: `useControllerState` hook provides shared state between components, allowing different parts of the application to access and modify the character's state.
+
+4. **Animation Management**: `Player` component determines appropriate animations based on movement and action states, transitioning between idle, walking, running, and action animations as needed.

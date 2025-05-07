@@ -27,90 +27,91 @@ Key technologies:
 
 - Point-and-click movement system (click on the ground to move character)
 - Targeting system with visual feedback (click effect animations)
-- Character animations (idle, walk, run, jump, attack, etc.)
-- Various character state management (IDLE, WALK, RUN, JUMP, PUNCH, KICK, etc.)
-- Physics-based character movement with automatic pathfinding
+- Character animations (idle, run, sprint, jump, punch, kick, normal_attack, cast etc.)
+- Various character state management (IDLE, RUN, SPRINT, JUMP, PUNCH, KICK, NORMAL_ATTACK, CAST, etc.)
+- Physics-based character movement
 - Quarter view camera perspective
 - Environmental collision detection
-- Keyboard and mouse control options
+- Mouse and keyboard control (QWER for actions)
 - 3D model rendering with animations
 - Interactive ground plane
 - Animation system with support for looping and one-shot animations
-- Character bounding box calculations
 - Raycasting for precise mouse interaction with the 3D environment
 
 ## File Structure Overview
 
-### Core Files
+### `src/main.tsx`
 
-#### `src/main.tsx`
+- Entry point for the application.
+- Sets up React rendering and mounts the `App` component.
 
-- Entry point for the application
-- Sets up React rendering
+### `src/App.tsx`
 
-#### `src/App.tsx`
+- Main application component.
+- Configures the overall layout and includes the `GameScene` component.
 
-- Main application component
-- Configures the root layout
+### `src/App.css`
 
-#### `src/assets.json`
+- Defines the main styles for the `App` component and its child UI elements.
 
-- Defines game assets including character models and animations
-- Maps animation types to resource URLs
+### `src/index.css`
 
-### Constants
+- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
 
-#### `src/constants/character.ts`
+### `src/assets.json`
 
-- Defines character states (idle, walk, run, etc.)
-- Provides enum values for animation system
+- File for managing asset metadata. Includes character model and animation information.
 
-#### `src/constants/controls.ts`
+### `src/store/`
 
-- Defines keyboard and mouse control mappings
-- Sets up input configuration for player movement
+- Directory containing Zustand stores for application state management.
+  - **`cubeStore.ts`**: Store for voxel world management that handles adding, removing, and storing block data. Also manages terrain generation state and controls selected block type.
+  - **`playerStore.ts`**: Store for player refs.
+
+### `src/constants/`
+
+- Directory defining constant values used throughout the application.
+  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
+  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
 
 ### Components
 
-#### 3D Components (`src/components/r3f/`)
+### `src/components/`
 
-##### `src/components/r3f/GameScene.tsx`
+- Directory managing React components categorized by function.
 
-- Main game scene component
-- Sets up physics and environment
-- Integrates player and floor components
-- Configures keyboard controls
+  - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-##### `src/components/r3f/Experience.tsx`
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `PointToMoveController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
+    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
+    - **`PointingSystem.tsx`**: Core component for the point-and-click movement mechanics. Implements raycasting to convert screen clicks to world positions. Creates visual feedback when clicking on the ground (click effect).
 
-- Sets up the 3D world environment
-- Configures lighting, camera, and scene objects
-- Activates physics engine
-- Uses PointToMoveController for character movement
-  - PointToMoveController provides adjustable zoom functionality within a range of 1 to 3
-- Integrates the targeting system for click-to-move functionality
+  - **`scene/`**: Contains components related to 3D scene setup.
 
-##### `src/components/r3f/Player.tsx`
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
 
-- Player character with control logic
-- Handles animations, movement, and state transitions
-- Implements character controller and input handling
-- Configures various character actions and animations
-- Manages character bounding box calculations
-- Responds to movement points set by the targeting system
+  - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
 
-##### `src/components/r3f/TargetingSystem.tsx`
+### Key Libraries & Components from External Sources
 
-- Core component for the point-and-click movement mechanics
-- Implements raycasting to convert screen clicks to world positions
-- Creates visual feedback when clicking on the ground (click effect)
-- Communicates with the controller to set movement targets
-- Works independently from terrain to ensure reliable targeting
-- Handles edge cases for click detection on various surfaces
+- **`vibe-starter-3d`**: A library providing foundational 3D game components and utilities.
+  - **`PointToMoveController`**: Wraps the player character and manages point-to-move navigation by implementing a character controller with physics. It handles character movement, rotation, and camera following.
+  - **`CharacterRenderer`**: Renders 3D character models with animations from glTF/GLB files. Manages animation states and transitions.
+  - **`useControllerState`**: A React hook that provides control state management for the character, including:
+    - `setEnableInput`: Function to enable/disable player input controls
+    - `setMoveToPoint`: Function to set the destination point for character movement
+    - `isPointMoving`: Function that returns whether the character is currently moving toward a point
+    - `rigidBody`: Reference to the physics body for the character
 
-##### `src/components/r3f/Floor.tsx`
+### Point-to-Move System Implementation
 
-- Ground plane with physics properties
-- Provides surface for character movement
-- Includes collision detection
-- Serves as the primary target for mouse click raycasting
+The point-to-move system is implemented through a combination of components:
+
+1. **Click Detection**: `PointingSystem` component uses raycasting to convert mouse clicks to 3D world positions, providing visual feedback at the clicked location.
+
+2. **Movement Control**: `PointToMoveController` from the vibe-starter-3d library handles the physics-based movement of the character toward the destination point.
+
+3. **State Management**: `useControllerState` hook provides shared state between components, allowing the pointing system to set movement targets that the controller can read.
+
+4. **Animation Management**: `Player` component determines appropriate animations based on movement state, using the `isPointMoving()` function to detect when the character should be in a movement animation state.

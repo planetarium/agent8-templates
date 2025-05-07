@@ -7,10 +7,10 @@ import { useMouseControls, useControllerState } from 'vibe-starter-3d';
 const isDevelopment = false; // Manually change for debug visualization
 
 /**
- * TargetingSystem - A targeting system that works independently of terrain
+ * PointingSystem - A poin system that works independently of terrain
  * Detects click positions in the game and sets movement points.
  */
-export const PointSystem: React.FC = () => {
+export const PointingSystem: React.FC = () => {
   const { camera, scene, size } = useThree();
   const getMouseInputs = useMouseControls();
   const { setMoveToPoint } = useControllerState();

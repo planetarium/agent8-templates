@@ -1,8 +1,10 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Experience } from './Experience';
-import { KeyboardControls } from '@react-three/drei';
+import { Experience } from '../r3f/Experience';
+import { KeyboardControls, StatsGl } from '@react-three/drei';
 import { keyboardMap } from '../../constants/controls';
+import { TileSelector } from '../ui/TileSelector';
+import { Crosshair } from '../ui/Crosshair';
 import { Physics } from '@react-three/rapier';
 
 /**
@@ -16,7 +18,12 @@ export const GameScene: React.FC = () => {
     <div className="relative w-full h-screen">
       {/* Keyboard preset */}
       <KeyboardControls map={keyboardMap}>
-        <Canvas shadows>
+        <Canvas
+          shadows
+          onPointerDown={(e) => {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }}
+        >
           <Physics>
             <Suspense fallback={null}>
               <Experience />
@@ -24,6 +31,9 @@ export const GameScene: React.FC = () => {
           </Physics>
         </Canvas>
       </KeyboardControls>
+      {/* Place UI components outside the Canvas */}
+      <TileSelector />
+      <Crosshair />
     </div>
   );
 };

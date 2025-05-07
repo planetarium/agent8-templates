@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useCubeStore } from '../stores/cubeStore';
-import { getTotalTileCount, getTileCoordinates, getSpriteInfo } from '../utils/tileTextureLoader';
+import { useCubeStore } from '../../stores/cubeStore';
+import { getTotalTileCount, getTileCoordinates, getSpriteInfo } from '../../utils/tileTextureLoader';
 
 // Sprite URL
-import assetsData from '../assets.json';
+import assetsData from '../../assets.json';
 const spriteUrl = assetsData.sprites.minecraft.url;
 
 export const TileSelector: React.FC = () => {

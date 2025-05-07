@@ -16,7 +16,6 @@ export function Experience() {
 
       {/* Player character with Controller */}
       <QuarterViewController
-        cameraMode="orthographic"
         followCharacter={true}
         followLight={{
           position: [0.6, 1, 0.3],

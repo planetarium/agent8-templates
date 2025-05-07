@@ -25,8 +25,8 @@ Key technologies:
 
 ## Implemented Features
 
-- Character animations (idle, walk, run, jump, attack, etc.)
-- Various character state management (IDLE, WALK, RUN, JUMP, PUNCH, KICK, etc.)
+- Character animations (idle, run, sprint, jump, punch, kick, normal_attack, cast etc.)
+- Various character state management (IDLE, RUN, SPRINT, JUMP, PUNCH, KICK, NORMAL_ATTACK, CAST, etc.)
 - Physics-based character movement with gravity
 - Side view camera perspective (fixed orientation)
 - Platformer-style jumping mechanics
@@ -41,68 +41,72 @@ Key technologies:
 
 ## File Structure Overview
 
-### Core Files
+### `src/main.tsx`
 
-#### `src/main.tsx`
+- Entry point for the application.
+- Sets up React rendering and mounts the `App` component.
 
-- Entry point for the application
-- Sets up React rendering
+### `src/App.tsx`
 
-#### `src/App.tsx`
+- Main application component.
+- Configures the overall layout and includes the `GameScene` component.
 
-- Main application component
-- Configures the root layout
+### `src/App.css`
 
-#### `src/assets.json`
+- Defines the main styles for the `App` component and its child UI elements.
 
-- Defines game assets including character models and animations
-- Maps animation types to resource URLs
+### `src/index.css`
 
-### Constants
+- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
 
-#### `src/constants/character.ts`
+### `src/assets.json`
 
-- Defines character states (idle, walk, run, jump, etc.)
-- Provides enum values for animation system
+- File for managing asset metadata. Includes character model and animation information.
 
-#### `src/constants/controls.ts`
+### `src/constants/`
 
-- Defines keyboard control mappings
-- Sets up input configuration for player movement and actions
+- Directory defining constant values used throughout the application.
+  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
+  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
 
 ### Components
 
-#### 3D Components (`src/components/r3f/`)
+### `src/components/`
 
-##### `src/components/r3f/GameScene.tsx`
+- Directory managing React components categorized by function.
 
-- Main game scene component
-- Sets up physics and environment
-- Integrates player and floor components
-- Configures keyboard controls
+  - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-##### `src/components/r3f/Experience.tsx`
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `SideViewController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
+    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
 
-- Sets up the 3D world environment
-- Configures lighting, camera, and scene objects
-- Activates physics engine
-- Uses SideViewController for side-scrolling camera perspective
-  - SideViewController provides adjustable zoom functionality within a range of 1 to 3
-- Links the player character with the controller
+  - **`scene/`**: Contains components related to 3D scene setup.
 
-##### `src/components/r3f/Player.tsx`
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
 
-- Player character with control logic
-- Handles animations, movement, and state transitions
-- Implements character controller and input handling
-- Configures various character actions and animations
-- Manages character bounding box calculations
-- Handles jumping mechanics and platform interactions
+  - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
 
-##### `src/components/r3f/Floor.tsx`
+### Key Libraries & Components from External Sources
 
-- Procedurally generates platform terrain using seed-based randomization
-- Creates varying platform heights, widths and gaps for platformer gameplay
-- Implements physics colliders for player interaction
-- Ensures platforms are properly spaced for jump distances
-- Generates initial platform at origin for character starting position
+- **`vibe-starter-3d`**: A library providing foundational 3D game components and utilities.
+  - **`SideViewController`**: Wraps the player character and manages side view navigation by implementing a character controller with physics. It handles character movement, jumping mechanics, and camera following with a fixed side-view perspective.
+  - **`CharacterRenderer`**: Renders 3D character models with animations from glTF/GLB files. Manages animation states and transitions based on player actions.
+  - **`useControllerState`**: A React hook that provides control state management for the character, including:
+    - `setEnableInput`: Function to enable/disable player input controls
+    - `rigidBody`: Reference to the physics body for the character
+  - **`useMouseControls`**: A React hook that provides access to mouse input state (left/right buttons and positions).
+
+### Side View System Implementation
+
+The side view platformer system is implemented through a combination of components:
+
+1. **Controller System**: `SideViewController` from the vibe-starter-3d library handles the physics-based movement of the character based on keyboard inputs, implementing platformer mechanics like jumping and gravity with a fixed camera angle that provides the side view perspective.
+
+2. **Input Management**: Keyboard inputs are captured through React Three Fiber's `useKeyboardControls` hook, which maps WASD/arrow keys to movement actions (with special emphasis on jump controls essential for platformer gameplay).
+
+3. **State Management**: `useControllerState` hook provides shared state between components, allowing different parts of the application to access and modify the character's state.
+
+4. **Animation Management**: `Player` component determines appropriate animations based on movement and action states, with special attention to jump, fall, and landing animations essential for platformer games.
+
+5. **Platform Generation**: Procedurally generated platforms create the game environment, with varying heights and distances to create challenging platforming gameplay.

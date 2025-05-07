@@ -105,5 +105,35 @@
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit-to-body.glb",
       "description": "Hit to Body"
     }
+  },
+  "sprites": {
+    "minecraft": {
+      "url": "https://agent8-games.verse8.io/assets/2d/minecraft/minecraft-tiles.png",
+      "description": "Minecraft style sprites",
+      "size": {
+        "width": 80,
+        "height": 80
+      },
+      "cellSize": {
+        "width": 16,
+        "height": 16
+      }
+    },
+    "dirt": {
+      "url": "https://agent8-games.verse8.io/assets/2d/minecraft/dirt.jpg",
+      "description": "Dirt texture",
+      "size": {
+        "width": 16,
+        "height": 16
+      }
+    },
+    "grass": {
+      "url": "https://agent8-games.verse8.io/assets/2d/minecraft/grass.jpg",
+      "description": "Grass texture",
+      "size": {
+        "width": 16,
+        "height": 16
+      }
+    }
   }
 }

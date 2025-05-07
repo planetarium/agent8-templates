@@ -4,7 +4,7 @@ import { CharacterState } from '../../constants/character';
 import { Player, PlayerRef } from './Player';
 import { Floor } from './Floor';
 import { PointToMoveController, ControllerHandle } from 'vibe-starter-3d';
-import { PointSystem } from './PointSystem';
+import { PointingSystem } from './PointingSystem';
 export function Experience() {
   return (
     <>
@@ -25,7 +25,7 @@ export function Experience() {
       >
         <Player initState={CharacterState.IDLE} />
       </PointToMoveController>
-      <PointSystem />
+      <PointingSystem />
       {/* Floor */}
       <Floor />
     </>
