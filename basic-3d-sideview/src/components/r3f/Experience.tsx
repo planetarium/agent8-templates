@@ -1,10 +1,10 @@
 import { Environment } from '@react-three/drei';
 import { CharacterState } from '../../constants/character';
-import { Player } from './Player';
-import { Floor } from './Floor';
+import Player from './Player';
+import Floor from './Floor';
 import { SideViewController } from 'vibe-starter-3d';
 
-export function Experience() {
+const Experience = () => {
   return (
     <>
       {/* Ambient light */}
@@ -22,4 +22,6 @@ export function Experience() {
       <Floor />
     </>
   );
-}
+};
+
+export default Experience;

@@ -1,11 +1,11 @@
 import { Environment, Sky } from '@react-three/drei';
 import { FirstPersonViewController } from 'vibe-starter-3d';
-import { Floor } from './Floor';
-import { InstancedCubes } from './InstancedCubes';
-import { CubePreview } from './CubePreview';
-import { useCubeRaycaster } from '../../hooks/useCubeRaycaster';
+import Floor from './Floor';
+import InstancedCubes from './InstancedCubes';
+import CubePreview from './CubePreview';
+import useCubeRaycaster from '../../hooks/useCubeRaycaster';
 
-export function Experience() {
+const Experience = () => {
   const targetHeight = 1.6;
   const { previewPosition } = useCubeRaycaster();
 
@@ -37,4 +37,6 @@ export function Experience() {
       <CubePreview position={previewPosition} />
     </>
   );
-}
+};
+
+export default Experience;

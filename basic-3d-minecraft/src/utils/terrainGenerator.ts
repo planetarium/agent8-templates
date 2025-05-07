@@ -6,7 +6,7 @@ import { createNoise2D } from 'simplex-noise';
  */
 
 // Noise generation function (seed-based)
-export function createNoise(seed: string) {
+const createNoise = (seed: string) => {
   // Create a numeric string from the seed
   let seedNumber = '';
   for (let i = 0; i < seed.length; i++) {
@@ -45,7 +45,7 @@ export function createNoise(seed: string) {
 
   // Initialize SimplexNoise instance with the seed
   return createNoise2D(alea());
-}
+};
 
 // Function to generate height map
 function generateHeightMap(noise: ReturnType<typeof createNoise>, width: number, depth: number): number[][] {
@@ -287,3 +287,5 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
 
   return cubes;
 }
+
+export default generateTerrain;

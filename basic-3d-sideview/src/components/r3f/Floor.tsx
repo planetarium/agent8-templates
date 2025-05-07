@@ -21,7 +21,7 @@ class SeededRandom {
   }
 }
 
-export const Floor = ({ seed = 12345 }: { seed?: number }) => {
+const Floor = ({ seed = 12345 }: { seed?: number }) => {
   const [rng, setRng] = useState<SeededRandom | null>(null);
 
   useEffect(() => {
@@ -118,3 +118,5 @@ export const Floor = ({ seed = 12345 }: { seed?: number }) => {
 
   return <>{renderFloorBlocks}</>;
 };
+
+export default Floor;

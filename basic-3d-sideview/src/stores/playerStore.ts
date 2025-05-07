@@ -10,7 +10,7 @@ type PlayerRefsState = {
   getPlayerRef: (key: string) => React.RefObject<RigidBody> | undefined;
 };
 
-export const usePlayerStore = create<PlayerRefsState>()(
+const usePlayerStore = create<PlayerRefsState>()(
   subscribeWithSelector((set, get) => ({
     playerRefs: {},
 
@@ -36,3 +36,5 @@ export const usePlayerStore = create<PlayerRefsState>()(
     },
   })),
 );
+
+export default usePlayerStore;

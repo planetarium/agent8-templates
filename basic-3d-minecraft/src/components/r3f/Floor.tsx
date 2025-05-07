@@ -3,7 +3,7 @@ import { RigidBody } from '@react-three/rapier';
 import { RepeatWrapping } from 'three';
 import Assets from '../../assets.json';
 
-export function Floor() {
+const Floor = () => {
   const texture = useTexture(Assets.sprites.dirt.url);
   texture.wrapS = texture.wrapT = RepeatWrapping;
   return (
@@ -14,4 +14,6 @@ export function Floor() {
       </mesh>
     </RigidBody>
   );
-}
+};
+
+export default Floor;

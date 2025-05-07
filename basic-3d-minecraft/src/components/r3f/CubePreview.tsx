@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useCubeStore } from '../../stores/cubeStore';
+import useCubeStore from '../../stores/cubeStore';
 import { getTileTexture } from '../../utils/tileTextureLoader';
 
 interface CubePreviewProps {
   position: [number, number, number] | null;
 }
 
-export function CubePreview({ position }: CubePreviewProps) {
+const CubePreview = ({ position }: CubePreviewProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const selectedTile = useCubeStore((state) => state.selectedTile);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
@@ -46,4 +46,6 @@ export function CubePreview({ position }: CubePreviewProps) {
       )}
     </mesh>
   );
-}
+};
+
+export default CubePreview;

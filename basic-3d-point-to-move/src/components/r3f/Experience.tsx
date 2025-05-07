@@ -1,11 +1,11 @@
-import { useRef } from 'react';
 import { Environment } from '@react-three/drei';
 import { CharacterState } from '../../constants/character';
-import { Player, PlayerRef } from './Player';
-import { Floor } from './Floor';
-import { PointToMoveController, ControllerHandle } from 'vibe-starter-3d';
-import { PointingSystem } from './PointingSystem';
-export function Experience() {
+import Player from './Player';
+import Floor from './Floor';
+import { PointToMoveController } from 'vibe-starter-3d';
+import PointingSystem from './PointingSystem';
+
+const Experience = () => {
   return (
     <>
       {/* Ambient light */}
@@ -30,4 +30,6 @@ export function Experience() {
       <Floor />
     </>
   );
-}
+};
+
+export default Experience;

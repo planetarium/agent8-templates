@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Crosshair: React.FC = () => {
+const Crosshair: React.FC = () => {
   return (
     <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50">
       <div className="crosshair-container flex items-center justify-center w-6 h-6">
@@ -11,3 +11,5 @@ export const Crosshair: React.FC = () => {
     </div>
   );
 };
+
+export default Crosshair;

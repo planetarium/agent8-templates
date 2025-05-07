@@ -1,16 +1,11 @@
 import { create } from 'zustand';
 import { generateTerrain, TILE_TYPES } from '../utils/terrainGenerator';
 
-// Edit mode enum
-export enum EditMode {
-  BUILD = 'build',
-}
-
 // Seed value constant
-export const DEFAULT_SEED = import.meta.env.VITE_AGENT8_VERSE || 'minecraft123';
+const DEFAULT_SEED = import.meta.env.VITE_AGENT8_VERSE || 'minecraft123';
 
 // Single terrain configuration value
-export const TERRAIN_CONFIG = {
+const TERRAIN_CONFIG = {
   width: 160,
   depth: 160,
 };
@@ -42,7 +37,7 @@ const createInitialTerrain = (seed: string): CubeInfo[] => {
   return generateTerrain(seed, TERRAIN_CONFIG.width, TERRAIN_CONFIG.depth);
 };
 
-export const useCubeStore = create<CubeStore>((set) => ({
+const useCubeStore = create<CubeStore>((set) => ({
   // Initial setup
   seed: DEFAULT_SEED,
   cubes: createInitialTerrain(DEFAULT_SEED),
@@ -73,3 +68,5 @@ export const useCubeStore = create<CubeStore>((set) => ({
   selectedTile: 0, // Default tile
   setSelectedTile: (index) => set({ selectedTile: index }),
 }));
+
+export default useCubeStore;

@@ -31,7 +31,7 @@ const loader = new THREE.TextureLoader();
 /**
  * Load spritesheet texture
  */
-export async function loadSpritesheet(): Promise<THREE.Texture> {
+const loadSpritesheet = async (): Promise<THREE.Texture> => {
   return new Promise((resolve, reject) => {
     if (textureCache.has(-1)) {
       resolve(textureCache.get(-1)!.clone());
@@ -59,7 +59,7 @@ export async function loadSpritesheet(): Promise<THREE.Texture> {
       },
     );
   });
-}
+};
 
 /**
  * Calculate tile index from row and column coordinates
@@ -119,7 +119,7 @@ export const getTileTexture = async (index: number): Promise<THREE.Texture> => {
 /**
  * Preload all tile textures (save to cache)
  */
-export async function preloadAllTiles(): Promise<THREE.Texture[]> {
+export const preloadAllTiles = async (): Promise<THREE.Texture[]> => {
   const textures: THREE.Texture[] = [];
 
   // Load main spritesheet
@@ -132,11 +132,11 @@ export async function preloadAllTiles(): Promise<THREE.Texture[]> {
   textures.push(...results);
 
   return textures;
-}
+};
 
 /**
  * Return total number of tiles
  */
-export function getTotalTileCount(): number {
+export const getTotalTileCount = (): number => {
   return TOTAL_TILES;
-}
+};

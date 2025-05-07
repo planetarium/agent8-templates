@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { GameScene } from './components/scene/GameScene.tsx';
+import GameScene from './components/scene/GameScene';
 
 const App: React.FC = () => {
   return (

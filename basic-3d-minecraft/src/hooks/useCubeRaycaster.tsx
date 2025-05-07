@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { useThree, useFrame } from '@react-three/fiber';
-import { useCubeStore } from '../stores/cubeStore';
+import useCubeStore from '../stores/cubeStore';
 import throttle from 'lodash/throttle';
 
 // Raycast distance limit constants
 const MIN_RAYCAST_DISTANCE = 2;
 const MAX_RAYCAST_DISTANCE = 15;
 
-export function useCubeRaycaster() {
+const useCubeRaycaster = () => {
   const { scene, camera } = useThree();
   const [previewPosition, setPreviewPosition] = useState<[number, number, number] | null>(null);
   const [faceIndex, setFaceIndex] = useState<number | null>(null);
@@ -149,4 +149,6 @@ export function useCubeRaycaster() {
   });
 
   return { previewPosition };
-}
+};
+
+export default useCubeRaycaster;

@@ -1,6 +1,6 @@
 import { RigidBody } from '@react-three/rapier';
 
-export const Floor = () => {
+const Floor = () => {
   return (
     <>
       <RigidBody type="fixed" colliders={'cuboid'}>
@@ -12,3 +12,5 @@ export const Floor = () => {
     </>
   );
 };
+
+export default Floor;

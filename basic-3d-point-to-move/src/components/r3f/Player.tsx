@@ -8,7 +8,7 @@ import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterR
 import Assets from '../../assets.json';
 import { RapierRigidBody } from '@react-three/rapier';
 import { useGameServer } from '@agent8/gameserver';
-import { usePlayerStore } from '../../stores/playerStore';
+import usePlayerStore from '../../stores/playerStore';
 
 /**
  * Player input parameters for action determination
@@ -29,7 +29,7 @@ interface PlayerInputs {
 /**
  * Player ref interface
  */
-export interface PlayerRef {
+interface PlayerRef {
   /** Bounding box of the character model */
   boundingBox: THREE.Box3 | null;
 }
@@ -51,12 +51,11 @@ interface PlayerProps {
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.IDLE, targetHeight = 1.6 }, ref) => {
+const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.IDLE, targetHeight = 1.6 }, ref) => {
   const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const currentStateRef = useRef<CharacterState>(initState);
   const [, getKeyboardInputs] = useKeyboardControls();
-  const getMouseInputs = useMouseControls();
   const { setEnableInput, setMoveToPoint, isPointMoving } = useControllerState();
 
   const { rigidBody } = useControllerState();
@@ -402,3 +401,5 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = Characte
     />
   );
 });
+
+export default Player;

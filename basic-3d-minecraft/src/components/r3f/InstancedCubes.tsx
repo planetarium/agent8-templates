@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useCubeStore } from '../../stores/cubeStore';
+import useCubeStore from '../../stores/cubeStore';
 import { getTileCoordinates, getSpriteInfo } from '../../utils/tileTextureLoader';
 
 // Maximum number of cube instances
@@ -75,7 +75,7 @@ type Chunk = {
   indices?: Uint32Array;
 };
 
-export function InstancedCubes() {
+const InstancedCubes = () => {
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const { camera } = useThree();
   const prevCameraChunkRef = useRef<string | null>(null);
@@ -503,4 +503,6 @@ export function InstancedCubes() {
         ))}
     </>
   );
-}
+};
+
+export default InstancedCubes;
