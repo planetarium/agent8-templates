@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, useControllerState } from 'vibe-starter-3d';
+import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, useControllerState } from 'vibe-starter-3d';
 import { useGameServer } from '@agent8/gameserver';
 import { usePlayerStore } from '../../stores/playerStore';
 import { RapierRigidBody } from '@react-three/rapier';
@@ -23,7 +23,7 @@ interface PlayerState {
 /**
  * Player ref interface
  */
-export interface PlayerRef {
+interface PlayerRef {
   /** Bounding box of the character model */
   boundingBox: THREE.Box3 | null;
 }
@@ -166,7 +166,7 @@ function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterSt
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = CharacterState.IDLE, targetHeight = 1.6 }, ref) => {
+const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = CharacterState.IDLE, targetHeight = 1.6 }, ref) => {
   const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const currentStateRef = useRef<CharacterState>(initAction);
@@ -269,3 +269,5 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initActio
     />
   );
 });
+
+export default Player;
