@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGameServer, useRoomState } from '@agent8/gameserver';
 import { useControllerState } from 'vibe-starter-3d';
 
-export const StatusDisplay: React.FC = () => {
+const StatusDisplay: React.FC = () => {
   const { server, connected } = useGameServer();
   const { roomId } = useRoomState();
   const [speed, setSpeed] = useState(0);
@@ -90,3 +90,5 @@ export const StatusDisplay: React.FC = () => {
     </div>
   );
 };
+
+export default StatusDisplay;
