@@ -11,7 +11,7 @@ import { createBulletEffectConfig } from '../../utils/effectUtils';
 
 const SHOOT_COOLDOWN = 200;
 
-export const Player: React.FC = () => {
+const Player: React.FC = () => {
   const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const getMouseInputs = useMouseControls();
@@ -44,7 +44,7 @@ export const Player: React.FC = () => {
   const spawnEffect = useCallback(
     async (type: string, config?: { [key: string]: any }) => {
       if (!account) return;
-      
+
       // Add effect locally via store
       addEffect(type, account, config);
     },
@@ -82,3 +82,5 @@ export const Player: React.FC = () => {
 
   return null;
 };
+
+export default Player;
