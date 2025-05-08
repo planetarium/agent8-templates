@@ -307,7 +307,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
           }
         }
       }
-      console.log('currentState', currentState);
       // Default - maintain current action
       return currentState;
     },
