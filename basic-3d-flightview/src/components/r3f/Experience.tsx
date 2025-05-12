@@ -1,11 +1,11 @@
 import { Sky } from '@react-three/drei';
-import FloatingShapes from './FloatingShapes';
-import { Ground } from './Ground';
 import { FlightViewController } from 'vibe-starter-3d';
-import { Player } from './Player';
 import { DEFAULT_BODY_LENGTH } from '../../constants/aircraft';
+import Ground from './Ground';
+import FloatingShapes from './FloatingShapes';
+import Player from './Player';
 
-export function Experience() {
+function Experience() {
   return (
     <>
       <Sky distance={450000} sunPosition={[-20, 30, 10]} turbidity={0.8} rayleigh={0.4} />
@@ -20,3 +20,5 @@ export function Experience() {
     </>
   );
 }
+
+export default Experience;

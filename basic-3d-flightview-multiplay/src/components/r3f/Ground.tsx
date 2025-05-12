@@ -10,7 +10,7 @@ type SimpleObject = {
   color: THREE.Color;
 };
 
-export const Ground = () => {
+const Ground = () => {
   // Generate object data to scatter on the ground (optimized with useMemo)
   const objects = useMemo<SimpleObject[]>(() => {
     const tempObjects: SimpleObject[] = [];
@@ -116,3 +116,5 @@ export const Ground = () => {
     </>
   );
 };
+
+export default Ground;

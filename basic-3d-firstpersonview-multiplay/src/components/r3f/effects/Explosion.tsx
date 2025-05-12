@@ -37,7 +37,7 @@ function makeParticles(color: string, speed: number) {
 }
 
 // "Explosion/smoke" effect appearing at the collision point
-export const Explosion: React.FC<ExplosionProps> = ({ config, onComplete }) => {
+const Explosion: React.FC<ExplosionProps> = ({ config, onComplete }) => {
   const groupRef = useRef<THREE.Group>(null);
   // Reusable dummy object
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -110,3 +110,5 @@ export const Explosion: React.FC<ExplosionProps> = ({ config, onComplete }) => {
     </group>
   );
 };
+
+export default Explosion;

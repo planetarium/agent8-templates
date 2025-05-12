@@ -3,13 +3,14 @@ import { useFrame, GroupProps } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Trail } from '@react-three/drei';
 import { useControllerState } from 'vibe-starter-3d';
+
 interface AircraftProps extends GroupProps {
   localPlayer?: boolean;
   bodyLength?: number;
   bodyColor?: string;
 }
 
-export function Aircraft({ localPlayer = false, bodyLength = 3, bodyColor = '#f5f5f5', ...props }: AircraftProps) {
+function Aircraft({ localPlayer = false, bodyLength = 3, bodyColor = '#f5f5f5', ...props }: AircraftProps) {
   const helixMeshRef = useRef<THREE.Mesh>(null);
   const tip1Ref = useRef<THREE.Object3D>(null);
   const tip2Ref = useRef<THREE.Object3D>(null);
@@ -80,3 +81,5 @@ export function Aircraft({ localPlayer = false, bodyLength = 3, bodyColor = '#f5
     </>
   );
 }
+
+export default Aircraft;

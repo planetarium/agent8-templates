@@ -80,7 +80,7 @@ const usePlayerAnimations = (currentStateRef: React.MutableRefObject<CharacterSt
 };
 
 // Remote player with interpolation/extrapolation movement
-export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
+const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
   ({ account, characterUrl: characterKey, position = [0, 0, 0], rotation = [0, 0, 0, 1], targetHeight = 1.6, nickname }, ref) => {
     const networkObjectRef = useRef<NetworkObjectHandle>(null);
     const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
@@ -161,3 +161,5 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
     );
   },
 );
+
+export default RemotePlayer;

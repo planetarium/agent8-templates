@@ -1,7 +1,7 @@
 // MuzzleFlash.tsx (new file)
-import React, { useState, useEffect, useMemo } from "react";
-import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
+import React, { useState, useEffect, useMemo } from 'react';
+import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
 
 // --- Muzzle Flash Configuration ---
 const FLASH_PETAL_COUNT = 5; // Number of flame petals
@@ -10,8 +10,8 @@ const FLASH_PETAL_BASE_RADIUS = 0.03; // Base radius of each petal
 const FLASH_RADIAL_SEGMENTS = 4; // Number of radial segments for each cone
 const FLASH_TILT_ANGLE = Math.PI / 4; // Tilt angle of flame petals (45 degrees)
 const FLASH_INNER_GLOW_SIZE = 0.08; // Size of the center glow
-const FLASH_COLOR = "#FFA500"; // Orange color
-const FLASH_INNER_COLOR = "#FFFF55"; // Brighter yellow for center
+const FLASH_COLOR = '#FFA500'; // Orange color
+const FLASH_INNER_COLOR = '#FFFF55'; // Brighter yellow for center
 const DEFAULT_DURATION = 100; // Default duration
 // ------------------------
 
@@ -23,7 +23,7 @@ interface MuzzleFlashProps {
 // Utility to convert Vector3 array to THREE.Vector3 (needed for rendering)
 const arrayToVec = (arr?: [number, number, number]): THREE.Vector3 => {
   if (!arr) {
-    console.error("Missing required config properties");
+    console.error('Missing required config properties');
     return new THREE.Vector3();
   }
   return new THREE.Vector3(arr[0], arr[1], arr[2]);
@@ -37,10 +37,7 @@ const parseConfig = (config: { [key: string]: any }) => {
   };
 };
 
-export const MuzzleFlash: React.FC<MuzzleFlashProps> = ({
-  config,
-  onComplete,
-}) => {
+const MuzzleFlash: React.FC<MuzzleFlashProps> = ({ config, onComplete }) => {
   const { position, direction, duration } = parseConfig(config);
 
   const [visible, setVisible] = useState(true);
@@ -51,23 +48,12 @@ export const MuzzleFlash: React.FC<MuzzleFlashProps> = ({
     const quaternion = new THREE.Quaternion();
     const normalizedDirection = direction.clone().normalize();
     // Rotate the group whose default direction is Z-axis (0,0,1) to the firing direction
-    quaternion.setFromUnitVectors(
-      new THREE.Vector3(0, 0, 1),
-      normalizedDirection
-    );
+    quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normalizedDirection);
     return quaternion;
   }, [direction]);
 
   // --- Muzzle Flash Related Memos ---
-  const petalGeometry = useMemo(
-    () =>
-      new THREE.ConeGeometry(
-        FLASH_PETAL_BASE_RADIUS,
-        FLASH_PETAL_LENGTH,
-        FLASH_RADIAL_SEGMENTS
-      ),
-    []
-  );
+  const petalGeometry = useMemo(() => new THREE.ConeGeometry(FLASH_PETAL_BASE_RADIUS, FLASH_PETAL_LENGTH, FLASH_RADIAL_SEGMENTS), []);
   const petalMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
@@ -77,12 +63,9 @@ export const MuzzleFlash: React.FC<MuzzleFlashProps> = ({
         opacity: 0.8,
         depthWrite: false,
       }),
-    []
+    [],
   );
-  const innerGlowGeometry = useMemo(
-    () => new THREE.SphereGeometry(FLASH_INNER_GLOW_SIZE, 16, 8),
-    []
-  );
+  const innerGlowGeometry = useMemo(() => new THREE.SphereGeometry(FLASH_INNER_GLOW_SIZE, 16, 8), []);
   const innerGlowMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
@@ -92,7 +75,7 @@ export const MuzzleFlash: React.FC<MuzzleFlashProps> = ({
         opacity: 1.0,
         depthWrite: false,
       }),
-    []
+    [],
   );
   // --- End of Muzzle Flash Related Memos ---
 
@@ -118,7 +101,7 @@ export const MuzzleFlash: React.FC<MuzzleFlashProps> = ({
   });
 
   if (!position || !direction || !duration) {
-    console.error("[MuzzleFlash] Missing required config properties");
+    console.error('[MuzzleFlash] Missing required config properties');
     return null;
   }
 
@@ -135,11 +118,7 @@ export const MuzzleFlash: React.FC<MuzzleFlashProps> = ({
         return (
           <group key={i} rotation={[0, 0, radialAngle]}>
             <group rotation={[FLASH_TILT_ANGLE, 0, 0]}>
-              <mesh
-                geometry={petalGeometry}
-                material={petalMaterial}
-                position={[0, FLASH_PETAL_LENGTH / 2, 0]}
-              />
+              <mesh geometry={petalGeometry} material={petalMaterial} position={[0, FLASH_PETAL_LENGTH / 2, 0]} />
             </group>
           </group>
         );
@@ -147,3 +126,5 @@ export const MuzzleFlash: React.FC<MuzzleFlashProps> = ({
     </group>
   );
 };
+
+export default MuzzleFlash;

@@ -6,7 +6,7 @@ import { Collider, InteractionGroups, RigidBody } from '@dimforge/rapier3d-compa
 
 const DEFAULT_SIZE = new THREE.Vector3(0.5, 0.5, 1);
 
-export interface BulletProps {
+interface BulletProps {
   startPosition: THREE.Vector3;
   direction: THREE.Vector3;
   color?: THREE.ColorRepresentation | undefined;
@@ -19,7 +19,7 @@ export interface BulletProps {
   onComplete?: () => void;
 }
 
-export const Bullet: React.FC<BulletProps> = ({
+const Bullet: React.FC<BulletProps> = ({
   startPosition,
   direction,
   color = 'orange',
@@ -123,3 +123,5 @@ export const Bullet: React.FC<BulletProps> = ({
     </group>
   );
 };
+
+export default Bullet;

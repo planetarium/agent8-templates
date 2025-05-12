@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useControllerState } from 'vibe-starter-3d';
-import { Aircraft } from './Aircraft';
 import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
@@ -10,6 +9,7 @@ import { EffectType } from '../../types';
 import { usePlayerStore } from '../../stores/playerStore';
 import { RapierRigidBody } from '@react-three/rapier';
 import { createBulletEffectConfig } from '../../utils/effectUtils';
+import Aircraft from './Aircraft';
 
 const SHOOT_COOLDOWN = 200;
 
@@ -21,7 +21,7 @@ interface PlayerProps {
   bodyLength?: number;
 }
 
-export const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
+const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
   const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const [subscribeKeys, getKeyboardInputs] = useKeyboardControls();
@@ -121,3 +121,5 @@ export const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
 
   return <Aircraft bodyLength={bodyLength} localPlayer={true} />;
 };
+
+export default Player;

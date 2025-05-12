@@ -4,9 +4,9 @@ import { CuboidCollider, interactionGroups } from '@react-three/rapier';
 import { Vector3, Quaternion } from '@react-three/fiber';
 import { ActiveCollisionTypes, RigidBody } from '@dimforge/rapier3d-compat';
 import { NetworkObject, NetworkObjectHandle, CollisionGroup, toVector3 } from 'vibe-starter-3d';
-import { Aircraft } from './Aircraft';
 import { AircraftState } from '../../constants/aircraft';
 import { usePlayerStore } from '../../stores/playerStore';
+import Aircraft from './Aircraft';
 
 interface RemotePlayerProps {
   account: string;
@@ -22,7 +22,7 @@ export interface RemotePlayerHandle {
   syncState: (state: string, position: Vector3, quaternionRotation?: Quaternion) => void;
 }
 
-export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
+const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
   ({ account, nickname, position = [0, 0, 0], rotation = [0, 0, 0, 1], bodyLength = 3, hitBodySize = [1, 0.6, 3] }, ref) => {
     const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
 
@@ -48,7 +48,7 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
       if (!account || !networkObjectRef.current) return;
 
       registerPlayerRef(account, networkObjectRef.current.rigidBodyRef);
-      
+
       return () => {
         unregisterPlayerRef(account);
       };
@@ -88,3 +88,5 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
     );
   },
 );
+
+export default RemotePlayer;

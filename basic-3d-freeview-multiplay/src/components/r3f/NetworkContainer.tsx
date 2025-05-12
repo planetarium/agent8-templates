@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useGameServer, useRoomState } from '@agent8/gameserver';
 import { UserState } from '../../types';
 import React from 'react';
-import { RemotePlayer, RemotePlayerHandle } from './RemotePlayer';
+import RemotePlayer, { RemotePlayerHandle } from './RemotePlayer';
 import { DEFAULT_HEIGHT } from '../../constants/character';
 import { UnsubscribeFunction } from '@agent8/gameserver/dist/src/server/GameServer';
 
@@ -12,7 +12,7 @@ import { UnsubscribeFunction } from '@agent8/gameserver/dist/src/server/GameServ
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements for the local player.
  */
-export function NetworkContainer() {
+function NetworkContainer() {
   const { connected, server, account } = useGameServer();
   const { roomId } = useRoomState();
   const [otherReadyPlayers, setUserStates] = useState<{ [account: string]: UserState }>({});
@@ -112,3 +112,5 @@ export function NetworkContainer() {
     </>
   );
 }
+
+export default NetworkContainer;

@@ -1,11 +1,12 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
-import { Experience } from '../r3f/Experience';
 import { KeyboardControls, StatsGl } from '@react-three/drei';
-import { NetworkContainer } from '../r3f/NetworkContainer';
-import { RTT } from '../ui/RTT';
 import { keyboardMap } from '../../constants/controls';
+import Experience from '../r3f/Experience';
+import NetworkContainer from '../r3f/NetworkContainer';
+import RTT from '../ui/RTT';
+
 /**
  * Game scene props
  */
@@ -24,7 +25,7 @@ interface GameSceneProps {
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements.
  */
-export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, characterUrl }) => {
+const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, characterUrl }) => {
   return (
     <div className="relative w-full h-screen">
       <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10">
@@ -60,3 +61,5 @@ export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, chara
     </div>
   );
 };
+
+export default GameScene;

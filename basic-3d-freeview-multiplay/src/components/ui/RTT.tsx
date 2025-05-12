@@ -1,7 +1,7 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { networkSyncStore } from '../../stores/networkSyncStore';
 
-export const RTT: React.FC<{}> = () => {
+const RTT: React.FC<{}> = () => {
   const rtt = networkSyncStore((state) => state.rtt);
 
   return (
@@ -10,3 +10,5 @@ export const RTT: React.FC<{}> = () => {
     </div>
   );
 };
+
+export default RTT;

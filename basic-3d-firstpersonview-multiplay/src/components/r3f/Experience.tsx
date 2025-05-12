@@ -1,8 +1,8 @@
 import { Environment, Grid } from '@react-three/drei';
-import { Player } from './Player';
-import { Floor } from './Floor';
 import { CharacterState } from '../../constants/character';
 import { FirstPersonViewController } from 'vibe-starter-3d';
+import Player from './Player';
+import Floor from './Floor';
 
 const targetHeight = 1.6;
 
@@ -14,7 +14,7 @@ interface ExperienceProps {
   characterUrl: string;
 }
 
-export function Experience({ characterUrl }: ExperienceProps) {
+function Experience({ characterUrl }: ExperienceProps) {
   return (
     <>
       <ambientLight intensity={0.7} />
@@ -32,3 +32,5 @@ export function Experience({ characterUrl }: ExperienceProps) {
     </>
   );
 }
+
+export default Experience;

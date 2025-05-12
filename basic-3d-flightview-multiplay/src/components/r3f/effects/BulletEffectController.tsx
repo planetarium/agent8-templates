@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Bullet } from './Bullet';
-import { MuzzleFlash } from './MuzzleFlash';
 import { Collider, InteractionGroups, RigidBody } from '@dimforge/rapier3d-compat';
+import Bullet from './Bullet';
+import MuzzleFlash from './MuzzleFlash';
 
 const DEFAULT_SPEED = 100;
 const DEFAULT_DURATION = 2000;
@@ -16,16 +16,6 @@ export interface BulletEffectControllerProps {
   onComplete?: () => void;
 }
 
-export interface BulletEffectConfig {
-  startPosition: THREE.Vector3;
-  direction: THREE.Vector3;
-  speed?: number;
-  duration?: number;
-  scale?: number;
-  color?: string;
-  flashDuration?: number;
-}
-
 const parseConfig = (config: { [key: string]: any }) => {
   return {
     startPosition: new THREE.Vector3(...config.startPosition),
@@ -38,7 +28,7 @@ const parseConfig = (config: { [key: string]: any }) => {
   };
 };
 
-export const BulletEffectController: React.FC<BulletEffectControllerProps> = ({ config, collisionGroups, owner, onHit, onComplete }) => {
+const BulletEffectController: React.FC<BulletEffectControllerProps> = ({ config, collisionGroups, owner, onHit, onComplete }) => {
   const { startPosition, direction, speed, duration, scale, flashDuration, color } = parseConfig(config);
   if (!startPosition || !direction || !speed || !duration) {
     console.error('[BulletEffectController] Missing required config properties');
@@ -74,3 +64,5 @@ export const BulletEffectController: React.FC<BulletEffectControllerProps> = ({ 
     </>
   );
 };
+
+export default BulletEffectController;

@@ -3,16 +3,16 @@ import { useGameServer } from '@agent8/gameserver';
 import * as THREE from 'three';
 import { ActiveEffect, EffectType } from '../../types';
 import { useEffectStore, useActiveEffects } from '../../stores/effectStore';
-import { BulletEffectController } from './effects/BulletEffectController';
 import { Collider, RigidBody } from '@dimforge/rapier3d-compat';
-import { Explosion } from './effects/Explosion';
 import { usePlayerStore } from '../../stores/playerStore';
 import { createExplosionEffectConfig } from '../../utils/effectUtils';
+import Explosion from './effects/Explosion';
+import BulletEffectController from './effects/BulletEffectController';
 
 /**
  * Effect container component using Zustand store for effect management.
  */
-export function EffectContainer() {
+function EffectContainer() {
   // Call ALL hooks unconditionally at the top
   const { connected } = useGameServer();
   const { getPlayerRef } = usePlayerStore();
@@ -91,3 +91,5 @@ export function EffectContainer() {
   // Render all active effects from the store
   return <>{activeEffects.map(renderEffect)}</>;
 }
+
+export default EffectContainer;
