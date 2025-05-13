@@ -1,5 +1,8 @@
 {
   "characters": {
+    "base-model": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/base-model.glb"
+    },
     "solider": {
       "url": "https://agent8-games.verse8.io/assets/3d/characters/human/solider.glb"
     },
