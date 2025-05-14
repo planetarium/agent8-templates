@@ -368,7 +368,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterSta
 
   const characterUrl = useMemo(() => {
     const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
-    return characterData?.url || Assets.characters['y-bot.glb'].url;
+    return characterData?.url || Assets.characters['base-model'].url;
   }, [characterKey]);
 
   return (
