@@ -1,4 +1,4 @@
-import { Environment } from '@react-three/drei';
+import { Environment, Grid } from '@react-three/drei';
 import { CharacterState } from '../../constants/character';
 import Player from './Player';
 import Floor from './Floor';
@@ -17,7 +17,6 @@ const Experience = () => {
       {/* player character with controller */}
       <PointToMoveController
         cameraMode="orthographic"
-        followCharacter={true}
         followLight={{
           position: [0.6, 1, 0.3],
           intensity: 2,

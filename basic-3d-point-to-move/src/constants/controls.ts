@@ -5,6 +5,5 @@ export const keyboardMap: KeyboardControlsEntry[] = [
   { name: 'w', keys: ['KeyW'] },
   { name: 'e', keys: ['KeyE'] },
   { name: 'r', keys: ['KeyR'] },
-  { name: 'jump', keys: ['Space'] },
   { name: 'sprint', keys: ['Shift'] },
 ];

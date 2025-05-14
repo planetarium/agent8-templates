@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, useMouseControls, useControllerState } from 'vibe-starter-3d';
+import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, useControllerState } from 'vibe-starter-3d';
 
 import Assets from '../../assets.json';
 import { RapierRigidBody } from '@react-three/rapier';
@@ -20,7 +20,6 @@ interface PlayerInputs {
   isKicking: boolean;
   isMeleeAttack: boolean;
   isCasting: boolean;
-  isJumping: boolean;
   isMoving: boolean;
   isSprinting: boolean;
   currentVelY: number;
@@ -224,7 +223,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
   const determinePlayerState = useCallback(
     (
       currentState: CharacterState,
-      { isRevive, isDying, isPunching, isKicking, isMeleeAttack, isCasting, isJumping, isMoving, isSprinting }: PlayerInputs,
+      { isRevive, isDying, isPunching, isKicking, isMeleeAttack, isCasting, isMoving, isSprinting }: PlayerInputs,
     ): CharacterState => {
       if (isRevive && currentState === CharacterState.DIE) {
         return CharacterState.IDLE;
@@ -282,16 +281,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
         return CharacterState.CAST;
       }
 
-      // Jump animation (can't jump while punching)
-      if (
-        isJumping &&
-        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
-          currentState,
-        )
-      ) {
-        return CharacterState.JUMP;
-      }
-
       // Moving state
       if (
         [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
@@ -322,7 +311,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
     if (!rigidBody) return;
 
     // 2. Calculate keyboard state
-    const { q, w, e, r, jump, sprint } = getKeyboardInputs();
+    const { q, w, e, r, sprint } = getKeyboardInputs();
 
     // 3. Calculate attack state
     const isPunching = !!q;
@@ -331,7 +320,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
     const isCasting = !!r;
 
     // 4. Calculate movement state
-    const isJumping = jump;
     const isMoving = isPointMoving();
     const isSprinting = sprint;
 
@@ -345,7 +333,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
       isKicking,
       isMeleeAttack,
       isCasting,
-      isJumping,
       isMoving,
       isSprinting,
       currentVelY: currentVel.y,
