@@ -14,7 +14,7 @@ const Experience = () => {
       <Environment preset="sunset" background={false} />
 
       {/* player character with controller */}
-      <SideViewController cameraMode="perspective" followCharacter={true}>
+      <SideViewController cameraMode="perspective" followCharacter={true} camDistance={10}>
         <Player initState={CharacterState.IDLE} />
       </SideViewController>
 

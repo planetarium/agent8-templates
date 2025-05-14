@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, useMouseControls, useControllerState } from 'vibe-starter-3d';
+import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, useMouseControls, useControllerState, AnimationType } from 'vibe-starter-3d';
 
 import Assets from '../../assets.json';
 import { RapierRigidBody } from '@react-three/rapier';
@@ -89,10 +89,111 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
     };
   }, [account, registerPlayerRef, unregisterPlayerRef]);
 
+  const animationConfigMap: AnimationConfigMap = useMemo(
+    () => ({
+      [CharacterState.IDLE]: {
+        url: Assets.animations['idle-00'].url,
+        loop: true,
+      },
+      [CharacterState.IDLE_01]: {
+        url: Assets.animations['idle-01'].url,
+        loop: true,
+      },
+      [CharacterState.WALK]: {
+        url: Assets.animations['walk'].url,
+        loop: true,
+      },
+      [CharacterState.RUN]: {
+        url: Assets.animations['run-medium'].url,
+        loop: true,
+      },
+      [CharacterState.FAST_RUN]: {
+        url: Assets.animations['run-fast'].url,
+        loop: true,
+      },
+      [CharacterState.JUMP]: {
+        url: Assets.animations['jump'].url,
+        loop: true,
+        clampWhenFinished: true,
+      },
+      [CharacterState.PUNCH]: {
+        url: Assets.animations['punch-00'].url,
+        loop: false,
+        duration: 0.5,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
+      },
+      [CharacterState.PUNCH_01]: {
+        url: Assets.animations['punch-01'].url,
+        loop: false,
+        duration: 0.5,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.PUNCH_01),
+      },
+      [CharacterState.KICK]: {
+        url: Assets.animations['kick-00'].url,
+        loop: false,
+        duration: 0.75,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.KICK),
+      },
+      [CharacterState.KICK_01]: {
+        url: Assets.animations['kick-01'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.KICK_01),
+      },
+      [CharacterState.KICK_02]: {
+        url: Assets.animations['kick-02'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.KICK_02),
+      },
+      [CharacterState.MELEE_ATTACK]: {
+        url: Assets.animations['melee-attack'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.MELEE_ATTACK),
+      },
+      [CharacterState.CAST]: {
+        url: Assets.animations['cast'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+        onComplete: () => handleAnimationComplete(CharacterState.CAST),
+      },
+      [CharacterState.HIT]: {
+        url: Assets.animations['hit-to-body'].url,
+        loop: false,
+        clampWhenFinished: false,
+        onComplete: () => handleAnimationComplete(CharacterState.HIT),
+      },
+      [CharacterState.DANCE]: {
+        url: Assets.animations['dance'].url,
+        loop: false,
+        clampWhenFinished: false,
+        onComplete: () => handleAnimationComplete(CharacterState.DANCE),
+      },
+      [CharacterState.SWIM]: {
+        url: Assets.animations['swim'].url,
+        loop: true,
+      },
+      [CharacterState.DIE]: {
+        url: Assets.animations['death-backward'].url,
+        loop: false,
+        clampWhenFinished: true,
+      },
+    }),
+    [],
+  );
+
   const handleAnimationComplete = useCallback(
-    (state: CharacterState) => {
+    (type: AnimationType) => {
       setEnableInput(true);
-      switch (state) {
+      switch (type) {
         case CharacterState.PUNCH:
         case CharacterState.PUNCH_01:
           currentStateRef.current = CharacterState.IDLE_01;
@@ -119,107 +220,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
       }
     },
     [setEnableInput],
-  );
-
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
-    () => ({
-      [CharacterState.IDLE]: {
-        animationType: 'IDLE',
-        loop: true,
-      },
-      [CharacterState.IDLE_01]: {
-        animationType: 'IDLE_01',
-        loop: true,
-      },
-      [CharacterState.WALK]: {
-        animationType: 'WALK',
-        loop: true,
-      },
-      [CharacterState.RUN]: {
-        animationType: 'RUN',
-        loop: true,
-      },
-      [CharacterState.FAST_RUN]: {
-        animationType: 'FAST_RUN',
-        loop: true,
-      },
-      [CharacterState.JUMP]: {
-        animationType: 'JUMP',
-        loop: true,
-        clampWhenFinished: true,
-      },
-      [CharacterState.PUNCH]: {
-        animationType: 'PUNCH',
-        loop: false,
-        duration: 0.5,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-      },
-      [CharacterState.PUNCH_01]: {
-        animationType: 'PUNCH_01',
-        loop: false,
-        duration: 0.5,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.PUNCH_01),
-      },
-      [CharacterState.KICK]: {
-        animationType: 'KICK',
-        loop: false,
-        duration: 0.75,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.KICK),
-      },
-      [CharacterState.KICK_01]: {
-        animationType: 'KICK_01',
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.KICK_01),
-      },
-      [CharacterState.KICK_02]: {
-        animationType: 'KICK_02',
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.KICK_02),
-      },
-      [CharacterState.MELEE_ATTACK]: {
-        animationType: 'MELEE_ATTACK',
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.MELEE_ATTACK),
-      },
-      [CharacterState.CAST]: {
-        animationType: 'CAST',
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.CAST),
-      },
-      [CharacterState.HIT]: {
-        animationType: 'HIT',
-        loop: false,
-        clampWhenFinished: false,
-        onComplete: () => handleAnimationComplete(CharacterState.HIT),
-      },
-      [CharacterState.DANCE]: {
-        animationType: 'DANCE',
-        loop: false,
-        clampWhenFinished: false,
-        onComplete: () => handleAnimationComplete(CharacterState.DANCE),
-      },
-      [CharacterState.SWIM]: {
-        animationType: 'SWIM',
-        loop: true,
-      },
-      [CharacterState.DIE]: {
-        animationType: 'DIE',
-        loop: false,
-        clampWhenFinished: true,
-      },
-    }),
-    [handleAnimationComplete],
   );
 
   const determinePlayerState = useCallback(
@@ -352,52 +352,14 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
     });
   });
 
-  // Define the character resource with all animations
-  const characterResource: CharacterResource = useMemo(
-    () => ({
-      name: 'Default Character',
-      url: Assets.characters['base-model'].url,
-      animations: {
-        // Idle animations
-        IDLE: Assets.animations['idle-00'].url,
-        IDLE_01: Assets.animations['idle-01'].url,
-        RIFLE_IDLE: Assets.animations['rifle-idle'].url,
-        PISTOL_IDLE: Assets.animations['pistol-idle'].url,
-
-        // Movement animations
-        WALK: Assets.animations['walk'].url,
-        RUN: Assets.animations['run-medium'].url,
-        FAST_RUN: Assets.animations['run-fast'].url,
-        RIFLE_RUN: Assets.animations['rifle-run'].url,
-        PISTOL_RUN: Assets.animations['pistol-run'].url,
-        JUMP: Assets.animations['jump'].url,
-        SWIM: Assets.animations['swim'].url,
-
-        // Attack animations
-        PUNCH: Assets.animations['punch-00'].url,
-        PUNCH_01: Assets.animations['punch-01'].url,
-        KICK: Assets.animations['kick-00'].url,
-        KICK_01: Assets.animations['kick-01'].url,
-        KICK_02: Assets.animations['kick-02'].url,
-        MELEE_ATTACK: Assets.animations['melee-attack'].url,
-        CAST: Assets.animations['cast'].url,
-
-        // Other animations
-        DANCE: Assets.animations['dance'].url,
-        HIT: Assets.animations['hit-to-body'].url,
-        DIE: Assets.animations['death-backward'].url,
-      },
-    }),
-    [],
-  );
-
   return (
     <CharacterRenderer
       ref={characterRendererRef}
-      characterResource={characterResource}
+      url={Assets.characters['base-model'].url}
       animationConfigMap={animationConfigMap}
-      currentActionRef={currentStateRef}
+      currentAnimationRef={currentStateRef}
       targetHeight={targetHeight}
+      onAnimationComplete={handleAnimationComplete}
     />
   );
 });
