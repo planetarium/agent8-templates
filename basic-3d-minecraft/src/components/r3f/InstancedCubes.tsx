@@ -467,15 +467,15 @@ const InstancedCubes = () => {
     addCube(...directions[faceIndex], selectedTile);
   };
 
-  // Do not render if there are no cubes
-  if (cubes.length === 0) {
-    return null;
-  }
-
   // Memoize active chunks to prevent unnecessary rendering
   const activeChunksArray = useMemo(() => {
     return chunks.filter((chunk) => chunk.isActive);
   }, [chunks]);
+
+  // Do not render if there are no cubes
+  if (cubes.length === 0) {
+    return null;
+  }
 
   return (
     <>

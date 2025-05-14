@@ -16,6 +16,20 @@
     "tags": ["vite", "react", "typescript", "phaser", "platformer"]
   },
   {
+    "name": "basic-3d",
+    "label": "3D Character Freeview Template",
+    "description": "Three.js 3D basic template",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d",
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "three.js",
+      "3d"
+    ]
+  },
+  {
     "name": "basic-3d-freeview",
     "label": "3D Character Freeview Template",
     "description": "Three.js 3D game template with free camera movement. Features character controls and exploration in a 3D environment with unrestricted camera angles.",

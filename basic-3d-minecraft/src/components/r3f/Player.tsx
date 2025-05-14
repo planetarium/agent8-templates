@@ -356,7 +356,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
   const characterResource: CharacterResource = useMemo(
     () => ({
       name: 'Default Character',
-      url: Assets.characters['knight'].url,
+      url: Assets.characters['base-model'].url,
       animations: {
         // Idle animations
         IDLE: Assets.animations['idle-00'].url,
