@@ -8,9 +8,9 @@ import throttle from 'lodash/throttle';
 import { PlayerInputs, PlayerRef } from '../../types/player';
 import {
   AnimationConfigMap,
+  AnimationType,
   CharacterRenderer,
   CharacterRendererRef,
-  CharacterResource,
   toQuaternionArray,
   toVector3Array,
   useControllerState,
@@ -78,75 +78,6 @@ function usePlayerStates() {
 }
 
 /**
- * Hook for managing player animations.
- */
-function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterState>) {
-  // Callback triggered when a non-looping animation finishes.
-  const handleAnimationComplete = React.useCallback(
-    (completedState: CharacterState) => {
-      // Transition back to IDLE only if the state hasn't changed
-      if (currentStateRef.current === completedState) {
-        switch (completedState) {
-          case CharacterState.JUMP:
-          case CharacterState.PUNCH:
-          case CharacterState.HIT:
-            currentStateRef.current = CharacterState.IDLE;
-            break;
-          default:
-            break;
-        }
-      }
-    },
-    [currentStateRef],
-  );
-
-  // Memoized map of animation configurations.
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
-    () => ({
-      [CharacterState.IDLE]: {
-        animationType: 'IDLE',
-        loop: true,
-      },
-      [CharacterState.WALK]: {
-        animationType: 'WALK',
-        loop: true,
-      },
-      [CharacterState.RUN]: {
-        animationType: 'RUN',
-        loop: true,
-      },
-      [CharacterState.JUMP]: {
-        animationType: 'JUMP',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.JUMP),
-      },
-      [CharacterState.PUNCH]: {
-        animationType: 'PUNCH',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-      },
-      [CharacterState.HIT]: {
-        animationType: 'HIT',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.HIT),
-      },
-      [CharacterState.DIE]: {
-        animationType: 'DIE',
-        loop: false,
-        duration: 10,
-        clampWhenFinished: true,
-      },
-    }),
-    [handleAnimationComplete],
-  );
-
-  return { animationConfigMap };
-}
-
-/**
  * Player component - Represents the local player character.
  * Manages inputs, state transitions, animations, and network synchronization.
  */
@@ -157,7 +88,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterSta
   const { determinePlayerState } = usePlayerStates();
   const { rigidBody: controllerRigidBody, childrenGroup: controllerChildrenGroup, setPosition, setRotation, setVelocity } = useControllerState();
   const currentStateRef = useRef<CharacterState>(initialState);
-  const { animationConfigMap } = usePlayerAnimations(currentStateRef);
 
   const playerRef = useRef<RapierRigidBody>(null);
   const characterRendererRef = useRef<CharacterRendererRef>(null);
@@ -193,6 +123,65 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterSta
       },
     }),
     [],
+  );
+
+  // Memoized map of animation configurations.
+  const animationConfigMap: AnimationConfigMap = useMemo(
+    () => ({
+      [CharacterState.IDLE]: {
+        url: Assets.animations.idle.url,
+        loop: true,
+      },
+      [CharacterState.WALK]: {
+        url: Assets.animations.walk.url,
+        loop: true,
+      },
+      [CharacterState.RUN]: {
+        url: Assets.animations.run.url,
+        loop: true,
+      },
+      [CharacterState.JUMP]: {
+        url: Assets.animations.jump.url,
+        loop: false,
+        clampWhenFinished: true,
+      },
+      [CharacterState.PUNCH]: {
+        url: Assets.animations.punch.url,
+        loop: false,
+        clampWhenFinished: true,
+      },
+      [CharacterState.HIT]: {
+        url: Assets.animations.hit.url,
+        loop: false,
+        clampWhenFinished: true,
+      },
+      [CharacterState.DIE]: {
+        url: Assets.animations.die.url,
+        loop: false,
+        duration: 10,
+        clampWhenFinished: true,
+      },
+    }),
+    [],
+  );
+
+  // Callback triggered when a non-looping animation finishes.
+  const handleAnimationComplete = React.useCallback(
+    (type: AnimationType) => {
+      // Transition back to IDLE only if the state hasn't changed
+      if (currentStateRef.current === type) {
+        switch (type) {
+          case CharacterState.JUMP:
+          case CharacterState.PUNCH:
+          case CharacterState.HIT:
+            currentStateRef.current = CharacterState.IDLE;
+            break;
+          default:
+            break;
+        }
+      }
+    },
+    [currentStateRef],
   );
 
   // Optimized network synchronization function
@@ -283,35 +272,22 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterSta
     syncToNetwork(currentPosition, currentRotation, newState);
   });
 
-  // Memoized character resource loading.
-  const characterResource: CharacterResource = useMemo(() => {
-    const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
-    const characterUrl = characterData?.url || Assets.characters['y-bot.glb'].url;
-    return {
-      name: characterKey,
-      url: characterUrl,
-      animations: {
-        IDLE: Assets.animations.idle.url,
-        WALK: Assets.animations.walk.url,
-        RUN: Assets.animations.run.url,
-        JUMP: Assets.animations.jump.url,
-        PUNCH: Assets.animations.punch.url,
-        HIT: Assets.animations.hit.url,
-        DIE: Assets.animations.die.url,
-      },
-    };
-  }, [characterKey]);
-
   if (!server || !connected) return null;
+
+  const characterUrl = useMemo(() => {
+    const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
+    return characterData?.url || Assets.characters['y-bot.glb'].url;
+  }, [characterKey]);
 
   // Render the character model and animations
   return (
     <CharacterRenderer
       ref={characterRendererRef}
-      characterResource={characterResource}
+      url={characterUrl}
       animationConfigMap={animationConfigMap}
-      currentActionRef={currentStateRef}
+      currentAnimationRef={currentStateRef}
       targetHeight={targetHeight}
+      onAnimationComplete={handleAnimationComplete}
     />
   );
 });

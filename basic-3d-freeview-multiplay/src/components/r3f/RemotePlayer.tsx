@@ -4,9 +4,9 @@ import { CharacterState } from '../../constants/character';
 import {
   AnimationConfig,
   AnimationConfigMap,
+  AnimationType,
   CharacterRenderer,
   CharacterRendererRef,
-  CharacterResource,
   ControllerUtils,
   NetworkObject,
   NetworkObjectHandle,
@@ -29,62 +29,11 @@ export interface RemotePlayerHandle {
   syncState: (state: string, position: Vector3, quaternionRotation?: Quaternion) => void;
 }
 
-// Hook for managing character animations based on state
-const usePlayerAnimations = (currentStateRef: React.MutableRefObject<CharacterState>) => {
-  const handleAnimationComplete = React.useCallback(
-    (state: CharacterState) => {
-      switch (state) {
-        case CharacterState.JUMP:
-        case CharacterState.PUNCH:
-        case CharacterState.HIT:
-          if (currentStateRef.current === state) {
-            currentStateRef.current = CharacterState.IDLE;
-          }
-          break;
-        default:
-          break;
-      }
-    },
-    [currentStateRef],
-  );
-
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
-    () => ({
-      [CharacterState.IDLE]: { animationType: 'IDLE', loop: true } as AnimationConfig,
-      [CharacterState.WALK]: { animationType: 'WALK', loop: true } as AnimationConfig,
-      [CharacterState.RUN]: { animationType: 'RUN', loop: true } as AnimationConfig,
-      [CharacterState.JUMP]: {
-        animationType: 'JUMP',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.JUMP),
-      } as AnimationConfig,
-      [CharacterState.PUNCH]: {
-        animationType: 'PUNCH',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-      } as AnimationConfig,
-      [CharacterState.HIT]: {
-        animationType: 'HIT',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.HIT),
-      } as AnimationConfig,
-      [CharacterState.DIE]: { animationType: 'DIE', loop: false, duration: 10, clampWhenFinished: true } as AnimationConfig,
-    }),
-    [handleAnimationComplete],
-  );
-
-  return { animationConfigMap };
-};
-
 // Remote player with interpolation/extrapolation movement
 const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
   ({ account, characterUrl: characterKey, position = [0, 0, 0], rotation = [0, 0, 0, 1], targetHeight = 1.6, nickname }, ref) => {
     const networkObjectRef = useRef<NetworkObjectHandle>(null);
     const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
-    const { animationConfigMap } = usePlayerAnimations(currentStateRef);
 
     useImperativeHandle(
       ref,
@@ -100,30 +49,69 @@ const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
       [],
     );
 
+    // Memoized map of animation configurations.
+    const animationConfigMap: AnimationConfigMap = useMemo(
+      () => ({
+        [CharacterState.IDLE]: {
+          url: Assets.animations.idle.url,
+          loop: true,
+        },
+        [CharacterState.WALK]: {
+          url: Assets.animations.walk.url,
+          loop: true,
+        },
+        [CharacterState.RUN]: {
+          url: Assets.animations.run.url,
+          loop: true,
+        },
+        [CharacterState.JUMP]: {
+          url: Assets.animations.jump.url,
+          loop: false,
+          clampWhenFinished: true,
+        },
+        [CharacterState.PUNCH]: {
+          url: Assets.animations.punch.url,
+          loop: false,
+          clampWhenFinished: true,
+        },
+        [CharacterState.HIT]: {
+          url: Assets.animations.hit.url,
+          loop: false,
+          clampWhenFinished: true,
+        },
+        [CharacterState.DIE]: {
+          url: Assets.animations.die.url,
+          loop: false,
+          duration: 10,
+          clampWhenFinished: true,
+        },
+      }),
+      [],
+    );
+
+    // Callback triggered when a non-looping animation finishes.
+    const handleAnimationComplete = React.useCallback(
+      (type: AnimationType) => {
+        switch (type) {
+          case CharacterState.JUMP:
+          case CharacterState.PUNCH:
+          case CharacterState.HIT:
+            if (currentStateRef.current === type) {
+              currentStateRef.current = CharacterState.IDLE;
+            }
+            break;
+          default:
+            break;
+        }
+      },
+      [currentStateRef],
+    );
+
     useEffect(() => {
       if (!networkObjectRef.current || !networkObjectRef.current.rigidBodyRef.current) return;
 
       networkObjectRef.current.rigidBodyRef.current.userData = { account };
     }, [networkObjectRef.current]);
-
-    // Character resource setup
-    const characterResource: CharacterResource = useMemo(() => {
-      const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
-      const characterUrl = characterData?.url;
-      return {
-        name: characterKey,
-        url: characterUrl,
-        animations: {
-          IDLE: Assets.animations.idle.url,
-          WALK: Assets.animations.walk.url,
-          RUN: Assets.animations.run.url,
-          JUMP: Assets.animations.jump.url,
-          PUNCH: Assets.animations.punch.url,
-          HIT: Assets.animations.hit.url,
-          DIE: Assets.animations.die.url,
-        },
-      };
-    }, [characterKey]);
 
     // Renderer setup
     const characterRendererRef = useRef<CharacterRendererRef>(null);
@@ -131,6 +119,11 @@ const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
 
     const capsuleRadius = ControllerUtils.capsuleRadius(targetHeight); // capsule collider radius
     const capsuleHalfHeight = ControllerUtils.capsuleHalfHeight(targetHeight); // half height of capsule collider
+
+    const characterUrl = useMemo(() => {
+      const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
+      return characterData?.url || Assets.characters['y-bot.glb'].url;
+    }, [characterKey]);
 
     return (
       <NetworkObject ref={networkObjectRef} position={position} rotation={rotation}>
@@ -142,11 +135,12 @@ const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
           />
         </group>
         <CharacterRenderer
-          characterResource={characterResource}
-          animationConfigMap={animationConfigMap}
-          currentActionRef={currentStateRef}
-          targetHeight={targetHeight}
           ref={characterRendererRef}
+          url={characterUrl}
+          animationConfigMap={animationConfigMap}
+          currentAnimationRef={currentStateRef}
+          targetHeight={targetHeight}
+          onAnimationComplete={handleAnimationComplete}
         />
 
         {/* Render custom UI (e.g., nickname) */}

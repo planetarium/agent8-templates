@@ -1,9 +1,9 @@
-import React, { useRef, useMemo, useImperativeHandle, forwardRef, useEffect } from 'react';
+import React, { useRef, useMemo, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, CharacterResource, useControllerState } from 'vibe-starter-3d';
+import { AnimationConfigMap, AnimationType, CharacterRenderer, CharacterRendererRef, useControllerState } from 'vibe-starter-3d';
 import { useGameServer } from '@agent8/gameserver';
 import { usePlayerStore } from '../../stores/playerStore';
 import { RapierRigidBody } from '@react-three/rapier';
@@ -97,71 +97,6 @@ function usePlayerStates() {
 }
 
 /**
- * Hook for handling player animations
- */
-function usePlayerAnimations(currentStateRef: React.MutableRefObject<CharacterState>) {
-  const handleAnimationComplete = React.useCallback(
-    (state: CharacterState) => {
-      switch (state) {
-        case CharacterState.PUNCH:
-          currentStateRef.current = CharacterState.IDLE;
-          break;
-        case CharacterState.HIT:
-          currentStateRef.current = CharacterState.IDLE;
-          break;
-        default:
-          break;
-      }
-    },
-    [currentStateRef],
-  );
-
-  // Animation configuration
-  const animationConfigMap: Partial<AnimationConfigMap<CharacterState>> = useMemo(
-    () => ({
-      [CharacterState.IDLE]: {
-        animationType: 'IDLE',
-        loop: true,
-      },
-      [CharacterState.WALK]: {
-        animationType: 'WALK',
-        loop: true,
-      },
-      [CharacterState.RUN]: {
-        animationType: 'RUN',
-        loop: true,
-      },
-      [CharacterState.JUMP]: {
-        animationType: 'JUMP',
-        loop: true,
-        clampWhenFinished: false,
-      },
-      [CharacterState.PUNCH]: {
-        animationType: 'PUNCH',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.PUNCH),
-      },
-      [CharacterState.HIT]: {
-        animationType: 'HIT',
-        loop: false,
-        clampWhenFinished: true,
-        onComplete: () => handleAnimationComplete(CharacterState.HIT),
-      },
-      [CharacterState.DIE]: {
-        animationType: 'DIE',
-        loop: false,
-        duration: 10,
-        clampWhenFinished: true,
-      },
-    }),
-    [handleAnimationComplete],
-  );
-
-  return { animationConfigMap };
-}
-
-/**
  * Player component that manages character model and animations
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
@@ -172,7 +107,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
   const currentStateRef = useRef<CharacterState>(initAction);
   const [, getKeyboardInputs] = useKeyboardControls();
   const { determinePlayerState: determinePlayerState } = usePlayerStates();
-  const { animationConfigMap } = usePlayerAnimations(currentStateRef);
   const { rigidBody } = useControllerState();
 
   const playerRef = useRef<RapierRigidBody>(null);
@@ -205,6 +139,62 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
       unregisterPlayerRef(account);
     };
   }, [account, registerPlayerRef, unregisterPlayerRef]);
+
+  // Memoized map of animation configurations.
+  const animationConfigMap: AnimationConfigMap = useMemo(
+    () => ({
+      [CharacterState.IDLE]: {
+        url: Assets.animations.idle.url,
+        loop: true,
+      },
+      [CharacterState.WALK]: {
+        url: Assets.animations.walk.url,
+        loop: true,
+      },
+      [CharacterState.RUN]: {
+        url: Assets.animations.run.url,
+        loop: true,
+      },
+      [CharacterState.JUMP]: {
+        url: Assets.animations.jump.url,
+        loop: true,
+      },
+      [CharacterState.PUNCH]: {
+        url: Assets.animations.punch.url,
+        loop: false,
+        clampWhenFinished: true,
+      },
+      [CharacterState.HIT]: {
+        url: Assets.animations.hit.url,
+        loop: false,
+        clampWhenFinished: true,
+      },
+      [CharacterState.DIE]: {
+        url: Assets.animations.die.url,
+        loop: false,
+        duration: 10,
+        clampWhenFinished: true,
+      },
+    }),
+    [],
+  );
+
+  // Callback triggered when a non-looping animation finishes.
+  const handleAnimationComplete = useCallback(
+    (type: AnimationType) => {
+      switch (type) {
+        case CharacterState.PUNCH:
+          currentStateRef.current = CharacterState.IDLE;
+          break;
+        case CharacterState.HIT:
+          currentStateRef.current = CharacterState.IDLE;
+          break;
+        default:
+          break;
+      }
+    },
+    [currentStateRef],
+  );
 
   // Update player action state based on inputs and physics
   useFrame(() => {
@@ -241,31 +231,14 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
     });
   });
 
-  // Define the character resource with all animations
-  const characterResource: CharacterResource = useMemo(
-    () => ({
-      name: 'Default Character',
-      url: Assets.characters['knight'].url,
-      animations: {
-        IDLE: Assets.animations.idle.url,
-        WALK: Assets.animations.walk.url,
-        RUN: Assets.animations.run.url,
-        JUMP: Assets.animations.jump.url,
-        PUNCH: Assets.animations.punch.url,
-        HIT: Assets.animations.hit.url,
-        DIE: Assets.animations.die.url,
-      },
-    }),
-    [],
-  );
-
   return (
     <CharacterRenderer
       ref={characterRendererRef}
-      characterResource={characterResource}
+      url={Assets.characters['base-model'].url}
       animationConfigMap={animationConfigMap}
-      currentActionRef={currentStateRef}
+      currentAnimationRef={currentStateRef}
       targetHeight={targetHeight}
+      onAnimationComplete={handleAnimationComplete}
     />
   );
 });
