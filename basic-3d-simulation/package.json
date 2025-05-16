@@ -11,18 +11,18 @@
   },
   "dependencies": {
     "@agent8/gameserver": "^1.5.1",
-    "@dimforge/rapier3d-compat": "0.14.0",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@react-three/postprocessing": "^2.19.1",
     "@react-three/rapier": "1.5.0",
+    "@dimforge/rapier3d-compat": "0.14.0",
     "lucide-react": "^0.482.0",
     "postprocessing": "^6.37.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.174.0",
     "three-stdlib": "2.35.14",
-    "vibe-starter-3d": "file:../../",
+    "vibe-starter-3d": "^0.3.16",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
