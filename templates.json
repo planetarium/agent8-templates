@@ -212,5 +212,13 @@
       "building",
       "survival"
     ]
+  },
+  {
+    "name": "basic-3d-simulation",
+    "label": "3D Character Simulation Template",
+    "description": "Three.js single-player simulation game template. Features character control from a third-person camera with physics simulation. This template is ready to use, camera system, character system, and map system.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "basic-3d-simulation",
+    "tags": ["vite", "react", "typescript", "three.js", "3d", "map", "single-player", "simulation", "physics", "civilization", "city-builder", "simcity", "4x"]
   }
 ]
