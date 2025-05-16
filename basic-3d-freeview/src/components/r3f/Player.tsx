@@ -9,11 +9,13 @@ import { usePlayerStore } from '../../stores/playerStore';
 import { RapierRigidBody } from '@react-three/rapier';
 import Assets from '../../assets.json';
 
-interface PlayerState {
+interface PlayerInputs {
   isRevive: boolean;
   isDying: boolean;
   isPunching: boolean;
-  isHit: boolean;
+  isKicking: boolean;
+  isMeleeAttack: boolean;
+  isCasting: boolean;
   isJumping: boolean;
   isMoving: boolean;
   isRunning: boolean;
@@ -41,62 +43,6 @@ interface PlayerProps {
 }
 
 /**
- * Hook for player state determination logic
- */
-function usePlayerStates() {
-  // Function to determine player state based on inputs and current state
-  const determinePlayerState = React.useCallback(
-    (currentState: CharacterState, { isRevive, isDying, isPunching, isHit, isJumping, isMoving, isRunning }: PlayerState): CharacterState => {
-      // Revival processing - transition from DIE to IDLE
-      if (isRevive && currentState === CharacterState.DIE) {
-        return CharacterState.IDLE;
-      }
-
-      // Maintain death state
-      if (isDying || currentState === CharacterState.DIE) {
-        return CharacterState.DIE;
-      }
-
-      // Punch animation - start only if not already punching
-      if (isPunching && currentState !== CharacterState.PUNCH) {
-        return CharacterState.PUNCH;
-      }
-
-      // Hit animation - immediately transition to HIT
-      if (isHit) {
-        return CharacterState.HIT;
-      }
-
-      // Jump animation (can't jump while punching)
-      if (isJumping && currentState !== CharacterState.PUNCH) {
-        return CharacterState.JUMP;
-      }
-
-      // Maintain punch animation until completion
-      if (currentState === CharacterState.PUNCH) {
-        return CharacterState.PUNCH;
-      }
-
-      // Idle state
-      if (!isMoving) {
-        return CharacterState.IDLE;
-      }
-
-      // Walk/Run animation
-      if (isMoving) {
-        return isRunning ? CharacterState.RUN : CharacterState.WALK;
-      }
-
-      // Default - maintain current action
-      return currentState;
-    },
-    [],
-  );
-
-  return { determinePlayerState: determinePlayerState };
-}
-
-/**
  * Player component that manages character model and animations
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
@@ -106,7 +52,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const currentStateRef = useRef<CharacterState>(initAction);
   const [, getKeyboardInputs] = useKeyboardControls();
-  const { determinePlayerState: determinePlayerState } = usePlayerStates();
+  const { setEnableInput } = useControllerState();
   const { rigidBody } = useControllerState();
 
   const playerRef = useRef<RapierRigidBody>(null);
@@ -144,35 +90,89 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
   const animationConfigMap: AnimationConfigMap = useMemo(
     () => ({
       [CharacterState.IDLE]: {
-        url: Assets.animations.idle.url,
+        url: Assets.animations['idle-00'].url,
+        loop: true,
+      },
+      [CharacterState.IDLE_01]: {
+        url: Assets.animations['idle-01'].url,
         loop: true,
       },
       [CharacterState.WALK]: {
-        url: Assets.animations.walk.url,
+        url: Assets.animations['walk'].url,
         loop: true,
       },
       [CharacterState.RUN]: {
-        url: Assets.animations.run.url,
+        url: Assets.animations['run-medium'].url,
+        loop: true,
+      },
+      [CharacterState.FAST_RUN]: {
+        url: Assets.animations['run-fast'].url,
         loop: true,
       },
       [CharacterState.JUMP]: {
-        url: Assets.animations.jump.url,
+        url: Assets.animations['jump'].url,
         loop: true,
+        clampWhenFinished: true,
       },
       [CharacterState.PUNCH]: {
-        url: Assets.animations.punch.url,
+        url: Assets.animations['punch-00'].url,
         loop: false,
+        duration: 0.5,
+        clampWhenFinished: true,
+      },
+      [CharacterState.PUNCH_01]: {
+        url: Assets.animations['punch-01'].url,
+        loop: false,
+        duration: 0.5,
+        clampWhenFinished: true,
+      },
+      [CharacterState.KICK]: {
+        url: Assets.animations['kick-00'].url,
+        loop: false,
+        duration: 0.75,
+        clampWhenFinished: true,
+      },
+      [CharacterState.KICK_01]: {
+        url: Assets.animations['kick-01'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+      },
+      [CharacterState.KICK_02]: {
+        url: Assets.animations['kick-02'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+      },
+      [CharacterState.MELEE_ATTACK]: {
+        url: Assets.animations['melee-attack'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+      },
+      [CharacterState.CAST]: {
+        url: Assets.animations['cast'].url,
+        loop: false,
+        duration: 1,
         clampWhenFinished: true,
       },
       [CharacterState.HIT]: {
-        url: Assets.animations.hit.url,
+        url: Assets.animations['hit-to-body'].url,
         loop: false,
-        clampWhenFinished: true,
+        clampWhenFinished: false,
+      },
+      [CharacterState.DANCE]: {
+        url: Assets.animations['dance'].url,
+        loop: false,
+        clampWhenFinished: false,
+      },
+      [CharacterState.SWIM]: {
+        url: Assets.animations['swim'].url,
+        loop: true,
       },
       [CharacterState.DIE]: {
-        url: Assets.animations.die.url,
+        url: Assets.animations['death-backward'].url,
         loop: false,
-        duration: 10,
         clampWhenFinished: true,
       },
     }),
@@ -182,18 +182,125 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
   // Callback triggered when a non-looping animation finishes.
   const handleAnimationComplete = useCallback(
     (type: AnimationType) => {
+      setEnableInput(true);
       switch (type) {
         case CharacterState.PUNCH:
-          currentStateRef.current = CharacterState.IDLE;
+        case CharacterState.PUNCH_01:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.KICK:
+        case CharacterState.KICK_01:
+        case CharacterState.KICK_02:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.CAST:
+          currentStateRef.current = CharacterState.IDLE_01;
           break;
         case CharacterState.HIT:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.MELEE_ATTACK:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.DANCE:
           currentStateRef.current = CharacterState.IDLE;
           break;
         default:
           break;
       }
     },
-    [currentStateRef],
+    [setEnableInput],
+  );
+
+  const determinePlayerState = useCallback(
+    (
+      currentState: CharacterState,
+      { isRevive, isDying, isPunching, isKicking, isMeleeAttack, isCasting, isJumping, isMoving, isRunning }: PlayerInputs,
+    ): CharacterState => {
+      if (isRevive && currentState === CharacterState.DIE) {
+        return CharacterState.IDLE;
+      }
+      // Maintain death state
+      if (isDying || currentState === CharacterState.DIE) {
+        return CharacterState.DIE;
+      }
+
+      // Punch animation - start only if not already punching
+      if (
+        isPunching &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        setEnableInput(false);
+        return CharacterState.PUNCH;
+      }
+
+      // Kick animation - start only if not already punching
+      if (
+        isKicking &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        setEnableInput(false);
+        return CharacterState.KICK;
+      }
+
+      // Melee attack animation - start only if not already punching or kicking
+      if (
+        isMeleeAttack &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        setEnableInput(false);
+        return CharacterState.MELEE_ATTACK;
+      }
+
+      // Cast animation - start only if not already punching or kicking
+      if (
+        isCasting &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        setEnableInput(false);
+        return CharacterState.CAST;
+      }
+
+      // Jump animation (can't jump while punching)
+      if (
+        isJumping &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        return CharacterState.JUMP;
+      }
+
+      // Moving state
+      if (
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        if (isMoving) {
+          if (isRunning) {
+            return CharacterState.RUN;
+          } else {
+            return CharacterState.WALK;
+          }
+        } else {
+          if (currentState != CharacterState.IDLE_01) {
+            return CharacterState.IDLE;
+          }
+        }
+      }
+      // Default - maintain current action
+      return currentState;
+    },
+    [setEnableInput],
   );
 
   // Update player action state based on inputs and physics
@@ -208,9 +315,9 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
       run: isRunning,
       jump: isJumping,
       action1: isPunching,
-      action2: isHit,
-      action3: isDying,
-      action4: isRevive,
+      action2: isKicking,
+      action3: isMeleeAttack,
+      action4: isCasting,
     } = getKeyboardInputs();
 
     const currentVel = rigidBody.linvel?.() || { y: 0 };
@@ -219,11 +326,14 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
     const isMoving = forward || backward || leftward || rightward;
 
     // Call action determination logic
+    // 5. Determine player state
     currentStateRef.current = determinePlayerState(currentStateRef.current, {
-      isRevive,
-      isDying,
+      isRevive: false,
+      isDying: false,
       isPunching,
-      isHit,
+      isKicking,
+      isMeleeAttack,
+      isCasting,
       isJumping,
       isMoving,
       isRunning,
