@@ -16,13 +16,14 @@ This project uses a **3D Three.js-based approach with Voxel Optimization** becau
 
 Key technologies:
 
-- Three.js for 3D rendering
-- React Three Fiber for React integration
-- @react-three/rapier for physics simulation
-- Simplex-noise for procedural terrain generation
-- Zustand for game state management
-- vibe-starter-3d for character control and animation
-- Instanced Meshes for optimized block rendering
+- Three.js - 3D rendering
+- React Three Fiber - React integration
+- @react-three/rapier - Physics simulation
+- Simplex-noise - Procedural terrain generation
+- Zustand - State management
+- vibe-starter-3d - Character control and animation
+- Instanced Meshes - Optimized block rendering
+- Tailwind CSS - UI composition
 
 ## Implemented Features
 
@@ -36,6 +37,7 @@ Key technologies:
 - Performance optimizations for handling thousands of blocks
 - Character animation system (idle, walk, run, jump)
 - Dynamic loading and unloading of terrain chunks based on player proximity
+- Asset preloading system with progress indication
 
 ## File Structure Overview
 
@@ -47,18 +49,27 @@ Key technologies:
 ### `src/App.tsx`
 
 - Main application component.
-- Renders the `GameScene` component.
+- Configures the overall layout and includes the `GameScene` component.
+- Manages loading state and switches between `PreloadScene` and `GameScene`.
+
+### `src/App.css`
+
+- Defines the main styles for the `App` component and its child UI elements.
+
+### `src/index.css`
+
+- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
 
 ### `src/assets.json`
 
 - Defines game assets for character models and animations.
 - Maps animation types to resource URLs.
 
-### `src/store/`
+### `src/stores/`
 
 - Directory containing Zustand stores for application state management.
   - **`cubeStore.ts`**: Store for voxel world management that handles adding, removing, and storing block data. Also manages terrain generation state and controls selected block type.
-  - **`playerStore.ts`**: Store for player refs.
+  - **`playerStore.ts`**: Manages player-related state and references, particularly for physics interactions. Provides methods to register, unregister, and access player rigid body references.
 
 ### `src/utils/`
 
@@ -83,19 +94,20 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Sets up 3D environment. Includes the crucial `FirstPersonViewController`, physics, lighting, and sky. Configures core game elements and handles terrain regeneration.
+    - **`Experience.tsx`**: Sets up 3D environment. Includes the crucial `FirstPersonViewController`, the `FollowLight` component that must be included with the controller for proper lighting, physics, lighting, and sky. Configures core game elements and handles terrain regeneration. The inclusion of both `FirstPersonViewController` and `FollowLight` is essential for the proper functioning of the first-person environment.
     - **`Player.tsx`**: Player character implementation that handles animations, movement, and state transitions. Processes user input for character control.
     - **`InstancedCubes.tsx`**: Core voxel rendering system that implements chunk-based rendering optimization. Uses instanced meshes for efficient block rendering and includes custom shader for texture atlas support.
     - **`CubePreview.tsx`**: Shows preview of block placement location and provides visual feedback for block placement.
     - **`Floor.tsx`**: Implements basic floor grid for reference and serves as the bottom boundary of the world.
 
-- **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Contains components related to 3D scene setup.
 
-  - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`PreloadScene.tsx`**: Manages asset preloading before the game starts. Loads all assets defined in assets.json (models, textures, etc.) and displays a loading progress bar. Ensures all assets are loaded before the game begins.
 
-- **`ui/`**: Directory containing components related to the user interface (UI).
-  - **`Crosshair.tsx`**: Place crosshair over `Canvas` component.
-  - **`TileSelector.tsx`**: Place tile selector ui over `Canvas` component.
+  - **`ui/`**: Directory containing components related to the user interface (UI).
+    - **`Crosshair.tsx`**: Displays a crosshair in the center of the screen for accurate block targeting.
+    - **`TileSelector.tsx`**: Provides UI for selecting different block types.
 
 ### Key Libraries & Components from External Sources
 
@@ -107,6 +119,7 @@ Key technologies:
     - `setEnableInput`: Function to enable/disable player input controls
     - `rigidBody`: Reference to the physics body for the character
   - **`useMouseControls`**: A React hook that provides access to mouse input state for interaction with the voxel world.
+  - **`FollowLight`**: A directional light that follows the character to ensure consistent lighting throughout the voxel world.
 
 - **`@react-three/rapier`**: Physics library for React Three Fiber.
   - Provides collision detection essential for character movement and interaction with blocks
@@ -124,6 +137,8 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 4. **Texture Atlas System**: Multiple block types are supported through a texture atlas implementation, allowing for diverse environments with minimal performance impact.
 
-5. **First-Person Control**: The `FirstPersonViewController` component from vibe-starter-3d provides smooth first-person movement and camera control, allowing players to navigate and interact with the voxel world.
+5. **First-Person Control**: The `FirstPersonViewController` component from vibe-starter-3d provides smooth first-person movement and camera control, allowing players to navigate and interact with the voxel world. The `FollowLight` component works alongside the controller to provide consistent lighting.
 
-6. **State Management**: Zustand stores like `cubeStore` maintain the state of the voxel world, tracking block positions, types, and handling block operations in a performant way.
+6. **State Management**: Zustand stores like `cubeStore` maintain the state of the voxel world, tracking block positions, types, and handling block operations in a performant way. Additionally, `playerStore` manages physics body references.
+
+7. **Asset Management**: `PreloadScene` component ensures all 3D models, textures, and other assets are preloaded before gameplay begins, providing a smooth user experience with a visual loading indicator.

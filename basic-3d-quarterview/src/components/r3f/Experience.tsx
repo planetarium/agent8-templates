@@ -2,25 +2,19 @@ import { Environment } from '@react-three/drei';
 import { CharacterState } from '../../constants/character';
 import Player from './Player';
 import Floor from './Floor';
-import { QuarterViewController } from 'vibe-starter-3d';
+import { QuarterViewController, FollowLight } from 'vibe-starter-3d';
 
 const Experience = () => {
   return (
     <>
-      {/* Ambient light */}
       <ambientLight intensity={0.7} />
 
-      {/* Environment */}
+      <FollowLight offset={[60, 100, 30]} intensity={2} />
+
       <Environment preset="sunset" background={false} />
 
       {/* Player character with Controller */}
-      <QuarterViewController
-        followCharacter={true}
-        followLight={{
-          position: [0.6, 1, 0.3],
-          intensity: 2,
-        }}
-      >
+      <QuarterViewController followCharacter={true}>
         <Player initState={CharacterState.IDLE} />
       </QuarterViewController>
 

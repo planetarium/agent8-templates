@@ -22,6 +22,7 @@ Key technologies:
 - @react-three/drei - Useful Three.js helpers
 - vibe-starter-3d - Character rendering and animation
 - Tailwind CSS - UI composition
+- Zustand - State management
 
 ## Implemented Features
 
@@ -38,6 +39,7 @@ Key technologies:
 - Animation system with support for looping and one-shot animations
 - Character bounding box calculations
 - Keyboard controls for movement (WASD/arrow keys), skills (Q/E/R/F), and mouse click for interactions
+- Asset preloading system with progress indication
 
 ## File Structure Overview
 
@@ -50,6 +52,7 @@ Key technologies:
 
 - Main application component.
 - Configures the overall layout and includes the `GameScene` component.
+- Manages loading state and switches between `PreloadScene` and `GameScene`.
 
 ### `src/App.css`
 
@@ -62,6 +65,11 @@ Key technologies:
 ### `src/assets.json`
 
 - File for managing asset metadata. Includes character model and animation information.
+
+### `src/stores/`
+
+- Directory containing Zustand stores for application state management.
+  - **`playerStore.ts`**: Manages player-related state and references, particularly for physics interactions. Provides methods to register, unregister, and access player rigid body references.
 
 ### `src/constants/`
 
@@ -77,13 +85,14 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `SideViewController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
-    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `SideViewController`, the `FollowLight` component that must be included with the controller for proper lighting, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`. The inclusion of both `SideViewController` and `FollowLight` is essential for the proper functioning of the side view environment.
+    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties and implements procedurally generated platforms for the platformer gameplay.
     - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
     - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`PreloadScene.tsx`**: Manages asset preloading before the game starts. Loads all assets defined in assets.json (models, textures, etc.) and displays a loading progress bar. Ensures all assets are loaded before the game begins.
 
   - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
 
@@ -105,8 +114,10 @@ The side view platformer system is implemented through a combination of componen
 
 2. **Input Management**: Keyboard inputs are captured through React Three Fiber's `useKeyboardControls` hook, which maps WASD/arrow keys to movement actions (with special emphasis on jump controls essential for platformer gameplay).
 
-3. **State Management**: `useControllerState` hook provides shared state between components, allowing different parts of the application to access and modify the character's state.
+3. **State Management**: `useControllerState` hook provides shared state between components, allowing different parts of the application to access and modify the character's state. Additionally, `playerStore` manages physics body references.
 
 4. **Animation Management**: `Player` component determines appropriate animations based on movement and action states, with special attention to jump, fall, and landing animations essential for platformer games.
 
 5. **Platform Generation**: Procedurally generated platforms create the game environment, with varying heights and distances to create challenging platforming gameplay.
+
+6. **Asset Management**: `PreloadScene` component ensures all 3D models, textures, and other assets are preloaded before gameplay begins, providing a smooth user experience with a visual loading indicator.

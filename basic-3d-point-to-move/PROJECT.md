@@ -22,6 +22,7 @@ Key technologies:
 - @react-three/drei - Useful Three.js helpers
 - vibe-starter-3d - Character rendering and animation
 - Tailwind CSS - UI composition
+- Zustand - State management
 
 ## Implemented Features
 
@@ -37,6 +38,7 @@ Key technologies:
 - Interactive ground plane
 - Animation system with support for looping and one-shot animations
 - Raycasting for precise mouse interaction with the 3D environment
+- Asset preloading system with progress indication
 
 ## File Structure Overview
 
@@ -49,6 +51,7 @@ Key technologies:
 
 - Main application component.
 - Configures the overall layout and includes the `GameScene` component.
+- Manages loading state and switches between `PreloadScene` and `GameScene`.
 
 ### `src/App.css`
 
@@ -62,11 +65,10 @@ Key technologies:
 
 - File for managing asset metadata. Includes character model and animation information.
 
-### `src/store/`
+### `src/stores/`
 
 - Directory containing Zustand stores for application state management.
-  - **`cubeStore.ts`**: Store for voxel world management that handles adding, removing, and storing block data. Also manages terrain generation state and controls selected block type.
-  - **`playerStore.ts`**: Store for player refs.
+  - **`playerStore.ts`**: Manages player-related state and references, particularly for physics interactions. Provides methods to register, unregister, and access player rigid body references.
 
 ### `src/constants/`
 
@@ -82,7 +84,7 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `PointToMoveController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `PointToMoveController`, the `FollowLight` component that must be included with the controller for proper lighting, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`. The inclusion of both `PointToMoveController` and `FollowLight` is essential for the proper functioning of the point-to-move environment.
     - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
     - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
     - **`PointingSystem.tsx`**: Core component for the point-and-click movement mechanics. Implements raycasting to convert screen clicks to world positions. Creates visual feedback when clicking on the ground (click effect).
@@ -90,6 +92,7 @@ Key technologies:
   - **`scene/`**: Contains components related to 3D scene setup.
 
     - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`PreloadScene.tsx`**: Manages asset preloading before the game starts. Loads all assets defined in assets.json (models, textures, etc.) and displays a loading progress bar. Ensures all assets are loaded before the game begins.
 
   - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
 
@@ -112,6 +115,8 @@ The point-to-move system is implemented through a combination of components:
 
 2. **Movement Control**: `PointToMoveController` from the vibe-starter-3d library handles the physics-based movement of the character toward the destination point.
 
-3. **State Management**: `useControllerState` hook provides shared state between components, allowing the pointing system to set movement targets that the controller can read.
+3. **State Management**: `useControllerState` hook provides shared state between components, allowing the pointing system to set movement targets that the controller can read. Additionally, `playerStore` manages physics body references.
 
 4. **Animation Management**: `Player` component determines appropriate animations based on movement state, using the `isPointMoving()` function to detect when the character should be in a movement animation state.
+
+5. **Asset Management**: `PreloadScene` component ensures all 3D models, textures, and other assets are preloaded before gameplay begins, providing a smooth user experience with a visual loading indicator.

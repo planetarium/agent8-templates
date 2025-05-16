@@ -1,5 +1,5 @@
 import { Environment, Sky } from '@react-three/drei';
-import { FirstPersonViewController } from 'vibe-starter-3d';
+import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
 import Floor from './Floor';
 import InstancedCubes from './InstancedCubes';
 import CubePreview from './CubePreview';
@@ -13,19 +13,13 @@ const Experience = () => {
     <>
       <ambientLight intensity={2} />
 
-      {/* Environment */}
+      <FollowLight />
+
       <Environment preset="sunset" background={false} />
       <Sky sunPosition={[100, 20, 100]} />
 
       {/* player character with controller */}
-      <FirstPersonViewController
-        targetHeight={targetHeight}
-        followLight={{
-          position: [20, 30, 10],
-          intensity: 1.2,
-        }}
-        position={[0, 10, 0]}
-      ></FirstPersonViewController>
+      <FirstPersonViewController targetHeight={targetHeight} position={[0, 10, 0]}></FirstPersonViewController>
 
       {/* Ground */}
       <Floor />
