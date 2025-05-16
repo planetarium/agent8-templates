@@ -71,7 +71,7 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `FreeViewController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight` and `FollowLight`, environmental elements `Environment`, the `Player` component wrapped in `FreeViewController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
     - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
     - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
 

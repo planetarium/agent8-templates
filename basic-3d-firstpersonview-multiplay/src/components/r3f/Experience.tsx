@@ -1,6 +1,6 @@
-import { Environment, Grid } from '@react-three/drei';
+import { Environment } from '@react-three/drei';
 import { CharacterState } from '../../constants/character';
-import { FirstPersonViewController } from 'vibe-starter-3d';
+import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
 import Player from './Player';
 import Floor from './Floor';
 
@@ -19,7 +19,8 @@ function Experience({ characterUrl }: ExperienceProps) {
     <>
       <ambientLight intensity={0.7} />
 
-      {/* Environment */}
+      <FollowLight />
+
       <Environment preset="sunset" background={false} />
 
       {/* player character with controller */}

@@ -102,7 +102,6 @@ export function Experience({ characterUrl }: ExperienceProps) {
           ref={controllerRef}
           targetHeight={targetHeight}
           followLight={{
-            position: [20, 30, 10],
             intensity: 1.2,
           }}
         >

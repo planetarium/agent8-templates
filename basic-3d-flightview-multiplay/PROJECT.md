@@ -71,7 +71,7 @@ This overview details the key files and directories within the `src/` directory.
     - **`Player.tsx`**: Logic for the player-controlled character (movement, animation, potentially includes aircraft logic).
     - **`Aircraft.tsx`**: Logic for the player-controlled airplane model and behavior (movement, rotation, firing).
     - **`RemotePlayer.tsx`**: Logic for rendering and synchronizing remote players.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. It sets up the sky environment using `Sky` from `@react-three/drei` and provides basic lighting with `ambientLight`. It utilizes `FlightViewController` from `vibe-starter-3d` to wrap the `Player` component, handling flight control logic. It also includes the `Ground` and `FloatingShapes` components to complete the scene.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. It sets up the sky environment using `Sky` from `@react-three/drei` and provides basic lighting with `ambientLight`. It utilizes `FlightViewController` from `vibe-starter-3d` to wrap the `Player` component, handling flight control logic. It also includes the `Ground`, `FloatingShapes`, and `FollowLight` components to complete the scene. The `FollowLight` component provides a light source that follows the player.
     - **`FloatingShapes.tsx`**: Manages floating 3D shapes in the scene.
     - **`Ground.tsx`**: Defines the ground plane with physical properties.
     - **`EffectContainer.tsx`**: Manages visual effects rendering.
