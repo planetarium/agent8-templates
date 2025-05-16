@@ -21,7 +21,6 @@ const Experience = () => {
       <FirstPersonViewController
         targetHeight={targetHeight}
         followLight={{
-          position: [20, 30, 10],
           intensity: 1.2,
         }}
         position={[0, 10, 0]}

@@ -17,7 +17,7 @@ const Experience = () => {
       <QuarterViewController
         followCharacter={true}
         followLight={{
-          position: [0.6, 1, 0.3],
+          position: [60, 100, 30],
           intensity: 2,
         }}
       >
