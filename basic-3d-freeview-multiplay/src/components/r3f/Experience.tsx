@@ -1,7 +1,7 @@
 import { Environment, Grid } from '@react-three/drei';
 import { CharacterState } from '../../constants/character';
 import { useGameServer } from '@agent8/gameserver';
-import { FreeViewController } from 'vibe-starter-3d';
+import { FollowLight, FreeViewController } from 'vibe-starter-3d';
 import Floor from './Floor';
 import Player from './Player';
 
@@ -30,7 +30,8 @@ function Experience({ characterUrl }: ExperienceProps) {
     <>
       <ambientLight intensity={0.7} />
 
-      {/* Environment */}
+      <FollowLight />
+
       <Environment preset="sunset" background={false} />
 
       {/* Local player character with controller */}

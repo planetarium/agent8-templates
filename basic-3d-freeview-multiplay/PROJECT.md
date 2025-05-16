@@ -86,7 +86,7 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Main component responsible for setting up the 3D environment. Includes lighting `ambientLight`, environmental elements `Environment`, the local player `Player` wrapped in `FreeViewController`, and the floor `Floor`.
+    - **`Experience.tsx`**: Main component responsible for setting up the 3D environment. Includes lighting `ambientLight`, environmental elements `Environment`, the local player `Player` wrapped in `FreeViewController`, the floor `Floor`, and the `FollowLight` component that follows the player.
     - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
     - **`Player.tsx`**: Component handling the logic related to the local player character model (movement, rotation, animation state management, input processing, and sending to the server).
     - **`RemotePlayer.tsx`**: Component rendering remote player character models, animations, positions, etc., based on the state received from the server.

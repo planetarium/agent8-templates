@@ -69,7 +69,7 @@ Key technologies:
 
     - **`CharacterPreview.tsx`**: Component for displaying a character preview in the UI.
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets, muzzle flash, and explosions.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environment `Environment`, and the floor `Floor` component. It also renders the `Player` component within the `FirstPersonViewController`.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environment `Environment`, the floor `Floor` component, and the `FollowLight` component that provides dynamic lighting following the player. It also renders the `Player` component within the `FirstPersonViewController`.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
     - **`NetworkContainer.tsx`**: Manages the local player `Player` and remote players `RemotePlayer` within the scene.
     - **`Player.tsx`**: Represents the local player's character, handling movement, camera, and interactions based on user input and network state. Implements FirstPersonViewController logic.
