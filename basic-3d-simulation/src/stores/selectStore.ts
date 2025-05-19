@@ -1,17 +1,17 @@
 import { create } from 'zustand';
 
-// 선택 관련 상태 관리 스토어
+// Store for managing selection state
 const useSelectStore = create((set) => ({
-  // 선택된 객체의 UUID
+  // UUID of the selected object
   selectedUuid: null,
 
-  // 객체 선택
+  // Select an object
   selectObject: (uuid) =>
     set((state) => ({
       selectedUuid: state.selectedUuid === uuid ? null : uuid,
     })),
 
-  // 선택 해제
+  // Clear selection
   clearSelection: () => set({ selectedUuid: null }),
 }));
 

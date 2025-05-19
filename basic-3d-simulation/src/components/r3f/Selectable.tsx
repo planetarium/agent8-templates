@@ -21,13 +21,13 @@ const Selectable: React.FC<SelectableProps> = ({ children, forceCompound = false
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
-  const selectedUuid = useSelectStore((state) => state.selectedUuid);
-  const selectObject = useSelectStore((state) => state.selectObject);
+  const selectedUuid = useSelectStore((state: { selectedUuid: string }) => state.selectedUuid);
+  const selectObject = useSelectStore((state: { selectObject: (uuid: string) => void }) => state.selectObject);
 
   // Create a memo to store the UUID we'll use for selection
   const selectionUuid = useMemo(() => {
     return forceCompound ? groupRef.current?.uuid : meshRef.current?.uuid;
-  }, [forceCompound, initialized]);
+  }, [forceCompound]);
 
   // Check initialization
   useEffect(() => {

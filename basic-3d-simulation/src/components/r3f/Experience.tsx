@@ -1,7 +1,7 @@
 import { Environment, Grid } from '@react-three/drei';
-import { CharacterState } from '../../constants/character.ts';
-import Player from './Player.tsx';
-import Floor from './Floor.tsx';
+import { CharacterState } from '../../constants/character';
+import Player from './Player';
+import Floor from './Floor';
 import { SimulationViewController, FollowLight } from 'vibe-starter-3d';
 import { useMemo } from 'react';
 import Selectable from './Selectable.tsx';
@@ -56,37 +56,7 @@ const Experience = () => {
       {/* Environment */}
       <Environment preset="sunset" background={false} />
 
-      {/* player character with controller */}
       <SimulationViewController cameraMode="perspective" />
-      <Player initState={CharacterState.IDLE} />
-
-      {/* Selectable boxes */}
-      {boxes.map((box, index) => (
-        <Selectable key={`box-${index}`}>
-          <mesh position={box.position}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color={box.color} />
-          </mesh>
-        </Selectable>
-      ))}
-
-      {/* Selectable spheres */}
-      {spheres.map((sphere, index) => (
-        <Selectable key={`sphere-${index}`}>
-          <mesh position={sphere.position}>
-            <sphereGeometry args={[1, 16, 16]} />
-            <meshStandardMaterial color={sphere.color} />
-          </mesh>
-        </Selectable>
-      ))}
-
-      {/* Selectable cone */}
-      <Selectable>
-        <mesh position={[0, 1, 0]}>
-          <coneGeometry args={[1, 2, 16]} />
-          <meshStandardMaterial color="#f542f2" />
-        </mesh>
-      </Selectable>
 
       {/* Clear selection when clicking on the floor */}
       <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} onClick={clearSelection}>
