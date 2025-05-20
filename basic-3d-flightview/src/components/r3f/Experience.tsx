@@ -1,7 +1,7 @@
 import { Sky } from '@react-three/drei';
 import { FlightViewController, FollowLight } from 'vibe-starter-3d';
 import { DEFAULT_BODY_LENGTH } from '../../constants/aircraft';
-import Ground from './Ground';
+import Runway from './Runway';
 import FloatingShapes from './FloatingShapes';
 import Player from './Player';
 
@@ -18,7 +18,7 @@ function Experience() {
         <Player bodyLength={DEFAULT_BODY_LENGTH} />
       </FlightViewController>
 
-      <Ground />
+      <Runway />
       <FloatingShapes />
     </>
   );

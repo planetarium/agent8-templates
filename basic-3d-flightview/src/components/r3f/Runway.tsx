@@ -10,7 +10,7 @@ type SimpleObject = {
   color: THREE.Color;
 };
 
-const Ground = () => {
+const Runway = () => {
   // Generate object data to scatter on the ground (optimized with useMemo)
   const objects = useMemo<SimpleObject[]>(() => {
     const tempObjects: SimpleObject[] = [];
@@ -109,8 +109,15 @@ const Ground = () => {
           <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
         </mesh>
       </RigidBody> */}
+
+      <RigidBody name="RUNWAY" type="fixed" colliders={'cuboid'}>
+        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} scale={[1000, 1000, 1]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
+        </mesh>
+      </RigidBody>
     </>
   );
 };
 
-export default Ground;
+export default Runway;
