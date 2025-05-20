@@ -118,7 +118,7 @@ const useCubeRaycaster = () => {
   // Cube action handler (always operates in builder mode)
   const handleCubeAction = useCallback(() => {
     if (previewPosition) {
-      // Builder mode: Add cube
+      // Builder mode: Add cube - selectedTile를 직접 사용 (cubeStore에서 변환됨)
       addCube(previewPosition[0], previewPosition[1], previewPosition[2], selectedTile);
     }
   }, [previewPosition, addCube, selectedTile]);

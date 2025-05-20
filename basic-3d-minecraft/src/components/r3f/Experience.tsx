@@ -1,7 +1,7 @@
 import { Environment, Sky } from '@react-three/drei';
 import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
 import Floor from './Floor';
-import InstancedCubes from './InstancedCubes';
+import InstancedCube from './InstancedCube';
 import CubePreview from './CubePreview';
 import useCubeRaycaster from '../../hooks/useCubeRaycaster';
 
@@ -25,7 +25,7 @@ const Experience = () => {
       <Floor />
 
       {/* Render instanced cubes (optimized way) */}
-      <InstancedCubes />
+      <InstancedCube />
 
       {/* Cube Preview */}
       <CubePreview position={previewPosition} />

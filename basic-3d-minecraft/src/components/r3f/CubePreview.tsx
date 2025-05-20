@@ -1,50 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import useCubeStore from '../../stores/cubeStore';
-import { getTileTexture } from '../../utils/tileTextureLoader';
+import SingleCube from './SingleCube';
 
 interface CubePreviewProps {
   position: [number, number, number] | null;
 }
 
 const CubePreview = ({ position }: CubePreviewProps) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const selectedTile = useCubeStore((state) => state.selectedTile);
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
 
-  // Load texture when the selected tile changes
+  // Update position when the position changes
   useEffect(() => {
-    const loadTexture = async () => {
-      try {
-        const newTexture = await getTileTexture(selectedTile);
-        setTexture(newTexture);
-      } catch (error) {
-        console.error('CubePreview texture loading failed:', error);
-      }
-    };
-
-    loadTexture();
-  }, [selectedTile]);
-
-  // Update mesh position when the position changes
-  useEffect(() => {
-    if (meshRef.current && position) {
-      meshRef.current.position.set(position[0], position[1], position[2]);
-      meshRef.current.visible = true;
-    } else if (meshRef.current) {
-      meshRef.current.visible = false;
+    if (groupRef.current && position) {
+      groupRef.current.position.set(position[0], position[1], position[2]);
+      groupRef.current.visible = true;
+    } else if (groupRef.current) {
+      groupRef.current.visible = false;
     }
   }, [position]);
 
   return (
-    <mesh ref={meshRef} visible={!!position}>
-      <boxGeometry args={[1.03, 1.03, 1.03]} />
-      {texture ? (
-        <meshStandardMaterial map={texture} transparent={true} opacity={0.5} side={THREE.DoubleSide} color="deepskyblue" />
-      ) : (
-        <meshBasicMaterial color="deepskyblue" transparent={true} opacity={0.3} />
-      )}
-    </mesh>
+    <group ref={groupRef} visible={!!position}>
+      <SingleCube tileIndex={selectedTile} scale={1.03} position={[0, 0, 0]} rotation={[0, 0, 0]} opacity={0.7} />
+    </group>
   );
 };
 

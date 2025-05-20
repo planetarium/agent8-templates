@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import { RigidBody, TrimeshCollider } from '@react-three/rapier';
 import useCubeStore from '../../stores/cubeStore';
-import { getTileCoordinates, getSpriteInfo } from '../../utils/tileTextureLoader';
+import { getColorByFace, getTileTypeFromIndex } from '../../utils/colorUtils';
 
 // Maximum number of cube instances
 const MAX_INSTANCES = 1000000;
@@ -15,34 +15,45 @@ const ACTIVE_CHUNKS_RADIUS = 3;
 // Maximum active chunks limit
 const MAX_ACTIVE_CHUNKS = 27; // 3x3x3 area
 
-// Shader code
+// Shader that supports different colors for each face
 const vertexShader = `
-  attribute vec4 uvOffsetScale;
-  varying vec2 vUv;
-  varying vec4 vUvOffsetScale;
+  attribute vec3 colorTop;
+  attribute vec3 colorBottom;
+  attribute vec3 colorFront;
+  attribute vec3 colorBack;
+  attribute vec3 colorLeft;
+  attribute vec3 colorRight;
+  
+  varying vec3 vColor;
+  varying vec3 vNormal;
   
   void main() {
-    vUv = uv;
-    vUvOffsetScale = uvOffsetScale;
+    // Pass normal vector
+    vNormal = normalize(normalMatrix * normal);
+    
+    // Select appropriate color based on face direction
+    if (abs(normal.y) > 0.9) {
+      // Top/bottom face
+      vColor = normal.y > 0.0 ? colorTop : colorBottom;
+    } else if (abs(normal.x) > 0.9) {
+      // Left/right face
+      vColor = normal.x > 0.0 ? colorRight : colorLeft;
+    } else if (abs(normal.z) > 0.9) {
+      // Front/back face
+      vColor = normal.z > 0.0 ? colorBack : colorFront;
+    }
+    
     vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
 const fragmentShader = `
-  uniform sampler2D spriteTexture;
-  varying vec2 vUv;
-  varying vec4 vUvOffsetScale;
+  varying vec3 vColor;
+  varying vec3 vNormal;
   
   void main() {
-    vec2 uvOffset = vUvOffsetScale.xy;
-    vec2 uvScale = vUvOffsetScale.zw;
-    vec2 adjustedUV = vec2(vUv.x, 1.0 - vUv.y);
-    vec2 finalUV = uvOffset + (adjustedUV * uvScale);
-    vec4 texColor = texture2D(spriteTexture, finalUV);
-    
-    if (texColor.a < 0.1) discard;
-    gl_FragColor = texColor;
+    gl_FragColor = vec4(vColor, 1.0);
   }
 `;
 
@@ -59,7 +70,7 @@ const getChunkKey = (chunkCoords: [number, number, number]): string => {
 // Type for cube data
 type Cube = {
   position: [number, number, number];
-  tileIndex: number;
+  colorIndex: number;
   chunkKey: string;
 };
 
@@ -75,7 +86,7 @@ type Chunk = {
   indices?: Uint32Array;
 };
 
-const InstancedCubes = () => {
+const InstancedCube = () => {
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const { camera } = useThree();
   const prevCameraChunkRef = useRef<string | null>(null);
@@ -94,29 +105,14 @@ const InstancedCubes = () => {
   const addCube = useCubeStore((state) => state.addCube);
   const selectedTile = useCubeStore((state) => state.selectedTile);
 
-  // Sprite information
-  const spriteInfo = useMemo(() => getSpriteInfo(), []);
-  const { tilesX, tilesY } = spriteInfo;
-
-  // Load texture and create shader material
-  const { material, texture } = useMemo(() => {
-    const texture = new THREE.TextureLoader().load(spriteInfo.url);
-    texture.flipY = false;
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        spriteTexture: { value: texture },
-      },
+  // Create shader material
+  const material = useMemo(() => {
+    return new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
-      transparent: true,
-      side: THREE.DoubleSide,
+      side: THREE.FrontSide,
     });
-
-    return { material, texture };
-  }, [spriteInfo.url]);
+  }, []);
 
   // Get current camera chunk (used in useFrame)
   const getCurrentCameraChunk = useCallback(() => {
@@ -233,6 +229,7 @@ const InstancedCubes = () => {
 
       chunkMap.get(chunkKey)!.cubes.push({
         ...cube,
+        colorIndex: cube.tileIndex,
         chunkKey,
       });
     });
@@ -389,59 +386,103 @@ const InstancedCubes = () => {
     });
   }, [chunks, cubes.length, rigidBodiesPool, camera, frameCountRef.current]);
 
-  // UV attribute update optimization
+  // Update buffer attributes
   useEffect(() => {
-    if (!instancedMeshRef.current || !texture) return;
+    if (!instancedMeshRef.current) return;
 
     const mesh = instancedMeshRef.current;
     const count = Math.min(cubes.length, MAX_INSTANCES);
 
-    // Limited logging (performance improvement)
     if (count % 100 === 0 || count < 100) {
-      console.log(`Updating UV attributes for ${count} cubes`);
+      console.log(`Updating color attributes for ${count} cubes`);
     }
 
-    // Performance optimization: Create Float32Array only once
-    const uvOffsetScaleArray = new Float32Array(MAX_INSTANCES * 4);
+    // Create color data arrays for each face
+    const colorTopArray = new Float32Array(MAX_INSTANCES * 3);
+    const colorBottomArray = new Float32Array(MAX_INSTANCES * 3);
+    const colorFrontArray = new Float32Array(MAX_INSTANCES * 3);
+    const colorBackArray = new Float32Array(MAX_INSTANCES * 3);
+    const colorLeftArray = new Float32Array(MAX_INSTANCES * 3);
+    const colorRightArray = new Float32Array(MAX_INSTANCES * 3);
+
+    // Set position matrix
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
     const scale = new THREE.Vector3(1, 1, 1);
 
+    // Set colors for each face of every cube
     for (let i = 0; i < count; i++) {
-      // Calculate tile UV information
-      const tileIndex = cubes[i]?.tileIndex ?? 0;
-      const { row, col } = getTileCoordinates(tileIndex);
+      const cube = cubes[i];
+      if (!cube) continue;
 
-      const uvOffsetX = col / tilesX;
-      const uvOffsetY = row / tilesY;
-      const uvScaleX = 1 / tilesX;
-      const uvScaleY = 1 / tilesY;
+      // Set color for each face - using cube's tileIndex directly
+      const colorTop = getColorByFace(cube.tileIndex, 4); // Top
+      const colorBottom = getColorByFace(cube.tileIndex, 5); // Bottom
+      const colorFront = getColorByFace(cube.tileIndex, 0); // Front
+      const colorBack = getColorByFace(cube.tileIndex, 2); // Back
+      const colorLeft = getColorByFace(cube.tileIndex, 3); // Left
+      const colorRight = getColorByFace(cube.tileIndex, 1); // Right
 
-      uvOffsetScaleArray[i * 4] = uvOffsetX;
-      uvOffsetScaleArray[i * 4 + 1] = uvOffsetY;
-      uvOffsetScaleArray[i * 4 + 2] = uvScaleX;
-      uvOffsetScaleArray[i * 4 + 3] = uvScaleY;
+      // Top face color
+      colorTopArray[i * 3] = colorTop.r;
+      colorTopArray[i * 3 + 1] = colorTop.g;
+      colorTopArray[i * 3 + 2] = colorTop.b;
+
+      // Bottom face color
+      colorBottomArray[i * 3] = colorBottom.r;
+      colorBottomArray[i * 3 + 1] = colorBottom.g;
+      colorBottomArray[i * 3 + 2] = colorBottom.b;
+
+      // Front face color
+      colorFrontArray[i * 3] = colorFront.r;
+      colorFrontArray[i * 3 + 1] = colorFront.g;
+      colorFrontArray[i * 3 + 2] = colorFront.b;
+
+      // Back face color
+      colorBackArray[i * 3] = colorBack.r;
+      colorBackArray[i * 3 + 1] = colorBack.g;
+      colorBackArray[i * 3 + 2] = colorBack.b;
+
+      // Left face color
+      colorLeftArray[i * 3] = colorLeft.r;
+      colorLeftArray[i * 3 + 1] = colorLeft.g;
+      colorLeftArray[i * 3 + 2] = colorLeft.b;
+
+      // Right face color
+      colorRightArray[i * 3] = colorRight.r;
+      colorRightArray[i * 3 + 1] = colorRight.g;
+      colorRightArray[i * 3 + 2] = colorRight.b;
 
       // Set position matrix
-      const position = new THREE.Vector3().fromArray(cubes[i].position);
+      const position = new THREE.Vector3().fromArray(cube.position);
       matrix.compose(position, quaternion, scale);
       mesh.setMatrixAt(i, matrix);
     }
 
-    // Optimization: Update instead of deleting/creating attributes
-    if (mesh.geometry.getAttribute('uvOffsetScale')) {
-      (mesh.geometry.getAttribute('uvOffsetScale') as THREE.BufferAttribute).set(uvOffsetScaleArray);
-      (mesh.geometry.getAttribute('uvOffsetScale') as THREE.BufferAttribute).needsUpdate = true;
-    } else {
-      // Create new attribute only on the first run
-      mesh.geometry.setAttribute('uvOffsetScale', new THREE.InstancedBufferAttribute(uvOffsetScaleArray, 4));
-    }
+    // Update or create buffer attributes
+    updateInstancedAttribute(mesh, 'colorTop', colorTopArray, 3);
+    updateInstancedAttribute(mesh, 'colorBottom', colorBottomArray, 3);
+    updateInstancedAttribute(mesh, 'colorFront', colorFrontArray, 3);
+    updateInstancedAttribute(mesh, 'colorBack', colorBackArray, 3);
+    updateInstancedAttribute(mesh, 'colorLeft', colorLeftArray, 3);
+    updateInstancedAttribute(mesh, 'colorRight', colorRightArray, 3);
 
     // Update instance matrix
+    mesh.count = count;
     mesh.instanceMatrix.needsUpdate = true;
-  }, [cubes, tilesX, tilesY, texture]);
+  }, [cubes]);
 
-  // Cube click event handler
+  // Helper function to update instanced attributes
+  const updateInstancedAttribute = (mesh: THREE.InstancedMesh, name: string, array: Float32Array, itemSize: number) => {
+    if (mesh.geometry.getAttribute(name)) {
+      (mesh.geometry.getAttribute(name) as THREE.BufferAttribute).set(array);
+      (mesh.geometry.getAttribute(name) as THREE.BufferAttribute).needsUpdate = true;
+    } else {
+      mesh.geometry.setAttribute(name, new THREE.InstancedBufferAttribute(array, itemSize));
+    }
+  };
+
+  // Cube click handler
   const handleCubeClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (typeof e.instanceId !== 'number') return;
@@ -455,24 +496,23 @@ const InstancedCubes = () => {
     // Add new cube in the direction of the clicked face
     const [x, y, z] = position;
     const directions: [number, number, number][] = [
-      [x + 1, y, z],
-      [x - 1, y, z],
-      [x, y + 1, z],
-      [x, y - 1, z],
-      [x, y, z + 1],
-      [x, y, z - 1],
+      [x, y, z - 1], // Front
+      [x + 1, y, z], // Right
+      [x, y, z + 1], // Back
+      [x - 1, y, z], // Left
+      [x, y + 1, z], // Top
+      [x, y - 1, z], // Bottom
     ];
 
-    // Always operate in builder mode - add new cube
     addCube(...directions[faceIndex], selectedTile);
   };
 
-  // Memoize active chunks to prevent unnecessary rendering
+  // Active chunks memoization
   const activeChunksArray = useMemo(() => {
     return chunks.filter((chunk) => chunk.isActive);
   }, [chunks]);
 
-  // Do not render if there are no cubes
+  // Don't render if there are no cubes
   if (cubes.length === 0) {
     return null;
   }
@@ -485,7 +525,7 @@ const InstancedCubes = () => {
         args={[undefined, undefined, cubes.length]}
         castShadow
         receiveShadow
-        frustumCulled={true} // Optimization: Don't render cubes outside view
+        frustumCulled={true}
         onClick={handleCubeClick}
         userData={{ isCube: true }}
       >
@@ -505,4 +545,4 @@ const InstancedCubes = () => {
   );
 };
 
-export default InstancedCubes;
+export default InstancedCube;
