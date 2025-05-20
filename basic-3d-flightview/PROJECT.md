@@ -66,7 +66,7 @@ Key technologies:
     - **`Player.tsx`**: Component representing the player character in the 3D scene, potentially encompassing the aircraft and other player-specific elements.
     - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. It sets up the sky environment using `Sky` from `@react-three/drei` and provides basic lighting with `ambientLight`. It utilizes `FlightViewController` from `vibe-starter-3d` to wrap the `Player` component, handling flight control logic. It also incorporates a `FollowLight` component that dynamically follows the player, enhancing visibility and focus on the player's aircraft. It also includes the `Ground` and `FloatingShapes` components to complete the scene.
     - **`FloatingShapes.tsx`**: Component generating and managing various 3D shapes floating randomly in the scene.
-    - **`Ground.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`Ground.tsx`**: Component defining and visually representing the ground plane in the 3D space. It serves as a runway for the aircraft to gain speed before takeoff. Has physical properties.
     - **`EffectContainer.tsx`**: Container component managing and rendering various visual effects like bullet firing and hit effects.
     - **`effects/`**: Directory containing specific visual effect components.
       - **`Bullet.tsx`**: Component defining the visual representation and individual behavior (movement, collision detection) of bullets fired from the airplane.
