@@ -16,6 +16,14 @@
     "tags": ["vite", "react", "typescript", "phaser", "platformer"]
   },
   {
+    "name": "2d-phaser-basic",
+    "label": "2D Phaser Basic Template",
+    "description": "Template with basic 2D game using Phaser. Ideal for basic 2D game.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "2d-phaser-basic",
+    "tags": ["vite", "react", "typescript", "phaser", "2d", "boardgame"]
+  },
+  {
     "name": "basic-3d",
     "label": "3D Character Freeview Template",
     "description": "Three.js 3D basic template",
