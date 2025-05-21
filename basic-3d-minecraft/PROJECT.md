@@ -156,6 +156,10 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 9. **Coordinate System Synchronization**: The raycasting and placement systems are carefully aligned to ensure that preview blocks appear exactly where they will be placed, making building more intuitive and precise.
 
+# Critical Memory
+
+- **Design Decision**: Use only color values for cubes instead of textures if not explicitly requested
+
 # Next Actions
 
 - **Immediate**: User to implement creative terrain generation logic following the extensive TODOs
