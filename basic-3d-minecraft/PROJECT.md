@@ -112,7 +112,7 @@ The rendering system uses a color-based approach with these key features:
     - **`InstancedCube.tsx`**: Core voxel rendering system using instanced meshes with custom shader for optimized color-based rendering and chunk-based optimization.
     - **`SingleCube.tsx`**: Component for rendering individual cubes with color-based faces for UI and preview purposes.
     - **`CubePreview.tsx`**: Shows preview of block placement location with precise coordinate alignment to the actual placement position.
-    - **`Floor.tsx`**: Implements basic colored floor as the bottom boundary of the world.
+    - **`Water.tsx`**: Implements water simulation with translucent rendering.
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
