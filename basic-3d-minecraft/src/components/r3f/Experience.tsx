@@ -27,9 +27,9 @@ const Experience = () => {
       {/* Weak fill light from below */}
       <directionalLight position={[0, -10, 0]} intensity={0.3} color="#fff9e8" />
 
-      <FollowLight intensity={0.8} />
+      <Environment preset="dawn" background={true} />
 
-      <Sky sunPosition={[100, 30, 100]} />
+      <FollowLight intensity={0.8} />
 
       {/* player character with controller */}
       <FirstPersonViewController targetHeight={targetHeight} position={playerStartPosition}></FirstPersonViewController>

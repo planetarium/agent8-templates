@@ -25,9 +25,7 @@ const GameScene: React.FC = () => {
           }}
         >
           <Physics>
-            <Suspense fallback={null}>
-              <Experience />
-            </Suspense>
+            <Experience />
           </Physics>
         </Canvas>
       </KeyboardControls>
