@@ -1,11 +1,12 @@
 import { Environment, Sky } from '@react-three/drei';
 import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
-import Floor from './Floor';
+
 import InstancedCube from './InstancedCube';
 import CubePreview from './CubePreview';
 import useCubeRaycaster from '../../hooks/useCubeRaycaster';
 import useCubeStore from '../../stores/cubeStore';
 import { useEffect, useState } from 'react';
+import Water from './Water';
 
 const Experience = () => {
   const targetHeight = 1.6;
@@ -64,8 +65,8 @@ const Experience = () => {
       {/* player character with controller */}
       <FirstPersonViewController targetHeight={targetHeight} position={playerStartPosition}></FirstPersonViewController>
 
-      {/* Ground */}
-      <Floor />
+      {/* Water */}
+      <Water />
 
       {/* Render instanced cubes (optimized way) */}
       <InstancedCube />

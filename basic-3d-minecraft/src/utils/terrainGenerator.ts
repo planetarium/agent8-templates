@@ -1,5 +1,6 @@
 import { createNoise2D } from 'simplex-noise';
 import { TILE_TYPES } from '../constants/tiles';
+import { THEMES } from '../constants/themes';
 
 // Terrain generation configuration values
 const TERRAIN_CONFIG = {
@@ -24,6 +25,66 @@ const TERRAIN_CONFIG = {
     { minY: 25, maxY: 30, tile: TILE_TYPES.IRON_ORE }, // Iron ore layer (high mountains)
     { minY: 30, maxY: 35, tile: TILE_TYPES.GOLD_ORE }, // Gold ore layer (very high mountains)
     { minY: 35, maxY: 100, tile: TILE_TYPES.WOOL_WHITE }, // Peak layer (snow - top-most)
+  ],
+};
+
+// Define all available tile options for each base tile type
+const TILE_OPTIONS = {
+  // Options for grass tiles
+  [TILE_TYPES.GRASS]: [
+    TILE_TYPES.GRASS, // Default green grass
+    TILE_TYPES.WOOL_WHITE, // Snow covered grass
+    TILE_TYPES.SAND, // Sand instead of grass (desert)
+    TILE_TYPES.STONE, // Stone instead of grass (rocky)
+  ],
+
+  // Options for dirt tiles
+  [TILE_TYPES.DIRT]: [
+    TILE_TYPES.DIRT, // Default dirt
+    TILE_TYPES.WOOL_WHITE, // Snow covered dirt
+    TILE_TYPES.SAND, // Sand instead of dirt (desert)
+    TILE_TYPES.COBBLESTONE, // Cobblestone instead of dirt (rocky)
+    TILE_TYPES.GRAVEL, // Gravel instead of dirt
+  ],
+
+  // Options for stone tiles
+  [TILE_TYPES.STONE]: [
+    TILE_TYPES.STONE, // Default stone
+    TILE_TYPES.STONE, // Stone stays stone in most themes
+    TILE_TYPES.GOLD_ORE, // Gold colored stone (desert/yellow theme)
+    TILE_TYPES.COAL_ORE, // Dark stone
+  ],
+
+  // Options for cobblestone tiles
+  [TILE_TYPES.COBBLESTONE]: [
+    TILE_TYPES.COBBLESTONE, // Default cobblestone
+    TILE_TYPES.COBBLESTONE, // Cobblestone generally stays the same
+    TILE_TYPES.SAND, // Sand instead of cobblestone (desert)
+    TILE_TYPES.GRAVEL, // Gravel instead of cobblestone
+  ],
+
+  // Options for sand tiles
+  [TILE_TYPES.SAND]: [
+    TILE_TYPES.SAND, // Default sand
+    TILE_TYPES.WOOL_WHITE, // Snow covered sand (snow theme)
+    TILE_TYPES.SAND, // Sand stays sand in desert theme
+    TILE_TYPES.GRAVEL, // Gravel instead of sand (rocky theme)
+  ],
+
+  // Options for water tiles
+  [TILE_TYPES.WATER]: [
+    TILE_TYPES.WATER, // Default water
+    TILE_TYPES.GLASS, // Ice (frozen water)
+    TILE_TYPES.WATER, // Water is usually just water
+    TILE_TYPES.WATER, // Water is usually just water
+  ],
+
+  // Options for snow tiles
+  [TILE_TYPES.WOOL_WHITE]: [
+    TILE_TYPES.WOOL_WHITE, // Default snow
+    TILE_TYPES.WOOL_WHITE, // Snow stays snow in snow theme
+    TILE_TYPES.SAND, // Sand instead of snow (desert)
+    TILE_TYPES.IRON_BLOCK, // Iron block instead of snow (metallic theme)
   ],
 };
 
@@ -71,6 +132,38 @@ function createNoise(seed: string) {
 
   // Initialize SimplexNoise instance
   return createNoise2D(alea());
+}
+
+// Get tile preferences based on seed
+function getTilePreferencesFromSeed(seed: string): Record<number, number> {
+  // Generate consistent preferences from seed
+  const preferences: Record<number, number> = {};
+  const seedHash = generateSeedHash(seed);
+
+  // Generate a value 0-3 for each tile type to select from options
+  Object.keys(TILE_OPTIONS).forEach((tileType, index) => {
+    const numericType = parseInt(tileType);
+    const optionsLength = TILE_OPTIONS[numericType].length;
+
+    // Use different parts of seed hash to get different values
+    const hashPart = (seedHash + index * 7) % 100;
+
+    // Select which tile to use from the options
+    const preferenceIndex = Math.floor((hashPart / 100) * optionsLength);
+    preferences[numericType] = TILE_OPTIONS[numericType][preferenceIndex];
+  });
+
+  return preferences;
+}
+
+// Generate a numeric hash from a seed string
+function generateSeedHash(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
 }
 
 /**
@@ -161,9 +254,10 @@ function generateHeightMap(noise: ReturnType<typeof createNoise>, width: number,
  * @param x X coordinate
  * @param z Z coordinate
  * @param noise Noise function (for additional variation)
+ * @param tilePreferences Seed-based tile preferences
  * @returns Tile index
  */
-function getTileIndexForHeight(y: number, x: number, z: number, noise: ReturnType<typeof createNoise>): number {
+function getTileIndexForHeight(y: number, x: number, z: number, noise: ReturnType<typeof createNoise>, tilePreferences: Record<number, number>): number {
   // Detail noise for additional randomness
   const detailNoise = noise(x * 0.2, z * 0.2);
 
@@ -176,41 +270,49 @@ function getTileIndexForHeight(y: number, x: number, z: number, noise: ReturnTyp
 
     // Check if current Y is within this layer's range
     if (y >= layer.minY && y < layer.maxY) {
+      // Base tile (before theme application)
+      let baseTile;
+
       // Special case: Water tiles
       if (layer.tile === TILE_TYPES.WATER && y < TERRAIN_CONFIG.baseHeight) {
-        return detailNoise > 0.5 ? TILE_TYPES.SAND : TILE_TYPES.DIRT;
+        baseTile = detailNoise > 0.5 ? TILE_TYPES.SAND : TILE_TYPES.DIRT;
       }
-
-      // Probability-based special tile generation (multiple probability cases)
       // Edge effect generation (steeper slopes expose more stone)
-      if (layer.tile === TILE_TYPES.GRASS && slopeNoise > 0.7) {
-        return TILE_TYPES.STONE;
+      else if (layer.tile === TILE_TYPES.GRASS && slopeNoise > 0.7) {
+        baseTile = TILE_TYPES.STONE;
       }
-
       // Expand snow distribution in high altitude areas
-      if (y >= 25 && detailNoise > 0.4) {
+      else if (y >= 25 && detailNoise > 0.4) {
         // Snow can appear at iron ore layer and above
-        return TILE_TYPES.WOOL_WHITE;
+        baseTile = TILE_TYPES.WOOL_WHITE;
       }
-
       // 10% chance to diversify some blocks (ores and special blocks)
-      if (detailNoise > 0.9) {
+      else if (detailNoise > 0.9) {
         // Stone layer can contain coal, iron, and gold ores
         if (layer.tile === TILE_TYPES.STONE) {
-          if (detailNoise > 0.97) return TILE_TYPES.GOLD_ORE;
-          if (detailNoise > 0.93) return TILE_TYPES.IRON_ORE;
-          return TILE_TYPES.COAL_ORE;
+          if (detailNoise > 0.97) baseTile = TILE_TYPES.GOLD_ORE;
+          else if (detailNoise > 0.93) baseTile = TILE_TYPES.IRON_ORE;
+          else baseTile = TILE_TYPES.COAL_ORE;
         }
-
         // Grass layer can contain flowers or mushrooms
-        if (layer.tile === TILE_TYPES.GRASS) {
-          if (detailNoise > 0.97) return TILE_TYPES.FLOWER_RED;
-          if (detailNoise > 0.94) return TILE_TYPES.FLOWER_YELLOW;
-          return TILE_TYPES.MUSHROOM_BROWN;
+        else if (layer.tile === TILE_TYPES.GRASS) {
+          if (detailNoise > 0.97) baseTile = TILE_TYPES.FLOWER_RED;
+          else if (detailNoise > 0.94) baseTile = TILE_TYPES.FLOWER_YELLOW;
+          else baseTile = TILE_TYPES.MUSHROOM_BROWN;
+        } else {
+          baseTile = layer.tile;
         }
+      } else {
+        baseTile = layer.tile;
       }
 
-      return layer.tile;
+      // Apply tile preferences based on seed
+      // Only apply preferences if the baseTile has options defined
+      if (tilePreferences[baseTile] !== undefined) {
+        return tilePreferences[baseTile];
+      }
+
+      return baseTile;
     }
   }
 
@@ -237,6 +339,17 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
   // Create seed-based noise function
   const noise = createNoise(seed);
 
+  // Get tile preferences based on seed
+  const tilePreferences = getTilePreferencesFromSeed(seed);
+
+  // Log preferences for debugging
+  console.log(
+    'Generating terrain with tile preferences:',
+    Object.entries(tilePreferences)
+      .map(([type, preference]) => `${type} → ${preference}`)
+      .join(', '),
+  );
+
   // Generate height map
   const heightMap = generateHeightMap(noise, width, depth);
 
@@ -250,7 +363,7 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
 
       // Generate surface
       if (height >= TERRAIN_CONFIG.baseHeight) {
-        const tileIndex = getTileIndexForHeight(height, x, z, noise);
+        const tileIndex = getTileIndexForHeight(height, x, z, noise, tilePreferences);
 
         // Add surface cube
         cubes.push({
@@ -267,15 +380,30 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
           let depthTile;
 
           if (y === 1) {
-            if (tileIndex === TILE_TYPES.GRASS || tileIndex === TILE_TYPES.DIRT) {
+            if (tileIndex === TILE_TYPES.GRASS || tileIndex === TILE_TYPES.DIRT || tileIndex === TILE_TYPES.WOOL_WHITE) {
+              // Default to dirt beneath surface
               depthTile = TILE_TYPES.DIRT;
+              // Apply tile preferences if available
+              if (tilePreferences[TILE_TYPES.DIRT]) {
+                depthTile = tilePreferences[TILE_TYPES.DIRT];
+              }
             } else if (tileIndex === TILE_TYPES.SAND) {
               depthTile = noise(x * 0.3, z * 0.3) > 0.5 ? TILE_TYPES.SAND : TILE_TYPES.DIRT;
+              // Apply tile preferences if available
+              if (depthTile === TILE_TYPES.SAND && tilePreferences[TILE_TYPES.SAND]) {
+                depthTile = tilePreferences[TILE_TYPES.SAND];
+              } else if (depthTile === TILE_TYPES.DIRT && tilePreferences[TILE_TYPES.DIRT]) {
+                depthTile = tilePreferences[TILE_TYPES.DIRT];
+              }
             } else {
               depthTile = TILE_TYPES.STONE;
+              // Apply tile preferences if available
+              if (tilePreferences[TILE_TYPES.STONE]) {
+                depthTile = tilePreferences[TILE_TYPES.STONE];
+              }
             }
           } else {
-            depthTile = getTileIndexForHeight(belowY, x, z, noise);
+            depthTile = getTileIndexForHeight(belowY, x, z, noise, tilePreferences);
           }
 
           cubes.push({
@@ -286,17 +414,20 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
       }
       // Generate water (below sea level)
       else if (height < TERRAIN_CONFIG.baseHeight) {
+        // Use water or its preferred alternative
+        const waterTile = tilePreferences[TILE_TYPES.WATER] || TILE_TYPES.WATER;
+
         // Add water block
         cubes.push({
           position: [x, TERRAIN_CONFIG.baseHeight, z],
-          tileIndex: TILE_TYPES.WATER,
+          tileIndex: waterTile,
         });
 
         // Underwater terrain
         const underwaterNoise = noise(x * 0.3, z * 0.3);
         cubes.push({
           position: [x, height, z],
-          tileIndex: getTileIndexForHeight(height, x, z, noise),
+          tileIndex: getTileIndexForHeight(height, x, z, noise, tilePreferences),
         });
 
         // Additional terrain at medium water depths
@@ -306,23 +437,58 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
               const belowWaterY = height + y;
               cubes.push({
                 position: [x, belowWaterY, z],
-                tileIndex: getTileIndexForHeight(belowWaterY, x, z, noise),
+                tileIndex: getTileIndexForHeight(belowWaterY, x, z, noise, tilePreferences),
               });
             }
           }
         }
       }
 
-      // Tree generation (only on grass or dirt)
-      const surfaceTile = getTileIndexForHeight(height, x, z, noise);
-      if ((surfaceTile === TILE_TYPES.GRASS || surfaceTile === TILE_TYPES.DIRT) && noise(x * 0.7, z * 0.7) > 0.96 && height >= TERRAIN_CONFIG.baseHeight) {
+      // Tree generation based on seed-driven tile preferences
+      const surfaceTile = getTileIndexForHeight(height, x, z, noise, tilePreferences);
+
+      // Adjust tree properties based on surface tile
+      let treeThreshold = 0.96; // Base probability
+      let treeAllowed = false;
+
+      // Check if current surface tile allows trees
+      if (surfaceTile === TILE_TYPES.GRASS || surfaceTile === TILE_TYPES.DIRT || surfaceTile === TILE_TYPES.WOOL_WHITE || surfaceTile === TILE_TYPES.SAND) {
+        treeAllowed = true;
+
+        // Adjust tree probability based on surface
+        if (surfaceTile === TILE_TYPES.SAND) {
+          treeThreshold = 0.985; // Fewer trees on sand
+        }
+        if (surfaceTile === TILE_TYPES.WOOL_WHITE) {
+          treeThreshold = 0.99; // Very few trees on snow
+        }
+      }
+
+      if (treeAllowed && noise(x * 0.7, z * 0.7) > treeThreshold && height >= TERRAIN_CONFIG.baseHeight) {
+        // Determine tree types based on surface tile
+        let trunkType = TILE_TYPES.WOOD;
+        let leavesType = TILE_TYPES.LEAVES;
+
+        // Customize tree appearance based on surface tile
+        if (surfaceTile === TILE_TYPES.SAND) {
+          // Desert-like tree
+          leavesType = TILE_TYPES.GOLD_BLOCK; // Golden leaves
+        } else if (surfaceTile === TILE_TYPES.WOOL_WHITE) {
+          // Snow-covered tree
+          leavesType = TILE_TYPES.WOOL_WHITE; // White leaves
+        } else if (surfaceTile === TILE_TYPES.STONE || surfaceTile === TILE_TYPES.COBBLESTONE) {
+          // Stone-like tree
+          trunkType = TILE_TYPES.STONE;
+          leavesType = TILE_TYPES.IRON_ORE; // Metallic leaves
+        }
+
         // Tree trunk
         const trunkHeight = 3 + Math.floor(noise(x, z) * 3); // 3-5 blocks height
 
         for (let y = 1; y <= trunkHeight; y++) {
           cubes.push({
             position: [x, height + y, z],
-            tileIndex: TILE_TYPES.WOOD,
+            tileIndex: trunkType,
           });
         }
 
@@ -346,7 +512,7 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
                 if (edgeCondition) {
                   cubes.push({
                     position: [x + lx, height + trunkHeight + ly, z + lz],
-                    tileIndex: TILE_TYPES.LEAVES,
+                    tileIndex: leavesType,
                   });
                 }
               }
