@@ -32,10 +32,21 @@ Key technologies:
 - Multiple block types organized by color themes
 - Optimized chunk-based rendering system
 - Custom shader for per-face color implementation
-- Raycasting for accurate block targeting
+- Accurate raycasting for precise block targeting and preview
 - Performance optimizations for handling thousands of blocks
 - Dynamic loading and unloading of terrain chunks based on player proximity
 - Color-based theme system for intuitive block selection
+- Advanced terrain generation with layer-based block distribution
+- Absolute Y-coordinate based tile assignment for consistent terrain features
+- Enhanced cube preview positioning aligned with actual placement
+
+## Recent Improvements
+
+- **Enhanced Terrain Generation**: Improved terrain generator with smoother transitions and more natural formations
+- **Absolute Y-Coordinate System**: Modified terrain generation to use absolute Y-coordinates for more consistent layer-based block distribution
+- **Precise Raycasting**: Implemented synchronization between preview and actual cube placement with consistent coordinate systems
+- **Coordinate System Alignment**: Fixed positioning offsets between preview cubes and actual placement by aligning the two coordinate systems
+- **Theme-Based Block Selection**: Enhanced tile selection UI with improved theme organization and better visual feedback
 
 ## Color System Design
 
@@ -77,11 +88,12 @@ The rendering system uses a color-based approach with these key features:
 
 - Directory containing utility functions for the game.
   - **`colorUtils.ts`**: Defines and manages per-face colors for all block types and provides functions for color conversion and access.
+  - **`terrainGenerator.ts`**: Implements procedural terrain generation with multiple layers, using absolute Y-coordinates for consistent block distribution.
 
 ### `src/hooks/`
 
 - Directory containing custom React hooks.
-  - **`useCubeRaycaster.tsx`**: Custom hook for block placement and removal. Implements raycasting for block targeting and handles mouse interactions with the world.
+  - **`useCubeRaycaster.tsx`**: Custom hook for block placement and removal. Implements precise raycasting for block targeting and handles mouse interactions with perfect alignment between preview and actual placement.
 
 ### `src/constants/`
 
@@ -97,9 +109,9 @@ The rendering system uses a color-based approach with these key features:
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
     - **`Experience.tsx`**: Sets up 3D environment. Includes the crucial `FirstPersonViewController`, the `FollowLight` component that must be included with the controller for proper lighting, physics, lighting, and sky.
-    - **`Cubes.tsx`**: Core voxel rendering system using instanced meshes with custom shader for optimized color-based rendering and chunk-based optimization.
+    - **`InstancedCube.tsx`**: Core voxel rendering system using instanced meshes with custom shader for optimized color-based rendering and chunk-based optimization.
     - **`SingleCube.tsx`**: Component for rendering individual cubes with color-based faces for UI and preview purposes.
-    - **`CubePreview.tsx`**: Shows preview of block placement location and provides visual feedback for block placement.
+    - **`CubePreview.tsx`**: Shows preview of block placement location with precise coordinate alignment to the actual placement position.
     - **`Floor.tsx`**: Implements basic colored floor as the bottom boundary of the world.
 
   - **`scene/`**: Contains components related to 3D scene setup.
@@ -128,7 +140,7 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 1. **Chunk-Based Rendering**: The world is divided into chunks that are rendered using instanced meshes for performance optimization. Only chunks near the player are loaded, allowing for efficient rendering of large worlds.
 
-2. **Block Manipulation**: The system allows players to add and remove blocks through raycasting, with visual feedback provided through the `CubePreview` component.
+2. **Block Manipulation**: The system allows players to add and remove blocks through raycasting, with visual feedback provided through the `CubePreview` component which aligns perfectly with actual placement positions.
 
 3. **Color-Based System**: Multiple block types are supported through a custom shader that applies unique colors to each face, allowing for diverse environments with minimal performance impact.
 
@@ -139,3 +151,7 @@ The Minecraft-style voxel system is implemented through a combination of compone
 6. **Theme System**: Color-based themes group similar colored blocks to make it easy to create structures with natural gradient effects.
 
 7. **Optimized Instance Rendering**: The custom shader and instanced mesh approach allows for efficient rendering of thousands of blocks while still applying unique colors to each face of every block.
+
+8. **Advanced Terrain Generation**: The terrain is generated using a layered approach based on absolute Y-coordinates, creating natural-looking landscapes with appropriate block types at different heights.
+
+9. **Coordinate System Synchronization**: The raycasting and placement systems are carefully aligned to ensure that preview blocks appear exactly where they will be placed, making building more intuitive and precise.

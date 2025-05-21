@@ -6,9 +6,6 @@ import SingleCube from '../r3f/SingleCube';
 import { THEMES, THEME_NAMES, THEME_ICONS, THEME_DESCRIPTIONS } from '../../constants/themes';
 import { getTileTypeFromIndex } from '../../utils/colorUtils';
 
-// Check development mode (using Vite environment variable)
-const isDevelopment = true;
-
 /**
  * Single tile rendering component
  */
@@ -35,7 +32,7 @@ const TileItem = ({ tileIndex, isSelected, onClick }: { tileIndex: number; isSel
       onClick={onClick}
     >
       <div className="w-full h-full">
-        <Canvas camera={{ position: [2, 2, 2], fov: 40 }} dpr={[1, 2]}>
+        <Canvas camera={{ position: [0, 0, 3], fov: 40 }} dpr={[1, 2]}>
           <color attach="background" args={['#222222']} />
           <ambientLight intensity={1.2} />
           <directionalLight position={[3, 3, 3]} intensity={0.8} />
@@ -84,15 +81,17 @@ const ThemeItem = ({ theme, isSelected, onClick }: { theme: THEMES; isSelected: 
  * Tile selector component
  */
 const TileSelector: React.FC = () => {
-  // Get state from cube store
-  const selectedTile = useCubeStore((state) => state.selectedTile);
-  const setSelectedTile = useCubeStore((state) => state.setSelectedTile);
-  const selectedTheme = useCubeStore((state) => state.selectedTheme);
-  const setSelectedTheme = useCubeStore((state) => state.setSelectedTheme);
-  const availableTiles = useCubeStore((state) => state.availableTiles);
+  const tileStore = useCubeStore();
+  const { selectedTile, setSelectedTile, availableTiles, regenerateTerrain, selectedTheme, setSelectedTheme } = tileStore;
 
   // Theme selection mode (false: tile selection mode, true: theme selection mode)
   const [showThemes, setShowThemes] = useState(false);
+
+  // State for seed input and terrain generation
+  const [customSeed, setCustomSeed] = useState(tileStore.seed);
+
+  // List of available tiles
+  const tileOptions = availableTiles || [];
 
   // Tile index related
   const currentTileIndex = useMemo(() => {
@@ -144,14 +143,6 @@ const TileSelector: React.FC = () => {
     };
   }, [handleKeyDown]);
 
-  // Debug information (development mode only)
-  useEffect(() => {
-    if (isDevelopment && selectedTile !== undefined) {
-      const actualTileType = getTileTypeFromIndex(selectedTile);
-      console.log(`Selected tile index: ${selectedTile}, Actual tile type: ${actualTileType}`);
-    }
-  }, [selectedTile]);
-
   // Theme selection handler
   const handleThemeSelect = useCallback(
     (theme: THEMES) => {
@@ -179,6 +170,11 @@ const TileSelector: React.FC = () => {
     return tiles;
   }, [availableTiles, currentTileIndex]);
 
+  // Terrain regeneration function
+  const handleRegenerateTerrain = () => {
+    regenerateTerrain(customSeed);
+  };
+
   // Theme selection mode rendering
   if (showThemes) {
     return (
@@ -204,22 +200,30 @@ const TileSelector: React.FC = () => {
   // Tile selection mode rendering
   return (
     <div className="fixed left-1/2 bottom-5 transform -translate-x-1/2 bg-black/90 p-3 rounded-lg border-2 border-[#313a40] shadow-lg z-50">
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center justify-between gap-3 mb-2">
         {/* Theme selection button */}
         <button className="flex items-center gap-1 px-3 py-1 bg-[#313a40] hover:bg-[#474f52] text-white rounded text-sm" onClick={() => setShowThemes(true)}>
           <span>{THEME_ICONS[selectedTheme]}</span>
-          <span>{THEME_NAMES[selectedTheme]}</span>
+          <span>Change Theme</span>
         </button>
 
-        {/* Keyboard shortcut guide */}
-        <div className="flex gap-2 text-white text-sm">
-          <span className="px-2 bg-[#474f52] rounded">Q</span>
-          <span className="px-2 bg-[#474f52] rounded">E</span>
+        {/* Terrain generation UI */}
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={customSeed}
+            onChange={(e) => setCustomSeed(e.target.value)}
+            placeholder="Enter seed"
+            className="bg-black/50 border border-gray-600 rounded px-2 py-1 text-white text-sm w-32"
+          />
+          <button onClick={handleRegenerateTerrain} className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700">
+            Generate Terrain
+          </button>
         </div>
       </div>
 
       {availableTiles.length === 0 ? (
-        <div className="text-white text-center py-2">There are no available tiles in this theme.</div>
+        <div className="text-white text-center py-2">No available tiles in this theme.</div>
       ) : (
         <div className="flex items-center justify-center">
           {displayTiles.map((tileIndex, idx) => (
@@ -232,6 +236,16 @@ const TileSelector: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Keyboard shortcut guide */}
+      <div className="flex justify-center gap-4 text-white text-xs mt-2">
+        <span>
+          Previous tile: <span className="px-2 bg-[#474f52] rounded">Q</span>
+        </span>
+        <span>
+          Next tile: <span className="px-2 bg-[#474f52] rounded">E</span>
+        </span>
+      </div>
     </div>
   );
 };

@@ -3,7 +3,7 @@ class Server {
   async joinRoom(roomId, nickname) {
     try {
       if (!nickname || nickname.trim() === '') {
-        throw new Error('닉네임을 입력해주세요');
+        throw new Error('Please enter a nickname');
       }
 
       // If roomId is provided, join that specific room
@@ -55,7 +55,7 @@ class Server {
 
       return joinedRoomId;
     } catch (error) {
-      throw new Error(`방 참여 실패: ${error.message}`);
+      throw new Error(`Failed to join room: ${error.message}`);
     }
   }
 
@@ -76,7 +76,7 @@ class Server {
       // Actually leave the room
       return await $global.leaveRoom();
     } catch (error) {
-      throw new Error(`방 나가기 실패: ${error.message}`);
+      throw new Error(`Failed to leave room: ${error.message}`);
     }
   }
 
@@ -99,7 +99,7 @@ class Server {
 
       return character;
     } catch (error) {
-      throw new Error(`캐릭터 선택 실패: ${error.message}`);
+      throw new Error(`Failed to select character: ${error.message}`);
     }
   }
 
@@ -190,7 +190,7 @@ class Server {
   async sendMessage(message) {
     try {
       if (!message || message.trim() === '') {
-        throw new Error('메시지를 입력해주세요');
+        throw new Error('Please enter a message');
       }
 
       // Get user state to include nickname in the message
@@ -211,11 +211,11 @@ class Server {
 
       return true;
     } catch (error) {
-      throw new Error(`메시지 전송 실패: ${error.message}`);
+      throw new Error(`Failed to send message: ${error.message}`);
     }
   }
 
-  // Send effect event to all users in the room (범용적인 효과 이벤트 전송 함수)
+  // Send effect event to all users in the room (Generic effect event sending function)
   async sendEffectEvent(effectData) {
     try {
       // Get user state to include sender information
@@ -240,14 +240,14 @@ class Server {
 
       return true;
     } catch (error) {
-      console.error(`효과 이벤트 전송 실패: ${error.message}`);
+      console.error(`Failed to send effect event: ${error.message}`);
       return false;
     }
   }
 
-  // Send fireball effect event to all users in the room (이전 버전 호환성 유지용)
+  // Send fireball effect event to all users in the room (For backward compatibility)
   async sendFireballEffect(startPosition, direction, targetPosition) {
-    // 객체 형태로 들어올 경우 배열로 변환
+    // Convert object form to array if needed
     const convertToArray = (pos) => {
       if (Array.isArray(pos)) return pos;
       return [pos.x, pos.y, pos.z];
@@ -284,11 +284,11 @@ class Server {
   async applyDamage(targetAccount, damageAmount) {
     try {
       if (!targetAccount) {
-        throw new Error('대상 사용자를 지정해주세요');
+        throw new Error('Please specify a target user');
       }
 
       if (!damageAmount || damageAmount <= 0) {
-        throw new Error('유효한 데미지 값을 입력해주세요');
+        throw new Error('Please enter a valid damage value');
       }
 
       // Get attacker info
@@ -298,7 +298,7 @@ class Server {
       const targetState = await $room.getUserState(targetAccount);
 
       if (!targetState) {
-        throw new Error('대상 사용자를 찾을 수 없습니다');
+        throw new Error('Target user not found');
       }
 
       // Initialize stats if they don't exist
@@ -312,7 +312,7 @@ class Server {
       // Calculate new HP
       const newHp = Math.max(0, targetState.stats.currentHp - damageAmount);
 
-      // 상태 업데이트 객체 생성
+      // Create state update object
       const updateData = {
         stats: {
           ...targetState.stats,
@@ -321,7 +321,7 @@ class Server {
         lastActive: Date.now(),
       };
 
-      // HP가 0이 되면 state를 DIE로 설정
+      // Set state to DIE if HP becomes 0
       if (newHp <= 0) {
         updateData.state = 'DIE';
       }
@@ -335,14 +335,14 @@ class Server {
         newHp,
       };
     } catch (error) {
-      throw new Error(`데미지 적용 실패: ${error.message}`);
+      throw new Error(`Failed to apply damage: ${error.message}`);
     }
   }
 
   // Room tick function to handle periodic updates
   async $roomTick(deltaMS, roomId) {
     try {
-      // 주기적인 룸 상태 업데이트가 필요한 경우 여기에 추가
+      // Add periodic room state updates here if needed
     } catch (error) {
       console.error(`Room tick error: ${error.message}`);
     }

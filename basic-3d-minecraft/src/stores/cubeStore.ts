@@ -2,14 +2,15 @@ import { create } from 'zustand';
 import { TILE_TYPES } from '../constants/tiles';
 import { THEMES, getThemeTileIndices } from '../constants/themes';
 import { getTileTypeFromIndex } from '../utils/colorUtils';
+import { generateTerrain, GeneratedCube } from '../utils/terrainGenerator';
 
 // Seed value constant
 const DEFAULT_SEED = import.meta.env.VITE_AGENT8_VERSE || 'minecraft123';
 
 // Single terrain configuration value
 const TERRAIN_CONFIG = {
-  width: 160,
-  depth: 160,
+  width: 80,
+  depth: 80,
 };
 
 // Cube information interface - storing tileIndex directly without conversion
@@ -18,7 +19,7 @@ interface CubeInfo {
   tileIndex: number; // Tile index (not tile type)
 }
 
-// 배열 인덱스에서 타일 타입으로 변환하는 매핑 테이블 생성
+// Create a mapping table to convert from array index to tile type
 const TILE_INDEX_MAP = Object.values(TILE_TYPES).reduce((map, val, idx) => {
   map[idx] = val;
   return map;
@@ -35,12 +36,13 @@ interface CubeStore {
   tileTypes: typeof TILE_TYPES; // Tile type constants
   builderMode: boolean; // Builder mode
   toggleBuilderMode: () => void; // Toggle builder mode
+  regenerateTerrain: (newSeed?: string) => void; // Function to regenerate terrain
 
-  // 테마 관련 상태와 함수
-  selectedTheme: THEMES; // 선택된 테마
-  setSelectedTheme: (theme: THEMES) => void; // 테마 선택 함수
-  availableTiles: number[]; // 현재 테마에서 사용 가능한 타일 인덱스 목록
-  updateAvailableTiles: () => void; // 사용 가능한 타일 목록 업데이트
+  // Theme related states and functions
+  selectedTheme: THEMES; // Selected theme
+  setSelectedTheme: (theme: THEMES) => void; // Theme selection function
+  availableTiles: number[]; // List of available tile indices in the current theme
+  updateAvailableTiles: () => void; // Function to update the list of available tiles
 }
 
 // Check if two positions are the same
@@ -48,20 +50,25 @@ const isSamePosition = (a: [number, number, number], b: [number, number, number]
   return a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
 };
 
+// Function to create initial terrain
+const createInitialTerrain = (seed: string): CubeInfo[] => {
+  return generateTerrain(seed, TERRAIN_CONFIG.width, TERRAIN_CONFIG.depth);
+};
+
 const useCubeStore = create<CubeStore>((set, get) => ({
   // Initial setup
   seed: DEFAULT_SEED,
-  cubes: [],
+  cubes: createInitialTerrain(DEFAULT_SEED), // Apply initial terrain generation
   tileTypes: TILE_TYPES,
   builderMode: true,
 
-  // Terrain regeneration function (simplified)
+  // Terrain regeneration function
   regenerateTerrain: (newSeed) =>
     set((state) => {
       const seed = newSeed || state.seed;
       return {
         seed,
-        cubes: [],
+        cubes: createInitialTerrain(seed), // Regenerate terrain
       };
     }),
 
@@ -87,21 +94,21 @@ const useCubeStore = create<CubeStore>((set, get) => ({
   // Toggle builder mode
   toggleBuilderMode: () => set((state) => ({ builderMode: !state.builderMode })),
 
-  // 테마 관련 상태와 함수
-  selectedTheme: THEMES.ALL, // 기본 테마는 모든 블록
+  // Theme related states and functions
+  selectedTheme: THEMES.ALL, // Default theme is all blocks
   setSelectedTheme: (theme) => {
     set({ selectedTheme: theme });
-    // 테마가 변경되면 사용 가능한 타일 목록 업데이트
+    // Update the list of available tiles when the theme changes
     get().updateAvailableTiles();
   },
-  availableTiles: getThemeTileIndices(THEMES.ALL), // 초기값은 모든 타일
+  availableTiles: getThemeTileIndices(THEMES.ALL), // Initial value is all tiles
   updateAvailableTiles: () => {
     const theme = get().selectedTheme;
     const availableTiles = getThemeTileIndices(theme);
 
     set({ availableTiles });
 
-    // 현재 선택된 타일이 새 테마에 없는 경우, 첫 번째 사용 가능한 타일로 변경
+    // If the currently selected tile is not available in the new theme, change to the first available tile
     const selectedTile = get().selectedTile;
     if (!availableTiles.includes(selectedTile) && availableTiles.length > 0) {
       set({ selectedTile: availableTiles[0] });

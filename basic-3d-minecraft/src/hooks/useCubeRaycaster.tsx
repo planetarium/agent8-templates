@@ -89,16 +89,29 @@ const useCubeRaycaster = () => {
           objectMatrix = instanceWorldMatrix;
         }
 
-        // Calculate the position to place the cube based on the direction of the collided face
+        // Here we need to determine the cube position in exactly the same way
+        // as the handleCubeClick function in InstancedCube
+
+        // 1. Calculate exact position and face direction
         normal.transformDirection(objectMatrix);
 
-        // Move slightly in the normal direction from the collision point (by 0.5)
-        point.add(normal.multiplyScalar(0.5));
+        // 2. Calculate the position of the hit cube (InstancedCube uses integer coordinates)
+        // InstancedMesh already uses integer coordinates
+        const hitCubeX = Math.round(point.x - normal.x * 0.5);
+        const hitCubeY = Math.round(point.y - normal.y * 0.5);
+        const hitCubeZ = Math.round(point.z - normal.z * 0.5);
 
-        // Round the position to integer values
-        const x = Math.floor(point.x) + 0.5;
-        const y = Math.floor(point.y) + 0.5;
-        const z = Math.floor(point.z) + 0.5;
+        // 3. Calculate new cube position based on face direction (normal vector)
+        // Normalize normal direction to -1, 0, or 1
+        const nx = Math.round(normal.x);
+        const ny = Math.round(normal.y);
+        const nz = Math.round(normal.z);
+
+        // 4. New cube position = hit cube position + normal direction
+        // Calculate in the same way as InstancedCube.handleCubeClick
+        const x = hitCubeX + nx;
+        const y = hitCubeY + ny;
+        const z = hitCubeZ + nz;
 
         setPreviewPosition([x, y, z]);
         setFaceIndex(validIntersection.faceIndex || 0);
@@ -118,8 +131,9 @@ const useCubeRaycaster = () => {
   // Cube action handler (always operates in builder mode)
   const handleCubeAction = useCallback(() => {
     if (previewPosition) {
-      // Builder mode: Add cube - selectedTile를 직접 사용 (cubeStore에서 변환됨)
-      addCube(previewPosition[0], previewPosition[1], previewPosition[2], selectedTile);
+      // previewPosition is already calculated as integer position, so use it as is
+      const [x, y, z] = previewPosition;
+      addCube(x, y, z, selectedTile);
     }
   }, [previewPosition, addCube, selectedTile]);
 
