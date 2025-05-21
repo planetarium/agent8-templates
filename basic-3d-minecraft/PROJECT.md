@@ -155,3 +155,7 @@ The Minecraft-style voxel system is implemented through a combination of compone
 8. **Advanced Terrain Generation**: The terrain is generated using a layered approach based on absolute Y-coordinates, creating natural-looking landscapes with appropriate block types at different heights.
 
 9. **Coordinate System Synchronization**: The raycasting and placement systems are carefully aligned to ensure that preview blocks appear exactly where they will be placed, making building more intuitive and precise.
+
+# Next Actions
+
+- **Immediate**: User to implement creative terrain generation logic following the extensive TODOs
