@@ -15,11 +15,20 @@ const Experience = () => {
 
   return (
     <>
-      <ambientLight intensity={2.5} />
+      {/* Lower ambient light intensity for stronger shadows and contrast */}
+      <ambientLight intensity={0.5} />
 
-      <FollowLight />
+      {/* Main directional light - acts as the sun */}
+      <directionalLight position={[50, 100, 50]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} />
 
-      <Environment preset="sunset" background={false} />
+      {/* Secondary light - side lighting for enhanced depth */}
+      <directionalLight position={[-30, 50, -30]} intensity={0.8} color="#b9d4ff" />
+
+      {/* Weak fill light from below */}
+      <directionalLight position={[0, -10, 0]} intensity={0.3} color="#fff9e8" />
+
+      <FollowLight intensity={0.8} />
+
       <Sky sunPosition={[100, 30, 100]} />
 
       {/* player character with controller */}

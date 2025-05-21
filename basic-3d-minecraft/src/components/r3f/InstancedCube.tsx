@@ -26,12 +26,25 @@ const vertexShader = `
   
   varying vec3 vColor;
   varying vec3 vNormal;
+  varying vec2 vUv; // UV coordinates
   
   void main() {
-    // Pass normal vector
+    // Pass normal
     vNormal = normalize(normalMatrix * normal);
     
-    // Select appropriate color based on face direction
+    // Calculate appropriate UV coordinates based on face direction
+    if (abs(normal.y) > 0.9) {
+      // Top/bottom face - use xz plane
+      vUv = vec2(position.x + 0.5, position.z + 0.5);
+    } else if (abs(normal.x) > 0.9) {
+      // Left/right face - use zy plane
+      vUv = vec2(position.z + 0.5, position.y + 0.5);
+    } else {
+      // Front/back face - use xy plane
+      vUv = vec2(position.x + 0.5, position.y + 0.5);
+    }
+    
+    // Select color based on face
     if (abs(normal.y) > 0.9) {
       // Top/bottom face
       vColor = normal.y > 0.0 ? colorTop : colorBottom;
@@ -51,9 +64,27 @@ const vertexShader = `
 const fragmentShader = `
   varying vec3 vColor;
   varying vec3 vNormal;
+  varying vec2 vUv;
   
   void main() {
-    gl_FragColor = vec4(vColor, 1.0);
+    // Draw border: add border to all cube faces
+    float border = 0.025; // Border width
+    
+    // Check if current fragment is at edge
+    bool isEdge = vUv.x < border || vUv.x > 1.0 - border || 
+                 vUv.y < border || vUv.y > 1.0 - border;
+    
+    // Simple directional lighting
+    float light = max(dot(vNormal, normalize(vec3(1.0, 3.0, 2.0))), 0.0) * 0.3 + 0.7;
+    
+    // Apply lighting to base color
+    vec3 litColor = vColor * light;
+    
+    // Apply border effect with subtle darkening
+    vec3 finalColor = isEdge ? litColor * 0.75 : litColor;
+    
+    // Output color
+    gl_FragColor = vec4(finalColor, 1.0);
   }
 `;
 
