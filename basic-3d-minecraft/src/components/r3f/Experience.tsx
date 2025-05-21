@@ -21,9 +21,9 @@ const Experience = () => {
   // Calculate player start position after cubes are loaded
   useEffect(() => {
     if (cubes.length > 0) {
-      // Find the highest position at the center point (around x=80, z=80)
-      const centerX = 40;
-      const centerZ = 40;
+      // Find the highest position at the center point (around x=0, z=0)
+      const centerX = 0;
+      const centerZ = 0;
       const searchRadius = 5;
 
       let highestY = 0;
@@ -48,7 +48,7 @@ const Experience = () => {
         setPlayerStartPosition([centerX, highestY + 30, centerZ]);
       } else {
         // Start from a high position if no suitable terrain is found
-        setPlayerStartPosition([80, 100, 80]);
+        setPlayerStartPosition([0, 100, 0]);
       }
     }
   }, [cubes]);

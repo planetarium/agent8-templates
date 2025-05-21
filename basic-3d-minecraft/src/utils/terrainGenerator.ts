@@ -70,7 +70,7 @@ export function createSeedBasedNoise(seed: string, dimension: '2d' | '3d' = '2d'
   };
 
   // Return the appropriate noise function
-  return dimension === '2d' ? createNoise2D(() => seededRandom()) : createNoise3D(() => seededRandom());
+  return dimension === '2d' ? createNoise2D(seededRandom) : createNoise3D(seededRandom);
 }
 
 /**
@@ -104,6 +104,10 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
   // Create cube array
   const cubes: GeneratedCube[] = [];
 
+  // Calculate offsets to center the terrain around (0,0)
+  const xOffset = Math.floor(width / 2);
+  const zOffset = Math.floor(depth / 2);
+
   // Basic flat terrain example
   // TODO: Replace with your own terrain generation logic!
   for (let x = 0; x < width; x++) {
@@ -111,7 +115,12 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
       // Generate a simple height using noise
       const nx = x * TERRAIN_CONFIG.scale;
       const nz = z * TERRAIN_CONFIG.scale;
-      const height = Math.floor((terrainNoise(nx, nz) + 1) * 5) + TERRAIN_CONFIG.baseHeight;
+      // Add 0 as the third parameter for 2D noise
+      const height = Math.floor((terrainNoise(nx, nz, 0) + 1) * 5) + TERRAIN_CONFIG.baseHeight;
+
+      // Calculate centered positions
+      const xPos = x - xOffset;
+      const zPos = z - zOffset;
 
       // Add blocks from bottom to top
       for (let y = 0; y <= height; y++) {
@@ -128,7 +137,7 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
         }
 
         cubes.push({
-          position: [x, y, z],
+          position: [xPos, y, zPos],
           tileIndex: tileType,
         });
       }
