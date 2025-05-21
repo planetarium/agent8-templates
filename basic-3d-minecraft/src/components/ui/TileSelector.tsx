@@ -206,20 +206,6 @@ const TileSelector: React.FC = () => {
           <span>{THEME_ICONS[selectedTheme]}</span>
           <span>Change Theme</span>
         </button>
-
-        {/* Terrain generation UI */}
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={customSeed}
-            onChange={(e) => setCustomSeed(e.target.value)}
-            placeholder="Enter seed"
-            className="bg-black/50 border border-gray-600 rounded px-2 py-1 text-white text-sm w-32"
-          />
-          <button onClick={handleRegenerateTerrain} className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700">
-            Generate Terrain
-          </button>
-        </div>
       </div>
 
       {availableTiles.length === 0 ? (
