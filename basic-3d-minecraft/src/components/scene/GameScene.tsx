@@ -6,6 +6,8 @@ import { keyboardMap } from '../../constants/controls';
 import TileSelector from '../ui/TileSelector';
 import Crosshair from '../ui/Crosshair';
 import { Physics } from '@react-three/rapier';
+import { FirstPersonViewController } from 'vibe-starter-3d';
+import { FollowLight } from 'vibe-starter-3d';
 
 /**
  * Main game scene component
@@ -25,6 +27,8 @@ const GameScene: React.FC = () => {
           }}
         >
           <Physics>
+            <FollowLight intensity={0.8} />
+            <FirstPersonViewController />
             <Experience />
           </Physics>
         </Canvas>

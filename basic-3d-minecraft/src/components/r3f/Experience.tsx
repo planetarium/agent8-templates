@@ -1,17 +1,13 @@
-import { Environment, Sky } from '@react-three/drei';
-import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
+import { Environment } from '@react-three/drei';
 
 import InstancedCube from './InstancedCube';
 import CubePreview from './CubePreview';
 import useCubeRaycaster from '../../hooks/useCubeRaycaster';
-import useCubeStore from '../../stores/cubeStore';
-import { useEffect, useState } from 'react';
 import Water from './Water';
+import Player from './Player';
 
 const Experience = () => {
-  const targetHeight = 1.6;
   const { previewPosition } = useCubeRaycaster();
-  const playerStartPosition: [number, number, number] = [0, 40, 0];
 
   return (
     <>
@@ -29,11 +25,6 @@ const Experience = () => {
 
       <Environment preset="dawn" background={true} />
 
-      <FollowLight intensity={0.8} />
-
-      {/* player character with controller */}
-      <FirstPersonViewController targetHeight={targetHeight} position={playerStartPosition}></FirstPersonViewController>
-
       {/* Water */}
       <Water />
 
@@ -42,6 +33,8 @@ const Experience = () => {
 
       {/* Cube Preview */}
       <CubePreview position={previewPosition} />
+
+      <Player />
     </>
   );
 };

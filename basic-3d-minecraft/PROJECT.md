@@ -20,33 +20,35 @@ Key technologies:
 - React Three Fiber - React integration
 - @react-three/rapier - Physics simulation
 - Zustand - State management
-- vibe-starter-3d - Character control and animation
+- vibe-starter-3d (v0.4.0) - Advanced character control, animation system, and physics integration
 - Instanced Meshes - Optimized block rendering
 - Custom Shaders - Face-specific coloring
 - Tailwind CSS - UI composition
 
-## Implemented Features
+## Core Features
 
-- Block placing and removing with mouse interaction
-- First-person character movement with physics
-- Multiple block types organized by color themes
-- Optimized chunk-based rendering system
-- Custom shader for per-face color implementation
-- Accurate raycasting for precise block targeting and preview
-- Performance optimizations for handling thousands of blocks
-- Dynamic loading and unloading of terrain chunks based on player proximity
-- Color-based theme system for intuitive block selection
-- Advanced terrain generation with layer-based block distribution
-- Absolute Y-coordinate based tile assignment for consistent terrain features
-- Enhanced cube preview positioning aligned with actual placement
+- **Block Manipulation**: Interactive block placing and removing with precise mouse targeting
+- **First-Person Control**: Smooth character movement with physics-based collision detection
+- **Advanced Animation System**: Character state management with multiple animation types (idle, walk, run, jump, cast)
+- **Color-Based Block System**: Multiple block types organized by intuitive color themes
+- **Optimized Rendering**: Chunk-based system with instanced meshes for efficient rendering of thousands of blocks
+- **Custom Shader Implementation**: Per-face color rendering without texture overhead
+- **Precise Raycasting**: Accurate block targeting with synchronized preview and placement systems
+- **Dynamic World Loading**: Automatic chunk loading/unloading based on player proximity
+- **Procedural Terrain**: Advanced terrain generation with layer-based block distribution using absolute Y-coordinates
+- **Physics Integration**: Complete physics simulation with collision detection and rigid body management
+- **Player Reference System**: Multiplayer-ready player tracking and state management
 
-## Recent Improvements
+## Current Implementation Features
 
-- **Enhanced Terrain Generation**: Improved terrain generator with smoother transitions and more natural formations
-- **Absolute Y-Coordinate System**: Modified terrain generation to use absolute Y-coordinates for more consistent layer-based block distribution
-- **Precise Raycasting**: Implemented synchronization between preview and actual cube placement with consistent coordinate systems
-- **Coordinate System Alignment**: Fixed positioning offsets between preview cubes and actual placement by aligning the two coordinate systems
-- **Theme-Based Block Selection**: Enhanced tile selection UI with improved theme organization and better visual feedback
+- **Advanced Player System**: Dedicated Player.tsx component with comprehensive character management, animation control, and state transitions
+- **Character Animation System**: Complete character state management with animation mapping for idle, walking, running, jumping, and casting actions
+- **Physics Integration**: Full physics integration with collision detection, rigid body object type definitions, and player reference management
+- **Optimized Terrain Generation**: Procedural terrain generation with smooth transitions, natural formations, and absolute Y-coordinate based layer distribution
+- **Precise Block Interaction**: Synchronized raycasting system with perfect alignment between preview and actual cube placement
+- **Theme-Based Block System**: Intuitive color-based theme organization with enhanced tile selection UI and visual feedback
+- **Chunk-Based Rendering**: Efficient world rendering with dynamic loading/unloading based on player proximity
+- **Custom Shader System**: Per-face color implementation for diverse block types without texture overhead
 
 ## Color System Design
 
@@ -83,6 +85,7 @@ The rendering system uses a color-based approach with these key features:
 
 - Directory containing Zustand stores for application state management.
   - **`cubeStore.ts`**: Store for voxel world management that handles adding, removing, and storing block data. Also manages theme selection and controls selected block type.
+  - **`playerStore.ts`**: Store for player reference management that handles registration and access to player rigid body references for physics interactions and multiplayer support.
 
 ### `src/utils/`
 
@@ -101,6 +104,8 @@ The rendering system uses a color-based approach with these key features:
   - **`controls.ts`**: Defines keyboard control mappings and sets up input configuration for character movement.
   - **`tiles.ts`**: Defines tile types used throughout the application.
   - **`themes.ts`**: Defines color themes and theme-based block groupings for intuitive selection.
+  - **`character.ts`**: Defines character animation states and types for player state management.
+  - **`rigidBodyObjectType.ts`**: Defines physics object types for collision detection and interaction systems.
 
 ### `src/components/`
 
@@ -108,7 +113,8 @@ The rendering system uses a color-based approach with these key features:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Sets up 3D environment. Includes the crucial `FirstPersonViewController`, the `FollowLight` component that must be included with the controller for proper lighting, physics, lighting, and sky.
+    - **`Experience.tsx`**: Sets up 3D environment including lighting, sky, and world elements. Coordinates the overall 3D scene composition.
+    - **`Player.tsx`**: Dedicated player component managing character rendering, animations, state transitions, and physics interactions with comprehensive animation system.
     - **`InstancedCube.tsx`**: Core voxel rendering system using instanced meshes with custom shader for optimized color-based rendering and chunk-based optimization.
     - **`SingleCube.tsx`**: Component for rendering individual cubes with color-based faces for UI and preview purposes.
     - **`CubePreview.tsx`**: Shows preview of block placement location with precise coordinate alignment to the actual placement position.
@@ -116,7 +122,7 @@ The rendering system uses a color-based approach with these key features:
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, integrates `FirstPersonViewController` and `FollowLight` within the physics context, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`PreloadScene.tsx`**: Manages asset preloading before the game starts and displays a loading progress bar.
 
   - **`ui/`**: Directory containing components related to the user interface (UI).
@@ -144,9 +150,9 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 3. **Color-Based System**: Multiple block types are supported through a custom shader that applies unique colors to each face, allowing for diverse environments with minimal performance impact.
 
-4. **First-Person Control**: The `FirstPersonViewController` component from vibe-starter-3d provides smooth first-person movement and camera control, allowing players to navigate and interact with the voxel world.
+4. **Advanced Player System**: The dedicated `Player` component integrates with vibe-starter-3d's `FirstPersonViewController` and `CharacterRenderer` to provide smooth first-person movement, camera control, and comprehensive animation system with state management for character actions.
 
-5. **State Management**: Zustand stores like `cubeStore` maintain the state of the voxel world, tracking block positions, types, and handling block operations in a performant way.
+5. **State Management**: Zustand stores including `cubeStore` for voxel world management and `playerStore` for player reference tracking maintain comprehensive game state, handling block operations, player physics interactions, and multiplayer support in a performant way.
 
 6. **Theme System**: Color-based themes group similar colored blocks to make it easy to create structures with natural gradient effects.
 
