@@ -4,6 +4,7 @@ import Experience from '../r3f/Experience';
 import { keyboardMap } from '../../constants/controls';
 import { KeyboardControls } from '@react-three/drei';
 import { Physics } from '@react-three/rapier';
+import { FollowLight, SideViewController } from 'vibe-starter-3d';
 
 /**
  * Main game scene component
@@ -19,6 +20,8 @@ const GameScene: React.FC = () => {
         <Canvas shadows>
           <Physics>
             <Suspense fallback={null}>
+              <FollowLight />
+              <SideViewController cameraMode="perspective" followCharacter={true} camDistance={10} />
               <Experience />
             </Suspense>
           </Physics>

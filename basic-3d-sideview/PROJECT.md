@@ -20,26 +20,23 @@ Key technologies:
 - React Three Fiber - React integration
 - @react-three/rapier - Physics simulation
 - @react-three/drei - Useful Three.js helpers
-- vibe-starter-3d - Character rendering and animation
+- vibe-starter-3d (v0.4.0) - Advanced character rendering, animation, and physics integration
 - Tailwind CSS - UI composition
 - Zustand - State management
 
-## Implemented Features
+## Core Features
 
-- Character animations (idle, run, sprint, jump, punch, kick, normal_attack, cast etc.)
-- Various character state management (IDLE, RUN, SPRINT, JUMP, PUNCH, KICK, NORMAL_ATTACK, CAST, etc.)
-- Physics-based character movement with gravity
-- Side view camera perspective (fixed orientation)
-- Platformer-style jumping mechanics
-- Procedurally generated platforms using seed-based randomization
-- Environmental collision detection
-- Keyboard controls for character movement and actions
-- 3D model rendering with animations
-- Variable platform heights and gaps for challenging gameplay
-- Animation system with support for looping and one-shot animations
-- Character bounding box calculations
-- Keyboard controls for movement (WASD/arrow keys), skills (Q/E/R/F), and mouse click for interactions
-- Asset preloading system with progress indication
+- **Advanced Character System**: Comprehensive character rendering with physics-based rigid body integration
+- **Animation Management**: Complete animation system supporting idle, run, sprint, jump, punch, kick, normal_attack, cast, and other character states
+- **Physics Integration**: Full physics simulation with collision detection, gravity, and rigid body object type definitions
+- **Side View Camera**: Fixed side-view perspective with character following and configurable camera distance for optimal platformer experience
+- **Platformer Mechanics**: Specialized jumping mechanics and gravity-based movement essential for platformer gameplay
+- **Procedural Platform Generation**: Seed-based randomization system creating variable platform heights and gaps for challenging gameplay
+- **Interactive Controls**: Keyboard-based navigation (WASD for movement, QERF for actions) with mouse interaction support
+- **Environmental Collision**: Advanced collision detection system for platform interactions and environmental boundaries
+- **State Management**: Robust character state transitions and player reference tracking for multiplayer readiness
+- **Asset Management**: Comprehensive preloading system with progress indication for smooth gameplay
+- **3D Rendering**: High-quality 3D model rendering with smooth animation transitions optimized for platformer gameplay
 
 ## File Structure Overview
 
@@ -76,6 +73,7 @@ Key technologies:
 - Directory defining constant values used throughout the application.
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
   - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
+  - **`rigidBodyObjectType.ts`**: Defines physics object types for collision detection and interaction systems.
 
 ### Components
 
@@ -85,13 +83,13 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component wrapped in `SideViewController`, the `FollowLight` component that must be included with the controller for proper lighting, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`. The inclusion of both `SideViewController` and `FollowLight` is essential for the proper functioning of the side view environment.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight`, environmental elements `Environment`, the `Player` component, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
     - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties and implements procedurally generated platforms for the platformer gameplay.
-    - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
+    - **`Player.tsx`**: Advanced player component integrating RigidBodyPlayer with CharacterRenderer for comprehensive character management, physics interactions, and animation state management with collision detection capabilities optimized for platformer gameplay.
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, integrates `SideViewController` and `FollowLight` within the physics context, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`PreloadScene.tsx`**: Manages asset preloading before the game starts. Loads all assets defined in assets.json (models, textures, etc.) and displays a loading progress bar. Ensures all assets are loaded before the game begins.
 
   - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
@@ -110,13 +108,13 @@ Key technologies:
 
 The side view platformer system is implemented through a combination of components:
 
-1. **Controller System**: `SideViewController` from the vibe-starter-3d library handles the physics-based movement of the character based on keyboard inputs, implementing platformer mechanics like jumping and gravity with a fixed camera angle that provides the side view perspective.
+1. **Controller System**: `SideViewController` from the vibe-starter-3d library handles the physics-based movement of the character based on keyboard inputs, implementing platformer mechanics like jumping and gravity with a fixed camera angle that provides the side view perspective and configurable camera distance.
 
-2. **Input Management**: Keyboard inputs are captured through React Three Fiber's `useKeyboardControls` hook, which maps WASD/arrow keys to movement actions (with special emphasis on jump controls essential for platformer gameplay).
+2. **Input Management**: Keyboard inputs are captured through React Three Fiber's `useKeyboardControls` hook, which maps WASD/arrow keys to movement actions (with special emphasis on jump controls essential for platformer gameplay), with mouse controls for additional interactions.
 
-3. **State Management**: `useControllerState` hook provides shared state between components, allowing different parts of the application to access and modify the character's state. Additionally, `playerStore` manages physics body references.
+3. **State Management**: `useControllerState` hook provides shared state between components, allowing different parts of the application to access and modify the character's state. Additionally, `playerStore` manages physics body references for multiplayer support.
 
-4. **Animation Management**: `Player` component determines appropriate animations based on movement and action states, with special attention to jump, fall, and landing animations essential for platformer games.
+4. **Animation Management**: `Player` component with `RigidBodyPlayer` integration determines appropriate animations based on movement and action states, with special attention to jump, fall, and landing animations essential for platformer games, including full collision detection capabilities.
 
 5. **Platform Generation**: Procedurally generated platforms create the game environment, with varying heights and distances to create challenging platforming gameplay.
 
