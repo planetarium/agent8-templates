@@ -1,9 +1,6 @@
 import { Environment, Grid } from '@react-three/drei';
-import { CharacterState } from '../../constants/character';
 import Player from './Player';
 import Floor from './Floor';
-import { PointToMoveController, FollowLight } from 'vibe-starter-3d';
-import PointingSystem from './PointingSystem';
 
 const Experience = () => {
   return (
@@ -22,19 +19,9 @@ const Experience = () => {
         fadeStrength={1}
         userData={{ camExcludeCollision: true }} // this won't be collide by camera ray
       />
-
       <ambientLight intensity={0.7} />
-
-      <FollowLight offset={[60, 100, 30]} intensity={2} />
-
       <Environment preset="sunset" background={false} />
-
-      {/* player character with controller */}
-      <PointToMoveController cameraMode="orthographic">
-        <Player initState={CharacterState.IDLE} />
-      </PointToMoveController>
-      <PointingSystem />
-      {/* Floor */}
+      <Player />
       <Floor />
     </>
   );

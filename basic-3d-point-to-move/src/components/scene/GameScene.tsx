@@ -4,6 +4,9 @@ import Experience from '../r3f/Experience';
 import { KeyboardControls } from '@react-three/drei';
 import { keyboardMap } from '../../constants/controls';
 import { Physics } from '@react-three/rapier';
+import { FollowLight } from 'vibe-starter-3d';
+import { PointToMoveController } from 'vibe-starter-3d';
+import PointingSystem from '../r3f/PointingSystem';
 
 /**
  * Main game scene component
@@ -19,6 +22,9 @@ const GameScene: React.FC = () => {
         <Canvas shadows>
           <Physics>
             <Suspense fallback={null}>
+              <FollowLight offset={[60, 100, 30]} intensity={2} />
+              <PointToMoveController cameraMode="orthographic" />
+              <PointingSystem />
               <Experience />
             </Suspense>
           </Physics>
