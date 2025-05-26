@@ -39,8 +39,8 @@ Key technologies:
 
 ### `src/App.tsx`
 
-- Main application component.
-- Configures the overall layout and includes the `GameScene` and UI component `StatusDisplay`.
+- Main application component and entry point.
+- Sets up a full-screen container and renders the `GameScene` component, which handles all 3D scene setup and UI elements.
 
 ### `src/App.css`
 
@@ -55,6 +55,7 @@ Key technologies:
 - Directory defining constant values used throughout the application.
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
   - **`aircraft.ts`**: Defines constant values related to the aircraft, such as speed, rotation limits, etc.
+  - **`rigidBodyObjectType.ts`**: Defines constant values for different types of rigid body objects used in physics simulation (player, enemy, wall, floor, sea, etc.).
 
 ### `src/components/`
 
@@ -63,19 +64,20 @@ Key technologies:
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
     - **`Aircraft.tsx`**: Component handling the logic related to the player-controlled aircraft model (movement, rotation, bullet firing trigger).
-    - **`Player.tsx`**: Component representing the player character in the 3D scene, potentially encompassing the aircraft and other player-specific elements.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. It sets up the sky environment using `Sky` from `@react-three/drei` and provides basic lighting with `ambientLight`. It utilizes `FlightViewController` from `vibe-starter-3d` to wrap the `Player` component, handling flight control logic. It also incorporates a `FollowLight` component that dynamically follows the player, enhancing visibility and focus on the player's aircraft. It also includes the `Ground` and `FloatingShapes` components to complete the scene. As it comes with a pre-configured map and runway, it's highly recommended to use this component as is and avoid modifications unless absolutely necessary. **Very Important Tip: Absolutely do not modify this component when you are first starting out.**
+    - **`Player.tsx`**: Main player component that uses `RigidBodyPlayer` from `vibe-starter-3d` for physics-based player control. It handles player registration, bullet firing with cooldown, position tracking, and reset functionality. **Key feature**: Uses `onTriggerEnter` and `onTriggerExit` events to handle player interactions with other objects in the scene (collision detection, area triggers, etc.). The component includes a custom `CuboidCollider` for precise collision detection and wraps the `Aircraft` component for visual representation.
+    - **`Experience.tsx`**: Simplified 3D scene component that sets up the core scene elements. It configures ambient lighting, creates a sky environment using `Sky` from `@react-three/drei`, and includes the `Player`, `Ground`, and `FloatingShapes` components. This component focuses on the essential scene setup without flight control logic, which is now handled by `FlightViewController` in `GameScene.tsx`.
     - **`FloatingShapes.tsx`**: Component generating and managing various 3D shapes floating randomly in the scene.
-    - **`Runway.tsx`**: Component defining and visually representing the ground plane in the 3D space. It serves as a runway for the aircraft to gain speed before takeoff. Has physical properties.
+    - **`Ground.tsx`**: Component defining and visually representing the ground plane, runway, and scattered objects in the 3D space. It includes a sea plane, grass ground, runway with markings, and randomly generated objects (boxes, spheres, cones) scattered across the terrain. Has physical properties for collision detection.
     - **`EffectContainer.tsx`**: Container component managing and rendering various visual effects like bullet firing and hit effects.
     - **`effects/`**: Directory containing specific visual effect components.
       - **`Bullet.tsx`**: Component defining the visual representation and individual behavior (movement, collision detection) of bullets fired from the airplane.
       - **`BulletEffectController.tsx`**: Controller component responsible for creating and managing bullet-related effects (e.g., firing, collision). (Potential for Object Pooling usage)
       - **`MuzzleFlash.tsx`**: Component representing the muzzle flash effect.
+      - **`Explosion.tsx`**: Component creating explosion and smoke particle effects when bullets hit targets or objects.
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the `EffectContainer`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Main game scene component that sets up the complete 3D environment. It includes the `StatusDisplay` UI overlay, configures `KeyboardControls` for input handling, sets up the React Three Fiber `Canvas` with pointer lock functionality, configures physics simulation using `@react-three/rapier`, and integrates `FollowLight`, `FlightViewController` from `vibe-starter-3d` for flight control, along with `Experience` and `EffectContainer` components within a `Suspense` wrapper.
 
   - **`ui/`**: Contains components related to the user interface (UI).
     - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) on the screen.
@@ -85,6 +87,7 @@ Key technologies:
 - Directory containing state management logic (e.g., Zustand).
   - **`effectStore.ts`**: Store for managing effect-related state (e.g., bullets, explosions).
   - **`playerStore.ts`**: Store for managing player-related state (e.g., position, status).
+  - **`localPlayerStore.ts`**: Store specifically for managing local player state including position and speed with methods for updating player coordinates.
 
 ### `src/types/`
 

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import { KeyboardControls } from '@react-three/drei';
@@ -6,6 +6,8 @@ import { keyboardMap } from '../../constants/controls';
 import Experience from '../r3f/Experience';
 import EffectContainer from '../r3f/EffectContainer';
 import StatusDisplay from '../ui/StatusDisplay';
+import { FlightViewController, FollowLight } from 'vibe-starter-3d';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 
 /**
  * Main game scene component
@@ -13,7 +15,9 @@ import StatusDisplay from '../ui/StatusDisplay';
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements.
  */
-const GameScene: React.FC = () => {
+const GameScene = () => {
+  const { setSpeed } = useLocalPlayerStore();
+
   return (
     <div className="relative w-full h-screen">
       {/* UI Overlay */}
@@ -21,6 +25,7 @@ const GameScene: React.FC = () => {
 
       {/* Keyboard preset */}
       <KeyboardControls map={keyboardMap}>
+        {/* Single Canvas for the 3D scene */}
         <Canvas
           shadows
           camera={{ far: 5000 }}
@@ -30,6 +35,8 @@ const GameScene: React.FC = () => {
         >
           <Physics>
             <Suspense fallback={null}>
+              <FollowLight />
+              <FlightViewController minSpeed={0} maxSpeed={120} onSpeedChange={setSpeed} />
               <Experience />
               <EffectContainer />
             </Suspense>

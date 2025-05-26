@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameServer, useRoomState } from '@agent8/gameserver';
-import { useControllerState } from 'vibe-starter-3d';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 
 const StatusDisplay: React.FC = () => {
   const { server, connected } = useGameServer();
@@ -11,19 +11,12 @@ const StatusDisplay: React.FC = () => {
   const [maxHp, setMaxHp] = useState(0);
   const [players, setPlayers] = useState(0);
   const animationId = useRef<number | null>(null);
-  const { rigidBody, userData } = useControllerState();
+  const { state } = useLocalPlayerStore();
 
   useEffect(() => {
     const updateStatus = () => {
-      if (rigidBody) {
-        // Convert speed from m/s to km/h
-        //setSpeed(parseFloat((controllerRef.current.speed * 3.6).toFixed(1)));
-
-        if (userData.speed !== undefined) {
-          setSpeed(parseFloat((userData.speed * 3.6).toFixed(1)));
-        }
-        setAltitude(parseFloat(rigidBody.translation().y.toFixed(1)));
-      }
+      setSpeed(parseFloat((state.speed * 3.6).toFixed(1)));
+      setAltitude(parseFloat(state.position.y.toFixed(1)));
 
       animationId.current = requestAnimationFrame(updateStatus);
     };
@@ -33,7 +26,7 @@ const StatusDisplay: React.FC = () => {
     return () => {
       cancelAnimationFrame(animationId.current);
     };
-  }, [rigidBody, userData]);
+  }, [state]);
 
   useEffect(() => {
     if (!server || !connected || !roomId) return;
