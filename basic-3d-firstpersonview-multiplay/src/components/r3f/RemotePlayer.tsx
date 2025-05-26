@@ -4,15 +4,7 @@ import { CharacterState } from '../../constants/character';
 import { CapsuleCollider } from '@react-three/rapier';
 import { Vector3, Quaternion } from '@react-three/fiber';
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
-import {
-  AnimationConfigMap,
-  CharacterRenderer,
-  CharacterRendererRef,
-  ControllerUtils,
-  NetworkObjectHandle,
-  NetworkObject,
-  AnimationType,
-} from 'vibe-starter-3d';
+import { AnimationConfigMap, CharacterRenderer, CharacterRendererRef, PlayerUtils, NetworkObjectHandle, NetworkObject, AnimationType } from 'vibe-starter-3d';
 import Assets from '../../assets.json';
 import { usePlayerStore } from '../../stores/playerStore';
 
@@ -129,8 +121,8 @@ const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
     const characterRendererRef = useRef<CharacterRendererRef>(null);
     const nicknameOffsetY = targetHeight + 0.5;
 
-    const capsuleRadius = ControllerUtils.capsuleRadius(targetHeight); // capsule collider radius
-    const capsuleHalfHeight = ControllerUtils.capsuleHalfHeight(targetHeight); // half height of capsule collider
+    const capsuleRadius = PlayerUtils.capsuleRadius(targetHeight); // capsule collider radius
+    const capsuleHalfHeight = PlayerUtils.capsuleHalfHeight(targetHeight); // half height of capsule collider
 
     const characterUrl = useMemo(() => {
       const characterData = (Assets.characters as Record<string, { url: string }>)[characterKey];
@@ -139,7 +131,7 @@ const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
 
     return (
       <NetworkObject ref={networkObjectRef} position={position} rotation={rotation}>
-        <group position={[0, ControllerUtils.targetHeight(targetHeight) / 2, 0]}>
+        <group position={[0, PlayerUtils.targetHeight(targetHeight) / 2, 0]}>
           <CapsuleCollider
             name="character-capsule-collider"
             args={[capsuleHalfHeight, capsuleRadius]}
