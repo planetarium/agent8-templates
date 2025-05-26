@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, and hit reactions. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space. This project is intended for single-player gameplay.
+This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, kicking, melee attacks, casting, hit reactions, dancing, swimming, and death. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space. The project includes state management with Zustand, collision detection, and game server integration for multiplayer capabilities.
 
 ## Implementation Strategy
 
@@ -20,20 +20,25 @@ Key technologies:
 - @react-three/rapier for physics simulation
 - @react-three/drei for useful Three.js helpers
 - vibe-starter-3d for character rendering and animation
+- Zustand for state management
+- @agent8/gameserver for multiplayer game server integration
 - Tailwind CSS for styling
 
 ## Implemented Features
 
 - Keyboard-controlled character movement (WASD/Arrow keys)
-- Character animations (idle, walk, run, jump, punch, hit, die)
+- Extensive character animations (idle, walk, run, jump, punch, kick, melee attack, cast, hit, dance, swim, die)
 - Free view camera that follows the character
 - Physics-based character movement with collision detection
-- Character state management system
-- 3D environment with floor
-- Directional and ambient lighting
+- Advanced character state management system with Zustand
+- 3D environment with floor and environmental lighting
+- Directional and ambient lighting with sunset environment preset
 - Animation system with support for looping and one-shot animations
 - Character bounding box calculations
 - Pointer lock for immersive control
+- Collision trigger system using RigidBodyPlayer's onTriggerEnter/onTriggerExit events for object interactions
+- Game server integration for multiplayer support
+- Player reference management system
 
 ## File Structure Overview
 
@@ -63,7 +68,13 @@ Key technologies:
 
 - Directory defining constant values used throughout the application.
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
-  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
+  - **`character.ts`**: Defines character-related constants including extensive animation states (idle, walk, run, jump, punch, kick, melee attack, cast, hit, dance, swim, die).
+  - **`rigidBodyObjectType.ts`**: Defines constants for different types of rigid body objects in the physics simulation (player, enemy, monster, wall, obstacle, item, bullet, floor, etc.).
+
+### `src/stores/`
+
+- Directory containing state management stores using Zustand.
+  - **`playerStore.ts`**: Manages player references using Zustand with subscribeWithSelector middleware. Handles registration, unregistration, and retrieval of player rigid body references for multiplayer scenarios.
 
 ### `src/components/`
 
@@ -71,12 +82,12 @@ Key technologies:
 
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting `ambientLight` and `FollowLight`, environmental elements `Environment`, the `Player` component wrapped in `FreeViewController`, and the floor `Floor`. It renders the core visual and interactive elements within the physics simulation configured in `GameScene.tsx`.
+    - **`Experience.tsx`**: Simplified 3D scene component that focuses on core scene elements. Includes ambient lighting with 0.7 intensity, sunset environment preset (background disabled), the `Player` component, and the `Floor` component. This component has been streamlined to contain only essential scene elements, with lighting and camera controls moved to `GameScene.tsx`.
     - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
-    - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
+    - **`Player.tsx`**: Advanced component built around the `RigidBodyPlayer` component from vibe-starter-3d for physics-based character control. Handles comprehensive player character logic including movement, rotation, extensive animation state management (idle, walk, run, jump, punch, kick, melee attack, cast, hit, dance, swim, die), collision detection, game server integration, and player reference management. Features sophisticated animation configuration mapping and state determination logic. Utilizes `RigidBodyPlayer`'s `onTriggerEnter` and `onTriggerExit` events to handle player interactions with other objects in the 3D environment, enabling collision-based gameplay mechanics. Integrates with `CharacterRenderer` for visual representation and animation playback.
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Comprehensive 3D scene setup component that orchestrates the entire rendering pipeline. Creates a full-screen container with `Canvas` component featuring shadow support and pointer lock functionality (activated on pointer down). Integrates `KeyboardControls` with custom keyboard mapping, configures physics simulation using `@react-three/rapier`, and importantly includes `FollowLight` and `FreeViewController` from vibe-starter-3d within the physics context. Loads the `Experience` component with `Suspense` fallback to handle async loading of 3D assets.
 
   - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)

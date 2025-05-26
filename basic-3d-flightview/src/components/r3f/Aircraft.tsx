@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useFrame, GroupProps } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Trail } from '@react-three/drei';
-import { useControllerState } from 'vibe-starter-3d';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 
 interface AircraftProps extends GroupProps {
   localPlayer?: boolean;
@@ -10,17 +10,17 @@ interface AircraftProps extends GroupProps {
   bodyColor?: string;
 }
 
-function Aircraft({ localPlayer = false, bodyLength = 3, bodyColor = '#f5f5f5', ...props }: AircraftProps) {
+const Aircraft = ({ localPlayer = false, bodyLength = 3, bodyColor = '#f5f5f5', ...props }: AircraftProps) => {
   const helixMeshRef = useRef<THREE.Mesh>(null);
   const tip1Ref = useRef<THREE.Object3D>(null);
   const tip2Ref = useRef<THREE.Object3D>(null);
-  const { userData } = useControllerState();
+  const { state } = useLocalPlayerStore();
 
   useFrame((_, delta) => {
     if (helixMeshRef.current) {
       let rotZ: number;
-      if (localPlayer && userData.speed !== undefined) {
-        rotZ = 1.0 * delta * Math.min(60, userData.speed);
+      if (localPlayer) {
+        rotZ = 1.0 * delta * Math.min(60, state.speed);
       } else {
         rotZ = 1.0 * delta * 60;
       }
@@ -80,6 +80,6 @@ function Aircraft({ localPlayer = false, bodyLength = 3, bodyColor = '#f5f5f5', 
       </group>
     </>
   );
-}
+};
 
 export default Aircraft;

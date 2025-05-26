@@ -30,6 +30,8 @@ Key technologies:
 - Physics-based character movement with collision detection
 - 3D environment with floor
 - Pointer lock for immersive control
+- FPS-style crosshair overlay for targeting
+- Rigid body object type system for physics collision detection
 
 ## File Structure Overview
 
@@ -60,6 +62,7 @@ Key technologies:
 - Directory defining constant values used throughout the application.
   - **`character.ts`**: Defines character-related settings (e.g., movement speed, jump height).
   - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
+  - **`rigidBodyObjectType.ts`**: Defines constant values for different types of rigid body objects in the physics simulation (e.g., LOCAL_PLAYER, ENEMY, WALL, BULLET, FLOOR, etc.).
 
 ### `src/components/`
 
@@ -68,9 +71,9 @@ Key technologies:
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets and muzzle flash.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes the crucial `FirstPersonViewController`, `FollowLight`, lighting, environmental elements, and floor `Floor`.
+    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Sets up ambient lighting, environment preset (sunset), and includes the `Player` and `Floor` components.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
-    - **`Player.tsx`**: Component defining the player character model, animations, and basic physics interactions.
+    - **`Player.tsx`**: Component defining the player character using the `RigidBodyPlayer` component from vibe-starter-3d. Handles player state management, animation configurations, shooting mechanics, and object interactions through `onTriggerEnter` and `onTriggerExit` events. The character is set to invisible for FPS view, and includes comprehensive collision detection with other rigid body objects using the RigidBodyObjectType system.
     - **`effects/`**: Sub-directory containing components related to visual effects.
       - **`Bullet.tsx`**: Component defining the visual representation and behavior of bullets fired from the player.
       - **`BulletEffectController.tsx`**: Manages the entire bullet effect system, including creation, state updates, and recycling (Object Pooling).
@@ -78,7 +81,11 @@ Key technologies:
       - **`MuzzleFlash.tsx`**: Component that generates and manages the flash effect occurring at the muzzle when firing a gun.
 
   - **`scene/`**: Contains components related to 3D scene setup.
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the `EffectContainer`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component with shadow support and pointer lock functionality. Utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`. Inside the physics context, it includes `FollowLight`, `FirstPersonViewController`, `Experience`, and `EffectContainer` components wrapped in `Suspense`. Also renders the `Crosshair` UI component as an overlay.
+
+  - **`ui/`**: Contains UI components for the game interface.
+    - **`Crosshair.tsx`**: Renders a centered crosshair overlay for FPS-style targeting with white lines and black outline for better visibility across different backgrounds.
 
 ### `src/stores/`
 

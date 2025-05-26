@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
-import { RigidBody } from '@react-three/rapier';
+import { RigidBodyObject } from 'vibe-starter-3d';
+import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
 
 type SimpleObject = {
   position: THREE.Vector3;
@@ -10,7 +11,7 @@ type SimpleObject = {
   color: THREE.Color;
 };
 
-const Runway = () => {
+const Ground = () => {
   // Generate object data to scatter on the ground (optimized with useMemo)
   const objects = useMemo<SimpleObject[]>(() => {
     const tempObjects: SimpleObject[] = [];
@@ -53,47 +54,52 @@ const Runway = () => {
 
   return (
     <>
-      <RigidBody name="SEA" type="fixed" colliders={'cuboid'}>
+      <RigidBodyObject type="fixed" colliders={'cuboid'} userData={{ type: RigidBodyObjectType.SEA }}>
         <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} scale={[10000, 10000, 1]}>
           <planeGeometry args={[1, 1]} />
           <meshStandardMaterial color="#77aaff" />
         </mesh>
-      </RigidBody>
+      </RigidBodyObject>
 
-      <RigidBody name="GROUND" type="fixed" colliders={'cuboid'}>
+      <RigidBodyObject type="fixed" colliders={'cuboid'} userData={{ type: RigidBodyObjectType.FLOOR }}>
         <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} scale={[1000, 1000, 1]}>
           <planeGeometry args={[1, 1]} />
-          <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
+          <meshStandardMaterial color="#3d711c" />
         </mesh>
-      </RigidBody>
+      </RigidBodyObject>
 
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} scale={[6, 1000, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshStandardMaterial color="#51595c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-80.0} />
-      </mesh>
+      {/* Runway with markings as one RigidBody */}
+      <RigidBodyObject type="fixed" colliders={'cuboid'}>
+        {/* Runway surface */}
+        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} scale={[6, 1000, 1]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial color="#51595c" />
+        </mesh>
 
-      {/* Runway Markings */}
-      {Array.from({ length: 100 }).map((_, i) => {
-        const zPosition = -500 + i * 10;
-        return (
-          <mesh
-            key={`runway-line-${i}`}
-            receiveShadow
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, 0.011, zPosition]}
-            scale={[0.4, 5, 1]} // X: length, Y: width (relative to geometry)
-          >
-            <planeGeometry args={[1, 1]} />
-            <meshStandardMaterial
-              color="#ffffff"
-              polygonOffset
-              polygonOffsetFactor={-20.0}
-              polygonOffsetUnits={-100.0} // Slightly more offset than the runway
-            />
-          </mesh>
-        );
-      })}
+        {/* Runway Markings */}
+        {Array.from({ length: 100 }).map((_, i) => {
+          const zPosition = -500 + i * 10;
+          return (
+            <mesh
+              key={`runway-line-${i}`}
+              receiveShadow
+              rotation={[-Math.PI / 2, 0, 0]}
+              position={[0, 0.011, zPosition]}
+              scale={[0.4, 5, 1]} // X: length, Y: width (relative to geometry)
+            >
+              <planeGeometry args={[1, 1]} />
+              <meshStandardMaterial
+                color="#ffffff"
+                polygonOffset
+                polygonOffsetFactor={-20.0}
+                polygonOffsetUnits={-100.0} // Slightly more offset than the runway
+              />
+            </mesh>
+          );
+        })}
+      </RigidBodyObject>
 
+      {/* Test objects scattered on the ground */}
       {objects.map((obj, index) => (
         <mesh key={index} position={obj.position} scale={obj.scale} rotation={[0, obj.rotationY, 0]} castShadow receiveShadow>
           {obj.geometryType === 'box' && <boxGeometry args={[1, 1, 1]} />}
@@ -102,22 +108,8 @@ const Runway = () => {
           <meshStandardMaterial color={obj.color} roughness={0.8} metalness={0.1} />
         </mesh>
       ))}
-
-      {/* <RigidBody name="BOX" type="fixed" colliders={'cuboid'} collisionGroups={interactionGroups(CollisionGroup.Environment)}>
-        <mesh receiveShadow position={[0, 1, -10]} scale={[2, 2, 2]}>
-          <boxGeometry args={[1, 1, 1]} />
-          <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
-        </mesh>
-      </RigidBody> */}
-
-      <RigidBody name="RUNWAY" type="fixed" colliders={'cuboid'}>
-        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} scale={[1000, 1000, 1]}>
-          <planeGeometry args={[1, 1]} />
-          <meshStandardMaterial color="#3d711c" polygonOffset polygonOffsetFactor={-20.0} polygonOffsetUnits={-40.0} />
-        </mesh>
-      </RigidBody>
     </>
   );
 };
 
-export default Runway;
+export default Ground;

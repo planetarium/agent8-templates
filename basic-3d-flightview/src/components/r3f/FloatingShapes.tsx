@@ -1,7 +1,8 @@
-import { useMemo, useRef, ElementRef } from 'react';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { RigidBody, BallCollider } from '@react-three/rapier';
+import { BallCollider } from '@react-three/rapier';
 import { useFrame } from '@react-three/fiber';
+import { RigidBodyObject, RigidBodyObjectRef } from 'vibe-starter-3d';
 
 // Define movement types
 type MovementType = 'oscillate' | 'circle' | 'drift';
@@ -30,8 +31,7 @@ interface FloatingObjectData {
 
 // Render each object type and move it
 const FloatingObject = ({ data }: { data: FloatingObjectData }) => {
-  // Try using ElementRef<typeof RigidBody>
-  const rigidBodyRef = useRef<ElementRef<typeof RigidBody>>(null!);
+  const rigidBodyRef = useRef<RigidBodyObjectRef>(null!);
   const initialPosition = useRef(new THREE.Vector3(...data.position)).current;
   const angleRef = useRef(Math.random() * Math.PI * 2);
   const driftDirection = useRef(data.movementParams.direction?.clone() || new THREE.Vector3(0, 0, 0)).current;
@@ -133,10 +133,10 @@ const FloatingObject = ({ data }: { data: FloatingObjectData }) => {
   }
 
   return (
-    <RigidBody key={data.id} ref={rigidBodyRef} type="kinematicPosition" colliders={false} position={data.position}>
+    <RigidBodyObject key={data.id} ref={rigidBodyRef} type="kinematicPosition" colliders={false} position={data.position}>
       <BallCollider args={colliderArgs} />
       <group>{geometry}</group>
-    </RigidBody>
+    </RigidBodyObject>
   );
 };
 

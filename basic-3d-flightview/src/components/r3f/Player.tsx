@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useControllerState } from 'vibe-starter-3d';
+import { useCallback, useEffect, useRef } from 'react';
+import { RigidBodyPlayer, RigidBodyPlayerRef, useControllerState } from 'vibe-starter-3d';
 import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
@@ -7,40 +7,32 @@ import { useEffectStore } from '../../stores/effectStore';
 import { useFrame } from '@react-three/fiber';
 import { EffectType } from '../../types';
 import { usePlayerStore } from '../../stores/playerStore';
-import { RapierRigidBody } from '@react-three/rapier';
+import { CollisionPayload, CuboidCollider } from '@react-three/rapier';
 import { createBulletEffectConfig } from '../../utils/effectUtils';
 import Aircraft from './Aircraft';
+import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
+import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
 
 const SHOOT_COOLDOWN = 200;
+const AIRCRAFT_BODY_LENGTH = 3;
 
-/**
- * Props for the Player component.
- */
-interface PlayerProps {
-  /** Target body length for the aircraft */
-  bodyLength?: number;
-}
-
-const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
+const Player = () => {
   const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
   const [subscribeKeys, getKeyboardInputs] = useKeyboardControls();
-  const { rigidBody: controllerRigidBody, setPosition, setRotation, setVelocity } = useControllerState();
+  const { setPosition, setRotation, setVelocity } = useControllerState();
+  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
 
-  const playerRef = useRef<RapierRigidBody>(null);
+  const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
   const shootTimestamp = useRef(0);
   const canReset = useRef(true);
-
-  // IMPORTANT: Update player reference
-  useEffect(() => {
-    playerRef.current = controllerRigidBody;
-  }, [controllerRigidBody]);
 
   // IMPORTANT: Register player reference
   useEffect(() => {
     if (!account) return;
 
-    registerPlayerRef(account, playerRef);
+    registerPlayerRef(account, rigidBodyPlayerRef);
 
     return () => {
       unregisterPlayerRef(account);
@@ -74,20 +66,18 @@ const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
   );
 
   useFrame(() => {
-    if (!controllerRigidBody) return;
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
 
     const inputs = getKeyboardInputs();
     const now = Date.now();
     if (inputs.attack && now > shootTimestamp.current) {
       shootTimestamp.current = now + SHOOT_COOLDOWN;
 
-      const position = new THREE.Vector3(controllerRigidBody.translation().x, controllerRigidBody.translation().y, controllerRigidBody.translation().z);
-      const rotation = new THREE.Quaternion(
-        controllerRigidBody.rotation().x,
-        controllerRigidBody.rotation().y,
-        controllerRigidBody.rotation().z,
-        controllerRigidBody.rotation().w,
-      );
+      const originPosition = playerRigidBody.translation();
+      const originRotation = playerRigidBody.rotation();
+      const position = new THREE.Vector3(originPosition.x, originPosition.y, originPosition.z);
+      const rotation = new THREE.Quaternion(originRotation.x, originRotation.y, originRotation.z, originRotation.w);
 
       const forward = new THREE.Vector3(0, 0, -1);
       forward.applyQuaternion(rotation);
@@ -108,7 +98,7 @@ const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
   });
 
   useFrame(() => {
-    if (!controllerRigidBody || !canReset.current) return;
+    if (!rigidBodyPlayerRef.current || !canReset.current) return;
 
     const inputs = getKeyboardInputs();
     if (inputs.reset) {
@@ -117,9 +107,59 @@ const Player: React.FC<PlayerProps> = ({ bodyLength = 3 }) => {
     }
   });
 
+  useFrame(() => {
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
+
+    const position = playerRigidBody.translation();
+    setLocalPlayerPosition(position.x, position.y, position.z);
+  });
+
   if (!account) return null;
 
-  return <Aircraft bodyLength={bodyLength} localPlayer={true} />;
+  const hitBodySizeVector = new THREE.Vector3(AIRCRAFT_BODY_LENGTH / 3, AIRCRAFT_BODY_LENGTH / 5, AIRCRAFT_BODY_LENGTH);
+  const colliderOffsetY = hitBodySizeVector.y / 2;
+
+  /** handleTriggerEnter: Called when the player intersects or collides with another object.
+   * - Handles when entering a specific area or colliding with another object
+   */
+  const handleTriggerEnter = (payload: CollisionPayload) => {
+    if (payload.other.rigidBody?.userData?.['type']) {
+      // TODO: Handle when entering a specific area or colliding with another object
+    }
+  };
+
+  /** handleTriggerExit: Called when the player exits an intersection or ends a collision with another object.
+   * - Handles when exiting a specific area or when collision with another object ends
+   */
+  const handleTriggerExit = (payload: CollisionPayload) => {
+    if (payload.other.rigidBody?.userData?.['type']) {
+      // TODO: Handle when exiting a specific area or when collision with another object ends
+    }
+  };
+
+  return (
+    <RigidBodyPlayer
+      ref={rigidBodyPlayerRef}
+      userData={{ account, type: RigidBodyObjectType.LOCAL_PLAYER }}
+      onTriggerEnter={handleTriggerEnter}
+      onTriggerExit={handleTriggerExit}
+      autoCreateCollider={false}
+      offsetY={0}
+      type="kinematicPosition"
+      sensor={true}
+      enabledRotations={[false, false, false]}
+      gravityScale={0}
+    >
+      <CuboidCollider
+        position={[0, colliderOffsetY, 0]}
+        args={[hitBodySizeVector.x / 2, hitBodySizeVector.y / 2, hitBodySizeVector.z / 2]}
+        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_KINEMATIC | ActiveCollisionTypes.KINEMATIC_FIXED}
+      />
+
+      <Aircraft bodyLength={AIRCRAFT_BODY_LENGTH} localPlayer={true} />
+    </RigidBodyPlayer>
+  );
 };
 
 export default Player;

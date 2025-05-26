@@ -1,12 +1,14 @@
 import * as THREE from 'three';
-import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useRapier } from '@react-three/rapier';
-import { Collider, InteractionGroups, RigidBody } from '@dimforge/rapier3d-compat';
+import { RapierRigidBody, useRapier, CollisionPayload } from '@react-three/rapier';
+import { ActiveCollisionTypes, InteractionGroups } from '@dimforge/rapier3d-compat';
+import { RigidBodyObject, RigidBodyObjectRef } from 'vibe-starter-3d';
+import { RigidBodyObjectType } from '../../../constants/rigidBodyObjectType';
 
 const DEFAULT_SIZE = new THREE.Vector3(0.5, 0.5, 1);
 
-interface BulletProps {
+export interface BulletProps {
   startPosition: THREE.Vector3;
   direction: THREE.Vector3;
   color?: THREE.ColorRepresentation | undefined;
@@ -14,8 +16,8 @@ interface BulletProps {
   speed: number;
   duration: number;
   collisionGroups?: InteractionGroups;
-  owner?: RigidBody;
-  onHit?: (pos?: THREE.Vector3, rigidBody?: RigidBody, collider?: Collider) => void;
+  owner?: RapierRigidBody;
+  onHit?: (payload: CollisionPayload) => void;
   onComplete?: () => void;
 }
 
@@ -31,9 +33,10 @@ const Bullet: React.FC<BulletProps> = ({
   onHit,
   onComplete,
 }) => {
-  const [active, setActive] = useState(true);
-  const groupRef = useRef<THREE.Group>(null);
-  const timeRef = useRef(0);
+  const active = useRef(true);
+  const rigidBodyRef = useRef<RigidBodyObjectRef>(null);
+  const freezed = useRef(false);
+  const framesSinceFreezed = useRef(0);
   const { rapier, world } = useRapier();
   const normalizedDirection = direction.clone().normalize();
   const bulletGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.3);
@@ -43,62 +46,69 @@ const Bullet: React.FC<BulletProps> = ({
 
   // Bullet removal function
   const removeBullet = useCallback(() => {
-    if (active) {
-      setActive(false);
-      if (onCompleteRef.current) onCompleteRef.current();
-    }
+    if (!active.current) return;
+
+    active.current = false;
+    onCompleteRef.current?.();
   }, [active]);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  useEffect(() => {
-    // Reset the timer when the component mounts
-    timeRef.current = 0;
-    startTime.current = Date.now();
-    setActive(true);
-  }, [setActive]);
-
   useFrame((_, delta) => {
-    if (!active) return;
+    if (!active.current) return;
 
     const elapsed = Date.now() - startTime.current;
-    // // Destroy when lifetime ends (backup check)
     if (elapsed > duration) {
       removeBullet();
       return;
     }
 
-    const group = groupRef.current;
-    if (!group) return;
+    // skip update if bullet is freezed
+    if (freezed.current) {
+      framesSinceFreezed.current++;
 
-    // Calculate distance to travel in this frame
+      // If onTriggerEnter hasn't been called after 3 frames, unfreeze and continue checking
+      if (framesSinceFreezed.current > 3) {
+        console.warn('Bullet frozen too long, unfreezing to continue collision check');
+        freezed.current = false;
+        framesSinceFreezed.current = 0;
+      }
+      return;
+    }
+
+    const rigidBody = rigidBodyRef.current;
+    if (!rigidBody || rigidBody.numColliders() === 0) return;
+
     const frameTravelDistance = speed * delta;
-    // Use current mesh position as the origin for the ray
-    const origin = group.position;
+    const originVec = rigidBody.translation();
+    const ray = new rapier.Ray(originVec, normalizedDirection);
+    const bulletOwnCollider = rigidBody.collider(0);
 
-    const ray = new rapier.Ray(origin, normalizedDirection);
-
-    const hit = world.castRay(ray, frameTravelDistance, true, undefined, collisionGroups, undefined, owner);
+    const hit = world.castRay(
+      ray,
+      frameTravelDistance,
+      true, // solid
+      undefined, // queryFlags
+      collisionGroups, // groups
+      bulletOwnCollider, // Exclude bullet's own collider
+      owner, // Exclude the owner (firer)
+    );
 
     if (hit) {
-      // Calculate hit point
       const hitPoint = ray.pointAt(hit.timeOfImpact);
       const hitPointVec3 = new THREE.Vector3(hitPoint.x, hitPoint.y, hitPoint.z);
-      const hitCollider = hit.collider;
-      const hitRigidBody = hitCollider.parent();
 
-      // Move group to exact hit point
-      group.position.copy(hitPointVec3);
-
-      onHit?.(hitPointVec3, hitRigidBody, hitCollider);
-      onComplete?.();
+      freezed.current = true;
+      framesSinceFreezed.current = 0;
+      rigidBody.setTranslation(hitPointVec3, true);
       return;
     } else {
-      // No hit, advance the bullet's position
-      const nextPosition = origin.clone().addScaledVector(normalizedDirection, frameTravelDistance);
-      group.position.copy(nextPosition);
+      // No hit, continue with velocity based movement (handled by RigidBody component)
+      const curVec3 = new THREE.Vector3(originVec.x, originVec.y, originVec.z);
+      const nextPosition = curVec3.addScaledVector(normalizedDirection, frameTravelDistance);
+      rigidBody.setTranslation(nextPosition, true);
     }
   });
 
@@ -118,9 +128,33 @@ const Bullet: React.FC<BulletProps> = ({
   if (!active) return null;
 
   return (
-    <group ref={groupRef} scale={scale} position={[startPosition.x, startPosition.y, startPosition.z]} rotation={bulletRotation}>
+    <RigidBodyObject
+      ref={rigidBodyRef}
+      userData={{
+        type: RigidBodyObjectType.BULLET,
+      }}
+      type="kinematicVelocity"
+      position={[startPosition.x, startPosition.y, startPosition.z]}
+      rotation={bulletRotation}
+      sensor={true}
+      scale={scale}
+      colliders={'cuboid'}
+      collisionGroups={collisionGroups ?? 0xffffffff}
+      activeCollisionTypes={ActiveCollisionTypes.ALL}
+      onTriggerEnter={(payload: CollisionPayload) => {
+        freezed.current = false;
+        framesSinceFreezed.current = 0;
+        if (owner && owner.handle === payload.other.rigidBody.handle) {
+          return;
+        }
+
+        onHit?.(payload);
+        removeBullet();
+      }}
+      name="bullet"
+    >
       <mesh geometry={bulletGeometry} material={bulletMaterial} scale={DEFAULT_SIZE} />
-    </group>
+    </RigidBodyObject>
   );
 };
 

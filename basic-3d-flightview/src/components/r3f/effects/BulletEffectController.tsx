@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { Collider, InteractionGroups, RigidBody } from '@dimforge/rapier3d-compat';
 import Bullet from './Bullet';
 import MuzzleFlash from './MuzzleFlash';
+import { InteractionGroups, RigidBody } from '@dimforge/rapier3d-compat';
+import { CollisionPayload } from '@react-three/rapier';
 
 const DEFAULT_SPEED = 100;
 const DEFAULT_DURATION = 1000;
@@ -12,8 +13,18 @@ interface BulletEffectControllerProps {
   config: { [key: string]: any };
   collisionGroups?: InteractionGroups;
   owner?: RigidBody;
-  onHit?: (pos?: THREE.Vector3, rigidBody?: RigidBody, collider?: Collider) => void;
+  onHit?: (payload: CollisionPayload) => void;
   onComplete?: () => void;
+}
+
+export interface BulletEffectConfig {
+  startPosition: THREE.Vector3;
+  direction: THREE.Vector3;
+  speed?: number;
+  duration?: number;
+  scale?: number;
+  color?: string;
+  flashDuration?: number;
 }
 
 const parseConfig = (config: { [key: string]: any }) => {

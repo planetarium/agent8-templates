@@ -3,11 +3,11 @@ import { useGameServer } from '@agent8/gameserver';
 import * as THREE from 'three';
 import { ActiveEffect, EffectType } from '../../types';
 import { useEffectStore, useActiveEffects } from '../../stores/effectStore';
-import { Collider, RigidBody } from '@dimforge/rapier3d-compat';
 import { usePlayerStore } from '../../stores/playerStore';
 import { createExplosionEffectConfig } from '../../utils/effectUtils';
 import Explosion from './effects/Explosion';
 import BulletEffectController from './effects/BulletEffectController';
+import { CollisionPayload } from '@react-three/rapier';
 
 /**
  * Effect container component using Zustand store for effect management.
@@ -32,14 +32,15 @@ function EffectContainer() {
 
   // Handler for when an effect hits something (logic might be needed here)
   const handleEffectHit = useCallback(
-    (type: EffectType, pos?: THREE.Vector3, rigidBody?: RigidBody, collider?: Collider, sender?: string): boolean => {
-      const targetAccount = rigidBody?.userData?.['account'];
-      if (sender && targetAccount) {
-        if (targetAccount === sender) return false;
+    (type: EffectType, payload: CollisionPayload, sender?: string): boolean => {
+      const otherAccount = payload.other.rigidBody?.userData?.['account'];
+      if (sender && otherAccount) {
+        if (otherAccount === sender) return false;
       }
 
-      if (pos && type === EffectType.BULLET) {
-        addEffect(EffectType.EXPLOSION, undefined, createExplosionEffectConfig(pos, 0.1));
+      if (type === EffectType.BULLET) {
+        const hitPoint = payload.target.collider.translation();
+        addEffect(EffectType.EXPLOSION, undefined, createExplosionEffectConfig(new THREE.Vector3(hitPoint.x, hitPoint.y, hitPoint.z), 0.1));
       }
 
       return true;
@@ -50,7 +51,6 @@ function EffectContainer() {
   // Function to render individual effects based on their type
   const renderEffect = useCallback(
     (effect: ActiveEffect) => {
-      const playerRef = getPlayerRef(effect.sender)?.current;
       const type = effect.effectData.type;
 
       switch (type) {
@@ -60,7 +60,7 @@ function EffectContainer() {
               key={effect.key}
               config={effect.effectData.config}
               owner={getPlayerRef(effect.sender)?.current}
-              onHit={(pos, rigidBody, collider) => handleEffectHit(type, pos, rigidBody, collider, effect.sender)}
+              onHit={(payload) => handleEffectHit(type, payload, effect.sender)}
               onComplete={() => {
                 handleEffectComplete(effect.key);
               }}
