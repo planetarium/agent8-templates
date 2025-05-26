@@ -22,7 +22,7 @@
     "react-dom": "^18.3.1",
     "three": "^0.174.0",
     "three-stdlib": "2.35.14",
-    "vibe-starter-3d": "^0.3.16",
+    "vibe-starter-3d": "^0.4.3",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
