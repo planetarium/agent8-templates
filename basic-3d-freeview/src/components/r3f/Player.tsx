@@ -1,13 +1,15 @@
-import React, { useRef, useMemo, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
-import * as THREE from 'three';
+import { useRef, useMemo, useEffect, useCallback } from 'react';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfigMap, AnimationType, CharacterRenderer, CharacterRendererRef, useControllerState } from 'vibe-starter-3d';
+import { AnimationConfigMap, AnimationType, CharacterRenderer, RigidBodyPlayer, RigidBodyPlayerRef, useControllerState } from 'vibe-starter-3d';
 import { useGameServer } from '@agent8/gameserver';
 import { usePlayerStore } from '../../stores/playerStore';
-import { RapierRigidBody } from '@react-three/rapier';
 import Assets from '../../assets.json';
+import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
+import { CollisionPayload } from '@react-three/rapier';
+
+const targetHeight = 1.6;
 
 interface PlayerInputs {
   isRevive: boolean;
@@ -23,23 +25,11 @@ interface PlayerInputs {
 }
 
 /**
- * Player ref interface
- */
-interface PlayerRef {
-  /** Bounding box of the character model */
-  boundingBox: THREE.Box3 | null;
-}
-
-/**
  * Player props
  */
 interface PlayerProps {
   /** Initial position of the player */
   position?: Vector3;
-  /** Initial action for the character */
-  initState?: CharacterState;
-  /** Target height for the character model */
-  targetHeight?: number;
 }
 
 /**
@@ -47,39 +37,20 @@ interface PlayerProps {
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = CharacterState.IDLE, targetHeight = 1.6 }, ref) => {
+const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
-  const currentStateRef = useRef<CharacterState>(initAction);
+  const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
   const [, getKeyboardInputs] = useKeyboardControls();
   const { setEnableInput } = useControllerState();
-  const { rigidBody } = useControllerState();
 
-  const playerRef = useRef<RapierRigidBody>(null);
-
-  // CharacterRenderer ref
-  const characterRendererRef = useRef<CharacterRendererRef>(null);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      get boundingBox() {
-        return characterRendererRef.current?.boundingBox || null;
-      },
-    }),
-    [],
-  );
-
-  // IMPORTANT: Update player reference
-  useEffect(() => {
-    playerRef.current = rigidBody;
-  }, [rigidBody]);
+  const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
 
   // IMPORTANT: Register player reference
   useEffect(() => {
     if (!account) return;
 
-    registerPlayerRef(account, playerRef);
+    registerPlayerRef(account, rigidBodyPlayerRef);
 
     return () => {
       unregisterPlayerRef(account);
@@ -305,7 +276,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
 
   // Update player action state based on inputs and physics
   useFrame(() => {
-    if (!rigidBody) return;
+    if (!rigidBodyPlayerRef.current) return;
 
     const {
       forward,
@@ -320,7 +291,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
       action4: isCasting,
     } = getKeyboardInputs();
 
-    const currentVel = rigidBody.linvel?.() || { y: 0 };
+    const currentVel = rigidBodyPlayerRef.current.linvel?.() || { y: 0 };
 
     // Check if player is moving
     const isMoving = forward || backward || leftward || rightward;
@@ -341,16 +312,42 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState: initAction = Cha
     });
   });
 
+  /** handleTriggerEnter: Called when the player intersects or collides with another object.
+   * - Handles when entering a specific area or colliding with another object
+   */
+  const handleTriggerEnter = (payload: CollisionPayload) => {
+    if (payload.other.rigidBody?.userData?.['type']) {
+      // TODO: Handle when entering a specific area or colliding with another object
+    }
+  };
+
+  /** handleTriggerExit: Called when the player exits an intersection or ends a collision with another object.
+   * - Handles when exiting a specific area or when collision with another object ends
+   */
+  const handleTriggerExit = (payload: CollisionPayload) => {
+    if (payload.other.rigidBody?.userData?.['type']) {
+      // TODO: Handle when exiting a specific area or when collision with another object ends
+    }
+  };
+
   return (
-    <CharacterRenderer
-      ref={characterRendererRef}
-      url={Assets.characters['base-model'].url}
-      animationConfigMap={animationConfigMap}
-      currentAnimationRef={currentStateRef}
+    <RigidBodyPlayer
+      ref={rigidBodyPlayerRef}
+      userData={{ account, type: RigidBodyObjectType.LOCAL_PLAYER }}
+      position={position}
       targetHeight={targetHeight}
-      onAnimationComplete={handleAnimationComplete}
-    />
+      onTriggerEnter={handleTriggerEnter}
+      onTriggerExit={handleTriggerExit}
+    >
+      <CharacterRenderer
+        url={Assets.characters['base-model'].url}
+        animationConfigMap={animationConfigMap}
+        currentAnimationRef={currentStateRef}
+        targetHeight={targetHeight}
+        onAnimationComplete={handleAnimationComplete}
+      />
+    </RigidBodyPlayer>
   );
-});
+};
 
 export default Player;
