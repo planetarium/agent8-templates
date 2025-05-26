@@ -1,10 +1,12 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { keyboardMap } from '../../constants/controls';
 import { KeyboardControls } from '@react-three/drei';
 import { Physics } from '@react-three/rapier';
 import Experience from '../r3f/Experience';
 import EffectContainer from '../r3f/EffectContainer';
+import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
+import Crosshair from '../ui/Crosshair';
 
 /**
  * Main game scene component
@@ -12,7 +14,7 @@ import EffectContainer from '../r3f/EffectContainer';
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements.
  */
-const GameScene: React.FC = () => {
+const GameScene = () => {
   return (
     <div className="relative w-full h-screen">
       {/* Keyboard preset */}
@@ -26,6 +28,8 @@ const GameScene: React.FC = () => {
         >
           <Physics>
             <Suspense fallback={null}>
+              <FollowLight />
+              <FirstPersonViewController />
               <Experience />
               <EffectContainer />
             </Suspense>
@@ -33,15 +37,7 @@ const GameScene: React.FC = () => {
         </Canvas>
       </KeyboardControls>
 
-      {/* Crosshair rendered as a standard HTML element outside the Canvas */}
-      <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50">
-        <div className="crosshair-container relative flex items-center justify-center w-6 h-6">
-          {/* Horizontal line with black outline */}
-          <div className="w-3 h-[1px] bg-white opacity-100 absolute shadow-[0_0_0_1px_rgba(0,0,0,0.8)]"></div>
-          {/* Vertical line with black outline */}
-          <div className="h-3 w-[1px] bg-white opacity-100 absolute shadow-[0_0_0_1px_rgba(0,0,0,0.8)]"></div>
-        </div>
-      </div>
+      <Crosshair />
     </div>
   );
 };

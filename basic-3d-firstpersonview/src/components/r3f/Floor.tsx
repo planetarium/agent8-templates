@@ -1,13 +1,14 @@
-import { RigidBody } from '@react-three/rapier';
+import { RigidBodyObject } from 'vibe-starter-3d';
+import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
 
 function Floor() {
   return (
-    <RigidBody type="fixed" colliders="cuboid">
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -1, 0]}>
-        <boxGeometry args={[100, 100, 2]} />
+    <RigidBodyObject type="fixed" colliders="cuboid" userData={{ type: RigidBodyObjectType.FLOOR }}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, 0, 0]}>
+        <planeGeometry args={[100, 100]} />
         <meshStandardMaterial color="#3f3f3f" />
       </mesh>
-    </RigidBody>
+    </RigidBodyObject>
   );
 }
 

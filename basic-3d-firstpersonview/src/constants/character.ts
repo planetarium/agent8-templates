@@ -1,19 +1,17 @@
 import { AnimationType } from 'vibe-starter-3d';
 
 export const CharacterState: { [key: string]: AnimationType } = {
-  /** Standing still */
+  /** IDLE ACTION */
   IDLE: 'IDLE',
-  /** WALKING AT NORMAL SPEED */
+  /** WALKING ACTION */
   WALK: 'WALK',
-  /** RUNNING AT INCREASED SPEED */
+  /** RUNNING ACTION */
   RUN: 'RUN',
   /** JUMP ACTION */
   JUMP: 'JUMP',
-  /** ATTACK ACTION */
-  PUNCH: 'PUNCH',
-  /** ATTACK HIT */
+  /** HIT ACTION */
   HIT: 'HIT',
-  /** ATTACK HIT */
+  /** DIE ACTION */
   DIE: 'DIE',
 };
 

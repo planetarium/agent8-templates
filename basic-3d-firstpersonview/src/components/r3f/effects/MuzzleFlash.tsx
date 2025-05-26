@@ -1,4 +1,3 @@
-// MuzzleFlash.tsx (new file)
 import React, { useState, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
