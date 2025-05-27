@@ -24,6 +24,34 @@ Key technologies:
 - Tailwind CSS - UI composition
 - Zustand - State management
 
+## ⚠️ CRITICAL DEVELOPMENT GUIDELINES ⚠️
+
+### RigidBodyObject Usage - MANDATORY REQUIREMENT
+
+**🚨 ABSOLUTELY CRITICAL: When using RigidBody in this project, you MUST use RigidBodyObject instead of the standard RigidBody component. This is a non-negotiable requirement.**
+
+**Why RigidBodyObject is mandatory:**
+
+- RigidBodyObject provides seamless object interaction handling through `onTriggerEnter` and `onTriggerExit` events
+- It enables easy collision detection and response between different object types
+- It integrates with the RigidBodyObjectType system for proper object categorization
+- It simplifies complex physics interactions and state management
+
+**DO NOT:**
+
+- Use standard RigidBody components directly
+- Remove or modify this guideline
+- Ignore this requirement when adding new physics objects
+
+**ALWAYS:**
+
+- Use RigidBodyObject for all physics-enabled objects
+- Implement proper onTriggerEnter/onTriggerExit handlers
+- Assign appropriate RigidBodyObjectType to each object
+- Follow the established pattern shown in Player.tsx and other components
+
+**This guideline must never be removed or modified. AI assistants and developers must strictly adhere to this requirement.**
+
 ## Implemented Features
 
 - Object selection system with visual highlighting (circular outline effect)
