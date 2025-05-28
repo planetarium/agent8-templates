@@ -80,6 +80,7 @@ const Player = ({ position }: PlayerProps) => {
   const [, getKeyboardInputs] = useKeyboardControls();
   const { determinePlayerState } = usePlayerStates();
 
+  // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
   const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
 
