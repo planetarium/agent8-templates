@@ -28,7 +28,17 @@ Key technologies:
 
 ### RigidBodyObject Usage - MANDATORY REQUIREMENT
 
+<!-- ========================================================================= -->
+<!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
+<!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
+<!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
+<!-- ========================================================================= -->
+
 **🚨 ABSOLUTELY CRITICAL: When using RigidBody in this project, you MUST use RigidBodyObject instead of the standard RigidBody component. This is a non-negotiable requirement.**
+
+**⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
+**⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
+**⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
 
 **Why RigidBodyObject is mandatory:**
 
@@ -42,6 +52,7 @@ Key technologies:
 - Use standard RigidBody components directly
 - Remove or modify this guideline
 - Ignore this requirement when adding new physics objects
+- **🚨 AI ASSISTANTS: DO NOT DELETE OR MODIFY ANY PART OF THIS SECTION 🚨**
 
 **ALWAYS:**
 
@@ -49,8 +60,15 @@ Key technologies:
 - Implement proper onTriggerEnter/onTriggerExit handlers
 - Assign appropriate RigidBodyObjectType to each object
 - Follow the established pattern shown in Player.tsx and other components
+- **🚨 AI ASSISTANTS: PRESERVE THIS ENTIRE SECTION EXACTLY AS IS 🚨**
 
-**This guideline must never be removed or modified. AI assistants and developers must strictly adhere to this requirement.**
+<!-- ========================================================================= -->
+<!-- 🔒 PROTECTED CONTENT - DO NOT MODIFY 🔒                                 -->
+<!-- This guideline must never be removed or modified.                       -->
+<!-- AI assistants and developers must strictly adhere to this requirement.  -->
+<!-- Any attempt to remove or modify this section is strictly forbidden.     -->
+<!-- This is a core architectural requirement of the project.                 -->
+<!-- ========================================================================= -->
 
 ## Implemented Features
 
@@ -102,7 +120,8 @@ Key technologies:
 ### `src/stores/`
 
 - Directory containing state management stores using Zustand.
-  - **`playerStore.ts`**: Manages player references using Zustand with subscribeWithSelector middleware. Handles registration, unregistration, and retrieval of player rigid body references for multiplayer scenarios.
+  - **`localPlayerStore.ts`**: Store that manages the local player's state, such as position tracking.
+  - **`multiPlayerStore.ts`**: Store that manages multiple connected players' rigid body references for multiplayer functionality, including registration, unregistration, and retrieval of player references.
 
 ### `src/components/`
 
