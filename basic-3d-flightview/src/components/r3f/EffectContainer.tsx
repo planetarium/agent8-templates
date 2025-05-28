@@ -3,7 +3,7 @@ import { useGameServer } from '@agent8/gameserver';
 import * as THREE from 'three';
 import { ActiveEffect, EffectType } from '../../types';
 import { useEffectStore, useActiveEffects } from '../../stores/effectStore';
-import { usePlayerStore } from '../../stores/playerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
 import { createExplosionEffectConfig } from '../../utils/effectUtils';
 import Explosion from './effects/Explosion';
 import BulletEffectController from './effects/BulletEffectController';
@@ -15,7 +15,7 @@ import { CollisionPayload } from '@react-three/rapier';
 function EffectContainer() {
   // Call ALL hooks unconditionally at the top
   const { connected } = useGameServer();
-  const { getPlayerRef } = usePlayerStore();
+  const { getConnectedPlayerRef } = useMultiPlayerStore();
 
   // Get state and actions from the Zustand store
   const activeEffects = useActiveEffects();
@@ -59,7 +59,7 @@ function EffectContainer() {
             <BulletEffectController
               key={effect.key}
               config={effect.effectData.config}
-              owner={getPlayerRef(effect.sender)?.current}
+              owner={getConnectedPlayerRef(effect.sender)?.current}
               onHit={(payload) => handleEffectHit(type, payload, effect.sender)}
               onComplete={() => {
                 handleEffectComplete(effect.key);
@@ -82,7 +82,7 @@ function EffectContainer() {
           return null;
       }
     },
-    [handleEffectHit, handleEffectComplete, getPlayerRef],
+    [handleEffectHit, handleEffectComplete, getConnectedPlayerRef],
   );
 
   // Now perform the conditional return/render AFTER all hooks have been called

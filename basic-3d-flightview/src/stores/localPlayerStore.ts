@@ -10,11 +10,7 @@ type PlayerState = {
 type LocalPlayerState = {
   state: PlayerState;
   setSpeed: (speed: number) => void;
-  setX: (x: number) => void;
-  setY: (y: number) => void;
-  setZ: (z: number) => void;
   setPosition: (x: number, y: number, z: number) => void;
-  updatePosition: (position: THREE.Vector3) => void;
   clearPosition: () => void;
 };
 
@@ -29,27 +25,11 @@ export const useLocalPlayerStore = create<LocalPlayerState>()(
       get().state.speed = speed;
     },
 
-    setX: (x: number) => {
-      get().state.position.x = x;
-    },
-
-    setY: (y: number) => {
-      get().state.position.y = y;
-    },
-
-    setZ: (z: number) => {
-      get().state.position.z = z;
-    },
-
     setPosition: (x: number, y: number, z: number) => {
       const state = get().state;
       state.position.x = x;
       state.position.y = y;
       state.position.z = z;
-    },
-
-    updatePosition: (position: THREE.Vector3) => {
-      get().state.position.copy(position);
     },
 
     clearPosition: () => {

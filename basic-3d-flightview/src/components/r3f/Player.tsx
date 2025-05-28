@@ -6,7 +6,7 @@ import { useGameServer } from '@agent8/gameserver';
 import { useEffectStore } from '../../stores/effectStore';
 import { useFrame } from '@react-three/fiber';
 import { EffectType } from '../../types';
-import { usePlayerStore } from '../../stores/playerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
 import { CollisionPayload, CuboidCollider } from '@react-three/rapier';
 import { createBulletEffectConfig } from '../../utils/effectUtils';
 import Aircraft from './Aircraft';
@@ -19,25 +19,34 @@ const AIRCRAFT_BODY_LENGTH = 3;
 
 const Player = () => {
   const { account } = useGameServer();
-  const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
+  const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
+  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
   const [subscribeKeys, getKeyboardInputs] = useKeyboardControls();
   const { setPosition, setRotation, setVelocity } = useControllerState();
-  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
 
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
   const shootTimestamp = useRef(0);
   const canReset = useRef(true);
 
-  // IMPORTANT: Register player reference
+  // IMPORTANT: Register connected player reference
   useEffect(() => {
     if (!account) return;
 
-    registerPlayerRef(account, rigidBodyPlayerRef);
+    registerConnectedPlayer(account, rigidBodyPlayerRef);
 
     return () => {
-      unregisterPlayerRef(account);
+      unregisterConnectedPlayer(account);
     };
-  }, [account, registerPlayerRef, unregisterPlayerRef]);
+  }, [account, registerConnectedPlayer, unregisterConnectedPlayer]);
+
+  // IMPORTANT: Update local player store position information
+  useFrame(() => {
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
+
+    const position = playerRigidBody.translation();
+    setLocalPlayerPosition(position.x, position.y, position.z);
+  });
 
   useEffect(() => {
     return subscribeKeys((state) => {
@@ -105,14 +114,6 @@ const Player = () => {
       reset();
       canReset.current = false;
     }
-  });
-
-  useFrame(() => {
-    const playerRigidBody = rigidBodyPlayerRef.current;
-    if (!playerRigidBody) return;
-
-    const position = playerRigidBody.translation();
-    setLocalPlayerPosition(position.x, position.y, position.z);
   });
 
   if (!account) return null;
