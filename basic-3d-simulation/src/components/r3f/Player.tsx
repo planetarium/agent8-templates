@@ -1,14 +1,25 @@
 import { useRef, useMemo, useImperativeHandle, forwardRef, useCallback, useEffect } from 'react';
-import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfigMap, AnimationType, CharacterRenderer, CharacterRendererRef, useControllerState } from 'vibe-starter-3d';
+import {
+  AnimationConfigMap,
+  AnimationType,
+  CharacterRenderer,
+  CharacterRendererRef,
+  RigidBodyPlayer,
+  RigidBodyPlayerRef,
+  useControllerState,
+} from 'vibe-starter-3d';
 
 import Assets from '../../assets.json';
-import { RapierRigidBody } from '@react-three/rapier';
 import { useGameServer } from '@agent8/gameserver';
-import usePlayerStore from '../../stores/playerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
+import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
+import { CollisionPayload } from '@react-three/rapier';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
+
+const targetHeight = 1.6;
 
 /**
  * Player input parameters for action determination
@@ -26,23 +37,11 @@ interface PlayerInputs {
 }
 
 /**
- * Player ref interface
- */
-interface PlayerRef {
-  /** Bounding box of the character model */
-  boundingBox: THREE.Box3 | null;
-}
-
-/**
  * Player props
  */
 interface PlayerProps {
   /** Initial position of the player */
   position?: Vector3;
-  /** Initial action for the character */
-  initState?: CharacterState;
-  /** Target height for the character model */
-  targetHeight?: number;
 }
 
 /**
@@ -50,42 +49,36 @@ interface PlayerProps {
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
  */
-const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.IDLE, targetHeight = 1.6 }, ref) => {
+const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
-  const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
-  const currentStateRef = useRef<CharacterState>(initState);
+  const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
+  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
+  const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
   const [, getKeyboardInputs] = useKeyboardControls();
   const { setEnableInput, setMoveToPoint, isPointMoving } = useControllerState();
 
-  const { rigidBody } = useControllerState();
-  const playerRef = useRef<RapierRigidBody>(null);
-  const characterRendererRef = useRef<CharacterRendererRef>(null);
+  // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
+  const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      get boundingBox() {
-        return characterRendererRef.current?.boundingBox || null;
-      },
-    }),
-    [],
-  );
-
-  // IMPORTANT: Update player reference
-  useEffect(() => {
-    playerRef.current = rigidBody;
-  }, [rigidBody]);
-
-  // IMPORTANT: Register player reference
+  // IMPORTANT: Register connected player reference
   useEffect(() => {
     if (!account) return;
 
-    registerPlayerRef(account, playerRef);
+    registerConnectedPlayer(account, rigidBodyPlayerRef);
 
     return () => {
-      unregisterPlayerRef(account);
+      unregisterConnectedPlayer(account);
     };
-  }, [account, registerPlayerRef, unregisterPlayerRef]);
+  }, [account, registerConnectedPlayer, unregisterConnectedPlayer]);
+
+  // IMPORTANT: Update local player store position information
+  useFrame(() => {
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
+
+    const position = playerRigidBody.translation();
+    setLocalPlayerPosition(position.x, position.y, position.z);
+  });
 
   const handleAnimationComplete = useCallback(
     (type: AnimationType) => {
@@ -299,7 +292,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
 
   // Update player action state based on inputs and physics
   useFrame(() => {
-    if (!rigidBody) return;
+    if (!rigidBodyPlayerRef.current) return;
 
     // 2. Calculate keyboard state
     const { q, w, e, r, sprint } = getKeyboardInputs();
@@ -314,7 +307,7 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
     const isMoving = isPointMoving();
     const isSprinting = sprint;
 
-    const currentVel = rigidBody.linvel() || { y: 0 };
+    const currentVel = rigidBodyPlayerRef.current.linvel() || { y: 0 };
 
     // 5. Determine player state
     currentStateRef.current = determinePlayerState(currentStateRef.current, {
@@ -330,18 +323,42 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initState = CharacterState.
     });
   });
 
+  /** handleTriggerEnter: Called when the player intersects or collides with another object.
+   * - Handles when entering a specific area or colliding with another object
+   */
+  const handleTriggerEnter = (payload: CollisionPayload) => {
+    if (payload.other.rigidBody?.userData?.['type']) {
+      // TODO: Handle when entering a specific area or colliding with another object
+    }
+  };
+
+  /** handleTriggerExit: Called when the player exits an intersection or ends a collision with another object.
+   * - Handles when exiting a specific area or when collision with another object ends
+   */
+  const handleTriggerExit = (payload: CollisionPayload) => {
+    if (payload.other.rigidBody?.userData?.['type']) {
+      // TODO: Handle when exiting a specific area or when collision with another object ends
+    }
+  };
+
   return (
-    <mesh>
+    <RigidBodyPlayer
+      ref={rigidBodyPlayerRef}
+      userData={{ account, type: RigidBodyObjectType.LOCAL_PLAYER }}
+      position={position}
+      targetHeight={targetHeight}
+      onTriggerEnter={handleTriggerEnter}
+      onTriggerExit={handleTriggerExit}
+    >
       <CharacterRenderer
-        ref={characterRendererRef}
         url={Assets.characters['base-model'].url}
         animationConfigMap={animationConfigMap}
         currentAnimationRef={currentStateRef}
         targetHeight={targetHeight}
         onAnimationComplete={handleAnimationComplete}
       />
-    </mesh>
+    </RigidBodyPlayer>
   );
-});
+};
 
 export default Player;

@@ -15,9 +15,10 @@ import {
 
 import Assets from '../../assets.json';
 import { useGameServer } from '@agent8/gameserver';
-import usePlayerStore from '../../stores/playerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
 import { CollisionPayload } from '@react-three/rapier';
 import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 
 const targetHeight = 1.6;
 /**
@@ -51,38 +52,61 @@ interface PlayerInputs {
  */
 const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
-  const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
+  const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
+  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
   const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
   const [, getKeyboardInputs] = useKeyboardControls();
   const getMouseInputs = useMouseControls();
   const { setEnableInput } = useControllerState();
 
+  // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
   const characterRendererRef = useRef<CharacterRendererRef>(null);
 
-  // IMPORTANT: Register player reference
+  // IMPORTANT: Register connected player reference
   useEffect(() => {
     if (!account) return;
 
-    registerPlayerRef(account, rigidBodyPlayerRef);
+    registerConnectedPlayer(account, rigidBodyPlayerRef);
 
     return () => {
-      unregisterPlayerRef(account);
+      unregisterConnectedPlayer(account);
     };
-  }, [account, registerPlayerRef, unregisterPlayerRef]);
+  }, [account, registerConnectedPlayer, unregisterConnectedPlayer]);
+
+  // IMPORTANT: Update local player store position information
+  useFrame(() => {
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
+
+    const position = playerRigidBody.translation();
+    setLocalPlayerPosition(position.x, position.y, position.z);
+  });
 
   const handleAnimationComplete = useCallback(
     (type: AnimationType) => {
       setEnableInput(true);
       switch (type) {
-        case CharacterState.IDLE:
-          currentStateRef.current = CharacterState.IDLE;
+        case CharacterState.PUNCH:
+        case CharacterState.PUNCH_01:
+          currentStateRef.current = CharacterState.IDLE_01;
           break;
-        case CharacterState.IDLE_01:
+        case CharacterState.KICK:
+        case CharacterState.KICK_01:
+        case CharacterState.KICK_02:
           currentStateRef.current = CharacterState.IDLE_01;
           break;
         case CharacterState.CAST:
-          currentStateRef.current = CharacterState.CAST;
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.HIT:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.MELEE_ATTACK:
+          currentStateRef.current = CharacterState.IDLE_01;
+          break;
+        case CharacterState.DANCE:
+          currentStateRef.current = CharacterState.IDLE;
           break;
         default:
           break;
@@ -118,10 +142,65 @@ const Player = ({ position }: PlayerProps) => {
         loop: true,
         clampWhenFinished: true,
       },
+      [CharacterState.PUNCH]: {
+        url: Assets.animations['punch-00'].url,
+        loop: false,
+        duration: 0.5,
+        clampWhenFinished: true,
+      },
+      [CharacterState.PUNCH_01]: {
+        url: Assets.animations['punch-01'].url,
+        loop: false,
+        duration: 0.5,
+        clampWhenFinished: true,
+      },
+      [CharacterState.KICK]: {
+        url: Assets.animations['kick-00'].url,
+        loop: false,
+        duration: 0.75,
+        clampWhenFinished: true,
+      },
+      [CharacterState.KICK_01]: {
+        url: Assets.animations['kick-01'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+      },
+      [CharacterState.KICK_02]: {
+        url: Assets.animations['kick-02'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+      },
+      [CharacterState.MELEE_ATTACK]: {
+        url: Assets.animations['melee-attack'].url,
+        loop: false,
+        duration: 1,
+        clampWhenFinished: true,
+      },
       [CharacterState.CAST]: {
         url: Assets.animations['cast'].url,
         loop: false,
         duration: 1,
+        clampWhenFinished: true,
+      },
+      [CharacterState.HIT]: {
+        url: Assets.animations['hit-to-body'].url,
+        loop: false,
+        clampWhenFinished: false,
+      },
+      [CharacterState.DANCE]: {
+        url: Assets.animations['dance'].url,
+        loop: false,
+        clampWhenFinished: false,
+      },
+      [CharacterState.SWIM]: {
+        url: Assets.animations['swim'].url,
+        loop: true,
+      },
+      [CharacterState.DIE]: {
+        url: Assets.animations['death-backward'].url,
+        loop: false,
         clampWhenFinished: true,
       },
     }),
@@ -141,6 +220,39 @@ const Player = ({ position }: PlayerProps) => {
         return CharacterState.DIE;
       }
 
+      // Punch animation - start only if not already punching
+      if (
+        isPunching &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        setEnableInput(false);
+        return CharacterState.PUNCH;
+      }
+
+      // Kick animation - start only if not already punching
+      if (
+        isKicking &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        setEnableInput(false);
+        return CharacterState.KICK;
+      }
+
+      // Melee attack animation - start only if not already punching or kicking
+      if (
+        isMeleeAttack &&
+        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
+          currentState,
+        )
+      ) {
+        setEnableInput(false);
+        return CharacterState.MELEE_ATTACK;
+      }
+
       // Cast animation - start only if not already punching or kicking
       if (
         isCasting &&
@@ -148,6 +260,7 @@ const Player = ({ position }: PlayerProps) => {
           currentState,
         )
       ) {
+        setEnableInput(false);
         return CharacterState.CAST;
       }
 

@@ -13,8 +13,24 @@ export const CharacterState: { [key: string]: AnimationType } = {
   FAST_RUN: 'FAST_RUN',
   /** JUMP ACTION */
   JUMP: 'JUMP',
+  /** PUNCH ACTION */
+  PUNCH: 'PUNCH',
+  /** PUNCH ACTION */
+  PUNCH_01: 'PUNCH_01',
+  /** KICK ACTION */
+  KICK: 'KICK',
+  /** KICK ACTION */
+  KICK_01: 'KICK_01',
+  /** KICK ACTION */
+  KICK_02: 'KICK_02',
+  /** MELEE ATTACK ACTION */
+  MELEE_ATTACK: 'MELEE_ATTACK',
   /** CAST ACTION */
   CAST: 'CAST',
+  /** HIT ACTION */
+  HIT: 'HIT',
+  /** DIE ACTION */
+  DIE: 'DIE',
 };
 
 export type CharacterState = (typeof CharacterState)[keyof typeof CharacterState];

@@ -15,9 +15,10 @@ import {
 
 import Assets from '../../assets.json';
 import { useGameServer } from '@agent8/gameserver';
-import usePlayerStore from '../../stores/playerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
 import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
 import { CollisionPayload } from '@react-three/rapier';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 
 const targetHeight = 1.6;
 /**
@@ -51,25 +52,36 @@ interface PlayerInputs {
  */
 const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
-  const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
+  const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
+  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
   const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
   const [, getKeyboardInputs] = useKeyboardControls();
   const getMouseInputs = useMouseControls();
   const { setEnableInput } = useControllerState();
 
+  // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
   const characterRendererRef = useRef<CharacterRendererRef>(null);
 
-  // IMPORTANT: Register player reference
+  // IMPORTANT: Register connected player reference
   useEffect(() => {
     if (!account) return;
 
-    registerPlayerRef(account, rigidBodyPlayerRef);
+    registerConnectedPlayer(account, rigidBodyPlayerRef);
 
     return () => {
-      unregisterPlayerRef(account);
+      unregisterConnectedPlayer(account);
     };
-  }, [account, registerPlayerRef, unregisterPlayerRef]);
+  }, [account, registerConnectedPlayer, unregisterConnectedPlayer]);
+
+  // IMPORTANT: Update local player store position information
+  useFrame(() => {
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
+
+    const position = playerRigidBody.translation();
+    setLocalPlayerPosition(position.x, position.y, position.z);
+  });
 
   const animationConfigMap: AnimationConfigMap = useMemo(
     () => ({
