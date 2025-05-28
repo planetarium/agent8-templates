@@ -5,13 +5,14 @@ import { useGameServer } from '@agent8/gameserver';
 import { useEffectStore } from '../../stores/effectStore';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { EffectType } from '../../types';
-import { usePlayerStore } from '../../stores/playerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
 import { createBulletEffectConfig } from '../../utils/effectUtils';
 import Assets from '../../assets.json';
 import { CharacterState } from '../../constants/character';
 import { useKeyboardControls } from '@react-three/drei';
 import { CollisionPayload } from '@react-three/rapier';
 import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 
 const SHOOT_COOLDOWN = 200;
 const targetHeight = 1.6;
@@ -73,7 +74,8 @@ function usePlayerStates() {
 
 const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
-  const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
+  const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
+  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
   const getMouseInputs = useMouseControls();
   const [, getKeyboardInputs] = useKeyboardControls();
   const { determinePlayerState } = usePlayerStates();
@@ -84,16 +86,25 @@ const Player = ({ position }: PlayerProps) => {
   const shootTimestamp = useRef(0);
   const leftPressedLastFrame = useRef(false);
 
-  // IMPORTANT: Register player reference
+  // IMPORTANT: Register connected player reference
   useEffect(() => {
     if (!account) return;
 
-    registerPlayerRef(account, rigidBodyPlayerRef);
+    registerConnectedPlayer(account, rigidBodyPlayerRef);
 
     return () => {
-      unregisterPlayerRef(account);
+      unregisterConnectedPlayer(account);
     };
-  }, [account, registerPlayerRef, unregisterPlayerRef]);
+  }, [account, registerConnectedPlayer, unregisterConnectedPlayer]);
+
+  // IMPORTANT: Update local player store position information
+  useFrame(() => {
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
+
+    const position = playerRigidBody.translation();
+    setLocalPlayerPosition(position.x, position.y, position.z);
+  });
 
   // Get addEffect action from the store
   const addEffect = useEffectStore((state) => state.addEffect);
