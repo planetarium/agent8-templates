@@ -110,8 +110,9 @@ Key technologies:
 
 ### `src/stores/`
 
-- Directory containing Zustand stores for application state management.
-  - **`playerStore.ts`**: Manages player-related state and references, particularly for physics interactions. Provides methods to register, unregister, and access player rigid body references.
+- Directory containing state management stores using Zustand.
+  - **`localPlayerStore.ts`**: Store that manages the local player's state, such as position tracking.
+  - **`multiPlayerStore.ts`**: Store that manages multiple connected players' rigid body references for multiplayer functionality, including registration, unregistration, and retrieval of player references.
 
 ### `src/constants/`
 

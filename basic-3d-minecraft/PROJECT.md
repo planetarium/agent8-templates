@@ -129,9 +129,10 @@ The rendering system uses a color-based approach with these key features:
 
 ### `src/stores/`
 
-- Directory containing Zustand stores for application state management.
+- Directory containing state management stores using Zustand.
+  - **`localPlayerStore.ts`**: Store that manages the local player's state, such as position tracking.
+  - **`multiPlayerStore.ts`**: Store that manages multiple connected players' rigid body references for multiplayer functionality, including registration, unregistration, and retrieval of player references.
   - **`cubeStore.ts`**: Store for voxel world management that handles adding, removing, and storing block data. Also manages theme selection and controls selected block type.
-  - **`playerStore.ts`**: Store for player reference management that handles registration and access to player rigid body references for physics interactions and multiplayer support.
 
 ### `src/utils/`
 
