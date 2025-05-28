@@ -54,6 +54,7 @@ const Player = ({ position }: PlayerProps) => {
   const [, getKeyboardInputs] = useKeyboardControls();
   const { setEnableInput, setMoveToPoint, isPointMoving } = useControllerState();
 
+  // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
   const characterRendererRef = useRef<CharacterRendererRef>(null);
 

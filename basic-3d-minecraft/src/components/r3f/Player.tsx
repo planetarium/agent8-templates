@@ -57,6 +57,7 @@ const Player = ({ position }: PlayerProps) => {
   const getMouseInputs = useMouseControls();
   const { setEnableInput } = useControllerState();
 
+  // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
   const characterRendererRef = useRef<CharacterRendererRef>(null);
 

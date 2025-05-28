@@ -46,6 +46,7 @@ const Player = ({ position }: PlayerProps) => {
   const [, getKeyboardInputs] = useKeyboardControls();
   const { setEnableInput } = useControllerState();
 
+  // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
 
   // IMPORTANT: Register connected player reference
