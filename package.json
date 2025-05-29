@@ -1,0 +1,11 @@
+{
+  "name": "agent8-templates",
+  "version": "1.0.0",
+  "description": "Template collection for agent8 projects",
+  "private": true,
+  "scripts": {
+    "docs:help": "node scripts/copy-docs.js --help",
+    "docs:copy": "node scripts/copy-docs.js --target=basic-3d",
+    "docs:remove": "node scripts/remove-docs.js --target=basic-3d"
+  }
+}
