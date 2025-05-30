@@ -5,7 +5,6 @@ import { CharacterState } from '../../constants/character';
 import {
   AnimationConfigMap,
   CharacterRenderer,
-  CharacterRendererRef,
   useMouseControls,
   useControllerState,
   AnimationType,
@@ -61,7 +60,6 @@ const Player = ({ position }: PlayerProps) => {
 
   // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
-  const characterRendererRef = useRef<CharacterRendererRef>(null);
 
   // IMPORTANT: Register connected player reference
   useEffect(() => {
@@ -369,7 +367,6 @@ const Player = ({ position }: PlayerProps) => {
          * IMPORTANT: In First Person View (FPS), the player's own character should not be visible,
          * so the visible property is set to false. This setting is crucial for the FPS implementation.
          */
-        ref={characterRendererRef}
         visible={false}
         url={Assets.characters['base-model'].url}
         animationConfigMap={animationConfigMap}

@@ -5,7 +5,6 @@ import { CharacterState } from '../../constants/character';
 import {
   AnimationConfigMap,
   CharacterRenderer,
-  CharacterRendererRef,
   useMouseControls,
   useControllerState,
   AnimationType,
@@ -61,7 +60,6 @@ const Player = ({ position }: PlayerProps) => {
 
   // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
-  const characterRendererRef = useRef<CharacterRendererRef>(null);
 
   // IMPORTANT: Register connected player reference
   useEffect(() => {
@@ -374,7 +372,6 @@ const Player = ({ position }: PlayerProps) => {
       onTriggerExit={handleTriggerExit}
     >
       <CharacterRenderer
-        ref={characterRendererRef}
         url={Assets.characters['base-model'].url}
         animationConfigMap={animationConfigMap}
         currentAnimationRef={currentStateRef}

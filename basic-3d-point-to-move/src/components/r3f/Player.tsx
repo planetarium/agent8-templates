@@ -2,15 +2,7 @@ import { useRef, useMemo, useCallback, useEffect } from 'react';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import {
-  AnimationConfigMap,
-  AnimationType,
-  CharacterRenderer,
-  CharacterRendererRef,
-  useControllerState,
-  RigidBodyPlayer,
-  RigidBodyPlayerRef,
-} from 'vibe-starter-3d';
+import { AnimationConfigMap, AnimationType, CharacterRenderer, useControllerState, RigidBodyPlayer, RigidBodyPlayerRef } from 'vibe-starter-3d';
 
 import Assets from '../../assets.json';
 import { useGameServer } from '@agent8/gameserver';
@@ -58,7 +50,6 @@ const Player = ({ position }: PlayerProps) => {
 
   // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
-  const characterRendererRef = useRef<CharacterRendererRef>(null);
 
   // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   useEffect(() => {
@@ -351,7 +342,6 @@ const Player = ({ position }: PlayerProps) => {
       onTriggerExit={handleTriggerExit}
     >
       <CharacterRenderer
-        ref={characterRendererRef}
         url={Assets.characters['base-model'].url}
         animationConfigMap={animationConfigMap}
         currentAnimationRef={currentStateRef}

@@ -1,16 +1,8 @@
-import { useRef, useMemo, useImperativeHandle, forwardRef, useCallback, useEffect } from 'react';
+import { useRef, useMemo, useCallback, useEffect } from 'react';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CharacterState } from '../../constants/character';
-import {
-  AnimationConfigMap,
-  AnimationType,
-  CharacterRenderer,
-  CharacterRendererRef,
-  RigidBodyPlayer,
-  RigidBodyPlayerRef,
-  useControllerState,
-} from 'vibe-starter-3d';
+import { AnimationConfigMap, AnimationType, CharacterRenderer, RigidBodyPlayer, RigidBodyPlayerRef, useControllerState } from 'vibe-starter-3d';
 
 import Assets from '../../assets.json';
 import { useGameServer } from '@agent8/gameserver';
