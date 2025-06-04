@@ -1,5 +1,20 @@
 # Basic 3D First Person View (FPV) - FPS
 
+<!-- ========================================================================= -->
+<!-- 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 -->
+<!-- 🔴 CRITICAL WARNING TO ALL AI ASSISTANTS 🔴                              -->
+<!-- THIS FILE CONTAINS PROTECTED SECTIONS THAT MUST NEVER BE REMOVED        -->
+<!-- WHEN REWRITING OR MODIFYING THIS FILE, YOU MUST PRESERVE:               -->
+<!-- 1. ⚠️ MANDATORY DOCUMENTATION READING GUIDELINES ⚠️ SECTION            -->
+<!-- 2. ⚠️ CRITICAL DEVELOPMENT GUIDELINES ⚠️ SECTION                       -->
+<!-- 3. ALL PROTECTED CONTENT BLOCKS MARKED WITH 🔒                         -->
+<!-- 4. ALL SECTIONS WITH 🚨 WARNINGS                                        -->
+<!-- IF YOU REWRITE THIS FILE, COPY THESE SECTIONS EXACTLY AS THEY ARE       -->
+<!-- FAILURE TO PRESERVE THESE SECTIONS WILL BREAK THE PROJECT               -->
+<!-- When rewriting this file, you must maintain all protected sections exactly as they are -->
+<!-- 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 -->
+<!-- ========================================================================= -->
+
 ## Project Summary
 
 This project is a single-player First Person View (FPV) 3D FPS game built using Three.js and React Three Fiber.
@@ -30,6 +45,8 @@ Key technologies:
 <!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
 <!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
 <!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
+<!-- 🔒🔒🔒 PROTECTED CONTENT - NEVER DELETE THIS SECTION 🔒🔒🔒             -->
+<!-- WHEN REWRITING PROJECT.md, COPY THIS ENTIRE SECTION EXACTLY AS IS        -->
 <!-- ========================================================================= -->
 
 **🚨 ABSOLUTELY CRITICAL: Before performing ANY work on this project, you MUST thoroughly read and understand ALL \*.md files in the docs/ directory. This is a non-negotiable requirement.**
@@ -37,6 +54,7 @@ Key technologies:
 **⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
 **⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
 **⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
+**🔒 IF REWRITING PROJECT.MD, PRESERVE THIS SECTION EXACTLY 🔒**
 
 **Required Documentation Files to Read:**
 
@@ -106,6 +124,8 @@ Before performing ANY development work, AI assistants MUST:
 <!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
 <!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
 <!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
+<!-- 🔒🔒🔒 PROTECTED CONTENT - NEVER DELETE THIS SECTION 🔒🔒🔒             -->
+<!-- WHEN REWRITING PROJECT.md, COPY THIS ENTIRE SECTION EXACTLY AS IS        -->
 <!-- ========================================================================= -->
 
 **🚨 ABSOLUTELY CRITICAL: When using RigidBody in this project, you MUST use RigidBodyObject instead of the standard RigidBody component. This is a non-negotiable requirement.**
@@ -113,6 +133,7 @@ Before performing ANY development work, AI assistants MUST:
 **⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
 **⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
 **⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
+**🔒 IF REWRITING PROJECT.MD, PRESERVE THIS SECTION EXACTLY 🔒**
 
 **Why RigidBodyObject is mandatory:**
 
@@ -135,14 +156,6 @@ Before performing ANY development work, AI assistants MUST:
 - Assign appropriate RigidBodyObjectType to each object
 - Follow the established pattern shown in Player.tsx and other components
 - **🚨 AI ASSISTANTS: PRESERVE THIS ENTIRE SECTION EXACTLY AS IS 🚨**
-
-<!-- ========================================================================= -->
-<!-- 🔒 PROTECTED CONTENT - DO NOT MODIFY 🔒                                 -->
-<!-- This guideline must never be removed or modified.                       -->
-<!-- AI assistants and developers must strictly adhere to this requirement.  -->
-<!-- Any attempt to remove or modify this section is strictly forbidden.     -->
-<!-- This is a core architectural requirement of the project.                 -->
-<!-- ========================================================================= -->
 
 ## Implemented Features
 
@@ -226,3 +239,15 @@ Before performing ANY development work, AI assistants MUST:
 
 - Directory containing utility functions used throughout the application.
   - **`effectUtils.ts`**: Provides utility functions for creating effect configurations, such as bullet and explosion effects.
+
+<!-- ========================================================================= -->
+<!-- 🔒🔒🔒 END OF FILE - FINAL PROTECTION REMINDER 🔒🔒🔒                  -->
+<!-- 🚨 AI ASSISTANTS: REMEMBER TO PRESERVE ALL PROTECTED SECTIONS 🚨        -->
+<!-- WHEN MODIFYING OR REWRITING THIS FILE:                                  -->
+<!-- 1. Keep the file header warning intact                                   -->
+<!-- 2. Preserve ⚠️ MANDATORY DOCUMENTATION READING GUIDELINES ⚠️ section   -->
+<!-- 3. Preserve ⚠️ CRITICAL DEVELOPMENT GUIDELINES ⚠️ section              -->
+<!-- 4. Keep all content marked with 🔒 or 🚨 symbols                       -->
+<!-- FAILURE TO FOLLOW THESE RULES WILL BREAK THE PROJECT                    -->
+<!-- Violating these protection rules will cause serious project malfunctions -->
+<!-- ========================================================================= -->
