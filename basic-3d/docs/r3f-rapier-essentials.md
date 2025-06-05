@@ -106,11 +106,19 @@ const Barricade = () => {
   const barricadeRef = useRef<RapierRigidBody>(null);
   const angleRef = useRef(0);
 
+  // Create reusable objects for performance optimization
+  const quaternionRef = useRef(new Quaternion());
+  const eulerRef = useRef(new Euler(0, 0, 0));
+
   useFrame((_state, delta) => {
     if (barricadeRef.current) {
       angleRef.current += delta * 0.5;
-      const q = new Quaternion().setFromEuler(new Euler(0, angleRef.current, 0));
-      barricadeRef.current.setNextKinematicRotation(q);
+
+      // Reuse existing objects to avoid creating new ones
+      eulerRef.current.set(0, angleRef.current, 0);
+      quaternionRef.current.setFromEuler(eulerRef.current);
+
+      barricadeRef.current.setNextKinematicRotation(quaternionRef.current);
     }
   });
 
@@ -431,7 +439,207 @@ Understanding RigidBody properties is essential for proper physics behavior conf
 </RigidBody>
 ```
 
-### 2.3 Collider Properties (Manual Colliders)
+### 2.3 Kinematic Body Types: Position vs Velocity
+
+**Rule:**  
+Choose the right kinematic control method based on your movement needs and precision requirements.
+
+#### Core Differences
+
+| Feature            | `kinematicPosition`                                           | `kinematicVelocity`              |
+| ------------------ | ------------------------------------------------------------- | -------------------------------- |
+| **Control Method** | Direct position setting                                       | Velocity-based movement          |
+| **API Methods**    | `setNextKinematicTranslation()`, `setNextKinematicRotation()` | `setLinvel()`, `setAngvel()`     |
+| **Movement Style** | Precise, frame-by-frame positioning                           | Smooth acceleration/deceleration |
+| **Use Case**       | Exact paths, scripted animations                              | Natural movement, AI behavior    |
+
+#### kinematicPosition - Exact Control
+
+**Best for:** Elevators, rotating doors, scripted platforms, cutscene objects
+
+```tsx
+// Moving platform with exact sine wave motion
+const MovingPlatform = () => {
+  const platformRef = useRef<RapierRigidBody>(null);
+  const timeRef = useRef(0);
+
+  useFrame((_state, delta) => {
+    if (platformRef.current) {
+      timeRef.current += delta;
+
+      // Exact position calculation
+      const x = Math.sin(timeRef.current * 2) * 5;
+      const y = 0.75;
+      const z = 0;
+
+      platformRef.current.setNextKinematicTranslation({ x, y, z });
+    }
+  });
+
+  return (
+    <RigidBody ref={platformRef} type="kinematicPosition">
+      <CuboidCollider args={[2, 0.25, 2]} />
+      <mesh>
+        <boxGeometry args={[4, 0.5, 4]} />
+        <meshStandardMaterial color="blue" />
+      </mesh>
+    </RigidBody>
+  );
+};
+
+// Elevator with exact floor positioning
+const Elevator = () => {
+  const elevatorRef = useRef<RapierRigidBody>(null);
+  const [targetFloor, setTargetFloor] = useState(0);
+  const currentYRef = useRef(0);
+
+  useFrame((_state, delta) => {
+    if (elevatorRef.current) {
+      const targetY = targetFloor * 3; // 3m per floor
+      const diff = targetY - currentYRef.current;
+
+      if (Math.abs(diff) > 0.01) {
+        currentYRef.current += Math.sign(diff) * delta * 2;
+        elevatorRef.current.setNextKinematicTranslation({
+          x: 0,
+          y: currentYRef.current,
+          z: 0,
+        });
+      }
+    }
+  });
+
+  return (
+    <RigidBody ref={elevatorRef} type="kinematicPosition">
+      <CuboidCollider args={[1.5, 0.1, 1.5]} />
+      <mesh>
+        <boxGeometry args={[3, 0.2, 3]} />
+        <meshStandardMaterial color="gray" />
+      </mesh>
+    </RigidBody>
+  );
+};
+```
+
+#### kinematicVelocity - Natural Movement
+
+**Best for:** AI characters, patrol enemies, autonomous vehicles, smooth following objects
+
+```tsx
+// Patrolling enemy with natural movement
+const PatrollingEnemy = () => {
+  const enemyRef = useRef<RapierRigidBody>(null);
+  const directionRef = useRef(1);
+  const positionRef = useRef(0);
+
+  useFrame((_state, delta) => {
+    if (enemyRef.current) {
+      positionRef.current += directionRef.current * delta * 2;
+
+      // Smooth direction changes at boundaries
+      if (positionRef.current > 5 || positionRef.current < -5) {
+        directionRef.current *= -1;
+      }
+
+      // Velocity-based movement for natural feel
+      const velocityX = directionRef.current * 2; // m/s
+      enemyRef.current.setLinvel({ x: velocityX, y: 0, z: 0 }, true);
+    }
+  });
+
+  return (
+    <RigidBody ref={enemyRef} type="kinematicVelocity">
+      <CapsuleCollider args={[0.5, 1]} />
+      <mesh>
+        <capsuleGeometry args={[0.5, 2]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    </RigidBody>
+  );
+};
+
+// Following camera target with smooth acceleration
+const CameraTarget = ({ targetPosition }) => {
+  const targetRef = useRef<RapierRigidBody>(null);
+
+  useFrame(() => {
+    if (targetRef.current && targetPosition) {
+      const currentPos = targetRef.current.translation();
+      const diff = {
+        x: targetPosition.x - currentPos.x,
+        y: targetPosition.y - currentPos.y,
+        z: targetPosition.z - currentPos.z,
+      };
+
+      // Smooth following with velocity
+      const speed = 3.0;
+      const velocity = {
+        x: diff.x * speed,
+        y: diff.y * speed,
+        z: diff.z * speed,
+      };
+
+      targetRef.current.setLinvel(velocity, true);
+    }
+  });
+
+  return (
+    <RigidBody ref={targetRef} type="kinematicVelocity">
+      <BallCollider args={[0.2]} />
+      <mesh>
+        <sphereGeometry args={[0.2]} />
+        <meshStandardMaterial color="yellow" />
+      </mesh>
+    </RigidBody>
+  );
+};
+```
+
+#### Selection Guide
+
+**Choose `kinematicPosition` when:**
+
+- ✅ You need **exact positioning** (elevators, doors)
+- ✅ **Scripted animations** are required
+- ✅ **Frame-precise control** is important
+- ✅ Objects follow **predetermined paths**
+
+**Choose `kinematicVelocity` when:**
+
+- ✅ **Natural acceleration/deceleration** is desired
+- ✅ **AI movement** should feel organic
+- ✅ Objects need **smooth direction changes**
+- ✅ **Physics-like behavior** without full dynamics
+
+#### Performance Considerations
+
+```tsx
+// ✅ Good: Reuse objects for kinematicPosition
+const quaternionRef = useRef(new THREE.Quaternion());
+const eulerRef = useRef(new THREE.Euler());
+
+useFrame((_state, delta) => {
+  angleRef.current += delta * rotationSpeed;
+  eulerRef.current.set(0, angleRef.current, 0);
+  quaternionRef.current.setFromEuler(eulerRef.current);
+  rigidBodyRef.current?.setNextKinematicRotation(quaternionRef.current);
+});
+
+// ✅ Good: Smooth velocity interpolation for kinematicVelocity
+const targetVelocityRef = useRef({ x: 0, y: 0, z: 0 });
+const currentVelocityRef = useRef({ x: 0, y: 0, z: 0 });
+
+useFrame((_state, delta) => {
+  // Smooth velocity interpolation
+  const lerpFactor = 1 - Math.exp(-5 * delta);
+  currentVelocityRef.current.x += (targetVelocityRef.current.x - currentVelocityRef.current.x) * lerpFactor;
+  currentVelocityRef.current.z += (targetVelocityRef.current.z - currentVelocityRef.current.z) * lerpFactor;
+
+  rigidBodyRef.current?.setLinvel(currentVelocityRef.current, true);
+});
+```
+
+### 2.4 Collider Properties (Manual Colliders)
 
 **Rule:**  
 Understanding Collider properties is essential when using manual collider placement (`colliders={false}`).
@@ -538,6 +746,24 @@ useFrame(() => {
 const temp = useMemo(() => new THREE.Vector3(), []);
 useFrame(() => {
   ref.current.position.lerp(temp.set(x, y, z), 0.1);
+});
+
+// ❌ Creates new Quaternion/Euler objects every frame (rotation example)
+useFrame((_state, delta) => {
+  angleRef.current += delta * 0.5;
+  const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, angleRef.current, 0));
+  rigidBodyRef.current?.setNextKinematicRotation(q);
+});
+
+// ✅ Reuse Quaternion/Euler objects for rotations
+const quaternionRef = useRef(new THREE.Quaternion());
+const eulerRef = useRef(new THREE.Euler(0, 0, 0));
+
+useFrame((_state, delta) => {
+  angleRef.current += delta * 0.5;
+  eulerRef.current.set(0, angleRef.current, 0);
+  quaternionRef.current.setFromEuler(eulerRef.current);
+  rigidBodyRef.current?.setNextKinematicRotation(quaternionRef.current);
 });
 ```
 
@@ -856,15 +1082,6 @@ const safeApplyImpulse = useCallback((impulse) => {
 3. **Unnecessary re-renders**: Avoid setState in animation loops
 4. **Memory leaks**: Clean up timers and references
 5. **Collision overhead**: Use appropriate collision groups
-
----
-
-## 8. Recommended Libraries
-
-- **State Management**: `zustand`, `valtio`
-- **Animation**: `react-spring`
-- **Input**: `@react-three/drei` (KeyboardControls)
-- **Networking**: `socket.io`
 
 ---
 
