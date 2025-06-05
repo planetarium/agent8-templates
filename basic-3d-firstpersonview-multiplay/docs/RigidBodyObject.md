@@ -274,6 +274,136 @@ function Door() {
 }
 ```
 
+### Character Implementation
+
+When implementing general characters using `RigidBodyObject`, you need to manually set up colliders. This is suitable for **NPCs, enemies, remote players**, etc., that are **not the main player**.
+
+**⚠️ Important**: For main player characters, it is recommended to use `RigidBodyPlayer`. Character implementation using `RigidBodyObject` is mainly used for the following purposes:
+
+- **NPC (Non-Player Characters)**
+- **Enemy Characters**
+- **Remote Players in Multiplayer**
+- **Characters not controlled by controllers**
+
+#### 🔥 Core Concept: CapsuleCollider Position Setup
+
+**Most Important Concept**: Most 3D character models have their **Y-axis pivot positioned at the bottom (feet)**. Therefore, the character's origin `(0, 0, 0)` is at the feet level, and the `CapsuleCollider` must be positioned **half the character height upward** to account for this.
+
+```tsx
+// ❌ Wrong collider position - character half buried in ground
+<CapsuleCollider
+  position={[0, 0, 0]} // Collider center positioned at feet level
+  args={[halfHeight, radius]}
+/>
+
+// ✅ Correct collider position - character standing properly
+<CapsuleCollider
+  position={[0, targetHeight / 2, 0]} // Collider positioned half height upward
+  args={[halfHeight, radius]}
+/>
+```
+
+**Why is `targetHeight / 2` necessary?**
+
+- Character pivot: Feet level (Y = 0)
+- Character head: Y = targetHeight
+- Character center: Y = targetHeight / 2
+- **CapsuleCollider is created based on center, so it must be positioned at character center location**
+
+```tsx
+import { RigidBodyObject, CharacterUtils, CharacterRenderer } from 'vibe-starter-3d';
+import { CapsuleCollider } from '@react-three/rapier';
+
+function NPCCharacter({ position, userData }) {
+  const targetHeight = 1.6;
+
+  const handleTriggerEnter = (payload) => {
+    const playerType = payload.other.rigidBody?.userData?.type;
+
+    if (playerType === 'LOCAL_PLAYER') {
+      console.log('Player approached NPC');
+      // NPC interaction logic
+    }
+  };
+
+  return (
+    <RigidBodyObject
+      type="dynamic"
+      colliders={false} // Disable automatic collider
+      position={position}
+      userData={userData}
+      onTriggerEnter={handleTriggerEnter}
+    >
+      {/* 🔥 Core: position={[0, targetHeight / 2, 0]} */}
+      {/* Position collider half height upward since character pivot is at feet */}
+      <CapsuleCollider
+        position={[0, targetHeight / 2, 0]}
+        args={[CharacterUtils.capsuleHalfHeight(targetHeight), CharacterUtils.capsuleRadius(targetHeight)]}
+      />
+
+      {/* Character renderer */}
+      <CharacterRenderer
+        url="/models/npc-character.vrm"
+        targetHeight={targetHeight}
+        animationConfigMap={npcAnimationConfig}
+        currentAnimationRef={npcAnimationRef}
+      />
+    </RigidBodyObject>
+  );
+}
+```
+
+#### CharacterUtils Usage
+
+When implementing characters, use `CharacterUtils` to calculate appropriate collider sizes:
+
+```tsx
+import { CharacterUtils } from 'vibe-starter-3d';
+
+// Various character size collider calculations
+const adultHeight = 1.7;
+const childHeight = 1.2;
+const giantHeight = 2.5;
+
+// Adult character
+const adultCapsule = {
+  halfHeight: CharacterUtils.capsuleHalfHeight(adultHeight), // 0.51
+  radius: CharacterUtils.capsuleRadius(adultHeight), // 0.34
+};
+
+// Child character
+const childCapsule = {
+  halfHeight: CharacterUtils.capsuleHalfHeight(childHeight), // 0.36
+  radius: CharacterUtils.capsuleRadius(childHeight), // 0.24
+};
+
+// Giant character
+const giantCapsule = {
+  halfHeight: CharacterUtils.capsuleHalfHeight(giantHeight), // 0.75
+  radius: CharacterUtils.capsuleRadius(giantHeight), // 0.5
+};
+```
+
+**⚠️ Important Pattern**: All character colliders must follow this pattern:
+
+```tsx
+// Always use this pattern - since character pivot is at feet
+<CapsuleCollider
+  position={[0, targetHeight / 2, 0]} // 🔥 Core: half height upward!
+  args={[CharacterUtils.capsuleHalfHeight(targetHeight), CharacterUtils.capsuleRadius(targetHeight)]}
+/>
+```
+
+**Visual Understanding**:
+
+```
+Character Head ← Y = targetHeight (e.g., 1.6m)
+     |
+     |      ← CapsuleCollider center (Y = targetHeight / 2 = 0.8m)
+     |
+Character Feet ← Y = 0 (pivot position)
+```
+
 ## Direct Control via Ref
 
 ```tsx
@@ -431,35 +561,4 @@ Use appropriate collision groups to reduce unnecessary collision checks:
 
 ## Precautions
 
-1. **Distinguish from RigidBodyPlayer**: `RigidBodyObject` is for general physics objects, and `RigidBodyPlayer` should be used for player characters.
-
-2. **Collision Group Settings**: Only set collision groups when performance optimization is absolutely necessary. Default settings are sufficient in most cases.
-
-3. **Memory Leak Prevention**: When changing state in event handlers, ensure cleanup work is done when components unmount.
-
-4. **Null Checking**: Always use optional chaining when accessing `payload.other.rigidBody?.userData`.
-
-## Migration Guide
-
-How to migrate from existing `RigidBody` to `RigidBodyObject`:
-
-### Existing Code
-
-```tsx
-<RigidBody type="fixed" onCollisionEnter={handleCollision} onIntersectionEnter={handleIntersection}>
-  <mesh>...</mesh>
-</RigidBody>
-```
-
-### After Migration
-
-```tsx
-<RigidBodyObject
-  type="fixed"
-  onTriggerEnter={handleTrigger} // Handles both collisions and intersections
->
-  <mesh>...</mesh>
-</RigidBodyObject>
-```
-
-Now you can implement simpler and more stable physics interactions using the powerful features of `RigidBodyObject`!
+1. **Distinguish from RigidBodyPlayer**: `
