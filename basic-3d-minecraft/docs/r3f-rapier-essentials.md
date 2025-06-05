@@ -51,6 +51,23 @@ const [z, setZ] = useState(0);
 useFrame(() => setZ((v) => v + 0.1));
 ```
 
+**Critical:** This example shows **Mesh** control. For **RigidBody** objects, NEVER use direct position manipulation:
+
+```tsx
+// ❌ WRONG - Breaks physics sync for RigidBody
+const rigidBodyRef = useRef();
+useFrame(() => {
+  rigidBodyRef.current.position.z += 0.1; // DON'T DO THIS
+});
+
+// ✅ CORRECT - Use RigidBody API for physics objects
+const rigidBodyRef = useRef();
+useFrame(() => {
+  const currentVel = rigidBodyRef.current.linvel();
+  rigidBodyRef.current.setLinvel({ x: currentVel.x, y: currentVel.y, z: 1 }, true);
+});
+```
+
 ### 1.3 Initial vs Runtime State
 
 ```tsx
@@ -92,13 +109,13 @@ const Barricade = () => {
   useFrame((_state, delta) => {
     if (barricadeRef.current) {
       angleRef.current += delta * 0.5;
-      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, angleRef.current, 0));
-      barricadeRef.current.setRotation(q, true);
+      const q = new Quaternion().setFromEuler(new Euler(0, angleRef.current, 0));
+      barricadeRef.current.setNextKinematicRotation(q);
     }
   });
 
   return (
-    <RigidBody ref={barricadeRef} type="fixed" position={[0, 0.75, 0]} name="barricade">
+    <RigidBody ref={barricadeRef} type="kinematicPosition" position={[0, 0.75, 0]}>
       <CuboidCollider args={[5, 0.25, 0.25]} />
       <mesh castShadow receiveShadow>
         <boxGeometry args={[10, 0.5, 0.5]} />
@@ -118,9 +135,390 @@ const Barricade = () => {
 
 ---
 
-## 2. Performance Optimization
+## 2. RigidBody Configuration
 
-### 2.1 Essential Performance Rules
+### 2.1 Collider Types
+
+**Rule:**  
+Choose appropriate collider shapes for performance and accuracy. Simple shapes are faster than complex ones.
+
+#### Collider Types (via `colliders` prop)
+
+```tsx
+// Available collider values:
+'ball'; // Sphere collider
+'cuboid'; // Box collider
+'hull'; // Convex hull (for complex dynamic objects)
+'trimesh'; // Triangle mesh (for complex static geometry)
+false; // No auto collider
+```
+
+#### Basic Usage Examples
+
+```tsx
+// ✅ Manual collider (default behavior)
+<RigidBody type="dynamic">
+  <CuboidCollider args={[1, 1, 1]} />
+  <mesh>
+    <boxGeometry args={[2, 2, 2]} />
+    <meshStandardMaterial />
+  </mesh>
+</RigidBody>
+
+// ✅ Automatic collider generation
+<RigidBody colliders="cuboid" type="dynamic">
+  <mesh>
+    <boxGeometry args={[2, 2, 2]} />
+    <meshStandardMaterial />
+  </mesh>
+</RigidBody>
+
+// ❌ This won't work - no collider at all!
+<RigidBody type="dynamic">
+  <mesh>
+    <boxGeometry args={[2, 2, 2]} />
+    <meshStandardMaterial />
+  </mesh>
+</RigidBody>
+```
+
+**Important:** By default (`colliders={false}`), RigidBody has NO collision shape. You must either:
+
+1. Add manual colliders like `<CuboidCollider />`, or
+2. Set `colliders="cuboid"` (or other shape) for automatic generation
+
+#### Manual Collider Declaration
+
+**Rule:**  
+Use manual colliders for precise control or compound shapes.
+
+```tsx
+// ✅ Compound colliders (multiple shapes)
+<RigidBody colliders={false} position={[0, 1, 0]}>
+  {/* Main body */}
+  <CuboidCollider args={[1, 0.5, 1]} position={[0, 0, 0]} />
+  {/* Sensor trigger */}
+  <CuboidCollider args={[1.2, 0.1, 1.2]} position={[0, 0.6, 0]} sensor />
+
+  <mesh>
+    <boxGeometry args={[2, 1, 2]} />
+    <meshStandardMaterial />
+  </mesh>
+</RigidBody>
+
+// ✅ Custom positioned colliders
+<RigidBody colliders={false} type="fixed">
+  <BallCollider args={[0.5]} position={[0, 2, 0]} />
+  <CuboidCollider args={[2, 0.1, 2]} position={[0, 0, 0]} />
+
+  <mesh position={[0, 2, 0]}>
+    <sphereGeometry args={[0.5]} />
+    <meshStandardMaterial />
+  </mesh>
+  <mesh position={[0, 0, 0]}>
+    <boxGeometry args={[4, 0.2, 4]} />
+    <meshStandardMaterial />
+  </mesh>
+</RigidBody>
+
+// Sensor collider for triggers
+<RigidBody colliders={false} type="fixed">
+  <CuboidCollider
+    args={[2, 2, 2]}
+    sensor
+    onIntersectionEnter={({ target }) => {
+      console.log('Player entered zone!');
+    }}
+  />
+</RigidBody>
+```
+
+#### Performance Guidelines
+
+```tsx
+// ✅ Performance priority (fastest → slowest)
+"ball" > "cuboid" > "hull" > "trimesh"
+
+// ✅ Best practices
+// Static complex geometry
+<RigidBody colliders="trimesh" type="fixed">
+  <ComplexStaticMesh />
+</RigidBody>
+
+// Dynamic objects - keep simple
+<RigidBody colliders="ball" type="dynamic">
+  <ComplexVisualMesh />
+</RigidBody>
+
+// Player character - capsule for smooth movement
+<RigidBody colliders="ball" type="dynamic">
+  <CharacterMesh />
+</RigidBody>
+
+// Multiple simple colliders vs one complex
+// ✅ Better performance
+<RigidBody colliders={false}>
+  <CuboidCollider args={[1, 1, 1]} />
+  <BallCollider args={[0.5]} position={[2, 0, 0]} />
+</RigidBody>
+
+// ❌ Worse performance
+<RigidBody colliders="hull">
+  <ComplexMultiPartMesh />
+</RigidBody>
+```
+
+#### Common Collider Patterns
+
+```tsx
+// Character controller
+const Character = () => (
+  <RigidBody colliders={false} type="dynamic" lockRotations>
+    <CapsuleCollider args={[0.5, 1]} />
+    <mesh>
+      <capsuleGeometry args={[0.5, 2]} />
+      <meshStandardMaterial />
+    </mesh>
+  </RigidBody>
+);
+
+// Character with foot-pivot model (common case)
+const CharacterWithFootPivot = () => {
+  const characterHeight = 2.0;
+  const capsuleRadius = 0.5;
+  const capsuleHalfHeight = 1.0; // Half of character height
+
+  return (
+    <RigidBody colliders={false} type="dynamic" lockRotations>
+      {/* Position capsule at half character height for foot-pivot models */}
+      <CapsuleCollider args={[capsuleRadius, capsuleHalfHeight]} position={[0, characterHeight * 0.5, 0]} />
+      <mesh>
+        <capsuleGeometry args={[capsuleRadius, characterHeight]} />
+        <meshStandardMaterial />
+      </mesh>
+    </RigidBody>
+  );
+};
+
+// Character setup guidelines
+// ✅ For foot-pivot models (most common):
+// - Position CapsuleCollider at Y = characterHeight * 0.5
+// - This aligns physics center with visual center
+// - Prevents character "floating" or "sinking" into ground
+
+// ✅ For center-pivot models:
+// - CapsuleCollider position can be [0, 0, 0]
+// - Physics and visual centers already aligned
+
+// Projectile with sensor
+const Bullet = () => (
+  <RigidBody colliders={false} type="dynamic">
+    <BallCollider args={[0.1]} sensor onIntersectionEnter={handleHit} />
+    <mesh>
+      <sphereGeometry args={[0.1]} />
+      <meshStandardMaterial />
+    </mesh>
+  </RigidBody>
+);
+
+// Terrain
+const Terrain = ({ geometry }) => (
+  <RigidBody colliders="trimesh" type="fixed">
+    <mesh geometry={geometry}>
+      <meshStandardMaterial />
+    </mesh>
+  </RigidBody>
+);
+```
+
+### 2.2 RigidBody Properties
+
+**Rule:**  
+Understanding RigidBody properties is essential for proper physics behavior configuration.
+
+**Note:** Most RigidBodyOptions properties are optional. When undefined, Rapier uses these defaults:
+
+- `type`: `"dynamic"`
+- `colliders`: `false` (no automatic collider generation)
+- `gravityScale`: `1.0`
+- `dominanceGroup`: `0`
+- `ccd`: `false`
+- `lockRotations`/`lockTranslations`: `false`
+- `enabledRotations`/`enabledTranslations`: `[true, true, true]`
+- `linearVelocity`/`angularVelocity`: `[0, 0, 0]`
+
+**Essential Properties:**
+
+| Property              | Type                                                                       | Description                                                          | Use Case                                         |
+| --------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------ |
+| `type`                | `"fixed"` \| `"dynamic"` \| `"kinematicPosition"` \| `"kinematicVelocity"` | Physics body type (default: `"dynamic"`)                             | Static walls, moving objects, animated platforms |
+| `colliders`           | `"ball"` \| `"cuboid"` \| `"hull"` \| `"trimesh"` \| `false`               | Automatic collider generation (default: `false`)                     | Quick setup vs manual control                    |
+| `mass`                | `number`                                                                   | Object mass in kg (auto-calculated from density×volume if undefined) | Heavy/light objects, realistic physics           |
+| `friction`            | `number`                                                                   | Surface friction (0-∞)                                               | Slippery ice, sticky surfaces                    |
+| `restitution`         | `number`                                                                   | Bounciness (0-1)                                                     | Bouncy balls, dead drops                         |
+| `gravityScale`        | `number`                                                                   | Gravity multiplier (default: `1.0`)                                  | Floating objects, heavy objects                  |
+| `linearDamping`       | `number`                                                                   | Linear velocity damping                                              | Air resistance, underwater                       |
+| `angularDamping`      | `number`                                                                   | Angular velocity damping                                             | Spinning resistance                              |
+| `lockRotations`       | `boolean`                                                                  | Lock all rotations (default: `false`)                                | Character controllers                            |
+| `lockTranslations`    | `boolean`                                                                  | Lock all translations (default: `false`)                             | Fixed rotation objects                           |
+| `enabledRotations`    | `[boolean, boolean, boolean]`                                              | Enable rotations per axis (default: `[true, true, true]`)            | Constrain specific rotations                     |
+| `enabledTranslations` | `[boolean, boolean, boolean]`                                              | Enable translations per axis (default: `[true, true, true]`)         | Constrain movement directions                    |
+| `canSleep`            | `boolean`                                                                  | Allow physics sleeping                                               | Performance optimization                         |
+| `collisionGroups`     | `number`                                                                   | What groups this body belongs to                                     | Collision filtering                              |
+| `solverGroups`        | `number`                                                                   | What groups this body collides with                                  | Collision filtering                              |
+| `dominanceGroup`      | `number`                                                                   | Dominance for collision immunity (default: `0`)                      | Player immunity to pushbacks                     |
+| `ccd`                 | `boolean`                                                                  | Continuous Collision Detection (default: `false`)                    | Fast-moving objects                              |
+| `softCcdPrediction`   | `number`                                                                   | Soft CCD prediction distance                                         | Tunneling prevention                             |
+| `linearVelocity`      | `[number, number, number]`                                                 | Initial linear velocity (default: `[0, 0, 0]`)                       | Moving platforms, projectiles                    |
+| `angularVelocity`     | `[number, number, number]`                                                 | Initial angular velocity (default: `[0, 0, 0]`)                      | Spinning objects                                 |
+
+**Important RigidBody Type Constraints:**
+
+- **`setLinvel()`, `applyImpulse()`, `addForce()`**: Only work on `type="dynamic"` bodies
+- **`setTranslation()`, `setRotation()`**: Work on all types, but not recommended for dynamic bodies (use forces/velocities instead)
+- **`setNextKinematicTranslation()`**: Only for `type="kinematicPosition"` bodies
+
+#### Usage Examples
+
+```tsx
+// Character controller
+<RigidBody
+  type="dynamic"
+  colliders={false}
+  mass={70}
+  lockRotations={true}
+  friction={0.8}
+>
+  <CapsuleCollider args={[0.5, 1]} />
+  <mesh>...</mesh>
+</RigidBody>
+
+// Bouncy ball
+<RigidBody
+  colliders="ball"
+  restitution={0.9}
+  friction={0.1}
+  mass={1}
+>
+  <mesh>...</mesh>
+</RigidBody>
+
+// Floating platform (kinematic)
+<RigidBody
+  type="kinematicPosition"
+  colliders="cuboid"
+  friction={1.0}
+>
+  <mesh>...</mesh>
+</RigidBody>
+
+// 2D-style character (locked Z-axis)
+<RigidBody
+  type="dynamic"
+  enabledTranslations={[true, true, false]}
+  enabledRotations={[false, false, false]}
+  gravityScale={2.0}
+>
+  <mesh>...</mesh>
+</RigidBody>
+
+// Collision groups example
+<RigidBody
+  collisionGroups={0x0001} // This object is in group 1
+  solverGroups={0x0002}    // This object only collides with group 2
+>
+  <mesh>...</mesh>
+</RigidBody>
+```
+
+### 2.3 Collider Properties (Manual Colliders)
+
+**Rule:**  
+Understanding Collider properties is essential when using manual collider placement (`colliders={false}`).
+
+**Note:** Most ColliderOptions properties are optional. When undefined, Rapier uses these defaults:
+
+- `density`: `1.0` (kg/m³)
+- `friction`: `0.5`
+- `restitution`: `0.0`
+- `sensor`: `false`
+- `position`/`rotation`: `[0, 0, 0]` (no offset from RigidBody)
+
+**Essential Properties:**
+
+| Property                 | Type                                       | Description                                                               | Use Case                          |
+| ------------------------ | ------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------- |
+| `args`                   | `Array<number>`                            | Shape dimensions (Required)                                               | [width, height] for cuboid        |
+| `position`               | `[number, number, number]`                 | Position relative to RigidBody (default: `[0, 0, 0]`)                     | Offset colliders from body center |
+| `rotation`               | `[number, number, number]` \| `Quaternion` | Rotation relative to RigidBody (default: `[0, 0, 0]`)                     | Tilted colliders                  |
+| `density`                | `number`                                   | Material density (default: `1.0` kg/m³)                                   | Heavy/light materials             |
+| `friction`               | `number`                                   | Surface friction coefficient (default: `0.5`)                             | Slippery ice, sticky surfaces     |
+| `restitution`            | `number`                                   | Bounciness (default: `0.0`, range: 0-1)                                   | Bouncy balls, dead drops          |
+| `frictionCombineRule`    | `CoefficientCombineRule`                   | How friction combines with others                                         | Custom friction behavior          |
+| `restitutionCombineRule` | `CoefficientCombineRule`                   | How restitution combines                                                  | Custom bounce behavior            |
+| `collisionGroups`        | `InteractionGroups`                        | What groups this collider belongs to                                      | Collision filtering               |
+| `solverGroups`           | `InteractionGroups`                        | What groups this collider solves with                                     | Physics solver filtering          |
+| `sensor`                 | `boolean`                                  | Is this a trigger/sensor (default: `false`)                               | Trigger zones, collectibles       |
+| `contactSkin`            | `number`                                   | Contact skin thickness                                                    | Performance vs accuracy           |
+| `mass`                   | `number`                                   | Explicit mass override (auto-calculated from density×volume if undefined) | Override density calculations     |
+
+**Sensor Events:** Sensor colliders (`sensor={true}`) provide intersection events from `@react-three/rapier`:
+
+- `onIntersectionEnter`: When another collider starts touching this sensor
+- `onIntersectionExit`: When another collider stops touching this sensor
+- **Note**: These events fire for collider-to-collider interactions, not RigidBody-to-RigidBody
+- The `target` parameter in the event refers to the **other collider**, not the RigidBody
+
+#### Usage Examples
+
+```tsx
+// Manual collider with custom properties
+<RigidBody colliders={false} type="dynamic">
+  <CuboidCollider
+    args={[1, 0.5, 1]}
+    position={[0, 0.5, 0]}
+    density={2.0}
+    friction={0.8}
+    restitution={0.3}
+  />
+  <mesh>
+    <boxGeometry args={[2, 1, 2]} />
+    <meshStandardMaterial />
+  </mesh>
+</RigidBody>
+
+// Sensor collider for triggers
+<RigidBody colliders={false} type="fixed">
+  <CuboidCollider
+    args={[2, 2, 2]}
+    sensor
+    onIntersectionEnter={({ target }) => {
+      console.log('Player entered zone!');
+    }}
+  />
+</RigidBody>
+
+// Compound shape with different materials
+<RigidBody colliders={false} type="dynamic">
+  {/* Main body - steel */}
+  <CuboidCollider args={[1, 0.5, 1]} density={7.8} friction={0.6} />
+  {/* Rubber bumper */}
+  <CuboidCollider
+    args={[1.1, 0.1, 1.1]}
+    position={[0, 0.6, 0]}
+    density={1.2}
+    friction={0.9}
+    restitution={0.7}
+  />
+  <mesh>...</mesh>
+</RigidBody>
+```
+
+---
+
+## 3. Performance Optimization
+
+### 3.1 Essential Performance Rules
 
 **Avoid Re-renders:**
 
@@ -156,23 +554,72 @@ useFrame(() => {
 </Instances>
 ```
 
-### 2.2 Collision Groups
+### 3.2 Collision Groups
+
+**Rule:**  
+Use collision groups for filtering what objects can collide with each other. This improves performance by avoiding unnecessary collision checks.
 
 ```tsx
+// Import the helper
+import { interactionGroups } from '@react-three/rapier';
+
 const COLLISION_GROUPS = {
   PLAYER: 0x0001,
   ENEMY: 0x0002,
   BULLET: 0x0004,
   ENVIRONMENT: 0x0008,
+  PICKUP: 0x0010,
 } as const;
 
+// Using raw bitmasks (manual approach)
 <RigidBody
   collisionGroups={COLLISION_GROUPS.BULLET}
   solverGroups={COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.ENVIRONMENT}
 >
+  <Bullet />
+</RigidBody>
+
+// Using interactionGroups helper (recommended)
+<RigidBody
+  collisionGroups={interactionGroups(2, [0, 1, 3])} // Group 2, collides with groups 0,1,3
+  solverGroups={interactionGroups(2, [0, 1, 3])}
+>
+  <Enemy />
+</RigidBody>
+
+// Common patterns
+const PlayerRigidBody = () => (
+  <RigidBody
+    collisionGroups={interactionGroups(0, [1, 3])} // Player group 0, collides with enemies(1) and environment(3)
+  >
+    <Player />
+  </RigidBody>
+);
+
+const BulletRigidBody = () => (
+  <RigidBody
+    collisionGroups={interactionGroups(2, [1, 3])} // Bullet group 2, collides with enemies(1) and environment(3)
+  >
+    <Bullet />
+  </RigidBody>
+);
 ```
 
-### 2.3 Object Pooling
+**Performance Tip:** Always set both `collisionGroups` and `solverGroups` to the same value unless you need different behavior for collision detection vs. physics solving.
+
+**Advanced:** You can also set collision groups at the **individual collider level**, which overrides the RigidBody's groups:
+
+```tsx
+<RigidBody collisionGroups={interactionGroups(0, [1, 2])}>
+  {/* This collider inherits RigidBody's groups */}
+  <CuboidCollider args={[1, 1, 1]} />
+
+  {/* This collider has its own groups */}
+  <CuboidCollider args={[0.5, 0.5, 0.5]} collisionGroups={interactionGroups(3, [4])} solverGroups={interactionGroups(3, [4])} />
+</RigidBody>
+```
+
+### 3.3 Object Pooling
 
 ```tsx
 const bulletPool = useRef([]);
@@ -194,52 +641,88 @@ const returnBullet = useCallback((bullet) => {
 
 ---
 
-## 3. Force Application
+## 4. Force Application
 
-### 3.1 Method Selection
+### 4.1 Method Selection
 
-| Method         | Effect                  | Use Case            |
-| -------------- | ----------------------- | ------------------- |
-| `applyImpulse` | Instant velocity change | Jumping, explosions |
-| `addForce`     | Continuous acceleration | Thrusters, wind     |
-| `setLinvel`    | Direct velocity setting | Teleportation       |
+**Rule:**  
+Choose the right method based on your needs. All force/impulse methods require the body to be dynamic.
+
+| Method         | Effect                  | Use Case             | Units                |
+| -------------- | ----------------------- | -------------------- | -------------------- |
+| `applyImpulse` | Instant velocity change | Jumping, explosions  | N⋅s (Newton-seconds) |
+| `addForce`     | Continuous acceleration | Thrusters, wind      | N (Newtons)          |
+| `setLinvel`    | Direct velocity setting | Teleportation, reset | m/s                  |
 
 ```tsx
 const rigidBodyRef = useRef();
 
-// Jump (impulse)
+// Jump (impulse) - affects velocity immediately
 const jump = () => {
   rigidBodyRef.current?.applyImpulse({ x: 0, y: 10, z: 0 }, true);
 };
 
-// Continuous thrust (force)
+// Continuous thrust (force) - affects acceleration over time
 useFrame(() => {
-  rigidBodyRef.current?.addForce({ x: 0, y: 0, z: -5 }, true);
+  if (thrusterActive) {
+    rigidBodyRef.current?.addForce({ x: 0, y: 0, z: -5 }, true);
+  }
 });
 
-// Direct movement (velocity)
+// Direct movement (velocity) - for precise control
 const move = (velocity) => {
   rigidBodyRef.current?.setLinvel(velocity, true);
 };
+
+// Reset forces at end of frame if needed
+useFrame(() => {
+  // Clear accumulated forces if you want frame-by-frame control
+  rigidBodyRef.current?.resetForces(true);
+  rigidBodyRef.current?.resetTorques(true);
+});
 ```
+
+**Important Notes:**
+
+- The second parameter (`wakeUp: boolean`) ensures the body is active if it was sleeping
+- Forces accumulate until the physics step, while impulses are applied immediately
+- Use `resetForces()` if you want to manually control force application each frame
 
 ---
 
-## 4. Ray Casting
+## 5. Ray Casting
 
-### 4.1 Basic Pattern
+### 5.1 Basic Pattern
+
+**Rule:**  
+Use raycasting for ground detection, line-of-sight checks, and hit detection. Cache the Ray object for performance.
 
 ```tsx
 const { rapier, world } = useRapier();
 
+// Cache ray object to avoid recreating every frame
+const rayRef = useRef<typeof rapier.Ray>();
+const hitPointRef = useRef(new THREE.Vector3());
+
 const performRaycast = useCallback(
-  (origin, direction, maxDistance) => {
-    const ray = new rapier.Ray(origin, direction);
-    const hit = world.castRay(ray, maxDistance, true);
+  (origin, direction, maxDistance, excludeCollider?) => {
+    if (!rayRef.current) {
+      rayRef.current = new rapier.Ray(origin, direction);
+    } else {
+      rayRef.current.origin = origin;
+      rayRef.current.dir = direction;
+    }
+
+    const hit = world.castRay(rayRef.current, maxDistance, true, undefined, undefined, excludeCollider);
 
     if (hit) {
-      const hitPoint = ray.pointAt(hit.timeOfImpact);
-      return { point: hitPoint, collider: hit.collider };
+      hitPointRef.current.copy(rayRef.current.pointAt(hit.timeOfImpact));
+      return {
+        point: hitPointRef.current.clone(),
+        collider: hit.collider,
+        timeOfImpact: hit.timeOfImpact,
+        normal: hit.normal,
+      };
     }
     return null;
   },
@@ -247,26 +730,77 @@ const performRaycast = useCallback(
 );
 ```
 
-### 4.2 Collision Detection
+### 5.2 Practical Examples
 
 ```tsx
-// Ground check example
+// Ground check for character controller
 const checkGrounded = useCallback(() => {
   const character = characterRef.current;
   if (!character) return false;
 
-  const ray = new rapier.Ray(character.translation(), { x: 0, y: -1, z: 0 });
+  const origin = character.translation();
+  const hit = world.castRay(
+    new rapier.Ray(origin, { x: 0, y: -1, z: 0 }),
+    1.1, // Slightly longer than character height
+    true, // Solid bodies only
+    undefined, // All collision groups
+    undefined, // All solver groups
+    character, // Exclude character's own collider
+  );
 
-  const hit = world.castRay(ray, 1.1, true);
-  return !!hit;
-}, [world]);
+  return hit && hit.timeOfImpact < 1.05; // Small tolerance
+}, [world, rapier]);
+
+// Line of sight check
+const hasLineOfSight = useCallback(
+  (from: THREE.Vector3, to: THREE.Vector3) => {
+    const direction = new THREE.Vector3().subVectors(to, from).normalize();
+    const distance = from.distanceTo(to);
+
+    const hit = world.castRay(
+      new rapier.Ray(from, direction),
+      distance,
+      true,
+      COLLISION_GROUPS.ENVIRONMENT, // Only check against walls
+    );
+
+    return !hit; // No hit means clear line of sight
+  },
+  [world],
+);
+
+// Mouse picking with physics
+const handleMouseClick = useCallback(
+  (event: MouseEvent) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const ray = new rapier.Ray(raycaster.ray.origin, raycaster.ray.direction);
+
+    const hit = world.castRay(ray, 1000, true);
+    if (hit) {
+      // Apply force at hit point
+      const hitBody = hit.collider.parent();
+      hitBody?.applyImpulseAtPoint({ x: 0, y: 5, z: 0 }, ray.pointAt(hit.timeOfImpact), true);
+    }
+  },
+  [world, rapier],
+);
 ```
+
+**Performance Tips:**
+
+- Reuse Ray objects instead of creating new ones each frame
+- Use collision groups to limit what the ray can hit
+- Cache raycast results when possible
+- Avoid raycasting every frame for non-critical checks
 
 ---
 
-## 5. Memory Management
+## 6. Memory Management
 
-### 5.1 Cleanup Pattern
+### 6.1 Cleanup Pattern
 
 ```tsx
 useEffect(() => {
@@ -283,7 +817,7 @@ useEffect(() => {
 }, []);
 ```
 
-### 5.2 Safe Operations
+### 6.2 Safe Operations
 
 ```tsx
 const safeApplyImpulse = useCallback((impulse) => {
@@ -300,9 +834,9 @@ const safeApplyImpulse = useCallback((impulse) => {
 
 ---
 
-## 6. Performance Checklist
+## 7. Performance Checklist
 
-### 6.1 Essential Optimizations
+### 7.1 Essential Optimizations
 
 - [ ] Use `useRef` instead of `useState` for scene objects
 - [ ] Cache materials and geometries with `useMemo`
@@ -315,7 +849,7 @@ const safeApplyImpulse = useCallback((impulse) => {
 - [ ] Prefer instancing for many similar objects
 - [ ] Minimize React re-renders in physics loops
 
-### 6.2 Common Performance Pitfalls
+### 7.2 Common Performance Pitfalls
 
 1. **Creating objects in loops**: Cache and reuse Vector3, Quaternion, etc.
 2. **React state in useFrame**: Use refs for high-frequency updates
@@ -325,7 +859,7 @@ const safeApplyImpulse = useCallback((impulse) => {
 
 ---
 
-## 7. Recommended Libraries
+## 8. Recommended Libraries
 
 - **State Management**: `zustand`, `valtio`
 - **Animation**: `react-spring`
