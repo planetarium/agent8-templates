@@ -7,7 +7,7 @@ import {
   CharacterRenderer,
   CharacterRendererRef,
   CharacterResource,
-  PlayerUtils,
+  CharacterUtils,
   NetworkObject,
   NetworkObjectHandle,
 } from 'vibe-starter-3d';
@@ -129,12 +129,12 @@ export const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
     const characterRendererRef = useRef<CharacterRendererRef>(null);
     const nicknameOffsetY = targetHeight + 0.5;
 
-    const capsuleRadius = PlayerUtils.capsuleRadius(targetHeight); // capsule collider radius
-    const capsuleHalfHeight = PlayerUtils.capsuleHalfHeight(targetHeight); // half height of capsule collider
+    const capsuleRadius = CharacterUtils.capsuleRadius(targetHeight); // capsule collider radius
+    const capsuleHalfHeight = CharacterUtils.capsuleHalfHeight(targetHeight); // half height of capsule collider
 
     return (
       <NetworkObject ref={networkObjectRef} position={position} rotation={rotation}>
-        <group position={[0, PlayerUtils.targetHeight(targetHeight) / 2, 0]}>
+        <group position={[0, CharacterUtils.targetHeight(targetHeight) / 2, 0]}>
           <CapsuleCollider
             name="character-capsule-collider"
             args={[capsuleHalfHeight, capsuleRadius]}

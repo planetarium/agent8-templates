@@ -138,17 +138,10 @@ async function copyDocs() {
       console.log(colorize('blue', `📁 Copying docs to ${dir}...`));
 
       try {
-        // Backup existing docs folder if exists
+        // Remove existing docs folder if exists
         if (pathExists(targetDocsPath)) {
-          const backupPath = join(targetPath, 'docs.backup');
-          console.log(colorize('yellow', `   ⚠️  Existing docs folder found - backing up to docs.backup`));
-
-          // Remove existing backup if exists
-          if (pathExists(backupPath)) {
-            removeDirectory(backupPath);
-          }
-
-          renameSync(targetDocsPath, backupPath);
+          console.log(colorize('yellow', `   ⚠️  Existing docs folder found - removing...`));
+          removeDirectory(targetDocsPath);
         }
 
         // Copy docs folder

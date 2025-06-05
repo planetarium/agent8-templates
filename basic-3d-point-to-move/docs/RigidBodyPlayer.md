@@ -28,7 +28,7 @@
 
 ### Physics System Integration
 
-- **PlayerUtils Integration**: Automatic collider calculation based on character proportions
+- **CharacterUtils Integration**: Automatic collider calculation based on character proportions
 - **Physics Initialization**: Automatic initialization process for stable physics simulation
 - **Collision Events**: Detection of all interactions between player and other objects
 
@@ -303,7 +303,7 @@ function ControlledPlayer() {
 
 ## Automatic Collider System
 
-`RigidBodyPlayer` uses `PlayerUtils` to automatically generate appropriately sized capsule colliders based on character height.
+`RigidBodyPlayer` uses `CharacterUtils` to automatically generate appropriately sized capsule colliders based on character height.
 
 ### Automatic Generation (Default)
 
@@ -321,27 +321,27 @@ function ControlledPlayer() {
 
 ```tsx
 import { CapsuleCollider } from '@react-three/rapier';
-import { PlayerUtils } from 'vibe-starter-3d';
+import { CharacterUtils } from 'vibe-starter-3d';
 
 {
   /* Manual collider setup */
 }
 <RigidBodyPlayer targetHeight={2.0} autoCreateCollider={false}>
   {/* Custom collider */}
-  <CapsuleCollider args={[PlayerUtils.capsuleHalfHeight(2.0), PlayerUtils.capsuleRadius(2.0)]} />
+  <CapsuleCollider args={[CharacterUtils.capsuleHalfHeight(2.0), CharacterUtils.capsuleRadius(2.0)]} />
   <CharacterRenderer url="/models/tall-player.vrm" />
 </RigidBodyPlayer>;
 ```
 
-## PlayerUtils Integration
+## CharacterUtils Integration
 
-`RigidBodyPlayer` internally uses `PlayerUtils` to calculate appropriate collider sizes:
+`RigidBodyPlayer` internally uses `CharacterUtils` to calculate appropriate collider sizes:
 
 ```typescript
 // Automatically calculated values
 const height = 1.8;
-const radius = PlayerUtils.capsuleRadius(height); // 0.36
-const halfHeight = PlayerUtils.capsuleHalfHeight(height); // 0.54
+const radius = CharacterUtils.capsuleRadius(height); // 0.36
+const halfHeight = CharacterUtils.capsuleHalfHeight(height); // 0.54
 ```
 
 ## Controller Integration
