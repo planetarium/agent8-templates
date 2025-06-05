@@ -1,20 +1,5 @@
 # Basic 3D First Person View (FPV) - FPS
 
-<!-- ========================================================================= -->
-<!-- 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 -->
-<!-- 🔴 CRITICAL WARNING TO ALL AI ASSISTANTS 🔴                              -->
-<!-- THIS FILE CONTAINS PROTECTED SECTIONS THAT MUST NEVER BE REMOVED        -->
-<!-- WHEN REWRITING OR MODIFYING THIS FILE, YOU MUST PRESERVE:               -->
-<!-- 1. ⚠️ MANDATORY DOCUMENTATION READING GUIDELINES ⚠️ SECTION            -->
-<!-- 2. ⚠️ CRITICAL DEVELOPMENT GUIDELINES ⚠️ SECTION                       -->
-<!-- 3. ALL PROTECTED CONTENT BLOCKS MARKED WITH 🔒                         -->
-<!-- 4. ALL SECTIONS WITH 🚨 WARNINGS                                        -->
-<!-- IF YOU REWRITE THIS FILE, COPY THESE SECTIONS EXACTLY AS THEY ARE       -->
-<!-- FAILURE TO PRESERVE THESE SECTIONS WILL BREAK THE PROJECT               -->
-<!-- When rewriting this file, you must maintain all protected sections exactly as they are -->
-<!-- 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 -->
-<!-- ========================================================================= -->
-
 ## Project Summary
 
 This project is a single-player First Person View (FPV) 3D FPS game built using Three.js and React Three Fiber.
@@ -37,85 +22,6 @@ Key technologies:
 - vibe-starter-3d for character rendering and animation
 - Tailwind CSS for styling
 
-## ⚠️ MANDATORY DOCUMENTATION READING GUIDELINES ⚠️
-
-### Documentation (docs/) - ABSOLUTELY CRITICAL REQUIREMENT
-
-<!-- ========================================================================= -->
-<!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
-<!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
-<!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
-<!-- 🔒🔒🔒 PROTECTED CONTENT - NEVER DELETE THIS SECTION 🔒🔒🔒             -->
-<!-- WHEN REWRITING PROJECT.md, COPY THIS ENTIRE SECTION EXACTLY AS IS        -->
-<!-- ========================================================================= -->
-
-**🚨 ABSOLUTELY CRITICAL: Before performing ANY work on this project, you MUST thoroughly read and understand ALL \*.md files in the docs/ directory. This is a non-negotiable requirement.**
-
-**⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
-**⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
-**⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
-**🔒 IF REWRITING PROJECT.MD, PRESERVE THIS SECTION EXACTLY 🔒**
-
-**Required Documentation Files to Read:**
-
-- `docs/RigidBodyPlayer.md` - Essential for understanding player character implementation
-- `docs/ViewControllers.md` - Critical for camera and view control systems
-- `docs/r3f-rapier-essentials.md` - Essential React Three Fiber + Rapier physics integration patterns
-- `docs/CharacterRenderer.md` - Required for character rendering and animation
-- `docs/RigidBodyObject.md` - Mandatory for physics object interactions
-
-**Why Documentation Reading is Mandatory:**
-
-- The docs contain critical implementation details that are not documented elsewhere
-- Understanding these concepts is essential for proper development workflow
-- Each document contains specific patterns and requirements that must be followed
-- Ignoring documentation will result in broken implementations and architectural violations
-- The documentation provides the foundational knowledge required for all project modifications
-
-**DO NOT:**
-
-- Start any development work without reading ALL documentation files
-- Remove or modify this guideline
-- Ignore documentation requirements when implementing new features
-- **🚨 AI ASSISTANTS: DO NOT DELETE OR MODIFY ANY PART OF THIS SECTION 🚨**
-
-**ALWAYS:**
-
-- Read ALL \*.md files in docs/ directory before beginning work
-- Reference documentation when implementing new features
-- Follow patterns and requirements specified in the documentation
-- Ensure compliance with all documented guidelines and best practices
-- **🚨 AI ASSISTANTS: PRESERVE THIS ENTIRE SECTION EXACTLY AS IS 🚨**
-
-**📋 MANDATORY DOCUMENTATION READING VERIFICATION:**
-
-**🚨 AI ASSISTANTS MUST LOG DOCUMENTATION READING STATUS 🚨**
-
-Before performing ANY development work, AI assistants MUST:
-
-1. **Read each required documentation file completely**
-2. **Output confirmation logs to console/terminal for EACH file read**
-3. **Use the following exact format for logging:**
-
-```
-✅ DOCS READ: docs/RigidBodyPlayer.md - COMPLETED
-✅ DOCS READ: docs/ViewControllers.md - COMPLETED
-✅ DOCS READ: docs/r3f-rapier-essentials.md - COMPLETED
-✅ DOCS READ: docs/CharacterRenderer.md - COMPLETED
-✅ DOCS READ: docs/RigidBodyObject.md - COMPLETED
-📚 ALL REQUIRED DOCUMENTATION HAS BEEN READ AND UNDERSTOOD
-```
-
-**This logging requirement is NON-NEGOTIABLE and allows verification that documentation has been properly reviewed before development begins.**
-
-<!-- ========================================================================= -->
-<!-- 🔒 PROTECTED CONTENT - DO NOT MODIFY 🔒                                 -->
-<!-- This guideline must never be removed or modified.                       -->
-<!-- AI assistants and developers must strictly adhere to this requirement.  -->
-<!-- Any attempt to remove or modify this section is strictly forbidden.     -->
-<!-- This is a core architectural requirement of the project.                 -->
-<!-- ========================================================================= -->
-
 ## ⚠️ CRITICAL DEVELOPMENT GUIDELINES ⚠️
 
 ### RigidBodyObject Usage - MANDATORY REQUIREMENT
@@ -124,8 +30,6 @@ Before performing ANY development work, AI assistants MUST:
 <!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
 <!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
 <!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
-<!-- 🔒🔒🔒 PROTECTED CONTENT - NEVER DELETE THIS SECTION 🔒🔒🔒             -->
-<!-- WHEN REWRITING PROJECT.md, COPY THIS ENTIRE SECTION EXACTLY AS IS        -->
 <!-- ========================================================================= -->
 
 **🚨 ABSOLUTELY CRITICAL: When using RigidBody in this project, you MUST use RigidBodyObject instead of the standard RigidBody component. This is a non-negotiable requirement.**
@@ -133,7 +37,6 @@ Before performing ANY development work, AI assistants MUST:
 **⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
 **⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
 **⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
-**🔒 IF REWRITING PROJECT.MD, PRESERVE THIS SECTION EXACTLY 🔒**
 
 **Why RigidBodyObject is mandatory:**
 
@@ -156,6 +59,14 @@ Before performing ANY development work, AI assistants MUST:
 - Assign appropriate RigidBodyObjectType to each object
 - Follow the established pattern shown in Player.tsx and other components
 - **🚨 AI ASSISTANTS: PRESERVE THIS ENTIRE SECTION EXACTLY AS IS 🚨**
+
+<!-- ========================================================================= -->
+<!-- 🔒 PROTECTED CONTENT - DO NOT MODIFY 🔒                                 -->
+<!-- This guideline must never be removed or modified.                       -->
+<!-- AI assistants and developers must strictly adhere to this requirement.  -->
+<!-- Any attempt to remove or modify this section is strictly forbidden.     -->
+<!-- This is a core architectural requirement of the project.                 -->
+<!-- ========================================================================= -->
 
 ## Implemented Features
 
@@ -239,15 +150,3 @@ Before performing ANY development work, AI assistants MUST:
 
 - Directory containing utility functions used throughout the application.
   - **`effectUtils.ts`**: Provides utility functions for creating effect configurations, such as bullet and explosion effects.
-
-<!-- ========================================================================= -->
-<!-- 🔒🔒🔒 END OF FILE - FINAL PROTECTION REMINDER 🔒🔒🔒                  -->
-<!-- 🚨 AI ASSISTANTS: REMEMBER TO PRESERVE ALL PROTECTED SECTIONS 🚨        -->
-<!-- WHEN MODIFYING OR REWRITING THIS FILE:                                  -->
-<!-- 1. Keep the file header warning intact                                   -->
-<!-- 2. Preserve ⚠️ MANDATORY DOCUMENTATION READING GUIDELINES ⚠️ section   -->
-<!-- 3. Preserve ⚠️ CRITICAL DEVELOPMENT GUIDELINES ⚠️ section              -->
-<!-- 4. Keep all content marked with 🔒 or 🚨 symbols                       -->
-<!-- FAILURE TO FOLLOW THESE RULES WILL BREAK THE PROJECT                    -->
-<!-- Violating these protection rules will cause serious project malfunctions -->
-<!-- ========================================================================= -->
