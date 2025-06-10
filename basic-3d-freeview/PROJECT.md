@@ -120,6 +120,7 @@ Key technologies:
 ### `src/stores/`
 
 - Directory containing state management stores using Zustand.
+  - **`gameStore.ts`**: Store that manages the overall game state. Tracks and controls the readiness state of the map physics system (`isMapPhysicsReady`). This state is used to determine physics simulation pause/resume and loading screen display.
   - **`localPlayerStore.ts`**: Store that manages the local player's state, such as position tracking.
   - **`multiPlayerStore.ts`**: Store that manages multiple connected players' rigid body references for multiplayer functionality, including registration, unregistration, and retrieval of player references.
 
@@ -131,10 +132,12 @@ Key technologies:
 
     - **`Experience.tsx`**: Simplified 3D scene component that focuses on core scene elements. Includes ambient lighting with 0.7 intensity, sunset environment preset (background disabled), the `Player` component, and the `Floor` component. This component has been streamlined to contain only essential scene elements, with lighting and camera controls moved to `GameScene.tsx`.
     - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`MapPhysicsReadyChecker.tsx`**: Component that checks if the map physics system is ready by performing raycasting from above downward to detect map geometry and ensures physics interactions are properly initialized before gameplay begins. Performs checks every frame until valid map geometry is detected, with a timeout after 180 frames to prevent infinite checking. Excludes Capsule shapes (likely characters/objects) and sensor colliders from the inspection.
     - **`Player.tsx`**: Advanced component built around the `RigidBodyPlayer` component from vibe-starter-3d for physics-based character control. Handles comprehensive player character logic including movement, rotation, extensive animation state management (idle, walk, run, jump, punch, kick, melee attack, cast, hit, dance, swim, die), collision detection, game server integration, and player reference management. Features sophisticated animation configuration mapping and state determination logic. Utilizes `RigidBodyPlayer`'s `onTriggerEnter` and `onTriggerExit` events to handle player interactions with other objects in the 3D environment, enabling collision-based gameplay mechanics. Integrates with `CharacterRenderer` for visual representation and animation playback.
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Comprehensive 3D scene setup component that orchestrates the entire rendering pipeline. Creates a full-screen container with `Canvas` component featuring shadow support and pointer lock functionality (activated on pointer down). Integrates `KeyboardControls` with custom keyboard mapping, configures physics simulation using `@react-three/rapier`, and importantly includes `FollowLight` and `FreeViewController` from vibe-starter-3d within the physics context. Loads the `Experience` component with `Suspense` fallback to handle async loading of 3D assets.
+    - **`GameScene.tsx`**: Comprehensive 3D scene setup component that orchestrates the entire rendering pipeline. Creates a full-screen container with `Canvas` component featuring shadow support and pointer lock functionality (activated on pointer down). Integrates `KeyboardControls` with custom keyboard mapping, configures physics simulation using `@react-three/rapier`, and importantly includes `FollowLight` and `FreeViewController` from vibe-starter-3d within the physics context. Monitors map physics system readiness state (`isMapPhysicsReady`) to control physics simulation pause/resume and displays loading screen when not ready. Uses `MapPhysicsReadyChecker` component to verify map physics system initialization and loads the `Experience` component with `Suspense` fallback to handle async loading of 3D assets.
 
-  - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
+  - **`ui/`**: Contains UI components for the game interface.
+    - **`LoadingScreen.tsx`**: Loading screen component displayed during game loading.
