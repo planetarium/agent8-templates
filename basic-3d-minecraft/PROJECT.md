@@ -130,6 +130,7 @@ The rendering system uses a color-based approach with these key features:
 ### `src/stores/`
 
 - Directory containing state management stores using Zustand.
+  - **`gameStore.ts`**: Store that manages the overall game state. Tracks and controls the readiness state of the map physics system (`isMapPhysicsReady`). This state is used to determine physics simulation pause/resume and loading screen display.
   - **`localPlayerStore.ts`**: Store that manages the local player's state, such as position tracking.
   - **`multiPlayerStore.ts`**: Store that manages multiple connected players' rigid body references for multiplayer functionality, including registration, unregistration, and retrieval of player references.
   - **`cubeStore.ts`**: Store for voxel world management that handles adding, removing, and storing block data. Also manages theme selection and controls selected block type.
@@ -161,6 +162,7 @@ The rendering system uses a color-based approach with these key features:
   - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
     - **`Experience.tsx`**: Sets up 3D environment including lighting, sky, and world elements. Coordinates the overall 3D scene composition.
+    - **`MapPhysicsReadyChecker.tsx`**: Component that checks if the map physics system is ready by performing raycasting from above downward to detect map geometry and ensures physics interactions are properly initialized before gameplay begins. Performs checks every frame until valid map geometry is detected, with a timeout after 180 frames to prevent infinite checking. Excludes Capsule shapes (likely characters/objects) and sensor colliders from the inspection.
     - **`Player.tsx`**: Dedicated player component managing character rendering, animations, state transitions, and physics interactions with comprehensive animation system.
     - **`InstancedCube.tsx`**: Core voxel rendering system using instanced meshes with custom shader for optimized color-based rendering and chunk-based optimization.
     - **`SingleCube.tsx`**: Component for rendering individual cubes with color-based faces for UI and preview purposes.
@@ -169,10 +171,11 @@ The rendering system uses a color-based approach with these key features:
 
   - **`scene/`**: Contains components related to 3D scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, integrates `FirstPersonViewController` and `FollowLight` within the physics context, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`GameScene.tsx`**: Comprehensive 3D scene setup component that orchestrates the entire rendering pipeline. Creates a full-screen container with `Canvas` component featuring shadow support and pointer lock functionality (activated on pointer down). Integrates `KeyboardControls` with custom keyboard mapping, configures physics simulation using `@react-three/rapier`, and importantly includes `FollowLight` and `FirstPersonViewController` from vibe-starter-3d within the physics context. Monitors map physics system readiness state (`isMapPhysicsReady`) to control physics simulation pause/resume and displays loading screen when not ready. Uses `MapPhysicsReadyChecker` component to verify map physics system initialization and loads the `Experience` component with `Suspense` fallback to handle async loading of 3D assets.
     - **`PreloadScene.tsx`**: Manages asset preloading before the game starts and displays a loading progress bar.
 
-  - **`ui/`**: Directory containing components related to the user interface (UI).
+  - **`ui/`**: Contains UI components for the game interface.
+    - **`LoadingScreen.tsx`**: Loading screen component displayed during game loading.
     - **`Crosshair.tsx`**: Displays a crosshair in the center of the screen for accurate block targeting.
     - **`TileSelector.tsx`**: Provides UI for selecting different block types and themes with 3D preview of each block.
 

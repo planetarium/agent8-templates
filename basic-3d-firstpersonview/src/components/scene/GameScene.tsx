@@ -7,6 +7,9 @@ import Experience from '../r3f/Experience';
 import EffectContainer from '../r3f/EffectContainer';
 import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
 import Crosshair from '../ui/Crosshair';
+import { useGameStore } from '../../stores/gameStore';
+import LoadingScreen from '../ui/LoadingScreen';
+import MapPhysicsReadyChecker from '../r3f/MapPhysicsReadyChecker';
 
 /**
  * Main game scene component
@@ -15,8 +18,15 @@ import Crosshair from '../ui/Crosshair';
  * including physics, lighting, and scene elements.
  */
 const GameScene = () => {
+  // ⚠️ MUST CHECK: Map physics system ready state
+  // Physics paused and loading screen displayed while this value is false
+  const { isMapPhysicsReady } = useGameStore();
+
   return (
     <div className="relative w-full h-screen">
+      {/* Loading screen overlay */}
+      {!isMapPhysicsReady && <LoadingScreen />}
+
       {/* Keyboard preset */}
       <KeyboardControls map={keyboardMap}>
         {/* Single Canvas for the 3D scene */}
@@ -26,8 +36,10 @@ const GameScene = () => {
             (e.target as HTMLCanvasElement).requestPointerLock();
           }}
         >
-          <Physics>
+          <Physics paused={!isMapPhysicsReady}>
             <Suspense fallback={null}>
+              {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
+              {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
               <FollowLight />
               <FirstPersonViewController />
               <Experience />
@@ -37,7 +49,7 @@ const GameScene = () => {
         </Canvas>
       </KeyboardControls>
 
-      <Crosshair />
+      {isMapPhysicsReady && <Crosshair />}
     </div>
   );
 };
