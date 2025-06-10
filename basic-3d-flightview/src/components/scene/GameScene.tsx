@@ -8,6 +8,9 @@ import EffectContainer from '../r3f/EffectContainer';
 import StatusDisplay from '../ui/StatusDisplay';
 import { FlightViewController, FollowLight } from 'vibe-starter-3d';
 import { useLocalPlayerStore } from '../../stores/localPlayerStore';
+import { useGameStore } from '../../stores/gameStore';
+import LoadingScreen from '../ui/LoadingScreen';
+import MapPhysicsReadyChecker from '../r3f/MapPhysicsReadyChecker';
 
 /**
  * Main game scene component
@@ -16,12 +19,19 @@ import { useLocalPlayerStore } from '../../stores/localPlayerStore';
  * including physics, lighting, and scene elements.
  */
 const GameScene = () => {
+  // ⚠️ MUST CHECK: Map physics system ready state
+  // Physics paused and loading screen displayed while this value is false
+  const { isMapPhysicsReady } = useGameStore();
+
   const { setSpeed } = useLocalPlayerStore();
 
   return (
     <div className="relative w-full h-screen">
+      {/* Loading screen overlay */}
+      {!isMapPhysicsReady && <LoadingScreen />}
+
       {/* UI Overlay */}
-      <StatusDisplay />
+      {isMapPhysicsReady && <StatusDisplay />}
 
       {/* Keyboard preset */}
       <KeyboardControls map={keyboardMap}>
@@ -33,8 +43,10 @@ const GameScene = () => {
             (e.target as HTMLCanvasElement).requestPointerLock();
           }}
         >
-          <Physics>
+          <Physics paused={!isMapPhysicsReady}>
             <Suspense fallback={null}>
+              {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
+              {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
               <FollowLight />
               <FlightViewController minSpeed={0} maxSpeed={120} onSpeedChange={setSpeed} />
               <Experience />
