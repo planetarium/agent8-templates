@@ -4,8 +4,8 @@ import Assets from '../../assets.json';
 import { UserState } from '../../types';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { CharacterPreview } from '../r3f/CharacterPreview';
 import { Suspense } from 'react';
+import CharacterPreview from '../r3f/CharacterPreview';
 
 /**
  * Lobby room props
@@ -56,6 +56,7 @@ const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) =>
       await server.remoteFunction('setCharacter', [character]);
       setSelectedCharacter(character);
     } catch (err) {
+      console.error(err);
       setError(`${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsLoading(false);
@@ -63,7 +64,7 @@ const LobbyRoom: React.FC<LobbyRoomProps> = ({ roomId, onLeaveRoom, server }) =>
   };
 
   useEffect(() => {
-    if (currentUserState && selectedCharacter) {
+    if (currentUserState) {
       setIsReady(currentUserState.isReady ?? false);
       setSelectedCharacter(currentUserState.character || null);
     } else {

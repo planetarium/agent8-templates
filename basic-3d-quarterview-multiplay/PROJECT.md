@@ -1,159 +1,106 @@
-# League-style Top-Down Game
+# Basic 3D Free View
 
 ## Project Summary
 
-This project is a League of Legends style top-down multiplayer game where players control characters from above. The game features click-to-move navigation and ability-based combat, similar to popular MOBA games. Players can join or create rooms, select characters, and interact with other players in real-time 3D environment.
+This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, and hit reactions. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space. This project is intended for multi-player gameplay.
 
 ## Implementation Strategy
 
-This game uses a **3D Three.js-based approach** because:
+This project uses a **Three.js-based 3D approach** because:
 
-- It requires a top-down perspective with 3D character models
-- Three.js provides efficient rendering for 3D game environments
+- It requires real-time 3D character animation and control
+- Three.js provides efficient 3D rendering in web browsers
 - React Three Fiber simplifies integration with React components
-- The vibe-starter-3d library provides character and camera controls
+- The vibe-starter-3d library provides essential character rendering and animation tools
 
 Key technologies:
 
 - Three.js for 3D rendering
 - React Three Fiber for React integration
 - @react-three/rapier for physics simulation
-- @agent8/gameserver for multiplayer functionality
-- Zustand for state management
-- Tailwind CSS for UI composition
+- @react-three/drei for useful Three.js helpers
+- vibe-starter-3d for character rendering and animation
+- Tailwind CSS for styling
 
 ## Implemented Features
 
-- User authentication with nickname setting
-- Room creation and management system
-- Character selection from various 3D models
-- Click-to-move navigation system
-- Real-time player position and state synchronization
-- Character animations (idle, walk, run, jump, attack)
-- Fireball casting and effect system
-- Network latency measurement
-- Top-down camera perspective
-- Collision detection between characters and effects
-- Damage system with health management
+- Keyboard-controlled character movement (WASD/Arrow keys)
+- Character animations (idle, walk, run, jump, punch, hit, die)
+- Free view camera that follows the character
+- Physics-based character movement with collision detection
+- Character state management system
+- 3D environment with floor
+- Directional and ambient lighting
+- Animation system with support for looping and one-shot animations
+- Character bounding box calculations
+- Pointer lock for immersive control
 
 ## File Structure Overview
 
-### src/main.tsx
+### `src/main.tsx`
 
-- Entry point for the application
-- Sets up React rendering
+- Entry point for the application.
+- Sets up React rendering and mounts the `App` component.
 
-### src/App.tsx
+### `src/App.tsx`
 
-- Main application component
-- Handles game flow, user authentication, room management
-- Contains view transitions between screens
+- Main application component.
+- Sets up the Colyseus client and manages the room state (`RoomManager`) and the game scene (`GameScene`).
+- Handles routing or state-based rendering between nickname setup, lobby screen, and game screen.
 
-### src/assets.json
+### `src/App.css`
 
-- Defines game assets including character models and animations
-- Maps animation types to resource URLs
+- Defines the main styles for the `App` component and its child UI elements.
 
-### src/types/
+### `src/index.css`
 
-- Contains TypeScript definitions for game entities
-- Includes player.ts, user.ts, and effect.ts for type safety
+- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
 
-### src/constants/character.ts
+### `src/assets.json`
 
-- Defines character states (idle, walk, run, etc.)
-- Provides enum values for animation system
+- File for managing asset metadata. Includes character model and animation information.
 
-### src/constants/controls.ts
+### `src/constants/`
 
-- Defines keyboard and mouse control mappings
-- Sets up input configuration for player movement
+- Directory defining constant values used throughout the application.
+  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
+  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
 
-### src/hooks/useNetworkSync.ts
+### `src/types/`
 
-- Custom hook for network synchronization
-- Handles player data transmission between clients
+- Directory defining TypeScript types used in the application (e.g., `PlayerState`, `PlayerInput`).
 
-### src/store/networkSyncStore.ts
+### `src/hooks/`
 
-- Zustand store for network state management
-- Tracks player positions and states across the network
+- Directory defining reusable React hooks (e.g., `useKeyboardControls`).
 
-### src/store/effectStore.ts
+### `src/stores/`
 
-- Manages game effects like fireballs
-- Controls effect lifecycle and collision detection
+- Directory containing state management logic (e.g., Zustand).
+  - **`playerStore.ts`**: Manages player-related state (nickname, selected character, etc.).
+  - **`roomStore.ts`**: Manages Colyseus Room related state (room info, player list, etc.).
 
-### src/components/scene/NicknameSetup.tsx
+### `src/components/`
 
-- Component for setting user nickname
-- First screen in the game flow
+- Directory managing React components categorized by function.
 
-### src/components/scene/RoomManager.tsx
+  - **`r3f/`**: Contains 3D components related to React Three Fiber.
 
-- Interface for creating and joining game rooms
-- Displays available rooms and allows creation of new ones
+    - **`Experience.tsx`**: Main component responsible for setting up the 3D environment. Includes lighting `ambientLight`, environmental elements `Environment`, the local player `Player` wrapped in `QuarterViewController`, the floor `Floor`, and the `FollowLight` component that follows the player.
+    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
+    - **`Player.tsx`**: Component handling the logic related to the local player character model (movement, rotation, animation state management, input processing, and sending to the server).
+    - **`RemotePlayer.tsx`**: Component rendering remote player character models, animations, positions, etc., based on the state received from the server.
+    - **`NetworkContainer.tsx`**: Manages all remote player states received from the server and renders a `RemotePlayer` component for each remote player.
+    - **`CharacterPreview.tsx`**: Component for previewing character models, e.g., on the character selection screen.
+    - **`EffectContainer.tsx`**: Component managing and applying postprocessing effects (e.g., Bloom, SSR).
+    - **`effects/`**: Directory containing individual visual effect components (specific effect files can be added).
 
-### src/components/scene/LobbyRoom.tsx
+  - **`scene/`**: Contains components related to 3D scene setup and game state.
 
-- Pre-game lobby with character selection
-- Allows players to prepare before starting the game
+    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the network container `NetworkContainer` and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
+    - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character.
+    - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
+    - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
 
-### src/components/scene/GameScene.tsx
-
-- Main game scene component
-- Sets up 3D environment with physics and controls
-
-### src/components/r3f/Experience.tsx
-
-- Sets up the 3D world environment
-- Configures lighting, camera, and scene objects
-
-### src/components/r3f/Player.tsx
-
-- Local player character with control logic
-- Handles animations, movement, and state transitions
-
-### src/components/r3f/RemotePlayer.tsx
-
-- Representation of other players in the game
-- Renders network-synchronized character models
-
-### src/components/r3f/TargetingSystem.tsx
-
-- Targeting system that operates independently from terrain
-- Detects click positions and sets movement points
-- Handles click effect animations
-- Manages interactions through an invisible interaction layer
-- !! Important: essential component. must be included
-
-### src/components/r3f/Floor.tsx
-
-- Ground plane with physics properties
-- Provides surface for character movement
-
-### src/components/r3f/NetworkContainer.tsx
-
-- Manages network-synchronized entities
-- Handles creation and removal of remote players
-
-### src/components/r3f/EffectContainer.tsx
-
-- Container for visual effects like fireballs
-- Manages effect creation and lifecycle
-
-### src/components/r3f/effects/FireBall.tsx
-
-- Fireball projectile implementation
-- Handles movement, collision, and visual effects
-
-### src/components/ui/RTT.tsx
-
-- Displays network round-trip time
-- Provides feedback on connection quality
-
-### server.js
-
-- Game server implementation
-- Handles room management, player synchronization, and game logic
-- Processes effect events and damage calculations
+  - **`ui/`**: Contains general UI components.
+    - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).

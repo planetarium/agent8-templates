@@ -11,11 +11,10 @@ export interface UserState {
   isReady?: boolean;
   /** Selected character model key */
   character?: string;
-  /** User's transform data (position and rotation) */
-  transform?: {
-    position: [number, number, number];
-    rotation: [number, number, number, number];
-  };
+  /** User's position */
+  position?: [number, number, number];
+  /** User's rotation */
+  rotation?: [number, number, number, number];
   /** Current character state/animation */
   state?: string;
   /** User stats for game mechanics */

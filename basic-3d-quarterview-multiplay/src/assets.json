@@ -1,5 +1,8 @@
 {
   "characters": {
+    "base-model": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/human/base-model.glb"
+    },
     "solider": {
       "url": "https://agent8-games.verse8.io/assets/3d/characters/human/solider.glb"
     },
@@ -48,45 +51,101 @@
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb",
       "description": "Idle"
     },
+    "idle-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
+      "description": "Idle 00"
+    },
+    "idle-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-01.glb",
+      "description": "Idle 01"
+    },
+    "rifle-idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/rifle-idle.glb",
+      "description": "Rifle idle"
+    },
+    "pistol-idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/pistol-idle.glb",
+      "description": "Pistol idle"
+    },
     "walk": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
       "description": "Walk"
     },
-    "run": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run.glb",
-      "description": "Run"
+    "run-medium": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
+      "description": "Run Medium"
+    },
+    "run-fast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb",
+      "description": "Run Fast"
+    },
+    "rifle-run": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/rifle-run.glb",
+      "description": "Rifle Run"
+    },
+    "pistol-run": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/pistol-run.glb",
+      "description": "Pistol Run"
     },
     "jump": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/fall-idle.glb",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb",
       "description": "Jump"
     },
-    "punch": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch.glb",
-      "description": "Punch"
+    "swim": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/swim.glb",
+      "description": "Swim"
     },
-    "melee_attack": {
+    "punch-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-00.glb",
+      "description": "Punch 00"
+    },
+    "punch-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-01.glb",
+      "description": "Punch 01"
+    },
+    "kick-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-00.glb",
+      "description": "Kick 00"
+    },
+    "kick-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-01.glb",
+      "description": "Kick 01"
+    },
+    "kick-02": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-02.glb",
+      "description": "Kick 02"
+    },
+    "melee-attack": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
       "description": "Melee Attack"
     },
-    "aim": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/aimming.glb",
-      "description": "Aim"
+    "cast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/cast.glb",
+      "description": "Cast"
     },
-    "shoot": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot.glb",
-      "description": "Shoot"
+    "dance-locking": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/dance-locking.glb",
+      "description": "Dance Locking"
     },
-    "aim_run": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot-run.glb",
-      "description": "Aim Run"
+    "dance-wave": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/dance-wave.glb",
+      "description": "Dance Wave"
     },
-    "hit": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit.glb",
-      "description": "Hit"
+    "dance": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/dance-wave.glb",
+      "description": "Dance Wave"
     },
-    "die": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death.glb",
-      "description": "Die"
+    "death-backward": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death-backward.glb",
+      "description": "Death Backward"
+    },
+    "death-foward": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death-foward.glb",
+      "description": "Death Foward"
+    },
+    "hit-to-body": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit-to-body.glb",
+      "description": "Hit to Body"
     }
   }
 }

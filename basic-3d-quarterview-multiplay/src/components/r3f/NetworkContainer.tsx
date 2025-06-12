@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useGameServer, useRoomState } from '@agent8/gameserver';
 import { UserState } from '../../types';
 import React from 'react';
-import { RemotePlayer, RemotePlayerHandle } from './RemotePlayer';
+import RemotePlayer, { RemotePlayerHandle } from './RemotePlayer';
 import { DEFAULT_HEIGHT } from '../../constants/character';
 import { UnsubscribeFunction } from '@agent8/gameserver/dist/src/server/GameServer';
 
@@ -12,13 +12,10 @@ import { UnsubscribeFunction } from '@agent8/gameserver/dist/src/server/GameServ
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements for the local player.
  */
-export function NetworkContainer() {
+function NetworkContainer() {
   const { connected, server, account } = useGameServer();
-  if (!server) return null;
-  if (!connected) return null;
   const { roomId } = useRoomState();
   const [otherReadyPlayers, setUserStates] = useState<{ [account: string]: UserState }>({});
-
   const playerRefs = useRef<Record<string, React.RefObject<RemotePlayerHandle>>>({});
 
   useEffect(() => {
@@ -28,38 +25,63 @@ export function NetworkContainer() {
 
     unsubscribes.push(
       server.subscribeRoomState(roomId, (roomState) => {
-        for (const account in otherReadyPlayers) {
-          if (!roomState.$users.includes(account)) {
-            delete playerRefs.current[account];
-            delete otherReadyPlayers[account];
+        setUserStates((prevPlayers) => {
+          let changed = false;
+          const currentPlayers = Object.keys(prevPlayers);
+          const newPlayers = { ...prevPlayers };
+          for (const account of currentPlayers) {
+            if (!roomState.$users.includes(account)) {
+              delete newPlayers[account];
+              delete playerRefs.current[account];
+              changed = true;
+            }
           }
-        }
-
-        setUserStates(otherReadyPlayers);
+          return changed ? newPlayers : prevPlayers;
+        });
       }),
     );
 
     unsubscribes.push(
       server.subscribeRoomAllUserStates(roomId, (allUserStates: Record<string, UserState | null>) => {
-        let needUpdateUserStates = false;
-        Object.values(allUserStates).forEach((playerState) => {
-          if (playerState && playerState.account !== account && playerState.isReady && playerState.transform) {
-            if (!otherReadyPlayers[playerState.account]) {
-              otherReadyPlayers[playerState.account] = playerState;
-              playerRefs.current[playerState.account] = React.createRef<RemotePlayerHandle>();
-              needUpdateUserStates = true;
+        setUserStates((prevPlayers) => {
+          let updated = false;
+          const newPlayers = { ...prevPlayers };
+
+          Object.values(allUserStates).forEach((playerState) => {
+            // Skip self or null states
+            if (!playerState || playerState.account === account) {
+              return;
             }
 
-            const playerRef = playerRefs.current[playerState.account];
-            if (playerRef?.current) {
-              playerRef.current.syncState(playerState.state, playerState.transform.position, playerState.transform.rotation);
+            const playerAccount = playerState.account; // Get account from the state object
+
+            // If player is ready and has position
+            if (playerState.isReady && playerState.position) {
+              // Add new ready players
+              if (!newPlayers[playerAccount]) {
+                newPlayers[playerAccount] = playerState;
+                playerRefs.current[playerAccount] = React.createRef<RemotePlayerHandle>();
+                updated = true;
+              }
+
+              // Sync existing players' state via refs
+              const playerRef = playerRefs.current[playerAccount];
+              if (playerRef?.current) {
+                playerRef.current.syncState(playerState.state, playerState.position, playerState.rotation);
+              }
             }
-          }
+            // If player is NOT ready but exists in our list, remove them
+            else if (!playerState.isReady && newPlayers[playerAccount]) {
+              delete newPlayers[playerAccount];
+              delete playerRefs.current[playerAccount]; // Clean up ref
+              updated = true;
+            }
+          });
+
+          // Note: Player removal due to leaving the room is handled by the subscribeRoomState callback
+
+          return updated ? newPlayers : prevPlayers;
         });
-
-        if (needUpdateUserStates) {
-          setUserStates({ ...otherReadyPlayers });
-        }
       }),
     );
 
@@ -67,6 +89,8 @@ export function NetworkContainer() {
       unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
   }, [server, connected, roomId, account]);
+
+  if (!server || !connected || !account) return null;
 
   return (
     <>
@@ -76,8 +100,8 @@ export function NetworkContainer() {
             <RemotePlayer
               key={player.account}
               ref={playerRefs.current[player.account]}
-              position={player.transform?.position}
-              rotation={player.transform?.rotation}
+              position={player.position}
+              rotation={player.rotation}
               account={player.account}
               characterUrl={player.character}
               nickname={player.nickname}
@@ -88,3 +112,5 @@ export function NetworkContainer() {
     </>
   );
 }
+
+export default NetworkContainer;

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameServer } from '@agent8/gameserver';
-import './App.css';
+import { networkSyncStore } from './stores/networkSyncStore';
 import NicknameSetup from './components/scene/NicknameSetup';
 import RoomManager from './components/scene/RoomManager';
 import LobbyRoom from './components/scene/LobbyRoom';
-import { GameScene } from './components/scene/GameScene';
-import { networkSyncStore } from './store/networkSyncStore';
+import GameScene from './components/scene/GameScene';
+import './App.css';
 
 function App() {
   const { connected, server } = useGameServer();
@@ -19,7 +19,6 @@ function App() {
   const characterUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    console.log('server', server.account);
     if (server && connected) {
       networkSyncStore.getState().setServer(server);
     }
@@ -83,7 +82,11 @@ function App() {
     try {
       // Call the remote function to join/create a room
       const joinedRoomId = await server.remoteFunction('joinRoom', [roomId, nickname]);
-      setCurrentRoomId(joinedRoomId);
+      if (typeof joinedRoomId === 'string') {
+        setCurrentRoomId(joinedRoomId);
+      } else if (joinedRoomId instanceof Object) {
+        setError(joinedRoomId.error);
+      }
     } catch (err) {
       setError(`Failed to join room: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
