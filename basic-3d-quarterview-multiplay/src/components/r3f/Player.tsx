@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useCallback, forwardRef, useState, useEffect } from 'react';
+import { useRef, useMemo, useCallback, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { useKeyboardControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
@@ -6,7 +6,6 @@ import { CharacterState } from '../../constants/character';
 import Assets from '../../assets.json';
 import { useGameServer, useRoomState } from '@agent8/gameserver';
 import throttle from 'lodash/throttle';
-import { PlayerRef } from '../../types/player';
 import {
   AnimationConfigMap,
   AnimationType,
@@ -72,7 +71,7 @@ interface PlayerInputs {
  * Player component - Represents the local player character.
  * Manages inputs, state transitions, animations, and network synchronization.
  */
-const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterState.IDLE, targetHeight = 1.6, characterKey = 'y-bot.glb' }, ref) => {
+const Player = ({ initialState = CharacterState.IDLE, targetHeight = 1.6, characterKey = 'y-bot.glb' }: PlayerProps) => {
   const { server, connected, account } = useGameServer();
   const { roomId } = useRoomState();
   const { registerPlayerRef, unregisterPlayerRef } = usePlayerStore();
@@ -471,6 +470,6 @@ const Player = forwardRef<PlayerRef, PlayerProps>(({ initialState = CharacterSta
       />
     </RigidBodyPlayer>
   );
-});
+};
 
 export default Player;
