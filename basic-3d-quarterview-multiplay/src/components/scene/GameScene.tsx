@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { keyboardMap } from '../../constants/controls';
 import { KeyboardControls } from '@react-three/drei';
@@ -29,7 +29,14 @@ interface GameSceneProps {
  * including physics, lighting, and scene elements.
  */
 const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, characterUrl }) => {
-  const { isMapPhysicsReady } = useGameStore();
+  const { isMapPhysicsReady, setMapPhysicsReady } = useGameStore();
+
+  // cleanup
+  useEffect(() => {
+    return () => {
+      setMapPhysicsReady(false);
+    };
+  }, [setMapPhysicsReady]);
 
   return (
     <div className="relative w-full h-screen">
@@ -48,11 +55,11 @@ const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, characterUrl
       <KeyboardControls map={keyboardMap}>
         {/* Single Canvas for the 3D scene */}
         <Canvas shadows>
-          <Physics>
+          <Physics> 
             <Suspense fallback={null}>
               {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
               <FollowLight offset={[60, 100, 30]} intensity={2} />
-              <QuarterViewController followCharacter={true} />
+              {isMapPhysicsReady && <QuarterViewController followCharacter={true} />}
               <Experience characterUrl={characterUrl} />
               <NetworkContainer />
             </Suspense>
