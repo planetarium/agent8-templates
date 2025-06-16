@@ -1,5 +1,5 @@
 {
-  "name": "basic-3d-quarterview-multiplay",
+  "name": "basic-3d-freeview",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -22,7 +22,7 @@
     "react-dom": "^18.3.1",
     "three": "^0.174.0",
     "zustand": "^5.0.3",
-    "vibe-starter-3d": "^0.5.0"
+    "vibe-starter-3d": "^0.5.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16",

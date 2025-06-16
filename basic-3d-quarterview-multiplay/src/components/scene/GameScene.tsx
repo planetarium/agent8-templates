@@ -1,11 +1,15 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { keyboardMap } from '../../constants/controls';
+import { KeyboardControls } from '@react-three/drei';
 import { Physics } from '@react-three/rapier';
-import { Experience } from '../r3f/Experience';
-import { StatsGl } from '@react-three/drei';
-import { NetworkContainer } from '../r3f/NetworkContainer';
-import { EffectContainer } from '../r3f/EffectContainer';
-import { RTT } from '../ui/RTT';
+import Experience from '../r3f/Experience';
+import NetworkContainer from '../r3f/NetworkContainer';
+import { FollowLight, QuarterViewController } from 'vibe-starter-3d';
+import MapPhysicsReadyChecker from '../r3f/MapPhysicsReadyChecker';
+import { useGameStore } from '../../stores/gameStore';
+import RTT from '../ui/RTT';
+
 /**
  * Game scene props
  */
@@ -24,85 +28,46 @@ interface GameSceneProps {
  * This component is responsible for setting up the 3D environment
  * including physics, lighting, and scene elements.
  */
-export const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, characterUrl }) => {
-  const [inputMode, setInputMode] = useState<'keyboard' | 'pointToMove'>('keyboard');
+const GameScene: React.FC<GameSceneProps> = ({ roomId, onLeaveRoom, characterUrl }) => {
+  const { isMapPhysicsReady, setMapPhysicsReady } = useGameStore();
+
+  // cleanup
+  useEffect(() => {
+    return () => {
+      setMapPhysicsReady(false);
+    };
+  }, [setMapPhysicsReady]);
 
   return (
-    <div className="absolute top-0 left-0 w-full h-screen">
-      {/* 모드 전환 UI */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '60px',
-          right: '10px',
-          zIndex: 1000,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          padding: '8px',
-          borderRadius: '4px',
-          color: 'white',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '14px',
-          userSelect: 'none',
-          display: 'flex',
-          gap: '8px',
-        }}
-      >
-        <button
-          onClick={() => setInputMode('keyboard')}
-          style={{
-            padding: '5px 10px',
-            backgroundColor: inputMode === 'keyboard' ? '#4CAF50' : '#555',
-            border: 'none',
-            borderRadius: '4px',
-            color: 'white',
-            cursor: 'pointer',
-          }}
-        >
-          Keyboard
-        </button>
-        <button
-          onClick={() => setInputMode('pointToMove')}
-          style={{
-            padding: '5px 10px',
-            backgroundColor: inputMode === 'pointToMove' ? '#4CAF50' : '#555',
-            border: 'none',
-            borderRadius: '4px',
-            color: 'white',
-            cursor: 'pointer',
-          }}
-        >
-          Point & Click
-        </button>
-      </div>
-
-      <Canvas shadows>
-        <Physics debug={false}>
-          <Suspense fallback={null}>
-            <Experience characterUrl={characterUrl} inputMode={inputMode} />
-            <NetworkContainer />
-            <EffectContainer />
-          </Suspense>
-        </Physics>
-        <StatsGl showPanel={0} className="stats absolute bottom-0 left-0" />
-      </Canvas>
-      {/* 
-        pointer-events-none: Container itself ignores mouse events
-        Only add pointer-events-auto to child elements that need interaction
-      */}
-      <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10 pointer-events-none">
-        <button className="px-3 py-1 border border-gray-300 rounded text-sm bg-black/30 text-white hover:bg-black/50 pointer-events-auto" onClick={onLeaveRoom}>
+    <div className="relative w-full h-screen">
+      <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10">
+        <button className="px-3 py-1 border border-gray-300 rounded text-sm bg-black/30 text-white hover:bg-black/50" onClick={onLeaveRoom}>
           Leave Game
         </button>
-        <div className="flex items-center space-x-2 pointer-events-none">
-          {/* Add pointer-events-auto to RTT component if interaction is needed */}
-          <div className="pointer-events-auto">
-            <RTT />
-          </div>
-          <div className="px-3 py-1 bg-black/30 text-white rounded border border-gray-500 text-sm pointer-events-none">
+        <div className="flex items-center space-x-2">
+          <RTT />
+          <div className="px-3 py-1 bg-black/30 text-white rounded border border-gray-500 text-sm">
             Room ID: <span className="font-semibold">{roomId}</span>
           </div>
         </div>
       </div>
+      {/* Keyboard preset */}
+      <KeyboardControls map={keyboardMap}>
+        {/* Single Canvas for the 3D scene */}
+        <Canvas shadows>
+          <Physics> 
+            <Suspense fallback={null}>
+              {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
+              <FollowLight offset={[60, 100, 30]} intensity={2} />
+              {isMapPhysicsReady && <QuarterViewController followCharacter={true} />}
+              <Experience characterUrl={characterUrl} />
+              <NetworkContainer />
+            </Suspense>
+          </Physics>
+        </Canvas>
+      </KeyboardControls>
     </div>
   );
 };
+
+export default GameScene;

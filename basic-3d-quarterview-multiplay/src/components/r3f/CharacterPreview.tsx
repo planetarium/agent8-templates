@@ -1,8 +1,8 @@
 import React, { useRef, useMemo } from 'react';
 import { CharacterState } from '../../constants/character';
-import { AnimationConfig, AnimationConfigMap, CharacterRenderer, CharacterResource, CharacterRendererRef } from 'vibe-starter-3d';
 import Assets from '../../assets.json';
-import { Vector3 } from 'three';
+import { AnimationConfigMap } from 'vibe-starter-3d';
+import { CharacterRenderer } from 'vibe-starter-3d';
 
 /**
  * Character Preview component props
@@ -15,47 +15,29 @@ interface CharacterPreviewProps {
 /**
  * Simplified animation configuration for IDLE state only
  */
-const idleAnimationConfigMap: Partial<AnimationConfigMap<CharacterState>> = {
+const idleAnimationConfigMap: AnimationConfigMap = {
   [CharacterState.IDLE]: {
-    animationType: 'IDLE',
+    url: Assets.animations.idle.url,
     loop: true,
-  } as AnimationConfig,
+  },
 };
 
 /**
  * CharacterPreview component for rendering a static character preview in IDLE state
  */
-export const CharacterPreview: React.FC<CharacterPreviewProps> = ({ characterUrl }) => {
+const CharacterPreview: React.FC<CharacterPreviewProps> = ({ characterUrl }) => {
   // State is always IDLE for preview
   const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
 
-  // Define the character resource with IDLE animation only (or all if needed by CharacterRenderer)
-  const characterResource: CharacterResource = useMemo(() => {
-    // Include only necessary animations if CharacterRenderer allows, otherwise keep all
-    return {
-      name: characterUrl,
-      url: characterUrl,
-      animations: {
-        IDLE: Assets.animations.idle.url, // Only IDLE animation might be strictly necessary
-      },
-    };
-  }, [characterUrl]);
-
-  const characterRendererRef = useRef<CharacterRendererRef>(null);
-  const characterHeight = useMemo(() => {
-    const vector3 = new Vector3();
-    characterRendererRef.current?.boundingBox?.getSize(vector3);
-    return vector3.y;
-  }, [characterRendererRef.current]);
-
   return (
-    <group position={[0, -(characterHeight || 0) / 2, 0]}>
+    <group position={[0, -0.5, 0]}>
       <CharacterRenderer
-        characterResource={characterResource}
+        url={characterUrl}
         animationConfigMap={idleAnimationConfigMap} // Use simplified config
-        currentActionRef={currentStateRef} // Always IDLE
-        ref={characterRendererRef}
+        currentAnimationRef={currentStateRef} // Always IDLE
       />
     </group>
   );
 };
+
+export default CharacterPreview;

@@ -150,7 +150,7 @@ export const networkSyncStore = create<NetworkState>((set, get) => {
             const currentRtt = clientPongTime - response.clientPingTime;
             get().addRttValue(currentRtt);
           }
-        } catch (error) {
+        } catch {
           // Ping failed, no action needed
         }
 
