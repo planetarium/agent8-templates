@@ -203,7 +203,7 @@ Key technologies:
     - **`Player.tsx`**: Advanced player component integrating RigidBodyPlayer with CharacterRenderer for comprehensive character management, physics interactions, and animation state management with collision detection capabilities.
     - **`PointingSystem.tsx`**: Core component for the point-and-click movement mechanics. Implements raycasting to convert screen clicks to world positions. Creates visual feedback when clicking on the ground (click effect).
 
-  - **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Contains components related to scene setup.
 
     - **`GameScene.tsx`**: Comprehensive 3D scene setup component that orchestrates the entire rendering pipeline. Creates a full-screen container with `Canvas` component featuring shadow support and pointer lock functionality (activated on pointer down). Integrates `KeyboardControls` with custom keyboard mapping, configures the physics simulation using the `Physics` component from `@react-three/rapier`, integrates `PointToMoveController`, `FollowLight`, and `PointingSystem` within the physics context. Monitors map physics system readiness state (`isMapPhysicsReady`) to control physics simulation pause/resume and displays loading screen when not ready. Uses `MapPhysicsReadyChecker` component to verify map physics system initialization and loads the `Experience` component with `Suspense` fallback to handle async loading of 3D assets.
     - **`PreloadScene.tsx`**: Manages asset preloading before the game starts. Loads all assets defined in assets.json (models, textures, etc.) and displays a loading progress bar. Ensures all assets are loaded before the game begins.
