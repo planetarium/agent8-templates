@@ -196,7 +196,7 @@ Key technologies:
       - **`Explosion.tsx`**: Component that creates and manages explosion visual effects.
       - **`MuzzleFlash.tsx`**: Component that generates and manages the flash effect occurring at the muzzle when firing a gun.
 
-  - **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Contains components related to scene setup.
 
     - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component with shadow support and pointer lock functionality. Utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`. Includes functionality to pause physics until the map physics system is ready and displays the `LoadingScreen` component. Inside the physics context, it includes `MapPhysicsReadyChecker` for map physics initialization, `FollowLight`, `FirstPersonViewController`, `Experience`, and `EffectContainer` components wrapped in `Suspense`. Also renders the `Crosshair` UI component as an overlay only after the physics system is ready.
 

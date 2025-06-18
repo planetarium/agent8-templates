@@ -236,7 +236,7 @@ The rendering system uses a color-based approach with these key features:
     - **`CubePreview.tsx`**: Shows preview of block placement location with precise coordinate alignment to the actual placement position.
     - **`Water.tsx`**: Implements water simulation with translucent rendering.
 
-  - **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Contains components related to scene setup.
 
     - **`GameScene.tsx`**: Comprehensive 3D scene setup component that orchestrates the entire rendering pipeline. Creates a full-screen container with `Canvas` component featuring shadow support and pointer lock functionality (activated on pointer down). Integrates `KeyboardControls` with custom keyboard mapping, configures physics simulation using `@react-three/rapier`, and importantly includes `FollowLight` and `FirstPersonViewController` from vibe-starter-3d within the physics context. Monitors map physics system readiness state (`isMapPhysicsReady`) to control physics simulation pause/resume and displays loading screen when not ready. Uses `MapPhysicsReadyChecker` component to verify map physics system initialization and loads the `Experience` component with `Suspense` fallback to handle async loading of 3D assets.
     - **`PreloadScene.tsx`**: Manages asset preloading before the game starts and displays a loading progress bar.

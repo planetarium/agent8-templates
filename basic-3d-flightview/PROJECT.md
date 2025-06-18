@@ -189,7 +189,7 @@ Key technologies:
       - **`MuzzleFlash.tsx`**: Component representing the muzzle flash effect.
       - **`Explosion.tsx`**: Component creating explosion and smoke particle effects when bullets hit targets or objects.
 
-  - **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Contains components related to scene setup.
 
     - **`GameScene.tsx`**: Main game scene component that sets up the complete 3D environment. It manages the map physics readiness state using `useGameStore().isMapPhysicsReady` to control physics simulation and loading screen display. When physics are not ready, it shows `LoadingScreen` and pauses physics simulation. The component includes conditional UI rendering with `StatusDisplay` overlay when ready, configures `KeyboardControls` for input handling, sets up the React Three Fiber `Canvas` with pointer lock functionality and extended camera far plane (5000 units), configures physics simulation using `@react-three/rapier` with conditional pausing, and integrates `MapPhysicsReadyChecker` (when physics not ready), `FollowLight`, `FlightViewController` from `vibe-starter-3d` for flight control with speed settings (min: 0, max: 120) and speed change callbacks, along with `Experience` and `EffectContainer` components within a `Suspense` wrapper.
 

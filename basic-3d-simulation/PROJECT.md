@@ -204,7 +204,7 @@ Key technologies:
     - **`Player.tsx`**: Component handling the logic related to the player character model (movement, rotation, animation state management).
     - **`Selectable.tsx`**: Component that wraps 3D objects to make them selectable. Handles click events and adds visual feedback when objects are selected.
 
-  - **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Contains components related to scene setup.
 
     - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
     - **`PreloadScene.tsx`**: Manages asset preloading before the game starts. Loads all assets defined in assets.json (models, textures, etc.) and displays a loading progress bar. Ensures all assets are loaded before the game begins.
