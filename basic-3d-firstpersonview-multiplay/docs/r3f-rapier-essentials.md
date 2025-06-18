@@ -15,9 +15,18 @@ A comprehensive guide to building 3D games and interactive applications with Rea
 
 1. **Canvas Boundaries**
 
-   - All R3F components must be inside `<Canvas>`
-   - Never place R3F components outside `<Canvas>`
-   - Never place regular HTML elements inside `<Canvas>`
+   - All R3F-related components MUST be inside `<Canvas>`:
+
+     - All 3D components (`<mesh>`, `<boxGeometry>`, `<meshStandardMaterial>`)
+     - All R3F components (`<RigidBody>`, `<Physics>`)
+     - All Three.js related elements
+
+   - NEVER place R3F components outside `<Canvas>`
+
+   - NEVER place regular HTML elements inside `<Canvas>`:
+     - No `<div>`, `<button>`, `<p>`, etc.
+     - No regular React components
+     - No elements with regular CSS styling
 
 2. **UI Implementation**
 
