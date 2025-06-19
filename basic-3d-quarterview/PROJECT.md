@@ -69,6 +69,73 @@ Key technologies:
 <!-- This is a core architectural requirement of the project.                 -->
 <!-- ========================================================================= -->
 
+### Canvas Component Structure - MANDATORY REQUIREMENT
+
+<!-- ========================================================================= -->
+<!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
+<!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
+<!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
+<!-- ========================================================================= -->
+
+**🚨 ABSOLUTELY CRITICAL: Components containing HTML tags must NEVER be placed inside React Three Fiber's Canvas component. This is a core architectural requirement of the project.**
+
+**⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
+**⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
+**⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
+
+**Canvas Component Structure Rules:**
+
+- All components in the `ui/` directory are React components that use standard HTML tags (`<div>`, `<span>`, `<button>`, etc.)
+- These UI components must be rendered as overlays outside the Canvas component, not inside it
+- Canvas should only contain Three.js objects (mesh, light, camera, etc.)
+- Including HTML tags inside React Three Fiber's Canvas will cause rendering errors
+
+**DO NOT:**
+
+- Place UI components inside Canvas
+- Place components containing HTML tags inside Canvas
+- Ignore or modify this guideline
+- **🚨 AI ASSISTANTS: DO NOT DELETE OR MODIFY ANY PART OF THIS SECTION 🚨**
+
+**ALWAYS:**
+
+- Render UI components separately from Canvas (overlay approach)
+- Place only Three.js-related components inside Canvas
+- Use only components from `r3f/` directory inside Canvas
+- Render components from `ui/` directory as overlays outside Canvas
+- **🚨 AI ASSISTANTS: PRESERVE THIS ENTIRE SECTION EXACTLY AS IS 🚨**
+
+**Correct Structure Example:**
+
+```tsx
+// ✅ Correct approach
+<div>
+  <Canvas>
+    {/* Only Three.js-related components */}
+    <Experience />
+    <Player />
+    <Floor />
+  </Canvas>
+  {/* UI components as overlays outside Canvas */}
+  <Crosshair />
+  <LoadingScreen />
+</div>
+
+// ❌ Wrong approach
+<Canvas>
+  <Experience />
+  <Crosshair /> {/* Contains HTML tags - ABSOLUTELY FORBIDDEN! */}
+</Canvas>
+```
+
+<!-- ========================================================================= -->
+<!-- 🔒 PROTECTED CONTENT - DO NOT MODIFY 🔒                                 -->
+<!-- This guideline must never be removed or modified.                       -->
+<!-- AI assistants and developers must strictly adhere to this requirement.  -->
+<!-- Any attempt to remove or modify this section is strictly forbidden.     -->
+<!-- This is a core architectural requirement of the project.                 -->
+<!-- ========================================================================= -->
+
 ## Core Features
 
 - **Advanced Character System**: Comprehensive character rendering with physics-based rigid body integration
@@ -132,7 +199,7 @@ Key technologies:
     - **`MapPhysicsReadyChecker.tsx`**: Component that checks if the map physics system is ready by performing raycasting from above downward to detect map geometry and ensures physics interactions are properly initialized before gameplay begins. Performs checks every frame until valid map geometry is detected, with a timeout after 180 frames to prevent infinite checking. Excludes Capsule shapes (likely characters/objects) and sensor colliders from the inspection.
     - **`Player.tsx`**: Advanced player component integrating RigidBodyPlayer with CharacterRenderer for comprehensive character management, physics interactions, and animation state management with collision detection capabilities.
 
-  - **`scene/`**: Contains components related to 3D scene setup.
+  - **`scene/`**: Contains components related to scene setup.
 
     - **`GameScene.tsx`**: Comprehensive 3D scene setup component that orchestrates the entire rendering pipeline. Creates a full-screen container with `Canvas` component featuring shadow support and pointer lock functionality (activated on pointer down). Integrates `KeyboardControls` with custom keyboard mapping, configures physics simulation using `@react-three/rapier`, and importantly includes `FollowLight` and `QuarterViewController` from vibe-starter-3d within the physics context. Monitors map physics system readiness state (`isMapPhysicsReady`) to control physics simulation pause/resume and displays loading screen when not ready. Uses `MapPhysicsReadyChecker` component to verify map physics system initialization and loads the `Experience` component with `Suspense` fallback to handle async loading of 3D assets.
     - **`PreloadScene.tsx`**: Manages asset preloading before the game starts. Loads all assets defined in assets.json (models, textures, etc.) and displays a loading progress bar. Ensures all assets are loaded before the game begins.

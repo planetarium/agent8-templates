@@ -15,9 +15,18 @@ A comprehensive guide to building 3D games and interactive applications with Rea
 
 1. **Canvas Boundaries**
 
-   - All R3F components must be inside `<Canvas>`
-   - Never place R3F components outside `<Canvas>`
-   - Never place regular HTML elements inside `<Canvas>`
+   - All R3F-related components MUST be inside `<Canvas>`:
+
+     - All 3D components (`<mesh>`, `<boxGeometry>`, `<meshStandardMaterial>`)
+     - All R3F components (`<RigidBody>`, `<Physics>`)
+     - All Three.js related elements
+
+   - NEVER place R3F components outside `<Canvas>`
+
+   - NEVER place regular HTML elements inside `<Canvas>`:
+     - No `<div>`, `<button>`, `<p>`, etc.
+     - No regular React components
+     - No elements with regular CSS styling
 
 2. **UI Implementation**
 
@@ -455,46 +464,30 @@ function RotatingObstacle() {
 }
 ```
 
-**Example 2: Button-Controlled Elevator**
+**Example 2: Elevator System**
 
 ```tsx
 function ElevatorSystem() {
   const elevatorRef = useRef<RapierRigidBody>(null);
-  const [isMoving, setIsMoving] = useState(false);
-  const targetY = useRef(1);
+  const time = useRef(0);
 
-  const moveElevator = useCallback(
-    (newY: number) => {
-      if (!elevatorRef.current || isMoving) return;
+  useFrame((state, delta) => {
+    if (!elevatorRef.current) return;
 
-      targetY.current = newY;
-      setIsMoving(true);
-    },
-    [isMoving],
-  );
+    // Update time
+    time.current += delta;
 
-  useFrame(() => {
-    if (!elevatorRef.current || !isMoving) return;
+    // Use sine function to generate value between -1 and 1
+    // Multiply by 2 to get range -2 to 2, then add 3 to get range 1 to 5
+    const y = Math.sin(time.current) * 2 + 3;
 
+    // Keep current x, z position while updating y position
     const currentPos = elevatorRef.current.translation();
-    const distance = targetY.current - currentPos.y;
-
-    if (Math.abs(distance) < 0.1) {
-      elevatorRef.current.setNextKinematicTranslation({
-        x: currentPos.x,
-        y: targetY.current,
-        z: currentPos.z,
-      });
-      setIsMoving(false);
-    } else {
-      const speed = 2;
-      const newY = currentPos.y + Math.sign(distance) * speed * 0.016; // 60fps
-      elevatorRef.current.setNextKinematicTranslation({
-        x: currentPos.x,
-        y: newY,
-        z: currentPos.z,
-      });
-    }
+    elevatorRef.current.setNextKinematicTranslation({
+      x: currentPos.x,
+      y: y,
+      z: currentPos.z,
+    });
   });
 
   return (
@@ -504,22 +497,6 @@ function ElevatorSystem() {
         <mesh>
           <boxGeometry args={[3, 0.2, 3]} />
           <meshStandardMaterial color="brown" />
-        </mesh>
-      </RigidBody>
-
-      {/* Up Button */}
-      <RigidBody type="fixed" sensor position={[-4, 1, 0]} onIntersectionEnter={() => moveElevator(5)}>
-        <mesh>
-          <boxGeometry args={[0.5, 0.5, 0.5]} />
-          <meshStandardMaterial color="green" />
-        </mesh>
-      </RigidBody>
-
-      {/* Down Button */}
-      <RigidBody type="fixed" sensor position={[-4, 1, 2]} onIntersectionEnter={() => moveElevator(1)}>
-        <mesh>
-          <boxGeometry args={[0.5, 0.5, 0.5]} />
-          <meshStandardMaterial color="red" />
         </mesh>
       </RigidBody>
     </>
