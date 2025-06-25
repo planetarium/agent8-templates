@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { RigidBodyPlayer, RigidBodyPlayerRef, useControllerState } from 'vibe-starter-3d';
-import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
 import { useEffectStore } from '../../stores/effectStore';
@@ -17,17 +16,32 @@ import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
 const SHOOT_COOLDOWN = 200;
 const AIRCRAFT_BODY_LENGTH = 3;
 
+// Action types enum
+enum ActionType {
+  RESET = 'reset',
+  ATTACK = 'attack',
+}
+
+const keyMapping = {
+  [ActionType.RESET]: ['KeyR'],
+  [ActionType.ATTACK]: ['Space'],
+};
+
 const Player = () => {
   const { account } = useGameServer();
   const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
-  const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
-  const [subscribeKeys, getKeyboardInputs] = useKeyboardControls();
+  const { setPosition: setLocalPlayerPosition, setSpeed: setLocalPlayerSpeed } = useLocalPlayerStore();
   const { setPosition, setRotation, setVelocity } = useControllerState();
 
   // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
-  const shootTimestamp = useRef(0);
-  const canReset = useRef(true);
+  const canShootTimestamp = useRef(0);
+  const lastFramePressedReset = useRef(false);
+
+  // Speed calculation refs
+  const previousPosition = useRef<THREE.Vector3 | null>(null);
+  const speedHistory = useRef<{ distance: number; deltaTime: number }[]>([]);
+  const SPEED_HISTORY_LENGTH = 5;
 
   // IMPORTANT: Register connected player reference
   useEffect(() => {
@@ -49,13 +63,99 @@ const Player = () => {
     setLocalPlayerPosition(position.x, position.y, position.z);
   });
 
-  useEffect(() => {
-    return subscribeKeys((state) => {
-      if (!state.reset && !canReset.current) {
-        canReset.current = true;
+  // IMPORTANT: Update local player speed calculation based on position changes over 5 frames
+  useFrame((_, delta) => {
+    const playerRigidBody = rigidBodyPlayerRef.current;
+    if (!playerRigidBody) return;
+
+    const currentPosition = new THREE.Vector3().copy(playerRigidBody.translation());
+
+    if (previousPosition.current) {
+      // Calculate distance moved this frame
+      const distance = currentPosition.distanceTo(previousPosition.current);
+
+      // Add to speed history
+      speedHistory.current.push({ distance, deltaTime: delta });
+
+      // Keep only the last 5 frames
+      if (speedHistory.current.length > SPEED_HISTORY_LENGTH) {
+        speedHistory.current.shift();
       }
+
+      // Calculate average speed over the last frames
+      if (speedHistory.current.length > 0) {
+        const totalDistance = speedHistory.current.reduce((sum, frame) => sum + frame.distance, 0);
+        const totalTime = speedHistory.current.reduce((sum, frame) => sum + frame.deltaTime, 0);
+
+        // Calculate speed (distance per second)
+        const speed = totalTime > 0 ? totalDistance / totalTime : 0;
+        setLocalPlayerSpeed(speed);
+      }
+    }
+
+    // Update previous position for next frame
+    previousPosition.current = currentPosition.clone();
+  });
+
+  // Action input state management - only for actions, not movement
+  const actionInputRef = useRef<Partial<Record<ActionType, boolean>>>({});
+
+  // Set up key event listeners for actions only
+  useEffect(() => {
+    const actionKeys = Object.values(ActionType);
+
+    const initialState: Partial<Record<ActionType, boolean>> = {};
+    actionKeys.forEach((action) => {
+      initialState[action] = false;
     });
-  }, [subscribeKeys]);
+    actionInputRef.current = initialState;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      actionKeys.forEach((action) => {
+        if (keyMapping[action]?.includes(event.code)) {
+          actionInputRef.current[action] = true;
+        }
+      });
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      actionKeys.forEach((action) => {
+        if (keyMapping[action]?.includes(event.code)) {
+          actionInputRef.current[action] = false;
+        }
+      });
+    };
+
+    const handleMouseDown = (event: MouseEvent) => {
+      const mouseButton = `Mouse${event.button}`;
+      actionKeys.forEach((action) => {
+        if (keyMapping[action]?.includes(mouseButton)) {
+          actionInputRef.current[action] = true;
+        }
+      });
+    };
+
+    const handleMouseUp = (event: MouseEvent) => {
+      const mouseButton = `Mouse${event.button}`;
+      actionKeys.forEach((action) => {
+        if (keyMapping[action]?.includes(mouseButton)) {
+          actionInputRef.current[action] = false;
+        }
+      });
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
 
   const reset = useCallback(() => {
     setPosition(new THREE.Vector3(0, 0, 0));
@@ -69,6 +169,8 @@ const Player = () => {
   // Callback for Player to request a cast
   const spawnEffect = useCallback(
     async (type: string, config?: { [key: string]: any }) => {
+      if (!account) return;
+
       // Add effect locally via store
       addEffect(type, account, config);
     },
@@ -79,10 +181,12 @@ const Player = () => {
     const playerRigidBody = rigidBodyPlayerRef.current;
     if (!playerRigidBody) return;
 
-    const inputs = getKeyboardInputs();
+    // Shooting Logic
+    const attack = actionInputRef.current[ActionType.ATTACK];
     const now = Date.now();
-    if (inputs.attack && now > shootTimestamp.current) {
-      shootTimestamp.current = now + SHOOT_COOLDOWN;
+    const canAttack = attack && now > canShootTimestamp.current;
+    if (canAttack) {
+      canShootTimestamp.current = now + SHOOT_COOLDOWN;
 
       const originPosition = playerRigidBody.translation();
       const originRotation = playerRigidBody.rotation();
@@ -95,7 +199,10 @@ const Player = () => {
 
       const bulletSpeed = 200;
 
-      const offset = forward.clone().multiplyScalar(2).add(new THREE.Vector3(0, 0.5, 0));
+      const offset = forward
+        .clone()
+        .multiplyScalar(2)
+        .add(new THREE.Vector3(0, 0.5, 0));
       const startPosition = position.clone().add(offset);
       spawnEffect(
         EffectType.BULLET,
@@ -104,14 +211,21 @@ const Player = () => {
     }
   });
 
+  // Handle reset action input processing on every frame
+  // Prevents reset from being called continuously while key is held down
   useFrame(() => {
-    if (!rigidBodyPlayerRef.current || !canReset.current) return;
+    if (!rigidBodyPlayerRef.current) return;
 
-    const inputs = getKeyboardInputs();
-    if (inputs.reset) {
+    // Reset key input handling - prevents continuous execution
+    // Compare with previous frame state to execute only once even when key is held down
+    const inputReset = actionInputRef.current[ActionType.RESET];
+    if (inputReset && !lastFramePressedReset.current) {
+      // Execute reset only when key is pressed in current frame but not in previous frame
       reset();
-      canReset.current = false;
     }
+
+    // Store current frame's key input state for next frame comparison
+    lastFramePressedReset.current = inputReset;
   });
 
   if (!account) return null;
