@@ -13,7 +13,7 @@ const isDevelopment = false; // Manually change for debug visualization
 const PointingSystem: React.FC = () => {
   const { camera, scene, size } = useThree();
   const getMouseInputs = useMouseControls();
-  const { setMoveToPoint } = useControllerState();
+  const { setMoveTarget } = useControllerState();
 
   // Movement permission state
   const [canMove, setCanMove] = useState(true);
@@ -153,7 +153,7 @@ const PointingSystem: React.FC = () => {
       if (isDevelopment) console.log('Moving to position:', position);
 
       // Set movement point in game state (triggers character movement)
-      setMoveToPoint(position);
+      setMoveTarget(position);
 
       // Set position for click effect visualization (slightly above floor)
       setClickPosition(new Vector3(position.x, position.y + 0.01, position.z));
@@ -168,7 +168,7 @@ const PointingSystem: React.FC = () => {
         setCanMove(true);
       }, 100);
     },
-    [canMove, setMoveToPoint],
+    [canMove, setMoveTarget],
   );
 
   // Frame counter (for reducing log frequency)
