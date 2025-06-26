@@ -1,11 +1,14 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
-import Experience from '../r3f/Experience';
 import { FlightControllerKeyMapping, FlightViewController, FollowLight } from 'vibe-starter-3d';
 import { useGameStore } from '../../stores/gameStore';
+import { Sky } from '@react-three/drei';
 import MapPhysicsReadyChecker from '../r3f/MapPhysicsReadyChecker';
 import EffectContainer from './EffectContainer';
+import Player from './Player';
+import FloatingShapes from './FloatingShapes';
+import Ground from './Ground';
 
 const movementKeyMapping: FlightControllerKeyMapping = {
   forward: ['KeyW'],
@@ -41,10 +44,14 @@ const GameSceneCanvas = () => {
         <Suspense fallback={null}>
           {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
           {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
-          <FollowLight />
           <FlightViewController keyMapping={movementKeyMapping} />
-          <Experience />
           <EffectContainer />
+          <Sky distance={450000} sunPosition={[-20, 30, 10]} turbidity={0.8} rayleigh={0.4} />
+          <ambientLight intensity={1.2} />
+          <FollowLight />
+          <Player />
+          <FloatingShapes />
+          <Ground />
         </Suspense>
       </Physics>
     </Canvas>
