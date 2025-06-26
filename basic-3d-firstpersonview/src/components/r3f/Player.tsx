@@ -13,7 +13,6 @@ import {
   RigidBodyPlayerRef,
   useCharacterAnimation,
   useControllerStore,
-  useMouseControls,
 } from 'vibe-starter-3d';
 
 import { useLocalPlayerStore } from '../../stores/localPlayerStore';
@@ -317,7 +316,7 @@ const Player = ({ position }: PlayerProps) => {
           break;
       }
     },
-    [unlockControls],
+    [unlockControls, setAnimation],
   );
 
   const updatePlayerState = useCallback((): void => {
@@ -355,7 +354,7 @@ const Player = ({ position }: PlayerProps) => {
       const characterState = toCharacterState(characterMovementState);
       setAnimation(characterState);
     }
-  }, [isControlLocked, canInterrupt, getCharacterMovementState, toCharacterState]);
+  }, [isControlLocked, canInterrupt, getCharacterMovementState, toCharacterState, getAnimation, setAnimation]);
 
   // Update player action state based on inputs and physics
   useFrame(() => {
