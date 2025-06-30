@@ -4,11 +4,20 @@ import * as THREE from 'three';
 
 type PlayerState = {
   position: THREE.Vector3;
+  /**
+   * Player speed in meters per second (m/s)
+   * - Convert to km/h by multiplying by 3.6
+   * - Formula: m/s × 3.6 = km/h
+   */
   speed: number;
 };
 
 type LocalPlayerState = {
   state: PlayerState;
+  /**
+   * Set speed
+   * @param speed Speed value in meters per second (m/s)
+   */
   setSpeed: (speed: number) => void;
   setPosition: (x: number, y: number, z: number) => void;
   clearPosition: () => void;

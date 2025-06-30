@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useGameServer } from '@agent8/gameserver';
 import * as THREE from 'three';
 import { ActiveEffect, EffectType } from '../../types';
 import { useEffectStore, useActiveEffects } from '../../stores/effectStore';
@@ -13,8 +12,6 @@ import { CollisionPayload } from '@react-three/rapier';
  * Effect container component using Zustand store for effect management.
  */
 function EffectContainer() {
-  // Call ALL hooks unconditionally at the top
-  const { connected } = useGameServer();
   const { getConnectedPlayerRef } = useMultiPlayerStore();
 
   // Get state and actions from the Zustand store
@@ -84,9 +81,6 @@ function EffectContainer() {
     },
     [handleEffectHit, handleEffectComplete, getConnectedPlayerRef],
   );
-
-  // Now perform the conditional return/render AFTER all hooks have been called
-  if (!connected) return null;
 
   // Render all active effects from the store
   return <>{activeEffects.map(renderEffect)}</>;

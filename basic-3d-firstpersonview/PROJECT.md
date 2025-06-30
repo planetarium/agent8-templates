@@ -188,6 +188,7 @@ Key technologies:
     - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets and muzzle flash.
     - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Sets up ambient lighting, environment preset (sunset), and includes the `Player` and `Floor` components.
     - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
+    - **`GameSceneCanvas.tsx`**: React Three Fiber Canvas component that renders the 3D game world with physics simulation and controller setup.
     - **`MapPhysicsReadyChecker.tsx`**: Component that checks if the map physics system is ready by performing raycasting from above downward to detect map geometry and ensures physics interactions are properly initialized before gameplay begins. Performs checks every frame until valid map geometry is detected, with a timeout after 180 frames to prevent infinite checking. Excludes Capsule shapes (likely characters/objects) and sensor colliders from the inspection.
     - **`Player.tsx`**: Component defining the player character using the `RigidBodyPlayer` component from vibe-starter-3d. Handles player state management, animation configurations, shooting mechanics, and object interactions through `onTriggerEnter` and `onTriggerExit` events. The character is set to invisible for FPS view, and includes comprehensive collision detection with other rigid body objects using the RigidBodyObjectType system.
     - **`effects/`**: Sub-directory containing components related to visual effects.
@@ -198,10 +199,11 @@ Key technologies:
 
   - **`scene/`**: Contains components related to scene setup.
 
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component with shadow support and pointer lock functionality. Utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`. Includes functionality to pause physics until the map physics system is ready and displays the `LoadingScreen` component. Inside the physics context, it includes `MapPhysicsReadyChecker` for map physics initialization, `FollowLight`, `FirstPersonViewController`, `Experience`, and `EffectContainer` components wrapped in `Suspense`. Also renders the `Crosshair` UI component as an overlay only after the physics system is ready.
+    - **`GameScene.tsx`**: Main game scene component that serves as a layout container arranging the game UI and 3D Canvas. Contains critical performance warnings and guidelines to prevent re-rendering issues. Includes the `GameSceneCanvas` and `GameSceneUI` components in a proper layered structure where the Canvas renders the 3D world and UI components render as overlays.
 
   - **`ui/`**: Contains UI components for the game interface.
     - **`Crosshair.tsx`**: Renders a centered crosshair overlay for FPS-style targeting with white lines and black outline for better visibility across different backgrounds.
+    - **`GameSceneUI.tsx`**: Component that manages UI overlays for the game scene.
     - **`LoadingScreen.tsx`**: Loading screen component displayed during game loading.
 
 ### `src/stores/`

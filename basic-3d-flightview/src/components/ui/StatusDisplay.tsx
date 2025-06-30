@@ -5,7 +5,7 @@ import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 const StatusDisplay: React.FC = () => {
   const { server, connected } = useGameServer();
   const { roomId } = useRoomState();
-  const [speed, setSpeed] = useState(0);
+  const [speedKmh, setSpeedKmh] = useState(0);
   const [altitude, setAltitude] = useState(0);
   const [hp, setHp] = useState(0);
   const [maxHp, setMaxHp] = useState(0);
@@ -15,7 +15,7 @@ const StatusDisplay: React.FC = () => {
 
   useEffect(() => {
     const updateStatus = () => {
-      setSpeed(parseFloat((state.speed * 3.6).toFixed(1)));
+      setSpeedKmh(parseFloat((state.speed * 3.6).toFixed(1)));
       setAltitude(parseFloat(state.position.y.toFixed(1)));
 
       animationId.current = requestAnimationFrame(updateStatus);
@@ -71,7 +71,7 @@ const StatusDisplay: React.FC = () => {
     >
       <div>Players: {players}</div>
       <div>Health: {hp ? ((hp / maxHp) * 100).toFixed(0) : 0}%</div>
-      <div>Speed: {speed.toFixed(1)} km/h</div>
+      <div>Speed: {speedKmh.toFixed(1)} km/h</div>
       <div>Altitude: {altitude.toFixed(1)} m</div>
       <hr style={{ margin: '5px 0' }} />
       <div>Controls:</div>

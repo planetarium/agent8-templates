@@ -1,25 +1,40 @@
-import { useRef, useMemo, useCallback, useEffect } from 'react';
-import { useKeyboardControls } from '@react-three/drei';
-import { useFrame, Vector3 } from '@react-three/fiber';
-import { CharacterState } from '../../constants/character';
+import { useRef, useMemo, useEffect, useCallback } from 'react';
+import * as THREE from 'three';
+import { useFrame, useThree, Vector3 } from '@react-three/fiber';
+import { CollisionPayload } from '@react-three/rapier';
+import { useGameServer } from '@agent8/gameserver';
+
 import {
   AnimationConfigMap,
-  CharacterRenderer,
-  useMouseControls,
-  useControllerState,
   AnimationType,
+  CharacterMovementState,
+  CharacterRenderer,
   RigidBodyPlayer,
   RigidBodyPlayerRef,
+  useControllerStore,
+  useCharacterAnimation,
 } from 'vibe-starter-3d';
 
-import Assets from '../../assets.json';
-import { useGameServer } from '@agent8/gameserver';
-import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
-import { CollisionPayload } from '@react-three/rapier';
-import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
 import { useLocalPlayerStore } from '../../stores/localPlayerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
+
+import { CharacterState } from '../../constants/character';
+import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
+
+import Assets from '../../assets.json';
 
 const targetHeight = 1.6;
+
+// States that can be interrupted by actions
+const INTERRUPTIBLE_STATES = [
+  CharacterState.IDLE,
+  CharacterState.IDLE_01,
+  CharacterState.WALK,
+  CharacterState.RUN,
+  CharacterState.FAST_RUN,
+  CharacterState.JUMP,
+] as const;
+
 /**
  * Player props
  */
@@ -29,34 +44,21 @@ interface PlayerProps {
 }
 
 /**
- * Player input parameters for action determination
- */
-interface PlayerInputs {
-  isRevive: boolean;
-  isDying: boolean;
-  isPunching: boolean;
-  isKicking: boolean;
-  isMeleeAttack: boolean;
-  isCasting: boolean;
-  isJumping: boolean;
-  isMoving: boolean;
-  isSprinting: boolean;
-  currentVelY: number;
-}
-
-/**
  * Player component that manages character model and animations
  *
  * Handles player state management and delegates rendering to CharacterRenderer.
+ * Movement states come from ControllerStore, actions are handled locally.
  */
 const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
   const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
   const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
-  const currentStateRef = useRef<CharacterState>(CharacterState.IDLE);
-  const [, getKeyboardInputs] = useKeyboardControls();
-  const getMouseInputs = useMouseControls();
-  const { setEnableInput } = useControllerState();
+
+  // Use the new useCharacterAnimation hook
+  const { animationState, setAnimation, getAnimation } = useCharacterAnimation<CharacterState>(CharacterState.IDLE);
+
+  // Get movement state from controller store (unified API)
+  const { getCharacterMovementState, isControlLocked, lockControls, unlockControls } = useControllerStore();
 
   // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
@@ -81,38 +83,31 @@ const Player = ({ position }: PlayerProps) => {
     setLocalPlayerPosition(position.x, position.y, position.z);
   });
 
-  const handleAnimationComplete = useCallback(
-    (type: AnimationType) => {
-      setEnableInput(true);
-      switch (type) {
-        case CharacterState.PUNCH:
-        case CharacterState.PUNCH_01:
-          currentStateRef.current = CharacterState.IDLE_01;
-          break;
-        case CharacterState.KICK:
-        case CharacterState.KICK_01:
-        case CharacterState.KICK_02:
-          currentStateRef.current = CharacterState.IDLE_01;
-          break;
-        case CharacterState.CAST:
-          currentStateRef.current = CharacterState.IDLE_01;
-          break;
-        case CharacterState.HIT:
-          currentStateRef.current = CharacterState.IDLE_01;
-          break;
-        case CharacterState.MELEE_ATTACK:
-          currentStateRef.current = CharacterState.IDLE_01;
-          break;
-        case CharacterState.DANCE:
-          currentStateRef.current = CharacterState.IDLE;
-          break;
-        default:
-          break;
-      }
-    },
-    [setEnableInput],
-  );
+  // Action input state management - only for actions, not movement
+  const actionInputRef = useRef<Record<string, boolean>>({});
 
+  // Helper functions
+  const canInterrupt = useCallback((state: CharacterState): boolean => {
+    return INTERRUPTIBLE_STATES.includes(state);
+  }, []);
+
+  // Convert ControllerStore state to Player animation state
+  const toCharacterState = useCallback((characterMovementState: CharacterMovementState): CharacterState => {
+    switch (characterMovementState) {
+      case CharacterMovementState.IDLE:
+        return CharacterState.IDLE;
+      case CharacterMovementState.MOVING:
+        return CharacterState.WALK;
+      case CharacterMovementState.SPRINTING:
+        return CharacterState.RUN;
+      case CharacterMovementState.AIRBORNE:
+        return CharacterState.JUMP;
+      default:
+        return CharacterState.IDLE;
+    }
+  }, []);
+
+  // Memoized map of animation configurations.
   const animationConfigMap: AnimationConfigMap = useMemo(
     () => ({
       [CharacterState.IDLE]: {
@@ -205,134 +200,99 @@ const Player = ({ position }: PlayerProps) => {
     [],
   );
 
-  const determinePlayerState = useCallback(
-    (
-      currentState: CharacterState,
-      { isRevive, isDying, isPunching, isKicking, isMeleeAttack, isCasting, isJumping, isMoving, isSprinting }: PlayerInputs,
-    ): CharacterState => {
-      if (isRevive && currentState === CharacterState.DIE) {
-        return CharacterState.IDLE;
+  // Callback triggered when a non-looping animation finishes.
+  const handleAnimationComplete = useCallback(
+    (type: AnimationType) => {
+      unlockControls();
+      switch (type) {
+        case CharacterState.PUNCH:
+        case CharacterState.PUNCH_01:
+          setAnimation(CharacterState.IDLE_01);
+          break;
+        case CharacterState.KICK:
+        case CharacterState.KICK_01:
+        case CharacterState.KICK_02:
+          setAnimation(CharacterState.IDLE_01);
+          break;
+        case CharacterState.CAST:
+          setAnimation(CharacterState.IDLE_01);
+          break;
+        case CharacterState.HIT:
+          setAnimation(CharacterState.IDLE_01);
+          break;
+        case CharacterState.MELEE_ATTACK:
+          setAnimation(CharacterState.IDLE_01);
+          break;
+        case CharacterState.DANCE:
+          setAnimation(CharacterState.IDLE);
+          break;
+        default:
+          break;
       }
-      // Maintain death state
-      if (isDying || currentState === CharacterState.DIE) {
-        return CharacterState.DIE;
-      }
-
-      // Punch animation - start only if not already punching
-      if (
-        isPunching &&
-        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
-          currentState,
-        )
-      ) {
-        setEnableInput(false);
-        return CharacterState.PUNCH;
-      }
-
-      // Kick animation - start only if not already punching
-      if (
-        isKicking &&
-        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
-          currentState,
-        )
-      ) {
-        setEnableInput(false);
-        return CharacterState.KICK;
-      }
-
-      // Melee attack animation - start only if not already punching or kicking
-      if (
-        isMeleeAttack &&
-        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
-          currentState,
-        )
-      ) {
-        setEnableInput(false);
-        return CharacterState.MELEE_ATTACK;
-      }
-
-      // Cast animation - start only if not already punching or kicking
-      if (
-        isCasting &&
-        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
-          currentState,
-        )
-      ) {
-        setEnableInput(false);
-        return CharacterState.CAST;
-      }
-
-      // Jump animation (can't jump while punching)
-      if (
-        isJumping &&
-        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
-          currentState,
-        )
-      ) {
-        return CharacterState.JUMP;
-      }
-
-      // Moving state
-      if (
-        [CharacterState.IDLE, CharacterState.IDLE_01, CharacterState.WALK, CharacterState.RUN, CharacterState.FAST_RUN, CharacterState.JUMP].includes(
-          currentState,
-        )
-      ) {
-        if (isMoving) {
-          if (isSprinting) {
-            return CharacterState.FAST_RUN;
-          } else {
-            return CharacterState.RUN;
-          }
-        } else {
-          if (currentState != CharacterState.IDLE_01) {
-            return CharacterState.IDLE;
-          }
-        }
-      }
-      console.log('currentState', currentState);
-      // Default - maintain current action
-      return currentState;
     },
-    [setEnableInput],
+    [unlockControls],
   );
+
+  const updatePlayerState = useCallback((): void => {
+    const currentState = getAnimation();
+    const actionInput = actionInputRef.current;
+
+    // If controls are locked, don't process actions
+    if (isControlLocked()) {
+      return;
+    }
+
+    // Handle death and revive states
+    const isRevive = false;
+    const isDying = false;
+
+    if (isRevive && currentState === CharacterState.DIE) {
+      setAnimation(CharacterState.IDLE);
+      return;
+    }
+
+    if (isDying || currentState === CharacterState.DIE) {
+      setAnimation(CharacterState.DIE);
+      return;
+    }
+
+    // Handle action states (punch, kick, etc.) - highest priority
+    if (actionInput.punch && canInterrupt(currentState)) {
+      setAnimation(CharacterState.PUNCH);
+      lockControls();
+      return;
+    }
+
+    if (actionInput.kick && canInterrupt(currentState)) {
+      setAnimation(CharacterState.KICK);
+      lockControls();
+      return;
+    }
+
+    if (actionInput.meleeAttack && canInterrupt(currentState)) {
+      setAnimation(CharacterState.MELEE_ATTACK);
+      lockControls();
+      return;
+    }
+
+    if (actionInput.cast && canInterrupt(currentState)) {
+      setAnimation(CharacterState.CAST);
+      lockControls();
+      return;
+    }
+
+    // For movement states, use ControllerStore state
+    if (canInterrupt(currentState)) {
+      const characterMovementState = getCharacterMovementState();
+      const characterState = toCharacterState(characterMovementState);
+      setAnimation(characterState);
+    }
+  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState]);
 
   // Update player action state based on inputs and physics
   useFrame(() => {
     if (!rigidBodyPlayerRef.current) return;
-
-    // 1. Calculate mouse state
-    const { left: mouseLeft, right: mouseRight } = getMouseInputs();
-
-    // 2. Calculate keyboard state
-    const { up, down, left, right, jump, sprint, q, e, r, f } = getKeyboardInputs();
-
-    // 3. Calculate attack state
-    const isPunching = !!mouseLeft || !!q;
-    const isKicking = !!mouseRight || !!e;
-    const isMeleeAttack = !!r;
-    const isCasting = !!f;
-
-    // 4. Calculate movement state
-    const isMoving = up || down || left || right;
-    const isJumping = jump;
-    const isSprinting = sprint;
-
-    const currentVel = rigidBodyPlayerRef.current.linvel?.() || { y: 0 };
-
-    // 5. Determine player state
-    currentStateRef.current = determinePlayerState(currentStateRef.current, {
-      isRevive: false,
-      isDying: false,
-      isPunching,
-      isKicking,
-      isMeleeAttack,
-      isCasting,
-      isJumping,
-      isMoving,
-      isSprinting,
-      currentVelY: currentVel.y,
-    });
+    updatePlayerState();
   });
 
   /** handleTriggerEnter: Called when the player intersects or collides with another object.
@@ -370,7 +330,7 @@ const Player = ({ position }: PlayerProps) => {
         visible={false}
         url={Assets.characters['base-model'].url}
         animationConfigMap={animationConfigMap}
-        currentAnimationRef={currentStateRef}
+        animationState={animationState}
         targetHeight={targetHeight}
         onAnimationComplete={handleAnimationComplete}
       />

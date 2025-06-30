@@ -1,44 +1,31 @@
-import { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import Experience from '../r3f/Experience';
-import { KeyboardControls } from '@react-three/drei';
-import { keyboardMap } from '../../constants/controls';
-import { Physics } from '@react-three/rapier';
-import { FollowLight, QuarterViewController } from 'vibe-starter-3d';
-import { useGameStore } from '../../stores/gameStore';
-import LoadingScreen from '../ui/LoadingScreen';
-import MapPhysicsReadyChecker from '../r3f/MapPhysicsReadyChecker';
+import GameSceneCanvas from '../r3f/GameSceneCanvas';
+import GameSceneUI from '../ui/GameSceneUI';
 
 /**
- * Main game scene component
+ * Main Game Scene Component
  *
- * This component is responsible for setting up the 3D environment
- * including physics, lighting, and scene elements.
+ * This component serves as a layout container that arranges the game UI and 3D Canvas.
+ *
+ * 🚨 CRITICAL PERFORMANCE WARNING:
+ * Re-rendering of this component triggers re-rendering of the entire 3D Canvas, causing severe performance degradation.
+ *
+ * Prohibited Actions:
+ * - Using state management hooks like useState, useReducer
+ * - Passing frequently changing values as props
+ * - State updates inside useEffect
+ * - Conditional rendering that changes component structure
+ * - Creating inline objects/functions (e.g., style={{...}}, onClick={() => {}})
+ *
+ * Recommendations:
+ * - Handle state management in child components (GameSceneUI, GameSceneCanvas)
+ * - Access global state directly through zustand store or similar
+ * - Memoize event handlers with useCallback before use
  */
 const GameScene = () => {
-  // ⚠️ MUST CHECK: Map physics system ready state
-  // Physics paused and loading screen displayed while this value is false
-  const { isMapPhysicsReady } = useGameStore();
-
   return (
     <div className="relative w-full h-screen">
-      {/* Loading screen overlay */}
-      {!isMapPhysicsReady && <LoadingScreen />}
-
-      {/* Keyboard preset */}
-      <KeyboardControls map={keyboardMap}>
-        <Canvas shadows>
-          <Physics paused={!isMapPhysicsReady}>
-            <Suspense fallback={null}>
-              {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
-              {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
-              <FollowLight offset={[60, 100, 30]} intensity={2} />
-              <QuarterViewController followCharacter={true} />
-              <Experience />
-            </Suspense>
-          </Physics>
-        </Canvas>
-      </KeyboardControls>
+      <GameSceneUI />
+      <GameSceneCanvas />
     </div>
   );
 };
