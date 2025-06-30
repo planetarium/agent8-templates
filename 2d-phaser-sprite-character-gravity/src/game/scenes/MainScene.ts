@@ -12,8 +12,8 @@ export class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.spritesheet(
-      "medieval-knight",
-      Assets.sprites["medieval-knight"].url,
+      "2dbasic",
+      Assets.sprites["2dbasic"].url,
       {
         frameWidth: 192,
         frameHeight: 192,
@@ -45,7 +45,7 @@ export class MainScene extends Phaser.Scene {
       this,
       this.cameras.main.width / 2,
       this.ground.y - this.ground.height,
-      "medieval-knight"
+      "2dbasic"
     );
 
     // 플레이어와 지면의 충돌 설정
