@@ -11,12 +11,13 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload() {
+    this.physics.world.createDebugGraphic();
     this.load.spritesheet(
       "2dbasic",
       Assets.sprites["2dbasic"].url,
       {
-        frameWidth: 192,
-        frameHeight: 192,
+        frameWidth: Assets.sprites["2dbasic"].metadata?.frameWidth ?? 111,
+        frameHeight: Assets.sprites["2dbasic"].metadata?.frameHeight ?? 83,
       }
     );
   }
