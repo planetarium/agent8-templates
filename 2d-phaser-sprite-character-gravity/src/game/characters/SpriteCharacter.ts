@@ -19,8 +19,8 @@ export class SpriteCharacter extends Phaser.Physics.Arcade.Sprite {
     this.setBounce(0.2);
     this.setCollideWorldBounds(true);
 
-    this.body.setSize(80, 80);
-    this.body.setOffset(60, 40);
+    this.body.setSize(62, 75);
+    this.body.setOffset(23, -5);
   }
 
   setupAnimations() {
