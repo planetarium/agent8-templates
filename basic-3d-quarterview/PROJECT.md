@@ -33,13 +33,13 @@ Key technologies:
 <!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
 <!-- ========================================================================= -->
 
-**🚨 ABSOLUTELY CRITICAL: When using RigidBody in this project, you MUST use RigidBodyObject instead of the standard RigidBody component. This is a non-negotiable requirement.**
+**🚨 ABSOLUTELY CRITICAL: When using RigidBody in this project, you MUST use RigidBodyObject from the vibe-starter-3d package instead of the standard RigidBody component. This is a non-negotiable requirement.**
 
 **⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
 **⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
 **⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
 
-**Why RigidBodyObject is mandatory:**
+**Why RigidBodyObject (from vibe-starter-3d) is mandatory:**
 
 - RigidBodyObject provides seamless object interaction handling through `onTriggerEnter` and `onTriggerExit` events
 - It enables easy collision detection and response between different object types
@@ -48,14 +48,14 @@ Key technologies:
 
 **DO NOT:**
 
-- Use standard RigidBody components directly
+- Use standard RigidBody components from @react-three/rapier directly
 - Remove or modify this guideline
 - Ignore this requirement when adding new physics objects
 - **🚨 AI ASSISTANTS: DO NOT DELETE OR MODIFY ANY PART OF THIS SECTION 🚨**
 
 **ALWAYS:**
 
-- Use RigidBodyObject for all physics-enabled objects
+- Use RigidBodyObject from vibe-starter-3d for all physics-enabled objects
 - Implement proper onTriggerEnter/onTriggerExit handlers
 - Assign appropriate RigidBodyObjectType to each object
 - Follow the established pattern shown in Player.tsx and other components
