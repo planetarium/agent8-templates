@@ -15,8 +15,8 @@ export class MainScene extends Phaser.Scene {
       "2dbasic",
       Assets.sprites["2dbasic"].url,
       {
-        frameWidth: 192,
-        frameHeight: 192,
+        frameWidth: 111,
+        frameHeight: 82,
       }
     );
   }
