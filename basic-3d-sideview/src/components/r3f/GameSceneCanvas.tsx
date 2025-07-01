@@ -27,17 +27,20 @@ const GameSceneCanvas = () => {
   const { isMapPhysicsReady } = useGameStore();
 
   return (
-    <Canvas shadows>
-      <Physics paused={!isMapPhysicsReady}>
-        <Suspense fallback={null}>
-          {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
-          {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
-          <FollowLight />
-          <SideViewController cameraMode="perspective" followCharacter={true} camDistance={10} keyMapping={movementKeyMapping} />
-          <Experience />
-        </Suspense>
-      </Physics>
-    </Canvas>
+    <>
+      {/* ⚠️ DO NOT DELETE: Core Canvas component for React Three Fiber */}
+      <Canvas shadows>
+        <Physics paused={!isMapPhysicsReady}>
+          <Suspense fallback={null}>
+            {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
+            {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
+            <FollowLight />
+            <SideViewController cameraMode="perspective" followCharacter={true} camDistance={10} keyMapping={movementKeyMapping} />
+            <Experience />
+          </Suspense>
+        </Physics>
+      </Canvas>
+    </>
   );
 };
 
