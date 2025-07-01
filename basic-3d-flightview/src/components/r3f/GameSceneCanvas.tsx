@@ -33,28 +33,31 @@ const GameSceneCanvas = () => {
   const { isMapPhysicsReady } = useGameStore();
 
   return (
-    <Canvas
-      shadows
-      camera={{ far: 5000 }}
-      onPointerDown={(e) => {
-        (e.target as HTMLCanvasElement).requestPointerLock();
-      }}
-    >
-      <Physics paused={!isMapPhysicsReady} debug={false}>
-        <Suspense fallback={null}>
-          {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
-          {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
-          <FlightViewController keyMapping={movementKeyMapping} />
-          <EffectContainer />
-          <Sky distance={450000} sunPosition={[-20, 30, 10]} turbidity={0.8} rayleigh={0.4} />
-          <ambientLight intensity={1.2} />
-          <FollowLight />
-          <Player />
-          <FloatingShapes />
-          <Ground />
-        </Suspense>
-      </Physics>
-    </Canvas>
+    <>
+      {/* ⚠️ DO NOT DELETE: Core Canvas component for React Three Fiber */}
+      <Canvas
+        shadows
+        camera={{ far: 5000 }}
+        onPointerDown={(e) => {
+          (e.target as HTMLCanvasElement).requestPointerLock();
+        }}
+      >
+        <Physics paused={!isMapPhysicsReady} debug={false}>
+          <Suspense fallback={null}>
+            {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
+            {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
+            <FlightViewController keyMapping={movementKeyMapping} />
+            <EffectContainer />
+            <Sky distance={450000} sunPosition={[-20, 30, 10]} turbidity={0.8} rayleigh={0.4} />
+            <ambientLight intensity={1.2} />
+            <FollowLight />
+            <Player />
+            <FloatingShapes />
+            <Ground />
+          </Suspense>
+        </Physics>
+      </Canvas>
+    </>
   );
 };
 
