@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { useThree, useFrame } from '@react-three/fiber';
 import useCubeStore from '../stores/cubeStore';
+import { usePlayerActionStore } from '../stores/playerActionStore';
 import throttle from 'lodash/throttle';
 
 // Raycast distance limit constants
@@ -137,17 +138,20 @@ const useCubeRaycaster = () => {
     }
   }, [previewPosition, addCube, selectedTile]);
 
-  // Mouse click event listener
+  // Subscribe to addCube action from playerActionStore
   useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      if (e.button === 0) {
-        // Left click
-        handleCubeAction();
-      }
-    };
+    const unsubscribe = usePlayerActionStore.subscribe(
+      (state) => state.addCube,
+      (addCube) => {
+        if (addCube) {
+          handleCubeAction();
+          // Reset action after handling
+          usePlayerActionStore.getState().setPlayerAction('addCube', false);
+        }
+      },
+    );
 
-    window.addEventListener('mousedown', handleMouseDown);
-    return () => window.removeEventListener('mousedown', handleMouseDown);
+    return unsubscribe;
   }, [handleCubeAction]);
 
   // Cancel throttle function on component unmount
