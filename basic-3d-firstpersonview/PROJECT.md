@@ -205,6 +205,7 @@ Key technologies:
     - **`Crosshair.tsx`**: Renders a centered crosshair overlay for FPS-style targeting with white lines and black outline for better visibility across different backgrounds.
     - **`GameSceneUI.tsx`**: Component that manages UI overlays for the game scene.
     - **`LoadingScreen.tsx`**: Loading screen component displayed during game loading.
+    - **`InputController.tsx`**: Manages all input handling including keyboard, mouse, and touch controls with virtual joystick support for mobile devices and action buttons for FPS-style attack controls and movement.
 
 ### `src/stores/`
 
@@ -213,6 +214,7 @@ Key technologies:
   - **`gameStore.ts`**: Store that manages the overall game state. Tracks and controls the readiness state of the map physics system (`isMapPhysicsReady`). This state is used to determine physics simulation pause/resume and loading screen display.
   - **`localPlayerStore.ts`**: Store that manages the local player's state, such as position tracking.
   - **`multiPlayerStore.ts`**: Store that manages multiple connected players' rigid body references for multiplayer functionality, including registration, unregistration, and retrieval of player references.
+- **`playerActionStore.ts`**: Store that manages player action states including combat actions (punch, kick, meleeAttack, cast) with support for setting, getting, and resetting action states.
 
 ### `src/types/`
 

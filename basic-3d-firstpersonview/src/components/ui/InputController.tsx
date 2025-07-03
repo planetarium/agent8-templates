@@ -366,9 +366,9 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
   // Render action buttons
   return (
     <div className="fixed bottom-8 right-8 z-[1001]">
-      {/* Jump Button */}
+      {/* Attack Button */}
       <div
-        className={`w-20 h-20 rounded-full bg-gray-500 border-2 border-white 
+        className={`w-20 h-20 rounded-full bg-gray-500/30 border-2 border-white 
                    flex items-center justify-center cursor-pointer select-none touch-none
                    ${isAttackPressed ? 'scale-90' : 'scale-100'} transition-transform`}
         onMouseDown={handleAttackStart}
@@ -380,9 +380,9 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
         <span className="text-white text-xs font-bold">ATTACK</span>
       </div>
 
-      {/* Punch Button */}
+      {/* Jump Button */}
       <div
-        className={`absolute bottom-0 -left-12 -top-12 w-14 h-14 rounded-full bg-gray-500 border-2 border-white 
+        className={`absolute bottom-0 -left-12 -top-12 w-14 h-14 rounded-full bg-gray-500/30 border-2 border-white 
                    flex items-center justify-center cursor-pointer select-none touch-none
                    ${isJumpPressed ? 'scale-90' : 'scale-100'} transition-transform`}
         onMouseDown={handleJumpStart}
