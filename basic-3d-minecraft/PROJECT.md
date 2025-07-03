@@ -232,7 +232,7 @@ The rendering system uses a color-based approach with these key features:
     - **`Experience.tsx`**: Sets up 3D environment including lighting, sky, and world elements. Coordinates the overall 3D scene composition.
     - **`GameSceneCanvas.tsx`**: React Three Fiber Canvas component that renders the 3D game world with physics simulation and controller setup.
     - **`MapPhysicsReadyChecker.tsx`**: Component that checks if the map physics system is ready by performing raycasting from above downward to detect map geometry and ensures physics interactions are properly initialized before gameplay begins. Performs checks every frame until valid map geometry is detected, with a timeout after 180 frames to prevent infinite checking. Excludes Capsule shapes (likely characters/objects) and sensor colliders from the inspection.
-    - **`Player.tsx`**: Dedicated player component managing character rendering, animations.
+    - **`Player.tsx`**: Advanced player component integrating RigidBodyPlayer with CharacterRenderer for comprehensive character management, physics interactions, and animation state management with collision detection capabilities.
     - **`InstancedCube.tsx`**: Core voxel rendering system using instanced meshes with custom shader for optimized color-based rendering and chunk-based optimization.
     - **`SingleCube.tsx`**: Component for rendering individual cubes with color-based faces for UI and preview purposes.
     - **`CubePreview.tsx`**: Shows preview of block placement location with precise coordinate alignment to the actual placement position.
