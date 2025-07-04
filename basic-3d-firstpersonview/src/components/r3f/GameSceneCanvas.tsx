@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
-import { FirstPersonViewController, FollowLight } from 'vibe-starter-3d';
+import { FirstPersonViewController, FollowLight, IS_MOBILE } from 'vibe-starter-3d';
 import { useGameStore } from '../../stores/gameStore';
 import { Environment } from '@react-three/drei';
 import MapPhysicsReadyChecker from '../r3f/MapPhysicsReadyChecker';
@@ -26,7 +26,9 @@ const GameSceneCanvas = () => {
       <Canvas
         shadows
         onPointerDown={(e) => {
-          (e.target as HTMLCanvasElement).requestPointerLock();
+          if (!IS_MOBILE) {
+            (e.target as HTMLCanvasElement).requestPointerLock();
+          }
         }}
       >
         <Physics paused={!isMapPhysicsReady}>

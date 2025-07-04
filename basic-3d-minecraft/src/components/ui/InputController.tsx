@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useInputStore } from 'vibe-starter-3d';
+import { IS_MOBILE, useInputStore } from 'vibe-starter-3d';
 import { usePlayerActionStore } from '../../stores/playerActionStore';
 import nipplejs from 'nipplejs';
 
@@ -89,7 +89,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
 
   // Joystick input handling with analog support
   useEffect(() => {
-    if (disabled || disableJoystick) return;
+    if (disabled || disableJoystick || !IS_MOBILE) return;
 
     // Create div element for left side area of screen
     const joystickZone = document.createElement('div');
@@ -371,7 +371,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
     <div className="fixed bottom-8 right-8 z-[1001]">
       {/* Add cube Button */}
       <div
-        className={`w-20 h-20 rounded-full bg-gray-500/30 border-2 border-white 
+        className={`w-20 h-20 rounded-full bg-white/30 
                    flex items-center justify-center cursor-pointer select-none touch-none
                    ${isAddCubePressed ? 'scale-90' : 'scale-100'} transition-transform`}
         onMouseDown={handleAddCubeStart}
@@ -385,7 +385,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
 
       {/* Attack Button */}
       <div
-        className={`absolute bottom-0 -left-12 -top-12 w-14 h-14 rounded-full bg-gray-500/30 border-2 border-white 
+        className={`absolute bottom-0 -left-12 -top-12 w-14 h-14 rounded-full bg-white/30 
                    flex items-center justify-center cursor-pointer select-none touch-none
                    ${isJumpPressed ? 'scale-90' : 'scale-100'} transition-transform`}
         onMouseDown={handleJumpStart}

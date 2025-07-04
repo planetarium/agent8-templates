@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useInputStore } from 'vibe-starter-3d';
+import { IS_MOBILE, useInputStore } from 'vibe-starter-3d';
 import { usePlayerActionStore } from '../../stores/playerActionStore';
 import nipplejs from 'nipplejs';
 
@@ -120,7 +120,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
     const manager = nipplejs.create(options);
 
     manager.on('move', (evt, data) => {
-      if (disabled || disableJoystick) return; // Check disabled state
+      if (disabled || disableJoystick || IS_MOBILE) return; // Check disabled state
       setActiveInputSource('joystick');
 
       // Extract analog data from nipplejs
@@ -373,7 +373,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
     <div className="fixed bottom-8 right-8 z-[1001]">
       {/* Attack Button */}
       <div
-        className={`w-20 h-20 rounded-full bg-gray-500/30 border-2 border-white 
+        className={`w-20 h-20 rounded-full bg-white/30 
                    flex items-center justify-center cursor-pointer select-none touch-none
                    ${isAttackPressed ? 'scale-90' : 'scale-100'} transition-transform`}
         onMouseDown={handleAttackStart}
@@ -387,7 +387,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
 
       {/* Jump Button */}
       <div
-        className={`absolute bottom-0 -left-12 -top-12 w-14 h-14 rounded-full bg-gray-500/30 border-2 border-white 
+        className={`absolute bottom-0 -left-12 -top-12 w-14 h-14 rounded-full bg-white/30 
                    flex items-center justify-center cursor-pointer select-none touch-none
                    ${isJumpPressed ? 'scale-90' : 'scale-100'} transition-transform`}
         onMouseDown={handleJumpStart}
