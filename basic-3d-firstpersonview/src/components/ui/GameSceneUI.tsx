@@ -1,5 +1,6 @@
 import { useGameStore } from '../../stores/gameStore';
 import Crosshair from './Crosshair';
+import { InputController } from './InputController';
 import LoadingScreen from './LoadingScreen';
 
 /**
@@ -15,6 +16,9 @@ const GameSceneUI = () => {
 
   return (
     <>
+      {/* Input Controller - Global input management (keyboard, touch) */}
+      <InputController disableJoystick={false} disableKeyboard={false} disabled={!isMapPhysicsReady} />
+
       {/* Loading Game Scene screen overlay */}
       {!isMapPhysicsReady && <LoadingScreen />}
 

@@ -2,18 +2,9 @@ import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import Experience from '../r3f/Experience';
-import { ControllerKeyMapping, FollowLight, QuarterViewController } from 'vibe-starter-3d';
+import { FollowLight, QuarterViewController } from 'vibe-starter-3d';
 import { useGameStore } from '../../stores/gameStore';
 import MapPhysicsReadyChecker from '../r3f/MapPhysicsReadyChecker';
-
-const movementKeyMapping: ControllerKeyMapping = {
-  forward: ['KeyW', 'ArrowUp'],
-  backward: ['KeyS', 'ArrowDown'],
-  leftward: ['KeyA', 'ArrowLeft'],
-  rightward: ['KeyD', 'ArrowRight'],
-  jump: ['Space'],
-  run: ['ShiftLeft', 'ShiftRight'],
-};
 
 /**
  * Game Scene Canvas Component
@@ -35,7 +26,7 @@ const GameSceneCanvas = () => {
             {/* ⚠️ MUST INCLUDE: Essential checker for map physics initialization */}
             {!isMapPhysicsReady && <MapPhysicsReadyChecker />}
             <FollowLight offset={[60, 100, 30]} intensity={2} />
-            <QuarterViewController followCharacter={true} keyMapping={movementKeyMapping} />
+            <QuarterViewController followCharacter={true} />
             <Experience />
           </Suspense>
         </Physics>

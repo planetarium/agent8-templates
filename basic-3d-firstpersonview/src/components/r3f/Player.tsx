@@ -17,6 +17,7 @@ import {
 
 import { useLocalPlayerStore } from '../../stores/localPlayerStore';
 import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
+import { usePlayerActionStore } from '../../stores/playerActionStore';
 
 import { CharacterState } from '../../constants/character';
 import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
@@ -38,16 +39,6 @@ const INTERRUPTIBLE_STATES = [
   CharacterState.FAST_RUN,
   CharacterState.JUMP,
 ] as const;
-
-// Action types enum
-enum ActionType {
-  ATTACK = 'attack',
-}
-
-// Key mapping with type safety
-const keyMapping: Record<ActionType, string[]> = {
-  [ActionType.ATTACK]: ['Mouse0'],
-};
 
 const animationConfigMap: AnimationConfigMap = {
   [CharacterState.IDLE]: {
@@ -156,6 +147,7 @@ const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
   const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
   const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
+  const { getPlayerAction } = usePlayerActionStore();
 
   // Use the new useCharacterAnimation hook
   const { animationState, setAnimation, getAnimation } = useCharacterAnimation<CharacterState>(CharacterState.IDLE);
@@ -163,7 +155,7 @@ const Player = ({ position }: PlayerProps) => {
   const camera = useThree((state) => state.camera);
 
   // Get movement state from controller store (unified API)
-  const { getCharacterMovementState, isControlLocked, unlockControls } = useControllerStore();
+  const { getCharacterMovementState, isControlLocked, lockControls, unlockControls } = useControllerStore();
 
   // IMPORTANT: rigidBodyPlayerRef.current type is RigidBody
   const rigidBodyPlayerRef = useRef<RigidBodyPlayerRef>(null);
@@ -205,66 +197,6 @@ const Player = ({ position }: PlayerProps) => {
     [addEffect, account],
   );
 
-  // Action input state management - only for actions, not movement
-  const actionInputRef = useRef<Partial<Record<ActionType, boolean>>>({});
-
-  // Set up key event listeners for actions only
-  useEffect(() => {
-    const actionKeys = Object.values(ActionType);
-
-    const initialState: Partial<Record<ActionType, boolean>> = {};
-    actionKeys.forEach((action) => {
-      initialState[action] = false;
-    });
-    actionInputRef.current = initialState;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      actionKeys.forEach((action: ActionType) => {
-        if (keyMapping[action]?.includes(event.code)) {
-          actionInputRef.current[action] = true;
-        }
-      });
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      actionKeys.forEach((action: ActionType) => {
-        if (keyMapping[action]?.includes(event.code)) {
-          actionInputRef.current[action] = false;
-        }
-      });
-    };
-
-    const handleMouseDown = (event: MouseEvent) => {
-      const mouseButton = `Mouse${event.button}`;
-      actionKeys.forEach((action: ActionType) => {
-        if (keyMapping[action]?.includes(mouseButton)) {
-          actionInputRef.current[action] = true;
-        }
-      });
-    };
-
-    const handleMouseUp = (event: MouseEvent) => {
-      const mouseButton = `Mouse${event.button}`;
-      actionKeys.forEach((action: ActionType) => {
-        if (keyMapping[action]?.includes(mouseButton)) {
-          actionInputRef.current[action] = false;
-        }
-      });
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
-
   // Helper functions
   const canInterrupt = useCallback((state: CharacterState): boolean => {
     return INTERRUPTIBLE_STATES.includes(state);
@@ -275,10 +207,12 @@ const Player = ({ position }: PlayerProps) => {
     switch (characterMovementState) {
       case CharacterMovementState.IDLE:
         return CharacterState.IDLE;
-      case CharacterMovementState.MOVING:
+      case CharacterMovementState.WALKING:
         return CharacterState.WALK;
-      case CharacterMovementState.SPRINTING:
+      case CharacterMovementState.RUN:
         return CharacterState.RUN;
+      case CharacterMovementState.FAST_RUN:
+        return CharacterState.FAST_RUN;
       case CharacterMovementState.AIRBORNE:
         return CharacterState.JUMP;
       default:
@@ -354,14 +288,14 @@ const Player = ({ position }: PlayerProps) => {
       const characterState = toCharacterState(characterMovementState);
       setAnimation(characterState);
     }
-  }, [isControlLocked, canInterrupt, getCharacterMovementState, toCharacterState, getAnimation, setAnimation]);
+  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation, getPlayerAction]);
 
   // Update player action state based on inputs and physics
   useFrame(() => {
     if (!rigidBodyPlayerRef.current) return;
     updatePlayerState();
-    // Shooting Logic
-    const attack = actionInputRef.current[ActionType.ATTACK];
+
+    const attack = getPlayerAction('attack');
     const now = Date.now();
     const canAttack = attack && !lastFrameAttack.current;
     lastFrameAttack.current = attack;

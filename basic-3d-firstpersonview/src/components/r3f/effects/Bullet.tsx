@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { RapierRigidBody, useRapier, CollisionPayload } from '@react-three/rapier';
+import { RapierRigidBody, useRapier, CollisionPayload, CuboidArgs, CuboidCollider } from '@react-three/rapier';
 import { ActiveCollisionTypes, InteractionGroups } from '@dimforge/rapier3d-compat';
 import { RigidBodyObject, RigidBodyObjectRef } from 'vibe-starter-3d';
 import { RigidBodyObjectType } from '../../../constants/rigidBodyObjectType';
 
-const DEFAULT_SIZE = new THREE.Vector3(0.5, 0.5, 1);
+const DEFAULT_SIZE = new THREE.Vector3(0.05, 0.05, 0.15);
+const DEFAULT_SIZE_HALF: CuboidArgs = [DEFAULT_SIZE.x / 2, DEFAULT_SIZE.y / 2, DEFAULT_SIZE.z / 2];
 
 export interface BulletProps {
   startPosition: THREE.Vector3;
@@ -37,9 +38,11 @@ const Bullet: React.FC<BulletProps> = ({
   const rigidBodyRef = useRef<RigidBodyObjectRef>(null);
   const freezed = useRef(false);
   const framesSinceFreezed = useRef(0);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const visible = useRef(false);
   const { rapier, world } = useRapier();
   const normalizedDirection = direction.clone().normalize();
-  const bulletGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.3);
+  const bulletGeometry = new THREE.BoxGeometry(DEFAULT_SIZE.x, DEFAULT_SIZE.y, DEFAULT_SIZE.z);
   const bulletMaterial = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 2 });
   const onCompleteRef = useRef(onComplete);
   const startTime = useRef(Date.now());
@@ -63,6 +66,14 @@ const Bullet: React.FC<BulletProps> = ({
     if (elapsed > duration) {
       removeBullet();
       return;
+    }
+
+    // make bullet visible after 150ms
+    if (!visible.current && elapsed > 150) {
+      visible.current = true;
+      if (meshRef.current) {
+        meshRef.current.visible = true;
+      }
     }
 
     // skip update if bullet is freezed
@@ -138,7 +149,7 @@ const Bullet: React.FC<BulletProps> = ({
       rotation={bulletRotation}
       sensor={true}
       scale={scale}
-      colliders={'cuboid'}
+      colliders={false}
       collisionGroups={collisionGroups ?? 0xffffffff}
       activeCollisionTypes={ActiveCollisionTypes.ALL}
       onTriggerEnter={(payload: CollisionPayload) => {
@@ -153,7 +164,8 @@ const Bullet: React.FC<BulletProps> = ({
       }}
       name="bullet"
     >
-      <mesh geometry={bulletGeometry} material={bulletMaterial} scale={DEFAULT_SIZE} />
+      <CuboidCollider args={DEFAULT_SIZE_HALF} />
+      <mesh ref={meshRef} geometry={bulletGeometry} material={bulletMaterial} visible={false} />
     </RigidBodyObject>
   );
 };

@@ -1,8 +1,15 @@
-import { useRef, useMemo, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CollisionPayload } from '@react-three/rapier';
 import { useGameServer } from '@agent8/gameserver';
 
+import { useLocalPlayerStore } from '../../stores/localPlayerStore';
+import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
+
+import { CharacterState } from '../../constants/character';
+import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
+
+import Assets from '../../assets.json';
 import {
   AnimationConfigMap,
   AnimationType,
@@ -13,14 +20,7 @@ import {
   useCharacterAnimation,
   useControllerStore,
 } from 'vibe-starter-3d';
-
-import { useLocalPlayerStore } from '../../stores/localPlayerStore';
-import { useMultiPlayerStore } from '../../stores/multiPlayerStore';
-
-import { CharacterState } from '../../constants/character';
-import { RigidBodyObjectType } from '../../constants/rigidBodyObjectType';
-
-import Assets from '../../assets.json';
+import { usePlayerActionStore } from '../../stores/playerActionStore';
 
 const targetHeight = 1.6;
 
@@ -34,19 +34,94 @@ const INTERRUPTIBLE_STATES = [
   CharacterState.JUMP,
 ] as const;
 
-// Action types enum
-enum ActionType {
-  PUNCH = 'punch',
-  KICK = 'kick',
-  MELEE_ATTACK = 'meleeAttack',
-  CAST = 'cast',
-}
-
-const keyMapping = {
-  [ActionType.PUNCH]: ['KeyF', 'Mouse0'],
-  [ActionType.KICK]: ['KeyG', 'Mouse2'],
-  [ActionType.MELEE_ATTACK]: ['KeyQ', 'KeyC'],
-  [ActionType.CAST]: ['KeyE', 'Mouse1'],
+// Animation configuration map moved outside component for better performance
+const animationConfigMap: AnimationConfigMap = {
+  [CharacterState.IDLE]: {
+    url: Assets.animations['idle-00'].url,
+    loop: true,
+  },
+  [CharacterState.IDLE_01]: {
+    url: Assets.animations['idle-01'].url,
+    loop: true,
+  },
+  [CharacterState.WALK]: {
+    url: Assets.animations['walk'].url,
+    loop: true,
+  },
+  [CharacterState.RUN]: {
+    url: Assets.animations['run-medium'].url,
+    loop: true,
+  },
+  [CharacterState.FAST_RUN]: {
+    url: Assets.animations['run-fast'].url,
+    loop: true,
+  },
+  [CharacterState.JUMP]: {
+    url: Assets.animations['jump'].url,
+    loop: true,
+    clampWhenFinished: true,
+  },
+  [CharacterState.PUNCH]: {
+    url: Assets.animations['punch-00'].url,
+    loop: false,
+    duration: 0.5,
+    clampWhenFinished: true,
+  },
+  [CharacterState.PUNCH_01]: {
+    url: Assets.animations['punch-01'].url,
+    loop: false,
+    duration: 0.5,
+    clampWhenFinished: true,
+  },
+  [CharacterState.KICK]: {
+    url: Assets.animations['kick-00'].url,
+    loop: false,
+    duration: 0.75,
+    clampWhenFinished: true,
+  },
+  [CharacterState.KICK_01]: {
+    url: Assets.animations['kick-01'].url,
+    loop: false,
+    duration: 1,
+    clampWhenFinished: true,
+  },
+  [CharacterState.KICK_02]: {
+    url: Assets.animations['kick-02'].url,
+    loop: false,
+    duration: 1,
+    clampWhenFinished: true,
+  },
+  [CharacterState.MELEE_ATTACK]: {
+    url: Assets.animations['melee-attack'].url,
+    loop: false,
+    duration: 1,
+    clampWhenFinished: true,
+  },
+  [CharacterState.CAST]: {
+    url: Assets.animations['cast'].url,
+    loop: false,
+    duration: 1,
+    clampWhenFinished: true,
+  },
+  [CharacterState.HIT]: {
+    url: Assets.animations['hit-to-body'].url,
+    loop: false,
+    clampWhenFinished: false,
+  },
+  [CharacterState.DANCE]: {
+    url: Assets.animations['dance'].url,
+    loop: false,
+    clampWhenFinished: false,
+  },
+  [CharacterState.SWIM]: {
+    url: Assets.animations['swim'].url,
+    loop: true,
+  },
+  [CharacterState.DIE]: {
+    url: Assets.animations['death-backward'].url,
+    loop: false,
+    clampWhenFinished: true,
+  },
 };
 
 /**
@@ -67,6 +142,7 @@ const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
   const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
   const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
+  const { getPlayerAction } = usePlayerActionStore();
 
   // Use the new useCharacterAnimation hook
   const { animationState, setAnimation, getAnimation } = useCharacterAnimation<CharacterState>(CharacterState.IDLE);
@@ -97,66 +173,6 @@ const Player = ({ position }: PlayerProps) => {
     setLocalPlayerPosition(position.x, position.y, position.z);
   });
 
-  // Action input state management - only for actions, not movement
-  const actionInputRef = useRef<Partial<Record<ActionType, boolean>>>({});
-
-  // Set up key event listeners for actions only
-  useEffect(() => {
-    const actionKeys = Object.values(ActionType);
-
-    const initialState: Record<string, boolean> = {};
-    actionKeys.forEach((action) => {
-      initialState[action] = false;
-    });
-    actionInputRef.current = initialState;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      actionKeys.forEach((action) => {
-        if (keyMapping[action]?.includes(event.code)) {
-          actionInputRef.current[action] = true;
-        }
-      });
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      actionKeys.forEach((action) => {
-        if (keyMapping[action]?.includes(event.code)) {
-          actionInputRef.current[action] = false;
-        }
-      });
-    };
-
-    const handleMouseDown = (event: MouseEvent) => {
-      const mouseButton = `Mouse${event.button}`;
-      actionKeys.forEach((action) => {
-        if (keyMapping[action]?.includes(mouseButton)) {
-          actionInputRef.current[action] = true;
-        }
-      });
-    };
-
-    const handleMouseUp = (event: MouseEvent) => {
-      const mouseButton = `Mouse${event.button}`;
-      actionKeys.forEach((action) => {
-        if (keyMapping[action]?.includes(mouseButton)) {
-          actionInputRef.current[action] = false;
-        }
-      });
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
-
   // Helper functions
   const canInterrupt = useCallback((state: CharacterState): boolean => {
     return INTERRUPTIBLE_STATES.includes(state);
@@ -167,9 +183,11 @@ const Player = ({ position }: PlayerProps) => {
     switch (characterMovementState) {
       case CharacterMovementState.IDLE:
         return CharacterState.IDLE;
-      case CharacterMovementState.MOVING:
+      case CharacterMovementState.WALKING:
+        return CharacterState.WALK;
+      case CharacterMovementState.RUN:
         return CharacterState.RUN;
-      case CharacterMovementState.SPRINTING:
+      case CharacterMovementState.FAST_RUN:
         return CharacterState.FAST_RUN;
       case CharacterMovementState.AIRBORNE:
         return CharacterState.JUMP;
@@ -177,99 +195,6 @@ const Player = ({ position }: PlayerProps) => {
         return CharacterState.IDLE;
     }
   }, []);
-
-  // Memoized map of animation configurations.
-  const animationConfigMap: AnimationConfigMap = useMemo(
-    () => ({
-      [CharacterState.IDLE]: {
-        url: Assets.animations['idle-00'].url,
-        loop: true,
-      },
-      [CharacterState.IDLE_01]: {
-        url: Assets.animations['idle-01'].url,
-        loop: true,
-      },
-      [CharacterState.WALK]: {
-        url: Assets.animations['walk'].url,
-        loop: true,
-      },
-      [CharacterState.RUN]: {
-        url: Assets.animations['run-medium'].url,
-        loop: true,
-      },
-      [CharacterState.FAST_RUN]: {
-        url: Assets.animations['run-fast'].url,
-        loop: true,
-      },
-      [CharacterState.JUMP]: {
-        url: Assets.animations['jump'].url,
-        loop: true,
-        clampWhenFinished: true,
-      },
-      [CharacterState.PUNCH]: {
-        url: Assets.animations['punch-00'].url,
-        loop: false,
-        duration: 0.5,
-        clampWhenFinished: true,
-      },
-      [CharacterState.PUNCH_01]: {
-        url: Assets.animations['punch-01'].url,
-        loop: false,
-        duration: 0.5,
-        clampWhenFinished: true,
-      },
-      [CharacterState.KICK]: {
-        url: Assets.animations['kick-00'].url,
-        loop: false,
-        duration: 0.75,
-        clampWhenFinished: true,
-      },
-      [CharacterState.KICK_01]: {
-        url: Assets.animations['kick-01'].url,
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-      },
-      [CharacterState.KICK_02]: {
-        url: Assets.animations['kick-02'].url,
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-      },
-      [CharacterState.MELEE_ATTACK]: {
-        url: Assets.animations['melee-attack'].url,
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-      },
-      [CharacterState.CAST]: {
-        url: Assets.animations['cast'].url,
-        loop: false,
-        duration: 1,
-        clampWhenFinished: true,
-      },
-      [CharacterState.HIT]: {
-        url: Assets.animations['hit-to-body'].url,
-        loop: false,
-        clampWhenFinished: false,
-      },
-      [CharacterState.DANCE]: {
-        url: Assets.animations['dance'].url,
-        loop: false,
-        clampWhenFinished: false,
-      },
-      [CharacterState.SWIM]: {
-        url: Assets.animations['swim'].url,
-        loop: true,
-      },
-      [CharacterState.DIE]: {
-        url: Assets.animations['death-backward'].url,
-        loop: false,
-        clampWhenFinished: true,
-      },
-    }),
-    [],
-  );
 
   // Callback triggered when a non-looping animation finishes.
   const handleAnimationComplete = useCallback(
@@ -301,12 +226,11 @@ const Player = ({ position }: PlayerProps) => {
           break;
       }
     },
-    [setAnimation, unlockControls],
+    [unlockControls, setAnimation],
   );
 
   const updatePlayerState = useCallback((): void => {
     const currentState = getAnimation();
-    const actionInput = actionInputRef.current;
 
     // If controls are locked, don't process actions
     if (isControlLocked()) {
@@ -314,39 +238,46 @@ const Player = ({ position }: PlayerProps) => {
     }
 
     // Handle death and revive states
+    // TODO: Connect with actual game state
+    // const isRevive = playerHealth > 0 && currentState === CharacterState.DIE;
+    // const isDying = playerHealth <= 0 && currentState !== CharacterState.DIE;
+
+    // Currently using placeholder false values
     const isRevive = false;
     const isDying = false;
 
-    if (isRevive && currentState === CharacterState.DIE) {
+    // Revive handling: when health is restored while in death state
+    if (isRevive) {
       setAnimation(CharacterState.IDLE);
       return;
     }
 
-    if (isDying || currentState === CharacterState.DIE) {
+    // Death handling: when health drops to 0 or below
+    if (isDying) {
       setAnimation(CharacterState.DIE);
       return;
     }
 
     // Handle action states (punch, kick, etc.) - highest priority
-    if (actionInput[ActionType.PUNCH] && canInterrupt(currentState)) {
+    if (getPlayerAction('punch') && canInterrupt(currentState)) {
       setAnimation(CharacterState.PUNCH);
       lockControls();
       return;
     }
 
-    if (actionInput[ActionType.KICK] && canInterrupt(currentState)) {
+    if (getPlayerAction('kick') && canInterrupt(currentState)) {
       setAnimation(CharacterState.KICK);
       lockControls();
       return;
     }
 
-    if (actionInput[ActionType.MELEE_ATTACK] && canInterrupt(currentState)) {
+    if (getPlayerAction('meleeAttack') && canInterrupt(currentState)) {
       setAnimation(CharacterState.MELEE_ATTACK);
       lockControls();
       return;
     }
 
-    if (actionInput[ActionType.CAST] && canInterrupt(currentState)) {
+    if (getPlayerAction('cast') && canInterrupt(currentState)) {
       setAnimation(CharacterState.CAST);
       lockControls();
       return;
@@ -358,7 +289,7 @@ const Player = ({ position }: PlayerProps) => {
       const characterState = toCharacterState(characterMovementState);
       setAnimation(characterState);
     }
-  }, [getAnimation, isControlLocked, canInterrupt, setAnimation, lockControls, getCharacterMovementState, toCharacterState]);
+  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation, getPlayerAction]);
 
   // Update player action state based on inputs and physics
   useFrame(() => {
