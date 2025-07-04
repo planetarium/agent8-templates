@@ -91,7 +91,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
 
   // Joystick input handling with analog support
   useEffect(() => {
-    if (disabled || disableJoystick) return;
+    if (disabled || disableJoystick || !IS_MOBILE) return;
 
     // Create div element for left side area of screen
     const joystickZone = document.createElement('div');
@@ -120,7 +120,7 @@ export const InputController: React.FC<InputControllerProps> = ({ disabled = fal
     const manager = nipplejs.create(options);
 
     manager.on('move', (evt, data) => {
-      if (disabled || disableJoystick || IS_MOBILE) return; // Check disabled state
+      if (disabled || disableJoystick) return; // Check disabled state
       setActiveInputSource('joystick');
 
       // Extract analog data from nipplejs
