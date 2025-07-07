@@ -115,6 +115,9 @@ async function copyDocs() {
 
       if (isDirectory(itemPath) && item !== 'docs' && item !== 'scripts' && item !== '.git' && item !== 'node_modules') {
         if (target === 'all' || item.startsWith(target)) {
+          if (target === 'basic-3d' && item === 'basic-3d') {
+            continue;
+          }
           targetDirs.push(item);
         }
       }
