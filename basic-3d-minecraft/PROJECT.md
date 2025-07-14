@@ -35,7 +35,7 @@ Key technologies:
 - **Custom Shader Implementation**: Per-face color rendering without texture overhead
 - **Precise Raycasting**: Accurate block targeting with synchronized preview and placement systems
 - **Dynamic World Loading**: Automatic chunk loading/unloading based on player proximity
-- **Procedural Terrain**: Advanced terrain generation with layer-based block distribution using absolute Y-coordinates
+- **Procedural CubeMap**: Advanced cubeMap generation with layer-based block distribution using absolute Y-coordinates
 - **Physics Integration**: Complete physics simulation with collision detection and rigid body management
 - **Player Reference System**: Multiplayer-ready player tracking and state management
 
@@ -44,7 +44,7 @@ Key technologies:
 - **Advanced Player System**: Dedicated Player.tsx component with comprehensive character management, animation control, and state transitions
 - **Character Animation System**: Complete character state management with animation mapping for idle, walking, running, jumping, and casting actions
 - **Physics Integration**: Full physics integration with collision detection, rigid body object type definitions, and player reference management
-- **Optimized Terrain Generation**: Procedural terrain generation with smooth transitions, natural formations, and absolute Y-coordinate based layer distribution
+- **Optimized CubeMap Generation**: Procedural cubeMap generation with smooth transitions, natural formations, and absolute Y-coordinate based layer distribution
 - **Precise Block Interaction**: Synchronized raycasting system with perfect alignment between preview and actual cube placement
 - **Theme-Based Block System**: Intuitive color-based theme organization with enhanced tile selection UI and visual feedback
 - **Chunk-Based Rendering**: Efficient world rendering with dynamic loading/unloading based on player proximity
@@ -94,7 +94,7 @@ The rendering system uses a color-based approach with these key features:
 
 - Directory containing utility functions for the game.
   - **`colorUtils.ts`**: Defines and manages per-face colors for all block types and provides functions for color conversion and access.
-  - **`terrainGenerator.ts`**: Implements procedural terrain generation with multiple layers, using absolute Y-coordinates for consistent block distribution.
+  - **`cubeMapGenerator.ts`**: Implements procedural cubeMap generation with multiple layers, using absolute Y-coordinates for consistent block distribution.
 
 ### `src/hooks/`
 
@@ -166,7 +166,7 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 7. **Optimized Instance Rendering**: The custom shader and instanced mesh approach allows for efficient rendering of thousands of blocks while still applying unique colors to each face of every block.
 
-8. **Advanced Terrain Generation**: The terrain is generated using a layered approach based on absolute Y-coordinates, creating natural-looking landscapes with appropriate block types at different heights.
+8. **Advanced CubeMap Generation**: The cubeMap is generated using a layered approach based on absolute Y-coordinates, creating natural-looking landscapes with appropriate block types at different heights.
 
 9. **Coordinate System Synchronization**: The raycasting and placement systems are carefully aligned to ensure that preview blocks appear exactly where they will be placed, making building more intuitive and precise.
 
@@ -176,8 +176,8 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 # Next Actions
 
-- **HIGHEST PRIORITY**: AI AGENT MUST IMPLEMENT CREATIVE TERRAIN GENERATION LOGIC IMMEDIATELY. Focus on terrainGenerator.ts and create an impressive, varied 3D world with multiple biomes, structures, and terrain features. This is the most critical task for game engagement and visual appeal. Skip all other tasks until terrain generation is complete and visually stunning.
+- **HIGHEST PRIORITY**: AI AGENT MUST IMPLEMENT CREATIVE CUBEMAP GENERATION LOGIC IMMEDIATELY. Focus on cubeMapGenerator.ts and create an impressive, varied 3D world with multiple biomes, structures, and cubeMap features. This is the most critical task for game engagement and visual appeal. Skip all other tasks until cubeMap generation is complete and visually stunning.
 
-- **SECOND PRIORITY**: AI AGENT MUST IMPLEMENT SKYBOX USING EXISTING RESOURCES AND TOOLS. Immediately utilize available skybox resources, textures, or libraries to enhance the visual environment. If suitable tools or libraries exist for skybox implementation, use them directly rather than building from scratch. The skybox should complement the terrain features and biomes to create a cohesive visual experience. This task should be completed efficiently using readily available resources.
+- **SECOND PRIORITY**: AI AGENT MUST IMPLEMENT SKYBOX USING EXISTING RESOURCES AND TOOLS. Immediately utilize available skybox resources, textures, or libraries to enhance the visual environment. If suitable tools or libraries exist for skybox implementation, use them directly rather than building from scratch. The skybox should complement the cubeMap features and biomes to create a cohesive visual experience. This task should be completed efficiently using readily available resources.
 
-- **Third Priority**: AI AGENT to implement additional gameplay features after terrain and skybox are properly implemented.
+- **Third Priority**: AI AGENT to implement additional gameplay features after cubeMap and skybox are properly implemented.

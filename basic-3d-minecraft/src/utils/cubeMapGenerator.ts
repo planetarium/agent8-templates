@@ -16,8 +16,8 @@ export const BIOMES = {
   // FLOATING_ISLANDS: 'floating_islands',
 };
 
-// TODO: Configure your terrain generation parameters
-export const TERRAIN_CONFIG = {
+// TODO: Configure your cubeMap generation parameters
+export const CUBEMAP_CONFIG = {
   // Basic settings
   scale: 0.03,
   amplitude: 18,
@@ -82,9 +82,9 @@ export interface GeneratedCube {
 }
 
 /**
- * Terrain generation function
+ * CubeMap generation function
  *
- * TODO: This is where your creativity comes in! Implement your own terrain generation logic.
+ * TODO: This is where your creativity comes in! Implement your own cubeMap generation logic.
  * Some ideas:
  * - Create floating islands
  * - Generate cave systems
@@ -94,11 +94,11 @@ export interface GeneratedCube {
  * - Implement rivers, lakes, or oceans
  * - Add special structures
  */
-export function generateTerrain(seed: string, width: number = 160, depth: number = 160): GeneratedCube[] {
-  console.log(`Generating terrain with seed: ${seed}`);
+export function generateCubeMap(seed: string, width: number = 160, depth: number = 160): GeneratedCube[] {
+  console.log(`Generating cubeMap with seed: ${seed}`);
 
   // Create noise functions
-  const terrainNoise = createSeedBasedNoise(seed + '-terrain');
+  const cubeMapNoise = createSeedBasedNoise(seed + '-cubemap');
   // TODO: Create more noise functions as needed
 
   // Create cube array
@@ -108,15 +108,15 @@ export function generateTerrain(seed: string, width: number = 160, depth: number
   const xOffset = Math.floor(width / 2);
   const zOffset = Math.floor(depth / 2);
 
-  // Basic flat terrain example
-  // TODO: Replace with your own terrain generation logic!
+  // Basic flat cubeMap example
+  // TODO: Replace with your own cubeMap generation logic!
   for (let x = 0; x < width; x++) {
     for (let z = 0; z < depth; z++) {
       // Generate a simple height using noise
-      const nx = x * TERRAIN_CONFIG.scale;
-      const nz = z * TERRAIN_CONFIG.scale;
+      const nx = x * CUBEMAP_CONFIG.scale;
+      const nz = z * CUBEMAP_CONFIG.scale;
       // Add 0 as the third parameter for 2D noise
-      const height = Math.floor((terrainNoise(nx, nz, 0) + 1) * 5) + TERRAIN_CONFIG.baseHeight;
+      const height = Math.floor((cubeMapNoise(nx, nz, 0) + 1) * 5) + CUBEMAP_CONFIG.baseHeight;
 
       // Calculate centered positions
       const xPos = x - xOffset;
@@ -183,14 +183,14 @@ export function generateCaves(x: number, y: number, z: number, caveNoise: Return
 }
 
 /**
- * Post-processing for the terrain
+ * Post-processing for the cubeMap
  *
  * TODO: Implement your own post-processing logic!
- * - Smooth terrain
+ * - Smooth cubeMap
  * - Create rivers
  * - Add paths
  */
-export function postProcessTerrain(cubes: GeneratedCube[]): GeneratedCube[] {
+export function postProcessCubeMap(cubes: GeneratedCube[]): GeneratedCube[] {
   // TODO: Implement your post-processing logic
   return cubes;
 }

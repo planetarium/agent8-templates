@@ -2,13 +2,13 @@ import { create } from 'zustand';
 import { TILE_TYPES } from '../constants/tiles';
 import { THEMES, getThemeTileIndices } from '../constants/themes';
 import { getTileTypeFromIndex } from '../utils/colorUtils';
-import { generateTerrain, GeneratedCube } from '../utils/terrainGenerator';
+import { generateCubeMap, GeneratedCube } from '../utils/cubeMapGenerator';
 
 // Seed value constant
 const DEFAULT_SEED = import.meta.env.VITE_AGENT8_VERSE || 'minecraft123';
 
-// Single terrain configuration value
-const TERRAIN_CONFIG = {
+// Single cubeMap configuration value
+const CUBEMAP_CONFIG = {
   width: 80,
   depth: 80,
 };
@@ -20,10 +20,13 @@ interface CubeInfo {
 }
 
 // Create a mapping table to convert from array index to tile type
-const TILE_INDEX_MAP = Object.values(TILE_TYPES).reduce((map, val, idx) => {
-  map[idx] = val;
-  return map;
-}, {} as Record<number, number>);
+const TILE_INDEX_MAP = Object.values(TILE_TYPES).reduce(
+  (map, val, idx) => {
+    map[idx] = val;
+    return map;
+  },
+  {} as Record<number, number>,
+);
 
 interface CubeStore {
   cubes: CubeInfo[]; // Cube information array
@@ -36,7 +39,7 @@ interface CubeStore {
   tileTypes: typeof TILE_TYPES; // Tile type constants
   builderMode: boolean; // Builder mode
   toggleBuilderMode: () => void; // Toggle builder mode
-  regenerateTerrain: (newSeed?: string) => void; // Function to regenerate terrain
+  regenerateCubeMap: (newSeed?: string) => void; // Function to regenerate cubeMap
 
   // Theme related states and functions
   selectedTheme: THEMES; // Selected theme
@@ -50,25 +53,25 @@ const isSamePosition = (a: [number, number, number], b: [number, number, number]
   return a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
 };
 
-// Function to create initial terrain
-const createInitialTerrain = (seed: string): CubeInfo[] => {
-  return generateTerrain(seed, TERRAIN_CONFIG.width, TERRAIN_CONFIG.depth);
+// Function to create initial cubeMap
+const createInitialCubeMap = (seed: string): CubeInfo[] => {
+  return generateCubeMap(seed, CUBEMAP_CONFIG.width, CUBEMAP_CONFIG.depth);
 };
 
 const useCubeStore = create<CubeStore>((set, get) => ({
   // Initial setup
   seed: DEFAULT_SEED,
-  cubes: createInitialTerrain(DEFAULT_SEED), // Apply initial terrain generation
+  cubes: createInitialCubeMap(DEFAULT_SEED), // Apply initial cubeMap generation
   tileTypes: TILE_TYPES,
   builderMode: true,
 
-  // Terrain regeneration function
-  regenerateTerrain: (newSeed) =>
+  // CubeMap regeneration function
+  regenerateCubeMap: (newSeed) =>
     set((state) => {
       const seed = newSeed || state.seed;
       return {
         seed,
-        cubes: createInitialTerrain(seed), // Regenerate terrain
+        cubes: createInitialCubeMap(seed), // Regenerate cubeMap
       };
     }),
 

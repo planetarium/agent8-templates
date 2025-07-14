@@ -90,7 +90,7 @@ const ThemeItem = ({ theme, isSelected, onClick }: { theme: THEMES; isSelected: 
  */
 const TileSelector: React.FC = () => {
   const tileStore = useCubeStore();
-  const { selectedTile, setSelectedTile, availableTiles, regenerateTerrain, selectedTheme, setSelectedTheme } = tileStore;
+  const { selectedTile, setSelectedTile, availableTiles, regenerateCubeMap, selectedTheme, setSelectedTheme } = tileStore;
 
   // Theme selection mode (false: tile selection mode, true: theme selection mode)
   const [showThemes, setShowThemes] = useState(false);
@@ -183,9 +183,9 @@ const TileSelector: React.FC = () => {
     return tiles;
   }, [availableTiles, currentTileIndex, maxDisplayTiles]);
 
-  // Terrain regeneration function
-  const handleRegenerateTerrain = () => {
-    regenerateTerrain(customSeed);
+  // CubeMap regeneration function
+  const handleRegenerateCubeMap = () => {
+    regenerateCubeMap(customSeed);
   };
 
   // Theme selection mode rendering
