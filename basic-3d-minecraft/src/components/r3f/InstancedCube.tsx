@@ -88,14 +88,14 @@ const fragmentShader = `
   }
 `;
 
-// Function to calculate chunk coordinates from cube position
-const getChunkCoords = (position: [number, number, number]): [number, number, number] => {
-  return [Math.floor(position[0] / CHUNK_SIZE), Math.floor(position[1] / CHUNK_SIZE), Math.floor(position[2] / CHUNK_SIZE)];
+// Function to calculate chunk coordinates - 2D system (X, Z only)
+const getChunkCoords = (position: [number, number, number]): [number, number] => {
+  return [Math.floor(position[0] / CHUNK_SIZE), Math.floor(position[2] / CHUNK_SIZE)];
 };
 
-// Function to generate chunk key (unique identifier)
-const getChunkKey = (chunkCoords: [number, number, number]): string => {
-  return `${chunkCoords[0]},${chunkCoords[1]},${chunkCoords[2]}`;
+// Function to generate chunk key (unique identifier) - 2D system
+const getChunkKey = (chunkCoords: [number, number]): string => {
+  return `${chunkCoords[0]},${chunkCoords[1]}`;
 };
 
 // Type for cube data
@@ -108,7 +108,7 @@ type Cube = {
 // Type for chunk data
 type Chunk = {
   key: string;
-  coords: [number, number, number];
+  coords: [number, number]; // 2D coordinates (X, Z)
   cubes: Cube[];
   isActive: boolean;
   distance: number; // Distance from camera
@@ -158,18 +158,19 @@ const InstancedCube = () => {
     return [...chunks].sort((a, b) => {
       const centerA = new THREE.Vector3(
         a.coords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        0, // Y 값은 거리 계산에서 제외
         a.coords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
-        a.coords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
       );
 
       const centerB = new THREE.Vector3(
         b.coords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        0, // Y 값은 거리 계산에서 제외
         b.coords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
-        b.coords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
       );
 
-      const distA = centerA.distanceTo(cameraPosition);
-      const distB = centerB.distanceTo(cameraPosition);
+      const cameraPosXZ = new THREE.Vector3(cameraPosition.x, 0, cameraPosition.z);
+      const distA = centerA.distanceTo(cameraPosXZ);
+      const distB = centerB.distanceTo(cameraPosXZ);
 
       return distA - distB;
     });
@@ -189,7 +190,7 @@ const InstancedCube = () => {
     frameCountRef.current = (frameCountRef.current + 1) % 3;
   });
 
-  // Calculate active chunks based on camera position - optimized version
+  // Calculate active chunks based on camera position - 2D system
   const activeChunks = useMemo(() => {
     if (!camera || !cameraChunkTrigger) return new Set<string>();
 
@@ -197,27 +198,26 @@ const InstancedCube = () => {
     const centerChunk = getChunkCoords([cameraPosition.x, cameraPosition.y, cameraPosition.z]);
     const activeChunkSet = new Set<string>();
 
-    // Distance calculation for spherical activation area (using squared distance to avoid sqrt)
+    // Distance calculation for circular activation area (using squared distance to avoid sqrt)
     const radius = ACTIVE_CHUNKS_RADIUS;
     const maxDistSq = radius * CHUNK_SIZE * (radius * CHUNK_SIZE);
 
-    // Activate base area
+    // Activate base area - 2D system (X, Z only)
     for (let x = -radius; x <= radius; x++) {
-      for (let y = -radius; y <= radius; y++) {
-        for (let z = -radius; z <= radius; z++) {
-          const chunkCoords: [number, number, number] = [centerChunk[0] + x, centerChunk[1] + y, centerChunk[2] + z];
+      for (let z = -radius; z <= radius; z++) {
+        const chunkCoords: [number, number] = [centerChunk[0] + x, centerChunk[1] + z];
 
-          // Distance-based activation: exclude corner chunks too far from center
-          const chunkCenter = new THREE.Vector3(
-            chunkCoords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
-            chunkCoords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
-            chunkCoords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
-          );
+        // Distance-based activation: exclude corner chunks too far from center
+        const chunkCenter = new THREE.Vector3(
+          chunkCoords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+          0, // Y 값은 거리 계산에서 제외
+          chunkCoords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
+        );
 
-          const distSq = chunkCenter.distanceToSquared(cameraPosition);
-          if (distSq <= maxDistSq) {
-            activeChunkSet.add(getChunkKey(chunkCoords));
-          }
+        const cameraPosXZ = new THREE.Vector3(cameraPosition.x, 0, cameraPosition.z);
+        const distSq = chunkCenter.distanceToSquared(cameraPosXZ);
+        if (distSq <= maxDistSq) {
+          activeChunkSet.add(getChunkKey(chunkCoords));
         }
       }
     }
@@ -239,15 +239,16 @@ const InstancedCube = () => {
       const isActive = activeChunks.has(chunkKey);
 
       if (!chunkMap.has(chunkKey)) {
-        // Calculate chunk center
+        // Calculate chunk center - 2D system
         const chunkCenter = new THREE.Vector3(
           chunkCoords[0] * CHUNK_SIZE + CHUNK_SIZE / 2,
+          0, // Y 값은 거리 계산에서 제외
           chunkCoords[1] * CHUNK_SIZE + CHUNK_SIZE / 2,
-          chunkCoords[2] * CHUNK_SIZE + CHUNK_SIZE / 2,
         );
 
-        // Calculate distance from camera
-        const distance = chunkCenter.distanceTo(cameraPosition);
+        // Calculate distance from camera (2D distance)
+        const cameraPosXZ = new THREE.Vector3(cameraPosition.x, 0, cameraPosition.z);
+        const distance = chunkCenter.distanceTo(cameraPosXZ);
 
         chunkMap.set(chunkKey, {
           key: chunkKey,
