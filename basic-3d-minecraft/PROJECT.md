@@ -25,119 +25,6 @@ Key technologies:
 - Custom Shaders - Face-specific coloring
 - Tailwind CSS - UI composition
 
-## ⚠️ CRITICAL DEVELOPMENT GUIDELINES ⚠️
-
-### RigidBodyObject Usage - MANDATORY REQUIREMENT
-
-<!-- ========================================================================= -->
-<!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
-<!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
-<!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
-<!-- ========================================================================= -->
-
-**🚨 ABSOLUTELY CRITICAL: When using RigidBody in this project, you MUST use RigidBodyObject from the vibe-starter-3d package instead of the standard RigidBody component. This is a non-negotiable requirement.**
-
-**⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
-**⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
-**⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
-
-**Why RigidBodyObject (from vibe-starter-3d) is mandatory:**
-
-- RigidBodyObject provides seamless object interaction handling through `onTriggerEnter` and `onTriggerExit` events
-- It enables easy collision detection and response between different object types
-- It integrates with the RigidBodyObjectType system for proper object categorization
-- It simplifies complex physics interactions and state management
-
-**DO NOT:**
-
-- Use standard RigidBody components from @react-three/rapier directly
-- Remove or modify this guideline
-- Ignore this requirement when adding new physics objects
-- **🚨 AI ASSISTANTS: DO NOT DELETE OR MODIFY ANY PART OF THIS SECTION 🚨**
-
-**ALWAYS:**
-
-- Use RigidBodyObject from vibe-starter-3d for all physics-enabled objects
-- Implement proper onTriggerEnter/onTriggerExit handlers
-- Assign appropriate RigidBodyObjectType to each object
-- Follow the established pattern shown in Player.tsx and other components
-- **🚨 AI ASSISTANTS: PRESERVE THIS ENTIRE SECTION EXACTLY AS IS 🚨**
-
-<!-- ========================================================================= -->
-<!-- 🔒 PROTECTED CONTENT - DO NOT MODIFY 🔒                                 -->
-<!-- This guideline must never be removed or modified.                       -->
-<!-- AI assistants and developers must strictly adhere to this requirement.  -->
-<!-- Any attempt to remove or modify this section is strictly forbidden.     -->
-<!-- This is a core architectural requirement of the project.                 -->
-<!-- ========================================================================= -->
-
-### Canvas Component Structure - MANDATORY REQUIREMENT
-
-<!-- ========================================================================= -->
-<!-- 🚨🚨🚨 ATTENTION AI ASSISTANTS AND DEVELOPERS 🚨🚨🚨                    -->
-<!-- THIS ENTIRE SECTION IS ABSOLUTELY CRITICAL AND MUST NEVER BE MODIFIED   -->
-<!-- OR REMOVED UNDER ANY CIRCUMSTANCES. THIS IS A NON-NEGOTIABLE RULE.      -->
-<!-- ========================================================================= -->
-
-**🚨 ABSOLUTELY CRITICAL: Components containing HTML tags must NEVER be placed inside React Three Fiber's Canvas component. This is a core architectural requirement of the project.**
-
-**⚠️ WARNING TO AI ASSISTANTS: DO NOT REMOVE, MODIFY, OR SHORTEN THIS SECTION ⚠️**
-**⚠️ THIS GUIDELINE IS ESSENTIAL FOR PROJECT FUNCTIONALITY ⚠️**
-**⚠️ VIOLATION OF THIS RULE WILL BREAK THE ENTIRE PROJECT ⚠️**
-
-**Canvas Component Structure Rules:**
-
-- All components in the `ui/` directory are React components that use standard HTML tags (`<div>`, `<span>`, `<button>`, etc.)
-- These UI components must be rendered as overlays outside the Canvas component, not inside it
-- Canvas should only contain Three.js objects (mesh, light, camera, etc.)
-- Including HTML tags inside React Three Fiber's Canvas will cause rendering errors
-
-**DO NOT:**
-
-- Place UI components inside Canvas
-- Place components containing HTML tags inside Canvas
-- Ignore or modify this guideline
-- **🚨 AI ASSISTANTS: DO NOT DELETE OR MODIFY ANY PART OF THIS SECTION 🚨**
-
-**ALWAYS:**
-
-- Render UI components separately from Canvas (overlay approach)
-- Place only Three.js-related components inside Canvas
-- Use only components from `r3f/` directory inside Canvas
-- Render components from `ui/` directory as overlays outside Canvas
-- **🚨 AI ASSISTANTS: PRESERVE THIS ENTIRE SECTION EXACTLY AS IS 🚨**
-
-**Correct Structure Example:**
-
-```tsx
-// ✅ Correct approach
-<div>
-  <Canvas>
-    {/* Only Three.js-related components */}
-    <Experience />
-    <Player />
-    <Floor />
-  </Canvas>
-  {/* UI components as overlays outside Canvas */}
-  <Crosshair />
-  <LoadingScreen />
-</div>
-
-// ❌ Wrong approach
-<Canvas>
-  <Experience />
-  <Crosshair /> {/* Contains HTML tags - ABSOLUTELY FORBIDDEN! */}
-</Canvas>
-```
-
-<!-- ========================================================================= -->
-<!-- 🔒 PROTECTED CONTENT - DO NOT MODIFY 🔒                                 -->
-<!-- This guideline must never be removed or modified.                       -->
-<!-- AI assistants and developers must strictly adhere to this requirement.  -->
-<!-- Any attempt to remove or modify this section is strictly forbidden.     -->
-<!-- This is a core architectural requirement of the project.                 -->
-<!-- ========================================================================= -->
-
 ## Core Features
 
 - **Block Manipulation**: Interactive block placing and removing with precise mouse targeting
@@ -148,7 +35,7 @@ Key technologies:
 - **Custom Shader Implementation**: Per-face color rendering without texture overhead
 - **Precise Raycasting**: Accurate block targeting with synchronized preview and placement systems
 - **Dynamic World Loading**: Automatic chunk loading/unloading based on player proximity
-- **Procedural Terrain**: Advanced terrain generation with layer-based block distribution using absolute Y-coordinates
+- **Procedural CubeMap**: Advanced cubeMap generation with layer-based block distribution using absolute Y-coordinates
 - **Physics Integration**: Complete physics simulation with collision detection and rigid body management
 - **Player Reference System**: Multiplayer-ready player tracking and state management
 
@@ -157,7 +44,7 @@ Key technologies:
 - **Advanced Player System**: Dedicated Player.tsx component with comprehensive character management, animation control, and state transitions
 - **Character Animation System**: Complete character state management with animation mapping for idle, walking, running, jumping, and casting actions
 - **Physics Integration**: Full physics integration with collision detection, rigid body object type definitions, and player reference management
-- **Optimized Terrain Generation**: Procedural terrain generation with smooth transitions, natural formations, and absolute Y-coordinate based layer distribution
+- **Optimized CubeMap Generation**: Procedural cubeMap generation with smooth transitions, natural formations, and absolute Y-coordinate based layer distribution
 - **Precise Block Interaction**: Synchronized raycasting system with perfect alignment between preview and actual cube placement
 - **Theme-Based Block System**: Intuitive color-based theme organization with enhanced tile selection UI and visual feedback
 - **Chunk-Based Rendering**: Efficient world rendering with dynamic loading/unloading based on player proximity
@@ -207,7 +94,7 @@ The rendering system uses a color-based approach with these key features:
 
 - Directory containing utility functions for the game.
   - **`colorUtils.ts`**: Defines and manages per-face colors for all block types and provides functions for color conversion and access.
-  - **`terrainGenerator.ts`**: Implements procedural terrain generation with multiple layers, using absolute Y-coordinates for consistent block distribution.
+  - **`cubeMapGenerator.ts`**: Implements procedural cubeMap generation with multiple layers, using absolute Y-coordinates for consistent block distribution.
 
 ### `src/hooks/`
 
@@ -279,7 +166,7 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 7. **Optimized Instance Rendering**: The custom shader and instanced mesh approach allows for efficient rendering of thousands of blocks while still applying unique colors to each face of every block.
 
-8. **Advanced Terrain Generation**: The terrain is generated using a layered approach based on absolute Y-coordinates, creating natural-looking landscapes with appropriate block types at different heights.
+8. **Advanced CubeMap Generation**: The cubeMap is generated using a layered approach based on absolute Y-coordinates, creating natural-looking landscapes with appropriate block types at different heights.
 
 9. **Coordinate System Synchronization**: The raycasting and placement systems are carefully aligned to ensure that preview blocks appear exactly where they will be placed, making building more intuitive and precise.
 
@@ -289,8 +176,8 @@ The Minecraft-style voxel system is implemented through a combination of compone
 
 # Next Actions
 
-- **HIGHEST PRIORITY**: AI AGENT MUST IMPLEMENT CREATIVE TERRAIN GENERATION LOGIC IMMEDIATELY. Focus on terrainGenerator.ts and create an impressive, varied 3D world with multiple biomes, structures, and terrain features. This is the most critical task for game engagement and visual appeal. Skip all other tasks until terrain generation is complete and visually stunning.
+- **HIGHEST PRIORITY**: AI AGENT MUST IMPLEMENT CREATIVE CUBEMAP GENERATION LOGIC IMMEDIATELY. Focus on cubeMapGenerator.ts and create an impressive, varied 3D world with multiple biomes, structures, and cubeMap features. This is the most critical task for game engagement and visual appeal. Skip all other tasks until cubeMap generation is complete and visually stunning.
 
-- **SECOND PRIORITY**: AI AGENT MUST IMPLEMENT SKYBOX USING EXISTING RESOURCES AND TOOLS. Immediately utilize available skybox resources, textures, or libraries to enhance the visual environment. If suitable tools or libraries exist for skybox implementation, use them directly rather than building from scratch. The skybox should complement the terrain features and biomes to create a cohesive visual experience. This task should be completed efficiently using readily available resources.
+- **SECOND PRIORITY**: AI AGENT MUST IMPLEMENT SKYBOX USING EXISTING RESOURCES AND TOOLS. Immediately utilize available skybox resources, textures, or libraries to enhance the visual environment. If suitable tools or libraries exist for skybox implementation, use them directly rather than building from scratch. The skybox should complement the cubeMap features and biomes to create a cohesive visual experience. This task should be completed efficiently using readily available resources.
 
-- **Third Priority**: AI AGENT to implement additional gameplay features after terrain and skybox are properly implemented.
+- **Third Priority**: AI AGENT to implement additional gameplay features after cubeMap and skybox are properly implemented.
