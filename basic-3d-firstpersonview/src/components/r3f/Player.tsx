@@ -147,7 +147,6 @@ const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
   const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
   const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
-  const { getPlayerAction } = usePlayerActionStore();
 
   // Use the new useCharacterAnimation hook
   const { animationState, setAnimation, getAnimation } = useCharacterAnimation<CharacterState>(CharacterState.IDLE);
@@ -288,14 +287,15 @@ const Player = ({ position }: PlayerProps) => {
       const characterState = toCharacterState(characterMovementState);
       setAnimation(characterState);
     }
-  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation, getPlayerAction]);
+  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation]);
 
   // Update player action state based on inputs and physics
   useFrame(() => {
     if (!rigidBodyPlayerRef.current) return;
     updatePlayerState();
 
-    const attack = getPlayerAction('attack');
+    const playerActionState = usePlayerActionStore.getState();
+    const attack = playerActionState.getPlayerAction('attack');
     const now = Date.now();
     const canAttack = attack && !lastFrameAttack.current;
     lastFrameAttack.current = attack;
