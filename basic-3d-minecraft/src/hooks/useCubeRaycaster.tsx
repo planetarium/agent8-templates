@@ -15,6 +15,9 @@ const useCubeRaycaster = () => {
   const [faceIndex, setFaceIndex] = useState<number | null>(null);
   const addCube = useCubeStore((state) => state.addCube);
   const selectedTile = useCubeStore((state) => state.selectedTile);
+  
+  // Track previous addCube state for edge detection
+  const previousAddCubeState = useRef(false);
 
   // Create Raycaster
   const raycaster = new THREE.Raycaster();
@@ -138,22 +141,6 @@ const useCubeRaycaster = () => {
     }
   }, [previewPosition, addCube, selectedTile]);
 
-  // Subscribe to addCube action from playerActionStore
-  useEffect(() => {
-    const unsubscribe = usePlayerActionStore.subscribe(
-      (state) => state.addCube,
-      (addCube) => {
-        if (addCube) {
-          handleCubeAction();
-          // Reset action after handling
-          usePlayerActionStore.getState().setPlayerAction('addCube', false);
-        }
-      },
-    );
-
-    return unsubscribe;
-  }, [handleCubeAction]);
-
   // Cancel throttle function on component unmount
   useEffect(() => {
     return () => {
@@ -161,9 +148,24 @@ const useCubeRaycaster = () => {
     };
   }, [throttledRaycast]);
 
-  // Raycasting update (throttling applied)
+  // Main update loop - handles both raycasting and cube actions
   useFrame(() => {
+    // 1. Update raycasting (throttled)
     throttledRaycast();
+    
+    // 2. Check addCube action state
+    const playerActions = usePlayerActionStore();
+    const currentAddCubeState = playerActions.addCube;
+    
+    // Detect rising edge (false -> true)
+    if (currentAddCubeState && !previousAddCubeState.current) {
+      handleCubeAction();
+      // Reset action after handling
+      playerActions.setPlayerAction('addCube', false);
+    }
+    
+    // Update previous state
+    previousAddCubeState.current = currentAddCubeState;
   });
 
   return { previewPosition };
