@@ -142,6 +142,7 @@ const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
   const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
   const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
+  const { getPlayerAction } = usePlayerActionStore();
 
   // Use the new useCharacterAnimation hook
   const { animationState, setAnimation, getAnimation } = useCharacterAnimation<CharacterState>(CharacterState.IDLE);
@@ -237,41 +238,46 @@ const Player = ({ position }: PlayerProps) => {
     }
 
     // Handle death and revive states
+    // TODO: Connect with actual game state
+    // const isRevive = playerHealth > 0 && currentState === CharacterState.DIE;
+    // const isDying = playerHealth <= 0 && currentState !== CharacterState.DIE;
+
+    // Currently using placeholder false values
     const isRevive = false;
     const isDying = false;
 
+    // Revive handling: when health is restored while in death state
     if (isRevive) {
       setAnimation(CharacterState.IDLE);
       return;
     }
 
+    // Death handling: when health drops to 0 or below
     if (isDying) {
       setAnimation(CharacterState.DIE);
       return;
     }
 
-    const playerActionState = usePlayerActionStore.getState();
-
     // Handle action states (punch, kick, etc.) - highest priority
-    if (playerActionState.getPlayerAction('punch') && canInterrupt(currentState)) {
+    if (getPlayerAction('punch') && canInterrupt(currentState)) {
       setAnimation(CharacterState.PUNCH);
       lockControls();
       return;
     }
 
-    if (playerActionState.getPlayerAction('kick') && canInterrupt(currentState)) {
+    if (getPlayerAction('kick') && canInterrupt(currentState)) {
       setAnimation(CharacterState.KICK);
       lockControls();
       return;
     }
 
-    if (playerActionState.getPlayerAction('meleeAttack') && canInterrupt(currentState)) {
+    if (getPlayerAction('meleeAttack') && canInterrupt(currentState)) {
       setAnimation(CharacterState.MELEE_ATTACK);
       lockControls();
       return;
     }
 
-    if (playerActionState.getPlayerAction('cast') && canInterrupt(currentState)) {
+    if (getPlayerAction('cast') && canInterrupt(currentState)) {
       setAnimation(CharacterState.CAST);
       lockControls();
       return;
@@ -283,7 +289,7 @@ const Player = ({ position }: PlayerProps) => {
       const characterState = toCharacterState(characterMovementState);
       setAnimation(characterState);
     }
-  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation]); 
+  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation, getPlayerAction]);
 
   // Update player action state based on inputs and physics
   useFrame(() => {
@@ -308,7 +314,7 @@ const Player = ({ position }: PlayerProps) => {
       // TODO: Handle when exiting a specific area or when collision with another object ends
     }
   };
-  
+
   return (
     <RigidBodyPlayer
       ref={rigidBodyPlayerRef}

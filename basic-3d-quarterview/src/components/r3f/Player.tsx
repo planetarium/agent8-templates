@@ -142,6 +142,8 @@ const Player = ({ position }: PlayerProps) => {
   const { account } = useGameServer();
   const { registerConnectedPlayer, unregisterConnectedPlayer } = useMultiPlayerStore();
   const { setPosition: setLocalPlayerPosition } = useLocalPlayerStore();
+  const { getPlayerAction } = usePlayerActionStore();
+
   // Use the new useCharacterAnimation hook
   const { animationState, setAnimation, getAnimation } = useCharacterAnimation<CharacterState>(CharacterState.IDLE);
 
@@ -256,28 +258,26 @@ const Player = ({ position }: PlayerProps) => {
       return;
     }
 
-    const playerActionState = usePlayerActionStore.getState();
-
     // Handle action states (punch, kick, etc.) - highest priority
-    if (playerActionState.getPlayerAction('punch') && canInterrupt(currentState)) {
+    if (getPlayerAction('punch') && canInterrupt(currentState)) {
       setAnimation(CharacterState.PUNCH);
       lockControls();
       return;
     }
 
-    if (playerActionState.getPlayerAction('kick') && canInterrupt(currentState)) {
+    if (getPlayerAction('kick') && canInterrupt(currentState)) {
       setAnimation(CharacterState.KICK);
       lockControls();
       return;
     }
 
-    if (playerActionState.getPlayerAction('meleeAttack') && canInterrupt(currentState)) {
+    if (getPlayerAction('meleeAttack') && canInterrupt(currentState)) {
       setAnimation(CharacterState.MELEE_ATTACK);
       lockControls();
       return;
     }
 
-    if (playerActionState.getPlayerAction('cast') && canInterrupt(currentState)) {
+    if (getPlayerAction('cast') && canInterrupt(currentState)) {
       setAnimation(CharacterState.CAST);
       lockControls();
       return;
@@ -289,7 +289,7 @@ const Player = ({ position }: PlayerProps) => {
       const characterState = toCharacterState(characterMovementState);
       setAnimation(characterState);
     }
-  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation]);
+  }, [isControlLocked, canInterrupt, lockControls, getCharacterMovementState, toCharacterState, getAnimation, setAnimation, getPlayerAction]);
 
   // Update player action state based on inputs and physics
   useFrame(() => {
