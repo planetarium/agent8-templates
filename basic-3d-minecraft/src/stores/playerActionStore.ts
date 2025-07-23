@@ -12,7 +12,7 @@ interface PlayerActionStore extends PlayerActionState {
   resetAllPlayerActions: () => void;
 }
 
-export const playerActionStore: PlayerActionStore = {
+const playerActionStore: PlayerActionStore = {
   punch: false,
   kick: false,
   meleeAttack: false,

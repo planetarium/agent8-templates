@@ -15,6 +15,7 @@ const useCubeRaycaster = () => {
   const [faceIndex, setFaceIndex] = useState<number | null>(null);
   const addCube = useCubeStore((state) => state.addCube);
   const selectedTile = useCubeStore((state) => state.selectedTile);
+  const playerActions = usePlayerActionStore();
   
   // Track previous addCube state for edge detection
   const previousAddCubeState = useRef(false);
@@ -153,8 +154,6 @@ const useCubeRaycaster = () => {
     // 1. Update raycasting (throttled)
     throttledRaycast();
     
-    // 2. Check addCube action state
-    const playerActions = usePlayerActionStore();
     const currentAddCubeState = playerActions.addCube;
     
     // Detect rising edge (false -> true)
