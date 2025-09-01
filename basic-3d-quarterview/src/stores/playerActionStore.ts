@@ -1,6 +1,3 @@
-import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
-
 interface PlayerActionState {
   punch: boolean;
   kick: boolean;
@@ -14,30 +11,26 @@ interface PlayerActionStore extends PlayerActionState {
   resetAllPlayerActions: () => void;
 }
 
-const initialPlayerActionState: PlayerActionState = {
+const playerActionStore: PlayerActionStore = {
   punch: false,
   kick: false,
   meleeAttack: false,
   cast: false,
+
+  setPlayerAction: (action: string, pressed: boolean) => {
+    (playerActionStore as any)[action] = pressed;
+  },
+
+  getPlayerAction: (action: string): boolean => {
+    return (playerActionStore as any)[action];
+  },
+
+  resetAllPlayerActions: () => {
+    playerActionStore.punch = false;
+    playerActionStore.kick = false;
+    playerActionStore.meleeAttack = false;
+    playerActionStore.cast = false;
+  },
 };
 
-export const usePlayerActionStore = create<PlayerActionStore>()(
-  subscribeWithSelector((set, get) => ({
-    ...initialPlayerActionState,
-
-    setPlayerAction: (action: string, pressed: boolean) => {
-      set((state) => ({
-        ...state,
-        [action]: pressed,
-      }));
-    },
-
-    getPlayerAction: (action: string) => {
-      return get()[action as keyof PlayerActionState];
-    },
-
-    resetAllPlayerActions: () => {
-      set(() => ({ ...initialPlayerActionState }));
-    },
-  })),
-);
+export const usePlayerActionStore = () => playerActionStore;
