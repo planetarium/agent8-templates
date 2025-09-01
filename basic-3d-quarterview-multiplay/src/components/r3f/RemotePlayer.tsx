@@ -129,7 +129,7 @@ const RemotePlayer = forwardRef<RemotePlayerHandle, RemotePlayerProps>(
           clampWhenFinished: false,
         },
         [CharacterState.DANCE]: {
-          url: Assets.animations['dance'].url,
+          url: Assets.animations['dance-wave'].url,
           loop: false,
           clampWhenFinished: false,
         },
