@@ -185,7 +185,7 @@ const Player = ({ initialState = CharacterState.IDLE, targetHeight = 1.6, charac
         clampWhenFinished: false,
       },
       [CharacterState.DANCE]: {
-        url: Assets.animations['dance'].url,
+        url: Assets.animations['dance-wave'].url,
         loop: false,
         clampWhenFinished: false,
       },
