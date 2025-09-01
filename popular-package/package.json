@@ -5,7 +5,7 @@
   "type": "module",
   "dependencies": {
     "@agent8/gameserver": "^1.5.3",
-    "vibe-starter-3d": "^0.8.13",
+    "vibe-starter-3d": "^0.8.18",
     "vibe-starter-3d-environment": "^2.0.31",
     "@react-three/drei": "9.122.0",
     "@react-three/fiber": "8.18.0",
