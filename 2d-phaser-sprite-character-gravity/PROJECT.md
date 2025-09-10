@@ -49,3 +49,9 @@ This project is a template project with a basic 2D sprite character. It is imple
 
 - Contains component-specific styles for the App component
 - Demonstrates how to use component-scoped CSS
+
+### docs/project-2d-rules.md
+
+- Contains development rules and best practices for 2D game development
+- Includes guidelines for image generation, display sizing, shader usage, and game loop implementation
+- Provides specific examples for proper tween scaling using displayWidth/displayHeight instead of scaleX/scaleY
