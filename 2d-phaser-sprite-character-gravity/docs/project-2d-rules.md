@@ -10,7 +10,7 @@ YOU MUST follow these rules EXACTLY:
 7. ✅ BACKTICKS FOR STRINGS: Always use backticks (`) for multi-line strings
 
 🚨 CRITICAL RULE - NEVER BREAK THIS:
-When tweening size changes, you MUST use displayWidth/displayHeight, NOT scaleX/scaleY!
+When tweening size changes, you MUST use displayWidth/displayHeight!!!
 
 ❌ Wrong Example (FORBIDDEN - DO NOT WRITE):
 this.tweens.add({
