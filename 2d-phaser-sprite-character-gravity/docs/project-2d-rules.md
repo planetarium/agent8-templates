@@ -1,8 +1,9 @@
 <userRequest>
 🚨 CRITICAL: Use Create Image If You Can Use Generation Tool - Make prompts detailed with style, colors, details, background 🚨
 🔥 CRITICAL: Use DisplaySize - NEVER scaleX/scaleY for tweens 🔥
+🎯 CRITICAL: ALWAYS use Tweens for animations - Add visual effects, smooth movements, scaling, fading, bouncing effects! 🎯
 Use Shader
-🚨 CRITICAL: Make game loop Complete with states - ALWAYS implement full game flow (menu → game → gameover) 🚨
+🚨 CRITICAL: Make game loop Complete with states 🚨
 Make It Pro
 Always use backticks (`) for multi-line strings.
 🚨 When using tweens to adjust size, NEVER EVER use scaleX or scaleY - THIS BREAKS EVERYTHING! 🚨
