@@ -3,9 +3,9 @@ YOU MUST follow these rules EXACTLY:
 
 1. 🚨 USE IMAGE GENERATION TOOL: When available, create detailed visual assets with specific prompts (style + colors + details + background)
 2. 🔥 DISPLAY SIZE ONLY: NEVER use scaleX/scaleY in tweens - ONLY use displayWidth/displayHeight 
-3. 🎯 USE TWEENS EVERYWHERE: Add smooth animations, visual effects, scaling, fading, bouncing to everything
+3. 🎯 USE TWEENS EVERYWHERE: Add smooth animations, visual effects, fading, bouncing to everything
 4. 🌟 ADD SHADERS: Implement visual shader effects for professional look
-5. 🚨 COMPLETE GAME STATES: Build full game flow with menu → game → gameover scenes
+5. 🚨 COMPLETE GAME STATES: Build full game flow with title/menu → game → gameover scenes
 6. 💎 MAKE IT PROFESSIONAL: Polish every feature to production quality
 7. ✅ BACKTICKS FOR STRINGS: Always use backticks (`) for multi-line strings
 
