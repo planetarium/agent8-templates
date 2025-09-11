@@ -2,6 +2,12 @@ import Phaser from "phaser";
 import { MainScene } from "./scenes/MainScene";
 
 export const createGame = (parent: string) => {
+  const originalSpriteSetDisplaySize = Phaser.GameObjects.Sprite.prototype.setDisplaySize;
+  const originalImageSetDisplaySize = Phaser.GameObjects.Image.prototype.setDisplaySize;
+  const originalSpriteSetScale = Phaser.GameObjects.Sprite.prototype.setScale;
+  const originalImageSetScale = Phaser.GameObjects.Image.prototype.setScale;
+  const originalTweenAdd = Phaser.Tweens.TweenManager.prototype.add;
+
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: window.innerWidth,
@@ -27,21 +33,58 @@ export const createGame = (parent: string) => {
   // This code overrides core Phaser engine behavior. Any changes will break the entire game.
   // Requires manual review and testing before any modifications.
   game.events.once('ready', () => {
-    const originalSpriteSetDisplaySize = Phaser.GameObjects.Sprite.prototype.setDisplaySize;
     Phaser.GameObjects.Sprite.prototype.setDisplaySize = function (width: number, height?: number) {
       (this as any).baseDisplayWidth = width;
       (this as any).baseDisplayHeight = height !== undefined ? height : width;
       return originalSpriteSetDisplaySize.call(this, width, height);
     };
 
-    const originalImageSetDisplaySize = Phaser.GameObjects.Image.prototype.setDisplaySize;
     Phaser.GameObjects.Image.prototype.setDisplaySize = function (width: number, height?: number) {
       (this as any).baseDisplayWidth = width;
       (this as any).baseDisplayHeight = height !== undefined ? height : width;
       return originalImageSetDisplaySize.call(this, width, height);
     };
-    
-    const originalTweenAdd = Phaser.Tweens.TweenManager.prototype.add;
+
+    Phaser.GameObjects.Sprite.prototype.setScale = function (x: number, y?: number) {
+      if ((this as any).baseDisplayWidth && (this as any).baseDisplayHeight) {
+        const baseWidth = (this as any).baseDisplayWidth;
+        const baseHeight = (this as any).baseDisplayHeight;
+
+        const textureWidth = this.width;
+        const textureHeight = this.height;
+
+        const targetWidth = baseWidth * x;
+        const targetHeight = baseHeight * (y !== undefined ? y : x);
+
+        const actualScaleX = targetWidth / textureWidth;
+        const actualScaleY = targetHeight / textureHeight;
+
+        return originalSpriteSetScale.call(this, actualScaleX, actualScaleY);
+      } else {
+        return originalSpriteSetScale.call(this, x, y);
+      }
+    };
+
+    Phaser.GameObjects.Image.prototype.setScale = function (x: number, y?: number) {
+      if ((this as any).baseDisplayWidth && (this as any).baseDisplayHeight) {
+        const baseWidth = (this as any).baseDisplayWidth;
+        const baseHeight = (this as any).baseDisplayHeight;
+        
+        const textureWidth = this.width;
+        const textureHeight = this.height;
+
+        const targetWidth = baseWidth * x;
+        const targetHeight = baseHeight * (y !== undefined ? y : x);
+
+        const actualScaleX = targetWidth / textureWidth;
+        const actualScaleY = targetHeight / textureHeight;
+
+        return originalImageSetScale.call(this, actualScaleX, actualScaleY);
+      } else {
+        return originalImageSetScale.call(this, x, y);
+      }
+    };
+
     Phaser.Tweens.TweenManager.prototype.add = function (config: any) {
       const newConfig = { ...config };
 
