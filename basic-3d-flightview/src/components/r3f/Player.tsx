@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { RigidBodyPlayer, RigidBodyPlayerRef, useControllerState } from 'vibe-starter-3d';
 import * as THREE from 'three';
 import { useGameServer } from '@agent8/gameserver';
@@ -199,10 +199,7 @@ const Player = () => {
 
       const bulletSpeed = 200;
 
-      const offset = forward
-        .clone()
-        .multiplyScalar(2)
-        .add(new THREE.Vector3(0, 0.5, 0));
+      const offset = forward.clone().multiplyScalar(2).add(new THREE.Vector3(0, 0.5, 0));
       const startPosition = position.clone().add(offset);
       spawnEffect(
         EffectType.BULLET,
