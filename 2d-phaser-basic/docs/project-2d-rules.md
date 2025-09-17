@@ -8,6 +8,7 @@ YOU MUST follow these rules EXACTLY:
 5. 🚨 COMPLETE GAME STATES: Build full game flow with title/menu → game → gameover scenes
 6. 💎 MAKE IT PROFESSIONAL: Polish every feature to production quality
 7. ✅ BACKTICKS FOR STRINGS: Always use backticks (`) for multi-line strings
+8. 📐 SET DISPLAY SIZE: When adding images/sprites, ALWAYS use setDisplaySize() to control dimensions
 
 🚨 CRITICAL RULE - NEVER BREAK THIS:
 When tweening size changes, you MUST use displayWidth/displayHeight!!!
@@ -31,4 +32,15 @@ this.tweens.add({
     yoyo: true,
     ease: 'Back.easeOut'
 });
+
+🚨 CRITICAL RULE - setDisplaySize():
+When adding images/sprites, ALWAYS set display size immediately after creation!
+
+❌ Wrong Example (FORBIDDEN - DO NOT WRITE):
+const sprite = this.add.image(x, y, 'texture');
+// ❌ No size control - sprite uses original image dimensions
+
+✅ Correct Example (REQUIRED - ALWAYS WRITE):
+const sprite = this.add.image(x, y, 'texture');
+sprite.setDisplaySize(200, 150);  // ✅ MANDATORY! Always control dimensions
 </userRequest>
