@@ -69,7 +69,7 @@ export const createGame = (parent: string) => {
       if ((this as any).baseDisplayWidth && (this as any).baseDisplayHeight) {
         const baseWidth = (this as any).baseDisplayWidth;
         const baseHeight = (this as any).baseDisplayHeight;
-        
+
         const textureWidth = this.width;
         const textureHeight = this.height;
 
@@ -87,20 +87,27 @@ export const createGame = (parent: string) => {
 
     Phaser.Tweens.TweenManager.prototype.add = function (config: any) {
       const newConfig = { ...config };
-
-      if (config.scaleX !== undefined || config.scaleY !== undefined) {
+      if (config.scaleX !== undefined || config.scaleY !== undefined || config.scale !== undefined) {
         const targets = Array.isArray(config.targets) ? config.targets : [config.targets];
         targets.forEach((target: any) => {
           if (target instanceof Phaser.GameObjects.Sprite || target instanceof Phaser.GameObjects.Image) {
-            if (config.scaleX !== undefined) {
+            if (config.scale !== undefined) {
               const baseWidth = (target as any).baseDisplayWidth || target.displayWidth;
-              newConfig.displayWidth = baseWidth * config.scaleX;
-              delete newConfig.scaleX;
-            }
-            if (config.scaleY !== undefined) {
               const baseHeight = (target as any).baseDisplayHeight || target.displayHeight;
-              newConfig.displayHeight = baseHeight * config.scaleY;
-              delete newConfig.scaleY;
+              newConfig.displayWidth = baseWidth * config.scale;
+              newConfig.displayHeight = baseHeight * config.scale;
+              delete newConfig.scale;
+            } else {
+              if (config.scaleX !== undefined) {
+                const baseWidth = (target as any).baseDisplayWidth || target.displayWidth;
+                newConfig.displayWidth = baseWidth * config.scaleX;
+                delete newConfig.scaleX;
+              }
+              if (config.scaleY !== undefined) {
+                const baseHeight = (target as any).baseDisplayHeight || target.displayHeight;
+                newConfig.displayHeight = baseHeight * config.scaleY;
+                delete newConfig.scaleY;
+              }
             }
           }
         });
