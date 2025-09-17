@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { useFrame, Vector3 } from '@react-three/fiber';
 import { CollisionPayload } from '@react-three/rapier';
 import { useGameServer } from '@agent8/gameserver';

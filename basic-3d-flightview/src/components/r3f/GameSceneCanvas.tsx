@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import { FlightControllerKeyMapping, FlightViewController, FollowLight } from 'vibe-starter-3d';

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { useFrame, useThree, Vector3 } from '@react-three/fiber';
 import { CollisionPayload } from '@react-three/rapier';
