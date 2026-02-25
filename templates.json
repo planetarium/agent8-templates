@@ -190,5 +190,28 @@
       "building",
       "survival"
     ]
+  },
+  {
+    "name": "survivors-like-2d-action-mobile-game",
+    "label": "Survivors-like 2D Action Mobile Game Template",
+    "description": "Create a Survivors-like 2D action game for mobile devices. Make the earned gold exchangeable with a CROSS chain token.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "survivors-like-2d-action-mobile-game",
+    "tags": [
+      "survivors",
+      "survivors-like",
+      "2d",
+      "action",
+      "mobile",
+      "gold",
+      "CROSS",
+      "CROSS chain",
+      "token",
+      "exchangeable",
+      "vite",
+      "react",
+      "typescript",
+      "phaser"
+    ]
   }
 ]
