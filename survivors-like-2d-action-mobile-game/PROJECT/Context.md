@@ -7,7 +7,7 @@ This is a **Vampire Survivors-like 2D mobile game boilerplate**. The current def
 ## AI Agent Mission
 
 When starting development from this template, you MUST:
-1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one using the combination table in `docs/project-2d-rules.md` Section 1-B (world × hero × enemies × color palette)
+1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one using the combination table in `docs/project-2d-rules.md` Section 1-B (world × hero × enemies × color palette). If the user prompt contains only blockchain/token-related words (CROSS, chain, token, wallet) and no explicit world concept → treat as no concept provided and use Section 1-B.
 2. **Replace all placeholder content** — game name, sprites, enemies, abilities, UI theme, wave design
 3. **Follow the 10-step checklist** in `PROJECT/Status.md` immediately
 

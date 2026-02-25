@@ -38,6 +38,7 @@ All generated assets must look like they were crafted by a professional game art
   - `background` — transparent OR a specific background treatment
 - **Consistency**: All assets in a single game must share the same art style. Never mix styles between player, enemies, and background.
 - **Readable at game size**: Characters are rendered small on screen. Design for clarity at 48×48 to 96×96 px — bold outlines, strong contrast, no fine detail that disappears when scaled down.
+- **UI redesign mandatory**: After generating assets, you MUST fully redesign `src/App.tsx` to match the chosen concept (layout, colors, modals, joystick style). Replacing assets only while leaving the UI unchanged is not allowed.
 
 ## Technical Rules (Violations Break the Game)
 
