@@ -2,10 +2,12 @@
 
 Files are marked as **[CHANGE]** (must be replaced per concept) or **[DO NOT MODIFY]** (engine/infrastructure).
 
+> **Critical**: `App.tsx` and `assets.json` are a **pair**. When you replace assets, you must also fully redesign `App.tsx` (HUD, layout, colors, modals, joystick) to match the chosen concept. **Do both on the first prompt** — do not defer UI to a later prompt. Never update assets without updating App.tsx.
+
 ```
 src/
 ├── assets.json                          [CHANGE] All sprite/image URLs — replace every asset
-├── App.tsx                              [CHANGE] Full UI redesign: HUD layout, colors, modals, joystick style
+├── App.tsx                              [CHANGE] Full UI redesign: HUD layout, colors, modals, joystick style — MANDATORY with assets
 ├── main.tsx                             [DO NOT MODIFY]
 │
 ├── components/
@@ -44,7 +46,7 @@ docs/project-2d-rules.md                 [DO NOT MODIFY] Full AI agent ruleset (
 |----------|-------|--------|
 | Config (concept data) | `config/*.ts` | Replace all 4 |
 | Assets | `assets.json` | Replace all URLs |
-| UI | `App.tsx` | Full redesign |
+| UI | `App.tsx` | **Full redesign (mandatory with assets)** |
 | New ability icons | `AbilityIcon.tsx` | Add to ICON_MAP |
 | New ability logic | `MainScene.ts` | Add to handleSelectAbility |
 | Engine / Infrastructure | Everything else | Do not touch |

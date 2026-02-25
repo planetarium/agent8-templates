@@ -1,5 +1,9 @@
 # Requirements & Patterns
 
+## Critical: Asset + UI Pair Rule (First Prompt)
+
+> **Assets and UI redesign are mandatory together.** After generating any image assets (NanoBanana Pro), you MUST fully redesign `src/App.tsx` — layout, colors, modals, joystick style — to match the chosen concept. **Do this on the first prompt** — do not defer UI to a later prompt or follow-up. **Replacing assets only while leaving the UI unchanged is not allowed.**
+
 ## Immutable gameEvents Keys
 
 These event names are hardcoded in both React and Phaser. **Never rename them.**
@@ -38,7 +42,7 @@ All generated assets must look like they were crafted by a professional game art
   - `background` — transparent OR a specific background treatment
 - **Consistency**: All assets in a single game must share the same art style. Never mix styles between player, enemies, and background.
 - **Readable at game size**: Characters are rendered small on screen. Design for clarity at 48×48 to 96×96 px — bold outlines, strong contrast, no fine detail that disappears when scaled down.
-- **UI redesign mandatory**: After generating assets, you MUST fully redesign `src/App.tsx` to match the chosen concept (layout, colors, modals, joystick style). Replacing assets only while leaving the UI unchanged is not allowed.
+- **UI redesign mandatory (first prompt)**: After generating assets, you MUST fully redesign `src/App.tsx` to match the chosen concept (layout, colors, modals, joystick style). **Do this on the same prompt — do not defer to a follow-up.** Replacing assets only while leaving the UI unchanged is not allowed. This is a hard requirement.
 
 ## Technical Rules (Violations Break the Game)
 

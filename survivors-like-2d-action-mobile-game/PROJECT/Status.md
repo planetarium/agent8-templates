@@ -1,5 +1,12 @@
 # Project Status
 
+## Critical Rules (Do Not Skip)
+
+| Rule | Action |
+|------|--------|
+| **Concept** | CROSS/chain/token in user prompt ≠ cyberpunk. Pick world from Section 1-B (fantasy, ocean, steampunk, etc.). Cyberpunk/SF only if user explicitly requests. |
+| **Assets + UI (first prompt)** | Step 2 (assets) and Step 8 (App.tsx redesign) are **one unit**. **Complete both on the first prompt** — do not defer UI to a later prompt. Never leave UI unchanged after generating assets. |
+
 ## Current Boilerplate Default (Placeholder — Replace Everything)
 
 The template ships with a generic knight-vs-slimes theme. This is not a final game — it is scaffolding.
@@ -16,13 +23,13 @@ The template ships with a generic knight-vs-slimes theme. This is not a final ga
 ## Immediate Tasks — Execute in Order
 
 - [ ] **Step 1** — Finalize game name & world concept → update `GAME_CONFIG.name`, `subtitle` in `src/config/gameConfig.ts`
-- [ ] **Step 2** — Generate all assets (NanoBanana Pro): player, each enemy type, background, XP gem, currency icon — ⚠️ After asset generation, you MUST immediately proceed to Step 8 UI redesign
+- [ ] **Step 2** — Generate all assets (NanoBanana Pro): player, each enemy type, background, XP gem, currency icon — **→ On this same (first) prompt, do Step 8 (App.tsx full redesign). Do not defer UI to a later prompt. Assets alone = incomplete.**
 - [ ] **Step 3** — Update `src/assets.json` with new asset URLs
 - [ ] **Step 4** — Redesign `src/config/enemyTypes.ts`: min 3 enemy types, each with distinct `behavior`, `speed`, `hp`, `sprite`
 - [ ] **Step 5** — Redesign `src/config/abilities.ts`: min 6 abilities with concept-appropriate names; invent at least 1 new `effect` type
 - [ ] **Step 6** — Redesign `src/config/waves.ts`: 10-wave progression with enemy composition changes and difficulty curve
 - [ ] **Step 7** — Update `src/config/gameConfig.ts`: player stats, UI theme tokens (accent color, healthStyle, HUD layout)
-- [ ] **Step 8** — Redesign `src/App.tsx`: new HUD layout, color scheme, modal styles, joystick position
+- [ ] **Step 8** — Redesign `src/App.tsx`: new HUD layout, color scheme, modal styles, joystick position — **MANDATORY on first prompt (same session as Step 2). Do not defer to a follow-up prompt.**
 - [ ] **Step 9** — Update `src/components/AbilityIcon.tsx`: register icons for all new abilities in `ICON_MAP`
 - [ ] **Step 10** — Update `src/game/scenes/MainScene.ts`: implement `handleSelectAbility` logic for any new effect types
 

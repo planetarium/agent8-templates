@@ -1,5 +1,11 @@
 # Boilerplate Context
 
+## Critical Rules (Read First)
+
+> **CONCEPT ≠ BLOCKCHAIN**: `CROSS`, `chain`, `token`, `blockchain`, `wallet` are **technical specs only**. They do NOT imply cyberpunk, SF, or any game world. If the user prompt has only these words and no explicit world (e.g. "fantasy", "ocean", "steampunk") → **DO NOT choose cyberpunk/SF**. Use `docs/project-2d-rules.md` Section 1-B and pick from: fantasy, post-apocalypse, ocean, steampunk, Eastern myth, modern city, ancient Egypt, ice age.
+
+> **ASSETS + UI = SET (FIRST PROMPT)**: Asset generation and `App.tsx` UI redesign are a **single mandatory pair**. Both must be completed **on the first prompt** — do not defer UI to a follow-up. Never generate assets without immediately redesigning the full UI to match the chosen concept.
+
 ## What This Is
 
 This is a **Vampire Survivors-like 2D mobile game boilerplate**. The current default theme is a knight fighting slime monsters — this is placeholder content only. Every new game built from this template must replace the concept entirely.
@@ -7,7 +13,7 @@ This is a **Vampire Survivors-like 2D mobile game boilerplate**. The current def
 ## AI Agent Mission
 
 When starting development from this template, you MUST:
-1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one using the combination table in `docs/project-2d-rules.md` Section 1-B (world × hero × enemies × color palette). If the user prompt contains only blockchain/token-related words (CROSS, chain, token, wallet) and no explicit world concept → treat as no concept provided and use Section 1-B.
+1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one using the combination table in `docs/project-2d-rules.md` Section 1-B (world × hero × enemies × color palette). **If the user prompt contains only blockchain/token-related words (CROSS, chain, token, wallet) and no explicit world concept** → treat as no concept provided and use Section 1-B. **Do NOT default to cyberpunk/SF.**
 2. **Replace all placeholder content** — game name, sprites, enemies, abilities, UI theme, wave design
 3. **Follow the 10-step checklist** in `PROJECT/Status.md` immediately
 
@@ -44,4 +50,4 @@ Phaser (MainScene)
 - Phaser 3 (Arcade Physics, top-down, 0 gravity)
 - Tailwind CSS (UI styling)
 - Agent8 GameServer SDK (blockchain gold storage)
-- CROSS Token Network
+- CROSS Token Network (blockchain integration — not a game concept)
