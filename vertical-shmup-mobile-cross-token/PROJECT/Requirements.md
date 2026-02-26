@@ -71,11 +71,40 @@ All generated assets must look like they were crafted by a professional game art
 - [x] Game over screen with stats
 - [x] Wallet/exchange info scene
 
-## CROSS Integration
+## CROSS Integration Pipeline (First Prompt — Do Not Omit)
+
+When changing the game concept, **all 4 touchpoints below must be synchronized** for token integration to work. Updating only some will break claim/exchange functionality.
+
+```
+GameScene.ts          → stardustPending aggregation → GAME_OVER emit
+GameComponent.tsx     → claimStardust(amount) → server.remoteFunction('claimStardust', [amount])
+server/src/server.ts  → $asset.mint('stardust', amount)   ← asset key
+WalletOverlay.tsx     → "100 STARDUST = 1 SBT"            ← token name / exchange rate display
+```
+
+### Changeable vs Immutable
+
+| Target | Changeable? | Notes |
+|--------|-------------|-------|
+| `server.ts` — `$asset.mint('stardust')` asset key | Yes | Must change **in sync** with GameScene drop type `'stardust'` string |
+| `server.ts` — `$asset.get('stardust')` | Yes | Use same key as mint |
+| `server.ts` — function names `claimStardust`, `getStardustBalance` | **No** | GameComponent calls `remoteFunction('claimStardust')` — hardcoded |
+| `GameComponent.tsx` entire file | **No** | claimStardust, openCrossRamp logic must never be modified |
+| `EventBus.OPEN_CROSS_RAMP` | **No** | Changing event key breaks integration |
+| `WalletOverlay.tsx` — token name, exchange rate text | Yes | **Must** update to match concept |
+
+### When Changing Exchange Rate
+
+To change the exchange rate (e.g. 100 stardust = 1 SBT):
+1. `server.ts` — update claimStardust internal logic (validation range, etc.)
+2. `WalletOverlay.tsx` — update display text ("100 STARDUST", "1 SBT TOKEN")  
+Both must be updated together so UI matches actual behavior.
+
+### Template Default
 
 - [x] CrossRamp deployed (project: f8a20d22e093c3a3f4f19f290356d3b7)
-- [x] Token: configurable per game (e.g. SBT, 100 stardust = 1 SBT)
-- [x] Asset key: `stardust` (configurable in .crossramp)
+- [x] Token: SBT (100 stardust = 1 SBT)
+- [x] Asset key: `stardust`
 - [x] CROSS Mini Hub button in WalletScene
 - [x] Server: claimStardust mints stardust asset
 

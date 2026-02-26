@@ -33,4 +33,9 @@ The template ships with a Star Blaster (spaceship vs aliens) theme. This is not 
 - [ ] **Step 7** — Redesign overlay components: TitleOverlay, HUDOverlay, GameOverOverlay, WalletOverlay — **MANDATORY on first prompt (same session as Step 2). Do not defer to a follow-up prompt.**
 - [ ] **Step 8** — Apply JUICE effects: particles, camera shake, tweens, parallax BG (see `docs/project-2d-rules.md` Section 4)
 - [ ] **Step 9** — Add sound effects (shooting, explosion, collect) if available
-- [ ] **Step 10** — Update `server/src/server.ts` and `.crossramp` if token name/ratio changes
+- [ ] **Step 10** — CROSS Integration sync (required when changing concept):
+  - [ ] `server/src/server.ts`: `$asset.mint('stardust')` → change to new collectible key
+  - [ ] `server/src/server.ts`: `$asset.get('stardust')` → change to same key
+  - [ ] `GameScene.ts`: drop type `'stardust'` string → change to same key
+  - [ ] `WalletOverlay.tsx`: update token name ("SBT"), exchange rate ("100 STARDUST = 1 SBT")
+  - Do NOT change: `server.ts` function names (claimStardust, getStardustBalance), `GameComponent.tsx`
