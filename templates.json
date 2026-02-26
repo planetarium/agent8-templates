@@ -202,5 +202,24 @@
       "CROSS",
       "2d"
     ]
+  },
+  {
+    "name": "vertical-shmup-mobile-cross-token",
+    "label": "Vertical Shmup Mobile Game Template (CROSS Token)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-mobile-cross-token",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "arcade",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell"
+    ]
   }
 ]
