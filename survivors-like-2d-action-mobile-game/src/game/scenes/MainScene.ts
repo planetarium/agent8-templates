@@ -51,8 +51,9 @@ export class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.image('bg', Assets.images.background.url);
-    this.load.image(GAME_CONFIG.currency.spriteKey, Assets.images.coin.url);
-    this.load.image(GAME_CONFIG.xp.spriteKey, Assets.images.gem.url);
+    const images = Assets.images as Record<string, { url: string }>;
+    this.load.image(GAME_CONFIG.currency.spriteKey, images[GAME_CONFIG.currency.spriteKey].url);
+    this.load.image(GAME_CONFIG.xp.spriteKey, images[GAME_CONFIG.xp.spriteKey].url);
 
     const spriteKeys = new Set(ENEMY_TYPES.map((e) => e.spriteKey));
     spriteKeys.add(GAME_CONFIG.player.spriteKey);
