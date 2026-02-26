@@ -6,7 +6,6 @@
 |------|--------|
 | **Concept** | CROSS/chain/token in user prompt ≠ cyberpunk. Use Section 1-B as inspiration but create an original world concept yourself. Cyberpunk/SF only if user explicitly requests. |
 | **Assets + UI (first prompt)** | Step 2 (assets) and Step 8 (App.tsx redesign) are **one unit**. **Complete both on the first prompt** — do not defer UI to a later prompt. Never leave UI unchanged after generating assets. |
-| **CrossCoin** | App.tsx redesign MUST preserve all blockchain integration: `useGameServer`/`useAsset` hooks, `handleAddGold` (server.remoteFunction), `openShop` (getCrossRampShopUrl), CROSS Exchange button, total gold display. Assets + UI + CrossCoin = **triple set** on first prompt. |
 
 ## Current Boilerplate Default (Placeholder — Replace Everything)
 
@@ -30,8 +29,7 @@ The template ships with a generic knight-vs-slimes theme. This is not a final ga
 - [ ] **Step 5** — Redesign `src/config/abilities.ts`: min 6 abilities with concept-appropriate names; invent at least 1 new `effect` type
 - [ ] **Step 6** — Redesign `src/config/waves.ts`: 10-wave progression with enemy composition changes and difficulty curve
 - [ ] **Step 7** — Update `src/config/gameConfig.ts`: player stats, UI theme tokens (accent color, healthStyle, HUD layout)
-- [ ] **Step 8** — Redesign `src/App.tsx`: new HUD layout, color scheme, modal styles, joystick position — **MANDATORY on first prompt (same session as Step 2). Do not defer to a follow-up prompt.** Must preserve CrossCoin integration (see Step 8-1).
-- [ ] **Step 8-1** — Verify CrossCoin integration preserved in `App.tsx`: `useGameServer`/`useAsset` hooks, `handleAddGold` with `server.remoteFunction('addGold', [1], { throttle: 500, throttleKey: 'gold' })`, `openShop` with `getCrossRampShopUrl`, CROSS Exchange button on title screen, total gold display (`assets?.gold`), session gold in HUD and game over.
+- [ ] **Step 8** — Redesign `src/App.tsx`: new HUD layout, color scheme, modal styles, joystick position — **MANDATORY on first prompt (same session as Step 2). Do not defer to a follow-up prompt.**
 - [ ] **Step 9** — Update `src/components/AbilityIcon.tsx`: register icons for all new abilities in `ICON_MAP`
 - [ ] **Step 10** — Update `src/game/scenes/MainScene.ts`: implement `handleSelectAbility` logic for any new effect types
 
