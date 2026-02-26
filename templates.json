@@ -194,7 +194,7 @@
   {
     "name": "survivors-like-2d-action-mobile-game",
     "label": "Survivors-like 2D Action Mobile Game Template",
-    "description": "Vampire Survivors-style 2D auto-attack roguelite game template for mobile. Player moves while attacks fire automatically at nearby enemies. Features wave-based enemy spawning with increasing difficulty, XP gem collection, level-up ability selection (multishot, pierce, AOE, stat boosts), and progressive power scaling. Earned gold is exchangeable with a CROSS chain token via Agent8 GameServer SDK. This template is specifically designed for the survivors-like (horde survival) genre with top-down view and is NOT intended for shoot-em-up (shmup), tower defense, rhythm, or manually-aimed shooting games.",
+    "description": "Create a Survivors-like 2D action game for mobile devices. Make the earned gold exchangeable with a CROSS chain token.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "survivors-like-2d-action-mobile-game",
     "tags": [
