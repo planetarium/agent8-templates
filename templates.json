@@ -199,27 +199,8 @@
     "path": "survivors-like-2d-action-mobile-game",
     "tags": [
       "survivors",
-      "survivors-like",
-      "vampire-survivors",
-      "horde-survival",
-      "auto-attack",
-      "wave-based",
-      "ability-selection",
-      "level-up",
-      "top-down",
-      "action",
       "CROSS",
-      "CROSS chain",
-      "token",
-      "gold",
-      "exchangeable",
-      "2d",
-      "mobile",
-      "vite",
-      "react",
-      "typescript",
-      "phaser",
-      "survivors-cross"
+      "2d"
     ]
   }
 ]
