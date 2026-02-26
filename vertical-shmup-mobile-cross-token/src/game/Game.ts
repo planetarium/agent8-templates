@@ -1,5 +1,9 @@
 import Phaser from "phaser";
-import { MainScene } from "./scenes/MainScene";
+import { BootScene } from "./scenes/BootScene";
+import { TitleScene } from "./scenes/TitleScene";
+import { GameScene } from "./scenes/GameScene";
+import { GameOverScene } from "./scenes/GameOverScene";
+import { WalletScene } from "./scenes/WalletScene";
 
 export const createGame = (parent: string) => {
   const originalSpriteSetDisplaySize = Phaser.GameObjects.Sprite.prototype.setDisplaySize;
@@ -13,14 +17,15 @@ export const createGame = (parent: string) => {
     width: window.innerWidth,
     height: window.innerHeight,
     parent: parent,
+    backgroundColor: '#000011',
     physics: {
       default: "arcade",
       arcade: {
-        gravity: { x: 0, y: 2000 },
+        gravity: { x: 0, y: 0 },
         debug: false,
       },
     },
-    scene: [MainScene],
+    scene: [BootScene, TitleScene, GameScene, GameOverScene, WalletScene],
     scale: {
       mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH,

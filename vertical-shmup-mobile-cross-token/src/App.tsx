@@ -1,11 +1,16 @@
+import { GameServer, GameServerProvider } from "@agent8/gameserver";
 import GameComponent from "./components/GameComponent";
 import "./App.css";
 
+const gameServer = new GameServer();
+
 function App() {
   return (
-    <div className="app">
-      <GameComponent />
-    </div>
+    <GameServerProvider server={gameServer}>
+      <div className="app">
+        <GameComponent />
+      </div>
+    </GameServerProvider>
   );
 }
 
