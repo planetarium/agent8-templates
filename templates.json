@@ -203,7 +203,6 @@
       "vampire-survivors",
       "horde-survival",
       "auto-attack",
-      "roguelite",
       "wave-based",
       "ability-selection",
       "level-up",
@@ -219,7 +218,8 @@
       "vite",
       "react",
       "typescript",
-      "phaser"
+      "phaser",
+      "survivors-cross"
     ]
   }
 ]
