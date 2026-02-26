@@ -42,6 +42,7 @@ All generated assets must look like they were crafted by a professional game art
   - `background` — transparent OR a specific background treatment
 - **Consistency**: All assets in a single game must share the same art style. Never mix styles between player, enemies, and background.
 - **Readable at game size**: Characters are rendered small on screen. Design for clarity at 48×48 to 96×96 px — bold outlines, strong contrast, no fine detail that disappears when scaled down.
+- **Required image assets**: `background`, `player` spritesheet, each enemy type spritesheet, `gem` (XP), `currency` icon (key from `gameConfig.currency.spriteKey`), **`projectile`** (key from `gameConfig.projectile.spriteKey`). The projectile is a distinct asset — do not reuse the currency icon.
 - **UI redesign mandatory (first prompt)**: After generating assets, you MUST fully redesign `src/App.tsx` to match the chosen concept (layout, colors, modals, joystick style). **Do this on the same prompt — do not defer to a follow-up.** Replacing assets only while leaving the UI unchanged is not allowed. This is a hard requirement.
 
 ## Technical Rules (Violations Break the Game)

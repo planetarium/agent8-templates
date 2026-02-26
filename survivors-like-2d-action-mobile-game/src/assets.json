@@ -1,5 +1,8 @@
 {
   "images": {
+    "projectile": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1772001202054.png"
+    },
     "gem": {
       "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1772001202054.png"
     },

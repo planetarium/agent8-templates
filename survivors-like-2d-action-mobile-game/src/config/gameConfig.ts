@@ -40,6 +40,11 @@ export const GAME_CONFIG = {
     displayName: 'Gold',
   },
 
+  projectile: {
+    /** Sprite key for player projectiles. Must exist in assets.json images. */
+    spriteKey: 'projectile',
+  },
+
   xp: {
     spriteKey: 'gem',
     initialNextLevelXp: 5,

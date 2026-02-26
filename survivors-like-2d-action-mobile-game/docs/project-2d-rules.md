@@ -66,8 +66,9 @@ YOU MUST follow these rules when working with this template.
 ## 섹션 2 — 전면 재창조 체크리스트 (순서대로 실행)
 
 1. **게임 이름 & 세계관 확정** — `GAME_CONFIG.name`, `subtitle` 결정
-2. **에셋 생성** (이미지 생성 도구 사용): 플레이어, 적 타입별, 배경, XP 젬, 통화 아이콘  
-   → **에셋 생성 직후 Step 8 App.tsx UI 재설계를 반드시 이어서 실행 (세트 작업). 첫 프롬프트에서 완료 — UI를 나중 프롬프트로 미루지 것. 에셋만 교체하고 UI를 그대로 두는 것은 허용되지 않는다.**
+2. **에셋 생성** (이미지 생성 도구 사용): 플레이어, 적 타입별, 배경, XP 젬, 통화 아이콘, **투사체(projectile)**  
+   → **에셋 생성 직후 Step 8 App.tsx UI 재설계를 반드시 이어서 실행 (세트 작업). 첫 프롬프트에서 완료 — UI를 나중 프롬프트로 미루지 것. 에셋만 교체하고 UI를 그대로 두는 것은 허용되지 않는다.**  
+   → `gameConfig.projectile.spriteKey`와 `assets.json` images 키를 일치시킬 것. 투사체는 통화 아이콘과 별도 에셋.
 3. **`src/assets.json` 업데이트** — 새 URL 반영
 4. **`src/config/enemyTypes.ts`** — 최소 3종 적 설계, 각각 다른 `behavior` 지정
 5. **`src/config/abilities.ts`** — 최소 6개 스킬 설계, 컨셉에 맞는 이름/효과 (기존 예시는 참고만, 직접 새로 작성)

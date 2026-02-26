@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import Assets from '../../assets.json';
 import { gameEvents } from '../../App';
 import { GAME_CONFIG } from '../../config/gameConfig';
+import { getImageUrl } from '../../utils/getAssetUrl';
 import { ABILITIES } from '../../config/abilities';
 import { ENEMY_TYPES } from '../../config/enemyTypes';
 import { WaveSystem } from '../systems/WaveSystem';
@@ -50,10 +51,15 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('bg', Assets.images.background.url);
-    const images = Assets.images as Record<string, { url: string }>;
-    this.load.image(GAME_CONFIG.currency.spriteKey, images[GAME_CONFIG.currency.spriteKey].url);
-    this.load.image(GAME_CONFIG.xp.spriteKey, images[GAME_CONFIG.xp.spriteKey].url);
+    const assets = Assets as { images: Record<string, { url?: string }> };
+    const bgUrl = getImageUrl(assets, 'background');
+    if (bgUrl) this.load.image('bg', bgUrl);
+    const currencyUrl = getImageUrl(assets, GAME_CONFIG.currency.spriteKey);
+    if (currencyUrl) this.load.image(GAME_CONFIG.currency.spriteKey, currencyUrl);
+    const xpUrl = getImageUrl(assets, GAME_CONFIG.xp.spriteKey);
+    if (xpUrl) this.load.image(GAME_CONFIG.xp.spriteKey, xpUrl);
+    const projectileUrl = getImageUrl(assets, GAME_CONFIG.projectile.spriteKey);
+    if (projectileUrl) this.load.image(GAME_CONFIG.projectile.spriteKey, projectileUrl);
 
     const spriteKeys = new Set(ENEMY_TYPES.map((e) => e.spriteKey));
     spriteKeys.add(GAME_CONFIG.player.spriteKey);
@@ -391,7 +397,7 @@ export class MainScene extends Phaser.Scene {
             damage: this.projectileDamage,
             speed: this.projectileSpeed,
             size: GAME_CONFIG.player.projectileSize,
-            textureKey: GAME_CONFIG.currency.spriteKey,
+            textureKey: GAME_CONFIG.projectile.spriteKey,
           },
           this.projectiles
         );

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import Assets from '../../assets.json';
 import { gameEvents } from '../../App';
+import { getImageUrl } from '../../utils/getAssetUrl';
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -8,7 +9,9 @@ export class TitleScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('bg', Assets.images.background.url);
+    const assets = Assets as { images: Record<string, { url?: string }> };
+    const bgUrl = getImageUrl(assets, 'background');
+    if (bgUrl) this.load.image('bg', bgUrl);
   }
 
   create() {

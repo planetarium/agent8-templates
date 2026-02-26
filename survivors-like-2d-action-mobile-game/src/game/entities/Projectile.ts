@@ -29,7 +29,7 @@ export function createProjectile(
     damage: config?.damage ?? projectileDamage,
     speed: config?.speed ?? projectileSpeed,
     size: config?.size ?? projectileSize,
-    textureKey: config?.textureKey ?? GAME_CONFIG.currency.spriteKey,
+    textureKey: config?.textureKey ?? GAME_CONFIG.projectile.spriteKey,
     tint: config?.tint,
     lifetime: config?.lifetime ?? DEFAULT_LIFETIME,
   };

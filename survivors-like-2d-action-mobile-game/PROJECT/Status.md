@@ -23,8 +23,8 @@ The template ships with a generic knight-vs-slimes theme. This is not a final ga
 ## Immediate Tasks — Execute in Order
 
 - [ ] **Step 1** — Finalize game name & world concept → update `GAME_CONFIG.name`, `subtitle` in `src/config/gameConfig.ts`
-- [ ] **Step 2** — Generate all assets (NanoBanana Pro): player, each enemy type, background, XP gem, currency icon — **→ On this same (first) prompt, do Step 8 (App.tsx full redesign). Do not defer UI to a later prompt. Assets alone = incomplete.**
-- [ ] **Step 3** — Update `src/assets.json` with new asset URLs
+- [ ] **Step 2** — Generate all assets (NanoBanana Pro): player, each enemy type, background, XP gem, currency icon, projectile — **→ On this same (first) prompt, do Step 8 (App.tsx full redesign). Do not defer UI to a later prompt. Assets alone = incomplete.**
+- [ ] **Step 3** — Update `src/assets.json` with new asset URLs. Ensure `projectile` image key matches `GAME_CONFIG.projectile.spriteKey` (and `currency`/`xp` match their config keys).
 - [ ] **Step 4** — Redesign `src/config/enemyTypes.ts`: min 3 enemy types, each with distinct `behavior`, `speed`, `hp`, `sprite`
 - [ ] **Step 5** — Redesign `src/config/abilities.ts`: min 6 abilities with concept-appropriate names; invent at least 1 new `effect` type
 - [ ] **Step 6** — Redesign `src/config/waves.ts`: 10-wave progression with enemy composition changes and difficulty curve
