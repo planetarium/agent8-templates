@@ -4,6 +4,20 @@
 
 > **Assets and UI redesign are mandatory together.** After generating any image assets (NanoBanana Pro), you MUST fully redesign `src/App.tsx` — layout, colors, modals, joystick style — to match the chosen concept. **Do this on the first prompt** — do not defer UI to a later prompt or follow-up. **Replacing assets only while leaving the UI unchanged is not allowed.**
 
+## Critical: CrossCoin Blockchain Integration (Must Preserve on First Prompt)
+
+When redesigning `App.tsx`, the following blockchain integration elements are **mandatory** and must not be removed or omitted. Missing any item = incomplete implementation.
+
+| Element | Code Pattern | Location in App.tsx |
+|---------|-------------|---------------------|
+| GameServer hooks | `useGameServer()`, `useAsset()` | Top of App component |
+| Gold save to chain | `server.remoteFunction('addGold', [1], { throttle: 500, throttleKey: 'gold' })` | Inside `handleAddGold` |
+| CROSS Exchange shop | `server.getCrossRampShopUrl("en")` + `window.open(...)` | Inside `openShop` |
+| Total gold display | `assets?.gold` | Title screen UI |
+| CROSS Exchange button | Button calling `openShop` | Title screen UI |
+| Session gold counter | `sessionGold` state + `addGold` event listener | Playing HUD |
+| Session gold summary | `sessionGold` display | Game Over screen |
+
 ## Immutable gameEvents Keys
 
 These event names are hardcoded in both React and Phaser. **Never rename them.**

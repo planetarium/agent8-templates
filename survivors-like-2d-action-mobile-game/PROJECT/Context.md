@@ -6,6 +6,8 @@
 
 > **ASSETS + UI = SET (FIRST PROMPT)**: Asset generation and `App.tsx` UI redesign are a **single mandatory pair**. Both must be completed **on the first prompt** — do not defer UI to a follow-up. Never generate assets without immediately redesigning the full UI to match the chosen concept.
 
+> **CROSSCOIN INTEGRATION = MANDATORY (FIRST PROMPT)**: When redesigning `App.tsx`, you MUST preserve all CrossCoin/blockchain integration code. This includes: `useGameServer`/`useAsset` hooks, `handleAddGold` (with `server.remoteFunction`), `openShop` (with `getCrossRampShopUrl`), the CROSS Exchange button, and the total gold balance display. Assets + UI + CrossCoin are a **triple set** — all three must be completed on the first prompt.
+
 ## What This Is
 
 This is a **Vampire Survivors-like 2D mobile game boilerplate**. The current default theme is a knight fighting slime monsters — this is placeholder content only. Every new game built from this template must replace the concept entirely.
@@ -49,5 +51,5 @@ Phaser (MainScene)
 - React 18 + Vite + TypeScript
 - Phaser 3 (Arcade Physics, top-down, 0 gravity)
 - Tailwind CSS (UI styling)
-- Agent8 GameServer SDK (blockchain gold storage)
-- CROSS Token Network (blockchain integration — not a game concept)
+- **Agent8 GameServer SDK** — blockchain gold storage; `useGameServer`/`useAsset` hooks and `server.remoteFunction`/`getCrossRampShopUrl` are **mandatory** and must be preserved in `App.tsx`
+- **CROSS Token Network** — blockchain integration (technical spec only, not a game concept)
