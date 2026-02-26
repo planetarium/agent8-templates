@@ -4,96 +4,100 @@
 
 | Rule | Action |
 |------|--------|
-| **Concept** | CROSS/chain/token in user prompt ≠ cyberpunk. Use Section 1-B as inspiration but create an original world concept yourself. Cyberpunk/SF only if user explicitly requests. |
-| **Gravity** | First code change: set `gravity: { x: 0, y: 0 }` in `Game.ts`. Everything breaks with non-zero gravity. |
-| **Assets + UI (first prompt)** | Step 3 (assets) and Step 9 (App.tsx redesign) are **one unit**. **Complete both on the first prompt** — do not defer UI to a later prompt. Never leave UI unchanged after generating assets. |
+| **Concept** | CROSS/chain/token in user prompt ≠ cyberpunk/SF. Use `docs/project-2d-rules.md` Section 1-B as inspiration; create an original world. |
+| **Game.ts first** | Before writing any game code: fix `gravity: { x: 0, y: 0 }` AND update `scene: [TitleScene, MainScene, GameOverScene]`. |
+| **Assets + UI (first prompt)** | Asset generation (Step 4) and App.tsx redesign (Step 10) are **one unit**. Complete both on the first prompt — never defer UI. |
 
 ---
 
-## Current Template State (Placeholder — Build Everything)
+## Actual Template Baseline
 
-The template ships with a minimal Phaser scene (sky background + green ground rectangle). This is not a game — it is scaffolding with correct infrastructure.
+This template is `2d-phaser-basic` with zero game modifications. Understand what you're starting from:
 
-| Element | Current State | Required Action |
-|---------|--------------|-----------------|
-| Gravity | `y: 2000` (wrong) | Fix to `{ x: 0, y: 0 }` in Game.ts |
-| Player | None | Build PlayerShip entity with lerp movement |
-| Enemies | None | Build 3+ enemy types with bullet patterns |
-| Scrolling BG | None | Build 2-layer parallax TileSprite system |
-| Bullet system | None | Build pooled bullet groups (player + enemy) |
-| Stage system | None | Build StageSystem with 3+ stages |
-| Boss fight | None | Build boss entity with multi-phase AI |
-| Power-ups | None | Build 4+ power-up types with pickup logic |
-| Bomb | None | Build bomb system with screen flash |
-| Score | None | Build score + multiplier chain |
-| Lives/coins | None | Build lives system + blockchain coin events |
-| UI (React) | Bare div | Full redesign: HUD, touch layer, all modals |
-| Assets | Empty | Generate all required sprites |
-| Game name | "basic-vite-react" | Replace with concept name in package.json + gameConfig.ts |
+| File | Current State | What to Do |
+|------|--------------|------------|
+| `src/game/Game.ts` | Engine overrides ✓, gravity `y: 2000` ✗, `scene: [MainScene]` only ✗ | Fix gravity + add all 3 scenes |
+| `src/game/scenes/MainScene.ts` | Sky background + green ground rectangle | Completely replace with full game scene |
+| `src/App.tsx` | `<div class="app"><GameComponent /></div>` | Full redesign: HUD + touch overlay + all modals |
+| `src/assets.json` | `{ "sprites": {} }` | Replace with all generated asset URLs |
+| `src/App.css` | Basic overflow:hidden body rules | Update with concept theme colors |
+| `src/components/GameComponent.tsx` | Mounts Phaser canvas ✓ | Do not modify |
+| `src/main.tsx` | React 18 entry point ✓ | Do not modify |
+
+**Missing files (create all of these):**
+- `src/game/events.ts`
+- `src/game/scenes/TitleScene.ts`
+- `src/game/scenes/GameOverScene.ts`
+- `src/game/entities/PlayerShip.ts`
+- `src/game/entities/EnemyShip.ts`
+- `src/game/entities/Bullet.ts`
+- `src/game/entities/PowerUp.ts`
+- `src/game/systems/ScrollSystem.ts`
+- `src/game/systems/StageSystem.ts`
+- `src/game/systems/BossSystem.ts`
+- `src/config/gameConfig.ts`
+- `src/config/enemyTypes.ts`
+- `src/config/bulletPatterns.ts`
+- `src/config/powerUpTypes.ts`
+- `src/config/stageConfig.ts`
+- `src/components/PowerUpIndicator.tsx`
+- `server.js`
 
 ---
 
 ## Build Checklist — Execute in Order
 
-- [ ] **Step 1** — Fix `gravity` in `src/game/Game.ts`: `{ x: 0, y: 0 }`
-- [ ] **Step 2** — Finalize game name & world concept → update `GAME_CONFIG.name`, `subtitle` in `src/config/gameConfig.ts`
-- [ ] **Step 3** — Generate all assets (NanoBanana Pro): player ship, boss, each enemy type (3+), all bullet types, all power-up icons, all background layers, explosion spritesheet, coin/currency icon, shield effect
-  → **On this same (first) prompt, do Step 9 (App.tsx full redesign). Do not defer UI. Assets alone = incomplete.**
-- [ ] **Step 4** — Update `src/assets.json` with all new asset URLs. Ensure every key matches `GAME_CONFIG` sprite key references.
-- [ ] **Step 5** — Build `src/config/enemyTypes.ts`: min 3 enemy types, each with `behavior`, `speed`, `hp`, `sprite`, `bulletPattern`, `dropProbability`
-- [ ] **Step 6** — Build `src/config/bulletPatterns.ts`: define all enemy bullet pattern configs (aimed, spread, circle, spiral, etc.)
-- [ ] **Step 7** — Build `src/config/powerUpTypes.ts`: min 4 power-up types with effect types, icons, labels
-- [ ] **Step 8** — Build `src/config/stageConfig.ts`: min 3 stages, each with wave sequences, enemy compositions, boss config, scroll speed, background variant
-- [ ] **Step 9** — Redesign `src/App.tsx`: HUD (score, lives, bombs, stage), boss health bar, touch control overlay, power-up notification, all modal screens (title, stage clear, game over, pause) — **MANDATORY on first prompt (same session as Step 3). Do not defer.**
-- [ ] **Step 10** — Build `src/game/entities/PlayerShip.ts`: touch-tracking with lerp, auto-fire, invincibility frames, shield visual, bomb activation
-- [ ] **Step 11** — Build `src/game/entities/EnemyShip.ts`: factory function, behavior by type (formation, dive, stationary, boss), takes damage, death explosion
-- [ ] **Step 12** — Build `src/game/entities/Bullet.ts`: pool-based bullet factory for both player and enemy bullets, pattern emission helpers
-- [ ] **Step 13** — Build `src/game/entities/PowerUp.ts`: drop on death, move downward, player overlap pickup, apply effect to player state
-- [ ] **Step 14** — Build `src/game/systems/ScrollSystem.ts`: 2–3 TileSprite parallax layers, configurable scroll speed per stage
-- [ ] **Step 15** — Build `src/game/systems/StageSystem.ts`: time-based wave sequencer, reads from stageConfig, spawns enemies, triggers boss event
-- [ ] **Step 16** — Build `src/game/systems/BossSystem.ts`: boss HP tracking, phase transitions at HP thresholds, attack pattern switching, death sequence + coin drop
-- [ ] **Step 17** — Build `src/game/scenes/MainScene.ts`: wires all systems + entities together, handles all collisions, dispatches all gameEvents, manages game state (playing → stage clear → boss fight → game over)
-- [ ] **Step 18** — Update `src/components/PowerUpIndicator.tsx`: register icons/labels for all power-up types
+- [ ] **Step 1** — Create `src/game/events.ts`: `export const gameEvents = new EventTarget();`
+- [ ] **Step 2** — Fix `src/game/Game.ts`: gravity `{ x: 0, y: 0 }`, scene list `[TitleScene, MainScene, GameOverScene]`, add scene imports
+- [ ] **Step 3** — Finalize game name & world concept → draft `GAME_CONFIG.name`, `subtitle`, `currency.displayName`
+- [ ] **Step 4** — Generate all assets (NanoBanana Pro): player, boss, 3+ enemy types, player bullet, enemy bullet, all power-up icons, 2 background layers (tileable), explosion spritesheet (8+ frames), coin/currency icon
+  → **On this same (first) prompt, complete Step 10 (App.tsx redesign). Do not defer. Assets alone = incomplete.**
+- [ ] **Step 5** — Update `src/assets.json` with all new asset URLs
+- [ ] **Step 6** — Build `src/config/gameConfig.ts`: game name, player stats (speed, lerpFactor, HP, bombs, fireRate, bullet stats), scroll speeds, bomb config, scoring config, UI theme tokens, currency key
+- [ ] **Step 7** — Build `src/config/enemyTypes.ts`: min 3 enemy types, each with `behavior`, `speed`, `hp`, `sprite`, `bulletPattern`, `fireRate`, `scoreValue`, `dropProbability`, `size`
+- [ ] **Step 8** — Build `src/config/bulletPatterns.ts`: min 4 patterns (aimed, spread_3, circle_8, spiral + 1 custom concept-themed pattern)
+- [ ] **Step 9** — Build `src/config/powerUpTypes.ts`: min 4 types (weapon, shield, bomb, score_multiplier) + 1 original concept-themed type
+- [ ] **Step 10** — Redesign `src/App.tsx`: full HUD (score/multiplier, lives, bombs, stage), boss HP bar component, full-screen touch overlay (touchMove/touchEnd dispatch), power-up pickup banner, bomb button, title screen, stage clear screen, game over screen — **MANDATORY on first prompt with Step 4**
+- [ ] **Step 11** — Build `src/config/stageConfig.ts`: min 3 stages, each with `waves` array (atTime, enemyType, count, formation), `boss` config (sprite, hp, phases, coinReward), `scrollSpeed`, `duration`
+- [ ] **Step 12** — Build `src/game/entities/PlayerShip.ts`: factory function, touch lerp movement (reads `targetX/Y` from MainScene), auto-fire timer, invincibility frames on hit, shield visual toggle
+- [ ] **Step 13** — Build `src/game/entities/EnemyShip.ts`: factory function, behavior by type (`formation` y-drift, `dive` toward player, `stationary` shooter, `zigzag` sinusoidal), fire bullet pattern on timer, takes damage + death explosion
+- [ ] **Step 14** — Build `src/game/entities/Bullet.ts`: pool helpers (`getPlayerBullet`, `getEnemyBullet`), pool initialization, off-screen recycle logic
+- [ ] **Step 15** — Build `src/game/entities/PowerUp.ts`: spawn on enemy death (by dropProbability), drift downward, player overlap → apply effect → dispatch `showPowerUpPickup` → destroy
+- [ ] **Step 16** — Build `src/game/systems/ScrollSystem.ts`: initialize TileSprite layers from config, `update(layer1Speed, layer2Speed)` method, `setSpeedForStage(stageId)` method
+- [ ] **Step 17** — Build `src/game/systems/StageSystem.ts`: reads `stageConfig`, time-based wave sequencer (`this.time.addEvent`), spawns enemies at `atTime` seconds, emits boss trigger event when waves complete
+- [ ] **Step 18** — Build `src/game/systems/BossSystem.ts`: spawn boss at screen top, HP tracking, phase transitions at thresholds (60%→P2, 30%→P3 enrage), per-phase attack timers, defeat sequence (explosion + coin drop + `stageComplete` dispatch)
+- [ ] **Step 19** — Build `src/game/scenes/TitleScene.ts`: display title/logo, listen for `startGameFromUI` → `this.scene.start('MainScene')`, dispatch `showTitle` on create
+- [ ] **Step 20** — Build `src/game/scenes/GameOverScene.ts`: listen for `restartGameFromUI` → `this.scene.start('TitleScene')`, dispatch `showTitle`
+- [ ] **Step 21** — Build `src/game/scenes/MainScene.ts`: wire all systems + entities, set up all collision overlaps, dispatch all gameEvents, manage stage flow (playing → boss → stage clear → next stage / game over)
+- [ ] **Step 22** — Build `src/components/PowerUpIndicator.tsx`: icon + label map for all power-up types, renders pickup notification
+- [ ] **Step 23** — Create `server.js`: Agent8 `addCoin` blockchain function
 
 ---
 
-## Completed Infrastructure (Do Not Re-implement)
-
-These exist and work correctly in the boilerplate — do not replace:
-
-- `src/game/Game.ts` — Phaser engine with setDisplaySize/setScale/Tween overrides *(but fix gravity: `y: 0`)*
-- `src/game/scenes/TitleScene.ts` — listens for `startGameFromUI` event
-- `src/game/scenes/GameOverScene.ts` — listens for `restartGameFromUI` event
-- `src/components/GameComponent.tsx` — mounts Phaser canvas into React
-- `src/main.tsx` — React entry point
-- `server.js` — Agent8 blockchain `addCoin` function
-
----
-
-## Target Feature Set (Full Game)
+## Target Feature Set (Complete Game)
 
 ### Core Loop
-- [x] Vertical scrolling background (2-layer parallax)
-- [x] Player ship: touch-drag to move, auto-fire upward
-- [x] Enemy waves: formation flying, diving, stationary shooters
-- [x] Enemy bullets: aimed, spread, circular, spiral patterns
-- [x] Power-up drops: weapon, shield, bomb, score multiplier
-- [x] Bomb: screen-clear ability with limited charges
-- [x] Boss fight: large boss with 2–3 attack phases
-- [x] Score with kill-streak multiplier (resets on hit)
-- [x] Lives system: player dies and respawns (with invincibility)
+- [ ] Vertical scrolling background (2-layer parallax, speed varies by stage)
+- [ ] Player ship: full-screen touch drag to move (lerp), auto-fire upward
+- [ ] 3+ enemy types: formation flyers, divers, stationary shooters
+- [ ] Enemy bullet patterns: aimed, spread, circle, spiral, 1+ concept-specific
+- [ ] Power-up drops: weapon upgrade, shield, extra bomb, score multiplier, 1+ original
+- [ ] Bomb: screen-clear ability (limited charges), camera flash effect
+- [ ] Boss fight: large boss, 2–3 attack phases, health bar UI
+- [ ] Score with kill-streak multiplier chain (resets on player hit)
+- [ ] Lives system: 3 starting lives, invincibility on hit, game over at 0
 
 ### Progression
-- [x] 3+ stages with increasing difficulty
-- [x] Each stage ends with boss fight
-- [x] Stage clear screen with coin reward
-- [x] Coin blockchain save via Agent8 server.js
+- [ ] 3+ stages with increasing enemy density and bullet speed
+- [ ] Each stage ends with boss fight
+- [ ] Stage clear screen with coin count
+- [ ] Coin saved to blockchain via Agent8 server.js
 
 ### Polish
-- [x] Explosion spritesheet animation on enemy death
-- [x] Camera shake on player hit
-- [x] Screen flash on bomb
-- [x] Boss warning overlay
-- [x] Power-up pickup notification
-- [x] Smooth ship movement (lerp)
-- [x] Concept-themed art direction throughout
+- [ ] Explosion spritesheet animation on enemy/boss death
+- [ ] Camera shake on player hit
+- [ ] Screen flash on bomb
+- [ ] "WARNING" boss incoming overlay
+- [ ] Power-up pickup notification banner
+- [ ] Smooth ship lerp movement (not instant teleport)
+- [ ] Consistent concept-themed art direction across all assets + UI

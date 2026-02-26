@@ -2,97 +2,86 @@
 
 ## Project Summary
 
-This is an **arcade-style vertical shoot-em-up (shmup) 2D mobile game boilerplate** built with React + Phaser 3. It provides the infrastructure foundation for creating a high-quality mobile shmup in the tradition of Raiden, 1943, and DoDonPachi — adapted for touchscreen controls.
+This is an **arcade-style vertical shoot-em-up (shmup) 2D mobile game boilerplate** built with React + Phaser 3. The template provides only the minimum Phaser wiring and React mount — zero gameplay exists. The AI agent builds the entire game from scratch.
 
-The template ships as bare scaffolding (Phaser scene with no gameplay). The AI agent builds the complete game from this foundation using the architecture defined in `PROJECT/`.
+**Starting point**: This is a copy of `2d-phaser-basic` with no game modifications. `MainScene.ts` contains only a sky background and green ground rectangle as placeholder.
 
-**Blockchain integration**: CROSS Token via Agent8 SDK — players earn in-game currency (concept-themed) which is saved on-chain. The blockchain layer is technical infrastructure, not a game world element.
+**Blockchain integration**: CROSS Token via Agent8 SDK — players earn in-game currency saved on-chain. The blockchain layer is technical infrastructure, not a game world element.
 
-## Implementation Strategy
+## What Actually Exists
 
-### Architecture: React + Phaser Hybrid
+| File | Status |
+|------|--------|
+| `src/game/Game.ts` | Phaser engine overrides ✓ — but `gravity: y:2000` must be fixed, scene list must be updated |
+| `src/game/scenes/MainScene.ts` | Placeholder sky + ground only — completely replace |
+| `src/App.tsx` | Bare wrapper div — fully redesign |
+| `src/assets.json` | Empty `{ "sprites": {} }` — replace all |
+| `src/components/GameComponent.tsx` | Mounts Phaser ✓ — do not modify |
+| `src/main.tsx` | React 18 entry ✓ — do not modify |
 
-React handles all UI/HUD; Phaser handles all gameplay. Communication via a shared `EventTarget` (`gameEvents`).
+**Nothing else exists** — all scenes, entities, systems, configs, and `server.js` must be created.
+
+## Architecture
+
+React handles all UI/HUD. Phaser handles all gameplay. Communication via `gameEvents` (EventTarget singleton in `src/game/events.ts` — must be created).
 
 ```
-React
-  ├── HUD: score, lives, bomb count, stage, power-up display
-  ├── Boss health bar (appears during boss fights)
-  ├── Touch control layer (full-screen drag → ship movement)
-  └── Modals: title, stage clear, game over, pause
+React (App.tsx)
+  ├── HUD: score, multiplier, lives, bombs, stage
+  ├── Boss health bar (during boss fight only)
+  ├── Touch overlay: full-screen transparent div → ship movement
+  └── Modals: title, stage clear, game over
 
-      ↕ gameEvents
+      ↕ gameEvents (src/game/events.ts)
 
 Phaser (MainScene)
-  ├── Player ship (lerp-follows touch position, auto-fires up)
-  ├── Parallax scrolling background (2-layer TileSprite)
-  ├── Enemy waves via StageSystem
-  ├── Enemy bullet patterns (aimed/spread/circle/spiral)
-  ├── Boss fight with phase system
-  ├── Power-up drops + pickup
-  └── Object-pooled bullet groups
+  ├── Player ship (lerp to touch, auto-fire up)
+  ├── 2-layer parallax scroll
+  ├── Enemy waves (StageSystem)
+  ├── Enemy bullet patterns
+  ├── Boss fight (BossSystem)
+  └── Power-up drops + pickup
 ```
 
-**Scene flow**: `TitleScene` → `MainScene` (all stages + boss inside) → `GameOverScene`
+**Scene flow**: `TitleScene` → `MainScene` (all stages) → `GameOverScene`
 
-### Mobile Controls
+## First Actions (Before Any Game Code)
 
-The entire screen surface is the control area — no joystick. Player drags finger; ship smoothly lerps to touch position. Bomb button is a fixed corner button sized for thumb access.
-
-### Stage Progression
-
-3+ stages. Each stage: enemy waves (60–120s) → boss fight. Boss has 2–3 attack phases. Stage clear → coin reward → next stage.
-
-## Implemented Features (Template — Build Everything)
-
-The current template provides:
-- React + Vite + TypeScript build environment
-- Phaser 3 with engine overrides (setDisplaySize/setScale/Tween interceptors)
-- TitleScene and GameOverScene (event-driven state machine)
-- GameComponent (Phaser mount)
-- Agent8 server.js (blockchain addCoin)
-
-**Everything gameplay-related must be built** following `PROJECT/Status.md`.
-
-## File Structure Overview
-
-See `PROJECT/Structure.md` for the complete annotated file map.
-
-| Layer | Key Files | Status |
-|-------|-----------|--------|
-| Infrastructure | `Game.ts`, `TitleScene.ts`, `GameOverScene.ts`, `GameComponent.tsx`, `server.js` | Ready (fix gravity in Game.ts) |
-| Config | `config/gameConfig.ts`, `enemyTypes.ts`, `bulletPatterns.ts`, `powerUpTypes.ts`, `stageConfig.ts` | Must build |
-| Entities | `entities/PlayerShip.ts`, `EnemyShip.ts`, `Bullet.ts`, `PowerUp.ts` | Must build |
-| Systems | `systems/ScrollSystem.ts`, `StageSystem.ts`, `BossSystem.ts` | Must build |
-| Core scene | `scenes/MainScene.ts` | Must build |
-| UI | `App.tsx`, `components/PowerUpIndicator.tsx` | Must redesign (with assets) |
-| Assets | `assets.json` | Must replace |
+1. Create `src/game/events.ts` — shared EventTarget
+2. Fix `src/game/Game.ts` — gravity `{ x:0, y:0 }` + scene list `[TitleScene, MainScene, GameOverScene]`
 
 ## AI Agent Quick-Start
 
-1. Read `PROJECT/Context.md` — architecture, design principles
-2. Read `PROJECT/Requirements.md` — gameEvents API, asset rules, code patterns
-3. Read `PROJECT/Status.md` — ordered build checklist
-4. Read `docs/project-2d-rules.md` — full AI agent ruleset (concept selection, technical rules)
-5. Execute steps in order from `PROJECT/Status.md`
+1. `PROJECT/Context.md` — architecture, mission, what exists vs what to build
+2. `PROJECT/Requirements.md` — complete gameEvents API, asset rules, code patterns with examples
+3. `PROJECT/Status.md` — 23-step ordered build checklist
+4. `docs/project-2d-rules.md` — full AI agent ruleset (concept selection, technical rules)
+5. `PROJECT/Structure.md` — file map with TypeScript interface specs
 
-**First action**: Fix `gravity: { x: 0, y: 2000 }` → `{ x: 0, y: 0 }` in `src/game/Game.ts`
+## File Structure Overview
 
 ### src/main.tsx
-- React 18 entry point with createRoot
+React 18 entry point (do not modify)
 
 ### src/App.tsx
-- Root component — must be fully redesigned with HUD, touch overlay, and all modal screens
+Root component — must be fully redesigned with HUD, touch overlay, and all modal screens on the first prompt
 
 ### src/components/GameComponent.tsx
-- Mounts Phaser canvas into React DOM
+Mounts Phaser canvas into React DOM (do not modify)
+
+### src/game/events.ts
+**Must create** — `export const gameEvents = new EventTarget();`
 
 ### src/game/Game.ts
-- Phaser engine configuration with setDisplaySize/setScale/Tween overrides
-- **Modify once**: change gravity to `{ x: 0, y: 0 }` — then do not touch again
+Phaser engine config with setDisplaySize/setScale/Tween overrides. **Modify once**: fix gravity to `{ x:0, y:0 }` and update scene list — then freeze permanently.
 
-### src/game/scenes/MainScene.ts
-- Core game scene to be built — wires all systems and entities together
+### src/game/scenes/
+- `TitleScene.ts` — **create**: title screen, listens for `startGameFromUI`
+- `MainScene.ts` — **replace**: full game scene wiring all systems
+- `GameOverScene.ts` — **create**: game over screen, listens for `restartGameFromUI`
 
-### src/App.css
-- Component-specific styles for App — update with concept theme
+### src/config/
+All 5 files must be created: `gameConfig.ts`, `enemyTypes.ts`, `bulletPatterns.ts`, `powerUpTypes.ts`, `stageConfig.ts`
+
+### server.js
+**Must create** — Agent8 `addCoin` blockchain function
