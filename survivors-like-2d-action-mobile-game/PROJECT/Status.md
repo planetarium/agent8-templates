@@ -4,7 +4,7 @@
 
 | Rule | Action |
 |------|--------|
-| **Concept** | CROSS/chain/token in user prompt ≠ cyberpunk. Pick world from Section 1-B (fantasy, ocean, steampunk, etc.). Cyberpunk/SF only if user explicitly requests. |
+| **Concept** | CROSS/chain/token in user prompt ≠ cyberpunk. Use Section 1-B as inspiration but create an original world concept yourself. Cyberpunk/SF only if user explicitly requests. |
 | **Assets + UI (first prompt)** | Step 2 (assets) and Step 8 (App.tsx redesign) are **one unit**. **Complete both on the first prompt** — do not defer UI to a later prompt. Never leave UI unchanged after generating assets. |
 
 ## Current Boilerplate Default (Placeholder — Replace Everything)

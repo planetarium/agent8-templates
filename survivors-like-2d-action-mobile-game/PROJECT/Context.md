@@ -2,7 +2,7 @@
 
 ## Critical Rules (Read First)
 
-> **CONCEPT ≠ BLOCKCHAIN**: `CROSS`, `chain`, `token`, `blockchain`, `wallet` are **technical specs only**. They do NOT imply cyberpunk, SF, or any game world. If the user prompt has only these words and no explicit world (e.g. "fantasy", "ocean", "steampunk") → **DO NOT choose cyberpunk/SF**. Use `docs/project-2d-rules.md` Section 1-B and pick from: fantasy, post-apocalypse, ocean, steampunk, Eastern myth, modern city, ancient Egypt, ice age.
+> **CONCEPT ≠ BLOCKCHAIN**: `CROSS`, `chain`, `token`, `blockchain`, `wallet` are **technical specs only**. They do NOT imply cyberpunk, SF, or any game world. If the user prompt has only these words and no explicit world → **DO NOT choose cyberpunk/SF**. **MUST** read `docs/project-2d-rules.md` Section 1-B and use the combination table as inspiration, but **create an original world concept yourself**. Do not pick from a fixed list; fully new combinations not in the table are actively encouraged.
 
 > **ASSETS + UI = SET (FIRST PROMPT)**: Asset generation and `App.tsx` UI redesign are a **single mandatory pair**. Both must be completed **on the first prompt** — do not defer UI to a follow-up. Never generate assets without immediately redesigning the full UI to match the chosen concept.
 
@@ -13,7 +13,7 @@ This is a **Vampire Survivors-like 2D mobile game boilerplate**. The current def
 ## AI Agent Mission
 
 When starting development from this template, you MUST:
-1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one using the combination table in `docs/project-2d-rules.md` Section 1-B (world × hero × enemies × color palette). **If the user prompt contains only blockchain/token-related words (CROSS, chain, token, wallet) and no explicit world concept** → treat as no concept provided and use Section 1-B. **Do NOT default to cyberpunk/SF.**
+1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one. Use the Section 1-B combination table as **inspiration only**; do not copy examples verbatim — **actively create fully new combinations not in the table**. **If the user prompt contains only blockchain/token-related words (CROSS, chain, token, wallet) and no explicit world concept** → treat as no concept provided and use Section 1-B as inspiration. **Do NOT default to cyberpunk/SF.**
 2. **Replace all placeholder content** — game name, sprites, enemies, abilities, UI theme, wave design
 3. **Follow the 10-step checklist** in `PROJECT/Status.md` immediately
 
