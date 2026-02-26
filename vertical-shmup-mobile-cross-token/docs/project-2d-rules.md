@@ -77,7 +77,11 @@ YOU MUST follow these rules when working with this template.
 6. **`GameScene.ts`** — 파워업 시스템 (spread shot, shield, speed boost 등) 재설계
 7. **`src/components/overlays/*`** — UI 전면 재설계 (레이아웃, 색상, CSS, 아이콘, 폰트) — **첫 프롬프트에서 Step 2와 함께 완료. 미루지 말 것.**
 8. **JUICE 효과 추가** — 파티클, 카메라 쉐이크, 트윈, 사운드 (섹션 4 참조)
-9. **CROSS Integration 동기화 (필수)** — 컨셉 변경 시 반드시 수행:
+9. **Deploy CrossRamp (mandatory, first prompt)** — 반드시 수행:
+   - Call `read_gameserver_sdk_v2` → read server SDK docs
+   - Call `read_gameserver_sdk_crossramp` → deploy CrossRamp, creates `.crossramp` at root
+   - Confirm asset_keys in `.crossramp` matches the collectible key
+10. **CROSS Integration 동기화 (필수)** — 컨셉 변경 시 반드시 수행:
    - A. `server/src/server.ts` — `$asset.mint('stardust')`, `$asset.get('stardust')` 에셋 키를 컨셉 수집품명으로 변경
    - B. `GameScene.ts` — drop type `'stardust'` 문자열을 A와 동일하게 변경
    - C. `WalletOverlay.tsx` — 토큰명("SBT"), 교환 비율("100 STARDUST = 1 SBT") 텍스트 업데이트

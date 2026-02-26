@@ -33,7 +33,12 @@ The template ships with a Star Blaster (spaceship vs aliens) theme. This is not 
 - [ ] **Step 7** — Redesign overlay components: TitleOverlay, HUDOverlay, GameOverOverlay, WalletOverlay — **MANDATORY on first prompt (same session as Step 2). Do not defer to a follow-up prompt.**
 - [ ] **Step 8** — Apply JUICE effects: particles, camera shake, tweens, parallax BG (see `docs/project-2d-rules.md` Section 4)
 - [ ] **Step 9** — Add sound effects (shooting, explosion, collect) if available
-- [ ] **Step 10** — CROSS Integration sync (required when changing concept):
+- [ ] **Step 10** — Deploy CrossRamp & create `.crossramp` file (MANDATORY — do not skip):
+  1. Call `read_gameserver_sdk_v2` → read the gameserver SDK documentation
+  2. Call `read_gameserver_sdk_crossramp` → follow instructions to deploy CrossRamp
+  3. Confirm `.crossramp` file is created at project root with correct asset_keys
+  4. Ensure asset_keys in `.crossramp` matches the collectible key used in server.ts and GameScene.ts
+- [ ] **Step 11** — CROSS Integration sync (required when changing concept):
   - [ ] `server/src/server.ts`: `$asset.mint('stardust')` → change to new collectible key
   - [ ] `server/src/server.ts`: `$asset.get('stardust')` → change to same key
   - [ ] `GameScene.ts`: drop type `'stardust'` string → change to same key

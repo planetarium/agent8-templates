@@ -15,7 +15,7 @@ This is a **vertical shoot 'em up (shmup)** mobile game boilerplate. The current
 When starting development from this template, you MUST:
 1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one. Use the Section 1-B combination table as **inspiration only**; do not copy examples verbatim — **actively create fully new combinations not in the table**. **If the user prompt contains only blockchain/token-related words (CROSS, chain, token, wallet) and no explicit world concept** → treat as no concept provided and use Section 1-B as inspiration. **Do NOT default to cyberpunk/SF.**
 2. **Replace all placeholder content** — game name, sprites, enemies, boss, projectiles, UI theme, wave design
-3. **Follow the 10-step checklist** in `PROJECT/Status.md` immediately
+3. **Follow the 11-step checklist** in `PROJECT/Status.md` immediately
 
 ## Architecture
 
@@ -53,7 +53,7 @@ Phaser (scenes)
 
 ## Critical Memory
 
-- `.crossramp` file at root: uuid, project_id, asset_keys: ["stardust"]
+- `.crossramp` file at root: MUST be created via `read_gameserver_sdk_crossramp` tool (do NOT skip) — contains uuid, project_id, asset_keys matching the in-game collectible key
 - Asset key for in-game currency: `stardust` (configurable per concept)
 - CrossRamp exchange ratio configurable per game (e.g. 100 stardust → 1 token)
 - Game is mobile-first (touch controls, pointer follow)
