@@ -33,7 +33,16 @@ These event names are hardcoded in both React and Phaser. **Never rename them.**
 
 All generated assets must look like they were crafted by a professional game artist. Low-effort or generic results are not acceptable. Apply the following standards to every image prompt:
 
-- **Style**: Specify an explicit art direction (e.g. "pixel art 16-bit", "hand-painted 2D", "cel-shaded cartoon", "dark fantasy illustration")
+- **Style**: Specify an explicit art direction (e.g. "hand-painted 2D", "cel-shaded cartoon", "dark fantasy illustration"). For pixel art, see **Pixel Art quality rules** below.
+- **Pixel Art style (quality)** — When using pixel art, the tool often produces low-resolution, blurry output. To avoid this:
+  - **Never use** `"pixel art"` or `"16-bit pixel art"` alone — always add quality modifiers.
+  - **Required modifiers** in `style`: include at least one of `high-quality`, `high-resolution`, `detailed`, `HD`.
+  - **Required in `details`**: add `clean edges`, `vibrant colors`, `professional sprite quality`, or `sharp pixel edges, well-defined silhouette`.
+  - **Avoid**: `low-res`, `retro low quality`, `simple`, `minimal` — these degrade output.
+  - **Good examples**:
+    - `style: "high-quality pixel art, clean edges, vibrant palette, professional game sprite, HD rendering"`
+    - `style: "detailed pixel art style with crisp edges, rendered in high resolution, rich color palette"`
+  - **Bad examples**: `style: "pixel art"`, `style: "16-bit pixel art"` (no quality modifiers)
 - **Quality bar**: The result must be visually polished — rich colors, clear silhouette, readable at small size, consistent with the game's art direction
 - **Required prompt fields** — every generation call must include all four:
   - `style` — art style and rendering technique

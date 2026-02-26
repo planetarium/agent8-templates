@@ -195,6 +195,11 @@ UI는 **이름/색상만 바꾸는 것이 아님**. 컨셉에 맞게 **위치, C
 ## 섹션 6 — 기술 규칙 (기존 유지)
 
 1. **이미지 생성 도구 사용**: 에셋 생성 시 나노바나나프로(NanoBanana Pro) 사용, 상세 프롬프트에 style, colors, details, background 반드시 포함
+   - **Pixel Art 스타일 품질 주의**: "pixel art"를 선택하면 도구가 저해상도·저품질 이미지를 생성하는 경우가 많음. 품질 유지를 위해:
+     - `style` 필드에 **반드시** `high-quality`, `high-resolution`, `detailed`, `HD` 중 하나 이상 포함
+     - `details` 필드에 `clean edges`, `vibrant colors`, `professional sprite quality` 등 품질 관련 묘사 추가
+     - **금지**: `style: "pixel art"` 단독 사용, `low-res`, `retro low quality`, `simple`, `minimal` 등 품질 저하 키워드
+     - **권장 예시**: `style: "high-quality pixel art, clean edges, vibrant palette, professional game sprite, HD rendering"`
 2. **displayWidth/displayHeight만 사용**: Tween에서 `scaleX`/`scaleY` 금지
 3. **setDisplaySize() 필수**: 이미지/스프라이트 추가 시 즉시 크기 지정
 4. **Tween 애니메이션**: 부드러운 애니메이션, 페이드, 바운스 적용
