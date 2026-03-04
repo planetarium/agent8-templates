@@ -1,0 +1,31 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #0a0a0f;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+#root {
+  margin: 0 auto;
+}
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+}
