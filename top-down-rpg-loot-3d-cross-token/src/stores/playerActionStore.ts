@@ -1,5 +1,8 @@
 interface PlayerActionState {
+  punch: boolean;
+  kick: boolean;
   meleeAttack: boolean;
+  cast: boolean;
 }
 
 interface PlayerActionStore extends PlayerActionState {
@@ -9,7 +12,10 @@ interface PlayerActionStore extends PlayerActionState {
 }
 
 const playerActionStore: PlayerActionStore = {
+  punch: false,
+  kick: false,
   meleeAttack: false,
+  cast: false,
 
   setPlayerAction: (action: string, pressed: boolean) => {
     (playerActionStore as any)[action] = pressed;
@@ -20,7 +26,10 @@ const playerActionStore: PlayerActionStore = {
   },
 
   resetAllPlayerActions: () => {
+    playerActionStore.punch = false;
+    playerActionStore.kick = false;
     playerActionStore.meleeAttack = false;
+    playerActionStore.cast = false;
   },
 };
 

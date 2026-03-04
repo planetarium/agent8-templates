@@ -1,27 +1,41 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { IS_MOBILE, useInputStore } from 'vibe-starter-3d';
+import { useInputStore } from 'vibe-starter-3d';
 import { usePlayerActionStore } from '../../stores/playerActionStore';
 import nipplejs from 'nipplejs';
 
-type KeyMapping = Record<string, string[]>;
+/**
+ * Key mapping configuration - simple Record<string, string[]>
+ */
+type KeyMapping = Record<string, string[]>; // action: [key1, key2, ...]
 
+/**
+ * Controller key mapping
+ */
 const CONTROL_KEY_MAPPING: KeyMapping = {
   forward: ['KeyW', 'ArrowUp'],
   backward: ['KeyS', 'ArrowDown'],
   leftward: ['KeyA', 'ArrowLeft'],
   rightward: ['KeyD', 'ArrowRight'],
+  jump: ['Space'],
   run: ['ShiftLeft', 'ShiftRight'],
 };
 
+/**
+ * Player action key mapping
+ */
 const ACTION_KEY_MAPPING: KeyMapping = {
-  meleeAttack: ['KeyF', 'KeyQ', 'Mouse0'],
+  punch: ['KeyF', 'Mouse0'],
+  kick: ['KeyG', 'Mouse2'],
+  meleeAttack: ['KeyQ', 'KeyC'],
+  cast: ['KeyE', 'Mouse1'],
 };
 
+// Movement speed constants
 const MOVEMENT_SPEED_WALK = 0.6;
 const MOVEMENT_SPEED_RUN_BOOST = 0.4;
 const MOVEMENT_SPEED_MAX = 1.0;
-const JOYSTICK_RANGE_MULTIPLIER = 2.0;
+const JOYSTICK_RANGE_MULTIPLIER = 2.0; // Converts joystick range (0~0.5) to full range (0~1.0)
 
 interface InputControllerProps {
   disabled?: boolean;
@@ -29,130 +43,360 @@ interface InputControllerProps {
   disableJoystick?: boolean;
 }
 
-export const InputController: React.FC<InputControllerProps> = ({
-  disabled = false,
-  disableKeyboard = false,
-  disableJoystick = false,
-}) => {
-  const { setMovementInput, resetAllInputs, setActiveInputSource } = useInputStore();
+export const InputController: React.FC<InputControllerProps> = ({ disabled = false, disableKeyboard = false, disableJoystick = false }) => {
+  // Store actions to controller
+  const { setMovementInput, setActionInput, resetAllInputs, setActiveInputSource } = useInputStore();
   const { setPlayerAction, resetAllPlayerActions } = usePlayerActionStore();
 
+  // Button states
+  const [isJumpPressed, setIsJumpPressed] = useState(false);
   const [isAttackPressed, setIsAttackPressed] = useState(false);
-  const keyboardStateRef = useRef({ forward: false, backward: false, leftward: false, rightward: false, run: false });
 
+  // Keyboard state tracking
+  const keyboardStateRef = useRef({
+    forward: false,
+    backward: false,
+    leftward: false,
+    rightward: false,
+    run: false,
+  });
+
+  // Helper function to calculate movement from keyboard state
   const calculateKeyboardMovement = useCallback(() => {
     const state = keyboardStateRef.current;
+
+    // Calculate direction
     const x = (state.leftward ? 1 : 0) + (state.rightward ? -1 : 0);
     const y = (state.forward ? 1 : 0) + (state.backward ? -1 : 0);
+
+    // Use Three.js Vector2 for efficient normalization
     const direction = new THREE.Vector2(x, y);
     const magnitude = direction.length();
-    if (magnitude > 0) direction.normalize();
-    const baseIntensity = magnitude > 0 ? MOVEMENT_SPEED_WALK : 0;
-    const runBoost = state.run ? MOVEMENT_SPEED_RUN_BOOST : 0;
-    return { direction: { x: direction.x, y: direction.y }, intensity: Math.min(baseIntensity + runBoost, MOVEMENT_SPEED_MAX) };
+
+    // Normalize diagonal movement
+    if (magnitude > 0) {
+      direction.normalize();
+    }
+
+    // Calculate intensity: base speed + run boost
+    const baseIntensity = magnitude > 0 ? MOVEMENT_SPEED_WALK : 0; // Base walking speed
+    const runBoost = state.run ? MOVEMENT_SPEED_RUN_BOOST : 0; // Additional speed when running
+    const intensity = Math.min(baseIntensity + runBoost, MOVEMENT_SPEED_MAX);
+
+    return {
+      direction: { x: direction.x, y: direction.y },
+      intensity,
+    };
   }, []);
 
-  // Joystick
+  // Joystick input handling with analog support (always active, not mobile-only)
   useEffect(() => {
-    if (disabled || disableJoystick || !IS_MOBILE) return;
-    const zone = document.createElement('div');
-    zone.style.cssText = 'position:fixed;left:0;top:0;width:50%;height:100%;z-index:1000;pointer-events:auto;touch-action:none;user-select:none;';
-    document.body.appendChild(zone);
-    const manager = nipplejs.create({ zone, color: 'rgba(176,122,255,0.6)', mode: 'dynamic', shape: 'circle' });
-    manager.on('move', (_, data) => {
-      if (disabled) return;
+    if (disabled || disableJoystick) return;
+
+    // Create div element for left side area of screen
+    const joystickZone = document.createElement('div');
+    joystickZone.style.position = 'fixed';
+    joystickZone.style.left = '0';
+    joystickZone.style.top = '0';
+    joystickZone.style.width = '50%'; // Left 50% of screen
+    joystickZone.style.height = '100%';
+    joystickZone.style.zIndex = '1000';
+    joystickZone.style.pointerEvents = 'auto';
+    joystickZone.style.backgroundColor = 'transparent';
+    // Disable long touch events
+    joystickZone.style.touchAction = 'none';
+    joystickZone.style.userSelect = 'none';
+    joystickZone.style.setProperty('-webkit-user-select', 'none');
+    joystickZone.style.setProperty('-webkit-touch-callout', 'none');
+    document.body.appendChild(joystickZone);
+
+    const options: nipplejs.JoystickManagerOptions = {
+      zone: joystickZone,
+      color: 'white',
+      mode: 'dynamic',
+      shape: 'circle',
+    };
+
+    const manager = nipplejs.create(options);
+
+    manager.on('move', (evt, data) => {
+      if (disabled || disableJoystick) return; // Check disabled state
       setActiveInputSource('joystick');
-      const angle = (data.angle?.radian || 0) - Math.PI / 2;
-      const dist = data.distance || 0;
-      const maxDist = data.instance.options.size || 100;
-      const intensity = Math.min((dist / maxDist) * JOYSTICK_RANGE_MULTIPLIER, MOVEMENT_SPEED_MAX);
-      setMovementInput({ x: Math.sin(angle), y: Math.cos(angle) }, intensity, 'joystick');
+
+      // Extract analog data from nipplejs
+      const angle = data.angle?.radian || 0; // Angle in radians
+      const distance = data.distance || 0; // Distance from center
+      const maxDistance = data.instance.options.size || 100; // Maximum distance
+
+      // Calculate normalized direction vector
+      // nipplejs uses mathematical coordinate system (0° = right, 90° = up)
+      // We need to convert to game coordinate system (0° = up, 90° = right)
+      const gameAngle = angle - Math.PI / 2; // Rotate by -90 degrees
+      const directionX = Math.sin(gameAngle); // Right/Left
+      const directionY = Math.cos(gameAngle); // Forward/Backward
+
+      // Calculate intensity (0.0 to 1.0) based on distance from center
+      const intensity = Math.min((distance / maxDistance) * JOYSTICK_RANGE_MULTIPLIER, MOVEMENT_SPEED_MAX);
+
+      // Set analog movement input
+      setMovementInput({ x: directionX, y: directionY }, intensity, 'joystick');
     });
-    manager.on('end', () => setMovementInput({ x: 0, y: 0 }, 0, 'joystick'));
-    return () => { manager.destroy(); zone.parentNode?.removeChild(zone); };
+
+    manager.on('end', () => {
+      if (disabled || disableJoystick) return; // Check disabled state
+      // Reset all inputs when joystick ends
+      setMovementInput({ x: 0, y: 0 }, 0, 'joystick');
+    });
+
+    return () => {
+      manager.destroy();
+      if (joystickZone.parentNode) {
+        joystickZone.parentNode.removeChild(joystickZone);
+      }
+    };
   }, [disabled, disableJoystick, setMovementInput, setActiveInputSource]);
 
-  // Keyboard
+  // Keyboard input handling - convert to movement immediately
   useEffect(() => {
     if (disabled || disableKeyboard) return;
-    const down = (e: KeyboardEvent) => {
-      if (disabled) return;
-      let changed = false;
-      ['forward', 'backward', 'leftward', 'rightward', 'run'].forEach((k) => {
-        if (CONTROL_KEY_MAPPING[k]?.includes(e.code) && !(keyboardStateRef.current as any)[k]) {
-          (keyboardStateRef.current as any)[k] = true; changed = true;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (disabled || disableKeyboard) return; // Additional check in handler
+      let stateChanged = false;
+
+      // Handle movement keys
+      if (CONTROL_KEY_MAPPING['forward']?.includes(event.code) && !keyboardStateRef.current.forward) {
+        keyboardStateRef.current.forward = true;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['backward']?.includes(event.code) && !keyboardStateRef.current.backward) {
+        keyboardStateRef.current.backward = true;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['leftward']?.includes(event.code) && !keyboardStateRef.current.leftward) {
+        keyboardStateRef.current.leftward = true;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['rightward']?.includes(event.code) && !keyboardStateRef.current.rightward) {
+        keyboardStateRef.current.rightward = true;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['run']?.includes(event.code) && !keyboardStateRef.current.run) {
+        keyboardStateRef.current.run = true;
+        stateChanged = true;
+      }
+
+      // Handle action keys
+      if (CONTROL_KEY_MAPPING['jump']?.includes(event.code)) {
+        setActionInput('jump', true, 'keyboard');
+      }
+
+      // Handle player action keys
+      Object.keys(ACTION_KEY_MAPPING).forEach((action) => {
+        if (ACTION_KEY_MAPPING[action]?.includes(event.code)) {
+          setPlayerAction(action, true);
         }
       });
-      Object.keys(ACTION_KEY_MAPPING).forEach((a) => {
-        if (ACTION_KEY_MAPPING[a]?.includes(e.code)) setPlayerAction(a, true);
-      });
-      if (changed) { const m = calculateKeyboardMovement(); setMovementInput(m.direction, m.intensity, 'keyboard'); }
+
+      // Update movement if any movement-related key changed
+      if (stateChanged) {
+        const movement = calculateKeyboardMovement();
+        setMovementInput(movement.direction, movement.intensity, 'keyboard');
+      }
     };
-    const up = (e: KeyboardEvent) => {
-      if (disabled) return;
-      let changed = false;
-      ['forward', 'backward', 'leftward', 'rightward', 'run'].forEach((k) => {
-        if (CONTROL_KEY_MAPPING[k]?.includes(e.code) && (keyboardStateRef.current as any)[k]) {
-          (keyboardStateRef.current as any)[k] = false; changed = true;
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (disabled || disableKeyboard) return; // Additional check in handler
+      let stateChanged = false;
+
+      // Handle movement keys
+      if (CONTROL_KEY_MAPPING['forward']?.includes(event.code) && keyboardStateRef.current.forward) {
+        keyboardStateRef.current.forward = false;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['backward']?.includes(event.code) && keyboardStateRef.current.backward) {
+        keyboardStateRef.current.backward = false;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['leftward']?.includes(event.code) && keyboardStateRef.current.leftward) {
+        keyboardStateRef.current.leftward = false;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['rightward']?.includes(event.code) && keyboardStateRef.current.rightward) {
+        keyboardStateRef.current.rightward = false;
+        stateChanged = true;
+      }
+      if (CONTROL_KEY_MAPPING['run']?.includes(event.code) && keyboardStateRef.current.run) {
+        keyboardStateRef.current.run = false;
+        stateChanged = true;
+      }
+
+      // Handle action keys
+      if (CONTROL_KEY_MAPPING['jump']?.includes(event.code)) {
+        setActionInput('jump', false, 'keyboard');
+      }
+
+      // Handle player action keys
+      Object.keys(ACTION_KEY_MAPPING).forEach((action) => {
+        if (ACTION_KEY_MAPPING[action]?.includes(event.code)) {
+          setPlayerAction(action, false);
         }
       });
-      Object.keys(ACTION_KEY_MAPPING).forEach((a) => {
-        if (ACTION_KEY_MAPPING[a]?.includes(e.code)) setPlayerAction(a, false);
-      });
-      if (changed) { const m = calculateKeyboardMovement(); setMovementInput(m.direction, m.intensity, 'keyboard'); }
+
+      // Update movement if any movement-related key changed
+      if (stateChanged) {
+        const movement = calculateKeyboardMovement();
+        setMovementInput(movement.direction, movement.intensity, 'keyboard');
+      }
     };
-    const mdwn = (e: MouseEvent) => {
-      Object.keys(ACTION_KEY_MAPPING).forEach((a) => {
-        if (ACTION_KEY_MAPPING[a]?.includes(`Mouse${e.button}`)) setPlayerAction(a, true);
+
+    const handleMouseDown = (event: MouseEvent) => {
+      if (disabled || disableKeyboard) return; // Additional check in handler
+
+      // Handle player action mouse keys
+      const mouseButton = `Mouse${event.button}`;
+      Object.keys(ACTION_KEY_MAPPING).forEach((action) => {
+        if (ACTION_KEY_MAPPING[action]?.includes(mouseButton)) {
+          setPlayerAction(action, true);
+        }
       });
     };
-    const mup = (e: MouseEvent) => {
-      Object.keys(ACTION_KEY_MAPPING).forEach((a) => {
-        if (ACTION_KEY_MAPPING[a]?.includes(`Mouse${e.button}`)) setPlayerAction(a, false);
+
+    const handleMouseUp = (event: MouseEvent) => {
+      if (disabled || disableKeyboard) return; // Additional check in handler
+
+      // Handle player action mouse keys
+      const mouseButton = `Mouse${event.button}`;
+      Object.keys(ACTION_KEY_MAPPING).forEach((action) => {
+        if (ACTION_KEY_MAPPING[action]?.includes(mouseButton)) {
+          setPlayerAction(action, false);
+        }
       });
     };
-    document.addEventListener('keydown', down);
-    document.addEventListener('keyup', up);
-    document.addEventListener('mousedown', mdwn);
-    document.addEventListener('mouseup', mup);
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+
     return () => {
-      document.removeEventListener('keydown', down);
-      document.removeEventListener('keyup', up);
-      document.removeEventListener('mousedown', mdwn);
-      document.removeEventListener('mouseup', mup);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [disabled, disableKeyboard, setMovementInput, setPlayerAction, calculateKeyboardMovement]);
+  }, [disabled, disableKeyboard, setMovementInput, setActionInput, setPlayerAction, calculateKeyboardMovement]);
 
-  useEffect(() => () => { resetAllInputs(); resetAllPlayerActions(); }, []);
-
+  // Cleanup on unmount
   useEffect(() => {
-    if (disabled) { keyboardStateRef.current = { forward: false, backward: false, leftward: false, rightward: false, run: false }; resetAllInputs(); resetAllPlayerActions(); setIsAttackPressed(false); }
-  }, [disabled]);
+    return () => {
+      resetAllInputs();
+      resetAllPlayerActions();
+    };
+  }, [resetAllInputs, resetAllPlayerActions]);
 
-  const handleAttackStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (disabled) return; e.preventDefault(); e.stopPropagation();
-    setIsAttackPressed(true); setPlayerAction('meleeAttack', true);
-  }, [disabled, setPlayerAction]);
+  // Reset inputs when disabled
+  useEffect(() => {
+    if (disabled || disableKeyboard || disableJoystick) {
+      // Reset keyboard state if keyboard is disabled
+      if (disabled || disableKeyboard) {
+        keyboardStateRef.current = {
+          forward: false,
+          backward: false,
+          leftward: false,
+          rightward: false,
+          run: false,
+        };
+      }
+      // Reset button states
+      setIsJumpPressed(false);
+      setIsAttackPressed(false);
+      resetAllInputs();
+      resetAllPlayerActions();
+    }
+  }, [disabled, disableKeyboard, disableJoystick, resetAllInputs, resetAllPlayerActions]);
 
-  const handleAttackEnd = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (disabled) return; e.preventDefault(); e.stopPropagation();
-    setIsAttackPressed(false); setPlayerAction('meleeAttack', false);
-  }, [disabled, setPlayerAction]);
+  // Button handlers
+  const handleJumpStart = useCallback(
+    (event: React.MouseEvent | React.TouchEvent) => {
+      if (disabled) return;
+      event.preventDefault();
+      event.stopPropagation(); // Prevent event propagation
+      setIsJumpPressed(true);
+      setActionInput('jump', true, 'touch');
+    },
+    [disabled, setActionInput],
+  );
 
-  if (disableJoystick) return null;
+  const handleJumpEnd = useCallback(
+    (event: React.MouseEvent | React.TouchEvent) => {
+      if (disabled) return;
+      event.preventDefault();
+      event.stopPropagation(); // Prevent event propagation
+      setIsJumpPressed(false);
+      setActionInput('jump', false, 'touch');
+    },
+    [disabled, setActionInput],
+  );
 
+  const handleAttackStart = useCallback(
+    (event: React.MouseEvent | React.TouchEvent) => {
+      if (disabled) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setIsAttackPressed(true);
+      // NOTE: change to other action if needed
+      setPlayerAction('punch', true);
+    },
+    [disabled, setPlayerAction],
+  );
+
+  const handleAttackEnd = useCallback(
+    (event: React.MouseEvent | React.TouchEvent) => {
+      if (disabled) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setIsAttackPressed(false);
+      // NOTE: change to other action if needed
+      setPlayerAction('punch', false);
+    },
+    [disabled, setPlayerAction],
+  );
+
+  // Don't render action buttons if joystick is disabled
+  if (disableJoystick) {
+    return null;
+  }
+
+  // Render action buttons
   return (
     <div className="fixed bottom-8 right-8 z-[1001]">
+      {/* Attack Button */}
       <div
-        className={`w-20 h-20 rounded-full flex items-center justify-center cursor-pointer select-none touch-none ${isAttackPressed ? 'scale-90' : 'scale-100'} transition-transform`}
-        style={{ background: 'radial-gradient(circle, rgba(176,122,255,0.5) 0%, rgba(119,68,204,0.3) 100%)', border: '2px solid rgba(176,122,255,0.6)', boxShadow: '0 0 16px rgba(176,122,255,0.4)' }}
+        className={`w-20 h-20 rounded-full bg-white/30 
+                   flex items-center justify-center cursor-pointer select-none touch-none
+                   ${isAttackPressed ? 'scale-90' : 'scale-100'} transition-transform`}
         onMouseDown={handleAttackStart}
         onMouseUp={handleAttackEnd}
         onMouseLeave={handleAttackEnd}
         onTouchStart={handleAttackStart}
         onTouchEnd={handleAttackEnd}
       >
-        <span className="text-white text-xs font-bold">⚔ ATTACK</span>
+        <span className="text-white text-xs font-bold">ATTACK</span>
+      </div>
+
+      {/* Jump Button */}
+      <div
+        className={`absolute bottom-0 -left-12 -top-12 w-14 h-14 rounded-full bg-white/30 
+                   flex items-center justify-center cursor-pointer select-none touch-none
+                   ${isJumpPressed ? 'scale-90' : 'scale-100'} transition-transform`}
+        onMouseDown={handleJumpStart}
+        onMouseUp={handleJumpEnd}
+        onMouseLeave={handleJumpEnd}
+        onTouchStart={handleJumpStart}
+        onTouchEnd={handleJumpEnd}
+      >
+        <span className="text-white text-xs font-bold">JUMP</span>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import { useGameStore } from '../../stores/gameStore';
  * interactions are properly initialized before gameplay begins.
  *
  * - Performs checks every frame until map physics is confirmed ready
- * - Times out after 180 frames as fallback to prevent infinite checking
+ * - Times out after 60 frames as fallback to prevent infinite checking
  * - Excludes Capsule shapes (likely characters/objects) and sensor colliders
  * - Sets mapPhysicsReady to true once valid map geometry is detected
  */
@@ -32,17 +32,20 @@ function MapPhysicsReadyChecker() {
     const downDirection = new THREE.Vector3(0, -1, 0);
     const ray = new rapier.Ray(origin, downDirection);
 
+    // Get all intersections and find the first non-sensor collider
     const intersections: any[] = [];
     world.propagateModifiedBodyPositionsToColliders();
     world.updateSceneQueries();
     world.intersectionsWithRay(ray, 100, true, (intersection) => {
+      // Exclude Capsule shapes as they are unlikely to be map colliders
       if (intersection.collider.shape.type === rapier.ShapeType.Capsule) {
         return true;
       }
       intersections.push(intersection);
-      return true;
+      return true; // continue searching
     });
 
+    // Find the first non-sensor collider
     const validHit = intersections.find((intersection) => !intersection.collider.isSensor());
     if (!validHit) return;
 

@@ -1,12 +1,20 @@
 export const RigidBodyObjectType = {
   /** Local Player */
   LOCAL_PLAYER: 'LOCAL_PLAYER',
-  /** Enemy / Monster */
+  /** Enemy */
   ENEMY: 'ENEMY',
-  /** Loot / Collectible item */
-  ITEM: 'ITEM',
+  /** Monster */
+  MONSTER: 'MONSTER',
   /** Wall */
   WALL: 'WALL',
+  /** Obstacle */
+  OBSTACLE: 'OBSTACLE',
+  /** Item */
+  ITEM: 'ITEM',
+  /** Bullet */
+  BULLET: 'BULLET',
   /** Floor */
   FLOOR: 'FLOOR',
+  /** Floating board */
+  PLOTTING_BOARD: 'PLOTTING_BOARD',
 } as const;

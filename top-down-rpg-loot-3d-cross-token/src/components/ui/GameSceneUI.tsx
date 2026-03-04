@@ -1,35 +1,31 @@
 import { useGameStore } from '../../stores/gameStore';
 import { InputController } from './InputController';
 import LoadingScreen from './LoadingScreen';
-import TitleScreen from './TitleScreen';
-import HUDOverlay from './HUDOverlay';
-import GameOverScreen from './GameOverScreen';
-import WalletScreen from './WalletScreen';
-import CrossRampOverlay from './CrossRampOverlay';
+import InventoryHUD from './InventoryHUD';
+import MiningProgressUI from './MiningProgressUI';
+import QualitySettingsMenu from './QualitySettingsMenu';
 
 /**
- * GameSceneUI — renders the appropriate overlay based on game phase.
- * [CHANGE] Replace overlay components with concept-specific UI.
+ * Game Scene UI Component
+ *
+ * This component manages UI overlays for the game scene.
+ * It handles loading states and displays appropriate UI elements based on game state.
  */
 const GameSceneUI = () => {
-  const { isMapPhysicsReady, gamePhase } = useGameStore();
+  const { isMapPhysicsReady } = useGameStore();
 
   return (
     <>
-      {/* Input — disabled until physics ready and during non-play phases */}
-      <InputController
-        disabled={!isMapPhysicsReady || gamePhase !== 'playing'}
-        disableJoystick={false}
-        disableKeyboard={false}
-      />
-
-      {/* Phase overlays */}
+      {/* Input Controller - Global input management (keyboard, touch) */}
+      <InputController disableJoystick={false} disableKeyboard={false} disabled={!isMapPhysicsReady} />
+      {/* Inventory HUD - crystal counter */}
+      {isMapPhysicsReady && <InventoryHUD />}
+      {/* Mining progress bar */}
+      {isMapPhysicsReady && <MiningProgressUI />}
+      {/* Graphics quality settings — always visible */}
+      <QualitySettingsMenu />
+      {/* Loading Game Scene screen overlay */}
       {!isMapPhysicsReady && <LoadingScreen />}
-      {isMapPhysicsReady && gamePhase === 'title' && <TitleScreen />}
-      {isMapPhysicsReady && gamePhase === 'playing' && <HUDOverlay />}
-      {isMapPhysicsReady && gamePhase === 'gameover' && <GameOverScreen />}
-      {isMapPhysicsReady && gamePhase === 'wallet' && <WalletScreen />}
-      {isMapPhysicsReady && gamePhase === 'crossramp' && <CrossRampOverlay />}
     </>
   );
 };

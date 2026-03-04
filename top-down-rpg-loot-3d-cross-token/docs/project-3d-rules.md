@@ -1,156 +1,282 @@
-# 3D 프로젝트 개발 규칙 (AI 에이전트 지침)
+# 3D 오픈월드 자원 수집 게임 — AI 에이전트 지침
 
-## 1. 게임 콘셉트 결정 방법
+<userRequest>
+YOU MUST follow these rules when working with this template.
 
-### 1-A. 사용자 프롬프트 분석
+## 섹션 0 — 이 템플릿의 목적
 
-사용자의 프롬프트에서 다음을 파악한다:
-- **세계관**: 어떤 시대/환경인가? (판타지, SF, 서부, 동양, 해양 등)
-- **주인공**: 어떤 캐릭터인가? (기사, 마법사, 사무라이, 해적, 우주비행사 등)
-- **적**: 어떤 적이 등장하는가?
-- **수집품**: 무엇을 모으는가?
+이 프로젝트는 **3D 탑다운(쿼터뷰) 오픈월드 자원 수집** 모바일 게임의 보일러플레이트입니다. 플레이어가 지형을 탐험하며 수집품에 접근해 자동 채집하고, 획득한 자원을 CROSS 체인 토큰으로 교환하는 구조입니다.
 
-> ⚠️ **주의**: `CROSS`, `token`, `blockchain`, `wallet` 키워드는 **기술 스펙**이다. 이 단어들이 있다고 해서 사이버펑크/SF 세계관을 선택하면 안 된다.
+### 기본 컨셉 (Placeholder — 반드시 교체)
 
-### 1-B. 콘셉트 조합 예시 (영감용 — 그대로 복사하지 말 것)
+| 항목 | 기본값 |
+|------|--------|
+| 게임명 | REALM OF RELICS |
+| 수집품 | Crystal (크리스탈 파편) |
+| 환경 오브젝트 | 나무 (tree), 바위 (rock) |
+| 서버 에셋 키 | `crystal` |
 
-| 세계관 | 주인공 | 적 | 수집품 | 토큰명 |
-|--------|--------|-----|--------|--------|
-| 북유럽 신화 | 바이킹 전사 | 서리 거인, 좀비 드래곤 | 룬 석 | RXT |
-| 이집트 | 파라오 수호자 | 미라, 스카라브 | 황금 앙크 | ANK |
-| 동양 무협 | 검객 | 요괴, 도깨비 | 영혼 구슬 | ORB |
-| 해저 탐험 | 잠수부 | 상어, 해파리 | 산호 결정 | CRL |
-| 서부 개척 | 보안관 | 무법자, 선인장 골렘 | 황금 너겟 | NUG |
-| 우주 정거장 | 우주비행사 | 외계인, 로봇 | 광물 결정 | CRY |
+> 위 값들은 모두 **placeholder**. 새 게임을 만들 때 전부 교체한다.
 
-> 표에 없는 완전히 새로운 조합을 만드는 것이 더 좋다. 위는 영감을 위한 예시일 뿐이다.
+### 변경 가능한 것
+
+| 대상 | 파일 | 설명 |
+|------|------|------|
+| 게임명/부제 | `TitleScene.tsx` | h1 제목, p 부제 텍스트 |
+| 수집품 3D 모델 | `src/assets.json` → `objects.crystal.url` | GLB URL |
+| 수집품 색상 변형 (3종) | `LootManager.tsx` → `VARIANT_COLORS` | emissive, glow 색상 |
+| 수집품 이름 표시 | `InventoryHUD.tsx` 라벨 + 아이콘 SVG | "Crystals" 텍스트, SVG 교체 |
+| 채집 진행 라벨 | `MiningProgressUI.tsx` | "⛏ Mining…" 텍스트, 색상 |
+| 환경 오브젝트 모델 | `src/assets.json` → `objects.tree.url`, `objects.rock.url` | GLB URLs |
+| 플레이어 모델 | `src/assets.json` → `characters.base-model.url` | GLB URL |
+| 서버 에셋 키 | `server/src/server.ts` → `$asset.mint('crystal')` | 수집품 키 변경 |
+| InventoryHUD 에셋 키 | `InventoryHUD.tsx` → `assets?.crystal` | 서버 키와 동일하게 |
+| TitleScene 아이콘/색상 | `TitleScene.tsx` | SVG 아이콘, 그라데이션, 파티클 |
+| InventoryHUD 아이콘/색상 | `InventoryHUD.tsx` | SVG 아이콘, 보더, 글로우 색상 |
+| 교환 버튼 텍스트 | `TitleScene.tsx`, `InventoryHUD.tsx` | "⇄ EXCHANGE CRYSTALS" |
+| CrossRamp 에셋 키 | `.crossramp` → `asset_keys` | 서버 에셋 키와 동기화 |
+
+### 절대 변경 금지
+
+- **`server.ts`의 `collectCrystal` 함수명** — `LootManager.tsx`에서 `remoteFunction('collectCrystal', [id])`로 하드코딩
+- **`server.ts`의 `getMyAssets` 함수명** — `InventoryHUD.tsx`에서 `remoteFunction('getMyAssets', [])`로 하드코딩
+- **HTML inside `<Canvas>`** — Canvas 내부에 HTML 컴포넌트 절대 금지
+- **`GameScene.tsx` 내 useState/useEffect** — 레이아웃 컨테이너 전용
 
 ---
 
-## 2. 비주얼 교체 체크리스트 (10단계)
+## 섹션 1 — 컨셉 수령 절차
 
-새 게임을 만들 때 반드시 다음 순서로 진행한다:
+### 1-A. 사용자가 컨셉을 제공한 경우
 
-1. **콘셉트 확정**: 세계관, 주인공, 적, 수집품 결정
-2. **플레이어 모델**: `assets.json` → `characters.base-model.url` 교체 (GLB)
-3. **애니메이션**: 필요 시 `assets.json` 애니메이션 URL 교체
-4. **적 비주얼**: `Enemy.tsx` 캡슐 지오메트리 → 개념에 맞는 모양으로 교체
-5. **수집품 비주얼**: `LootGem.tsx` 팔면체 → 개념에 맞는 형태 + 색상
-6. **던전 환경**: `DungeonRoom.tsx` 벽 색상/재질, 조명 색상 교체
-7. **바닥 재질**: `Floor.tsx` 색상/roughness 교체
-8. **TitleScreen**: 게임명, 서브타이틀, 색상, 토큰명, 버튼 텍스트
-9. **HUDOverlay**: 아이콘, 수집품 이름, 색상 테마
-10. **GameOverScreen + WalletScreen**: 메시지, 토큰명, 교환 비율
+**블록체인 키워드 ≠ 게임 컨셉**: `CROSS`, `chain`, `token`, `blockchain`, `wallet` 등은 **기술 스펙**이며 게임 세계관에 영향을 주지 않는다. 이 키워드만 있고 세계관이 명시되지 않았다면 → **1-B 이동**.
 
-> **규칙**: 비주얼 교체와 UI 교체는 **반드시 첫 프롬프트에서 함께** 진행한다. 나중에 미루면 안 된다.
+1. **세계관 추출**: 판타지/자연/신화/해양/우주 등 배경
+2. **수집품 추출**: 무엇을 모으는가 (광석, 허브, 유물, 조개, 결정 등)
+3. **환경 추출**: 어떤 지형과 오브젝트인가 (숲/동굴/해저/사막 등)
+4. **색상/분위기 추출**: UI 색상 테마, 수집품 색상 변형 3종
+
+### 1-B. 사용자가 컨셉을 제공하지 않은 경우
+
+**자동 선택 금지**: 사이버펑크, SF — 사용자가 명시 요청한 경우에만 사용.
+
+아래 조합 테이블은 **영감 소스** — 표에 없는 새로운 조합을 만드는 것을 권장.
+
+| 세계관 | 수집품 | 환경 오브젝트 | 색상 테마 |
+|--------|--------|---------------|----------|
+| 북유럽 신화 | 룬 석 | 고목, 바이킹 석상 | 청회색 / 금색 |
+| 해저 탐험 | 산호 결정 | 해초, 바위 산호 | 청록 / 민트 |
+| 마법 숲 | 요정 씨앗 | 버섯 나무, 빛나는 꽃 | 초록 / 보라 |
+| 화산 지대 | 용암 결정 | 화산암, 불꽃 풀 | 주황 / 빨강 |
+| 고대 신전 | 황금 유물 | 석주, 덩굴 폐허 | 황금 / 황토 |
+| 빙하 왕국 | 빙정 | 얼음 나무, 눈 바위 | 흰색 / 아이스블루 |
+| 사막 신전 | 보석 모래 | 선인장, 오아시스 돌 | 황색 / 주황 |
+| 우주 정거장 | 광물 결정 | 안테나 구조물, 운석 | 은색 / 네온 |
+
+> 표에 없는 완전히 새로운 조합이 더 좋다. 위는 영감을 위한 예시일 뿐이다.
 
 ---
 
-## 3. Canvas 구조 규칙 (절대 준수)
+## 섹션 2 — 전면 재창조 체크리스트 (순서대로 실행)
 
-### 핵심 규칙: HTML 컴포넌트는 Canvas 내부에 절대 금지
+> **⚠️ 첫 프롬프트에서 아래 전부 완료** — 나중으로 미루지 말 것.
+
+### Step 1 — CrossRamp 배포 (최우선 — 첫 번째로 실행)
+
+```
+1. read_gameserver_sdk_v2 호출 → 서버 SDK 문서 읽기
+2. read_gameserver_sdk_crossramp 호출 → CrossRamp 배포
+   → 루트에 .crossramp 파일 생성됨 (기존 파일 있어도 재실행)
+3. .crossramp의 asset_keys가 수집품 에셋 키와 일치하는지 확인
+```
+
+> `.crossramp` 파일이 이미 존재하더라도 **컨셉 변경 시 반드시 재실행** (에셋 키가 바뀔 수 있음).
+
+### Step 2 — 서버 에셋 키 동기화
+
+`server/src/server.ts`에서 `$asset.mint('crystal', 1)` → 새 수집품 키로 변경.
+
+```typescript
+// 예: 허브를 수집하는 게임이라면
+async collectCrystal(_crystalId: string): Promise<Record<string, number>> {
+  return await $asset.mint('herb', 1);  // 'crystal' → 새 키
+}
+// ⚠️ 함수명 collectCrystal / getMyAssets는 절대 변경 금지
+```
+
+### Step 3 — assets.json 업데이트
+
+```json
+{
+  "objects": {
+    "crystal": { "url": "새 수집품 GLB URL" },
+    "tree":    { "url": "새 환경 오브젝트1 GLB URL" },
+    "rock":    { "url": "새 환경 오브젝트2 GLB URL" }
+  },
+  "characters": {
+    "base-model": { "url": "새 플레이어 GLB URL" }
+  }
+}
+```
+
+### Step 4 — LootManager.tsx 수집품 비주얼
+
+```typescript
+// VARIANT_COLORS — 수집품 색상 변형 3종 (컨셉 색상으로 교체)
+const VARIANT_COLORS: Array<{ emissive: string; glow: string }> = [
+  { emissive: '#ff8844', glow: '#ffcc88' }, // 변형 1 (컨셉 색상)
+  { emissive: '#ffee44', glow: '#ffffaa' }, // 변형 2
+  { emissive: '#ff4444', glow: '#ffaaaa' }, // 변형 3
+];
+```
+
+### Step 5 — UI 전면 재설계 (첫 프롬프트에서 Step 3과 함께 완료, 절대 미루지 말 것)
+
+**`TitleScene.tsx`** 교체 항목:
+- `h1` 텍스트 "REALM" + "OF RELICS" → 새 게임명
+- `p` 부제 "COLLECT · EXPLORE · TRANSCEND" → 컨셉에 맞게
+- 크리스탈 SVG 아이콘 → 수집품 형태 SVG로 교체
+- 배경 `linear-gradient` 색상 → 컨셉 분위기
+- 파티클 `hue` 범위 → 컨셉 색상 영역
+- "ENTER THE REALM" 버튼 텍스트 → 컨셉에 맞게
+- "⇄ EXCHANGE CRYSTALS" → 수집품명으로
+- crystalCount 배지의 "Crystals" 라벨 → 수집품명으로
+
+**`InventoryHUD.tsx`** 교체 항목:
+- `assets?.crystal` → 새 에셋 키로 (서버 키와 동일)
+- 크리스탈 SVG 아이콘 → 수집품 형태로 교체
+- "Crystals" 라벨 → 수집품명으로
+- 색상 (`#4488ff`, `rgba(100, 160, 255, ...)`) → 컨셉 색상
+- "⇄ Exchange" 버튼 텍스트 → 수집품명으로
+
+**`MiningProgressUI.tsx`** 교체 항목:
+- "⛏ Mining…" → 컨셉에 맞는 채집 동사 (예: "🌿 Harvesting…", "⚒ Excavating…")
+- "✓ Collected!" → 컨셉에 맞게
+- 색상 `#2266ff, #66aaff` → 컨셉 색상
+- 완료 색상 `#44ff88` → 컨셉 색상
+
+### Step 6 — JUICE 효과 추가 (섹션 4 참조)
+
+### Step 7 — 최종 동기화 검증
+
+| 파일 | 확인 사항 |
+|------|----------|
+| `server.ts` → `$asset.mint('키')` | `.crossramp` asset_keys와 동일한가 |
+| `InventoryHUD.tsx` → `assets?.키` | 서버 에셋 키와 동일한가 |
+| `TitleScene.tsx`, `InventoryHUD.tsx` | "Crystals" 텍스트 모두 수집품명으로 교체됐는가 |
+| `LootManager.tsx` → `VARIANT_COLORS` | 컨셉 색상으로 교체됐는가 |
+
+---
+
+## 섹션 3 — UI 재설계 상세 가이드
+
+**UI는 이름/색상만 바꾸는 것이 아님.** 컨셉에 맞게 아이콘, 레이아웃, CSS 전체를 재설계.
+
+### TitleScene.tsx
+
+- **배경**: `background: 'linear-gradient(...)'` — 컨셉 분위기 색상
+- **타이틀 SVG 아이콘**: 수집품 형태 SVG 직접 작성 (크리스탈 → 허브/보석/광석 등)
+- **파티클**: `hue` 범위를 컨셉 색상 영역으로 조정
+- **글로우 오브**: `rgba(100, 0, 255, ...)` → 컨셉 색상
+- **버튼 그라데이션, 보더 색상** → 컨셉 테마
+- **폰트 패밀리** → 컨셉 분위기에 맞는 폰트 (serif / sans-serif / monospace)
+
+### InventoryHUD.tsx
+
+- **배경/보더**: `rgba(5, 10, 30, ...)`, `rgba(100, 160, 255, ...)` → 컨셉 색상
+- **SVG 아이콘**: 크리스탈 폴리곤 SVG → 수집품 형태로 교체
+- **글로우**: `drop-shadow(0 0 4px #4488ff)` → 컨셉 색상
+- **교환 버튼**: 보라 계열 → 컨셉 색상
+
+### MiningProgressUI.tsx
+
+- **이모지 + 텍스트**: ⛏, ✓ → 컨셉 동사 (채집/발굴/수확)
+- **진행 바 색상**: `#2266ff → #66aaff` → 컨셉 색상
+- **완료 색상**: `#44ff88` → 컨셉 색상
+
+---
+
+## 섹션 4 — JUICE 필수 체크리스트
+
+**첫 프롬프트에서 게임 완성도와 함께 적용.** Don't be boring!
+
+| 항목 | 상태 | 참고 |
+|------|------|------|
+| **수집 파티클** | 기본 구현됨 | `CollectEffect.tsx` — 색상만 컨셉으로 |
+| **수집품 부유/회전** | 기본 구현됨 | `CrystalItem.tsx` useFrame float bob |
+| **채집 중 강조 (pulse)** | 기본 구현됨 | `isBeingMined` → emissiveIntensity 증가 |
+| **InventoryHUD 버스트** | 기본 구현됨 | 수집 시 아이콘 확대 + 글로우 |
+| **화면 플래시** | 기본 구현됨 | radial-gradient 오버레이 |
+| **+N 텍스트** | 기본 구현됨 | floating text 애니메이션 |
+| **타이틀 파티클** | 기본 구현됨 | `TitleScene.tsx` — 색상만 교체 |
+| **모바일 최적화** | 기본 구현됨 | 44px 탭 타겟, safe-area 지원 |
+
+---
+
+## 섹션 5 — 절대 변경 금지
+
+- **`server.ts` 함수명** `collectCrystal` / `getMyAssets` — 클라이언트에서 하드코딩 호출
+- **`GameScene.tsx`의 useState/useEffect** — 레이아웃 컨테이너 전용
+- **Canvas 내 HTML** — UI는 `src/components/ui/`에서 Canvas 외부 렌더링
+- **`TitleScene.tsx`의 `onStart` callback** — App.tsx 페이즈 전환에 연결
+- **`GameSceneUI.tsx`의 컴포넌트 구조** — InputController, InventoryHUD, MiningProgressUI, QualitySettingsMenu, LoadingScreen 구조 유지
+
+---
+
+## 섹션 6 — 기술 규칙
+
+### Canvas 구조
 
 ```tsx
 // ✅ 올바른 구조
 <div>
   <Canvas>
-    <Player />       {/* Three.js 컴포넌트 */}
-    <Enemy />        {/* Three.js 컴포넌트 */}
-    <DungeonRoom />  {/* Three.js 컴포넌트 */}
+    <Experience />       {/* GameEnvironment → Player + LootManager */}
+    <GameSceneCanvas />  {/* Physics + Lights + QuarterViewController */}
   </Canvas>
-
-  {/* UI는 Canvas 밖에서 overlay로 렌더링 */}
-  <HUDOverlay />
-  <TitleScreen />
+  <GameSceneUI />        {/* 모든 HTML UI — Canvas 외부 */}
 </div>
 
 // ❌ 잘못된 구조
 <Canvas>
-  <Player />
-  <HUDOverlay />  {/* HTML div 포함 — 금지 */}
+  <InventoryHUD />  {/* HTML div 포함 — 절대 금지 */}
 </Canvas>
 ```
 
-**예외**: `@react-three/drei`의 `<Html>` 컴포넌트는 Canvas 내부에서 사용 가능 (drei가 특수 처리).
+### 채집 시스템 흐름
 
----
+```
+플레이어 이동 → LootManager useFrame 거리 체크
+→ 거리 < 3.0 유닛 → startMining(id) → miningStore 진행 업데이트
+→ 2.0초 후 → handleLootCollected(id)
+  → inventoryStore.collectCrystal(1)
+  → server.remoteFunction('collectCrystal', [id])  ← 서버 에셋 mint
+  → 12초 후 새 랜덤 위치에 respawn
+```
 
-## 4. RigidBodyObject 규칙
+### CrossRamp 연동 (이미 구현됨 — 텍스트만 교체)
 
-물리 상호작용이 필요한 엔티티에는 `@react-three/rapier`의 `RigidBody` 대신 `vibe-starter-3d`의 `RigidBodyObject`를 사용한다.
+```typescript
+// TitleScene.tsx + InventoryHUD.tsx
+const url = await server.getCrossRampShopUrl('en');
+window.open(url, 'CrossRampShop', 'width=1024,height=768');
+```
 
-- **왜**: `RigidBodyObject`는 `onTriggerEnter` / `onTriggerExit` 이벤트를 제공해 충돌 처리가 단순해진다
-- **플레이어**: `RigidBodyPlayer` 사용 (이미 구현됨)
-- **적**: `RigidBodyObject` 사용 (Enemy.tsx)
-- **정적 지오메트리** (벽, 바닥): 일반 `RigidBody` 사용 가능
+### 에셋 키 변경 시 반드시 동기화할 3개 지점
 
----
+```
+1. server/src/server.ts → $asset.mint('새키', 1)
+2. InventoryHUD.tsx → assets?.['새키']
+3. .crossramp → asset_keys: ["새키"]  (read_gameserver_sdk_crossramp 재실행)
+```
 
-## 5. GameScene.tsx 성능 규칙
+### GameScene.tsx 성능 규칙
 
 ```tsx
 // ❌ GameScene.tsx에서 절대 금지
-const [someState, setSomeState] = useState(false);  // useState 금지
-useEffect(() => { setSomeState(true); }, []);        // state 업데이트 금지
-<GameSceneCanvas style={{ color: 'red' }} />        // 인라인 객체 금지
+const [state, setState] = useState(...);
+useEffect(() => { setState(...); }, [...]);
+<Component style={{ color: 'red' }} />  // 인라인 객체 금지
 ```
 
-이 파일은 레이아웃 컨테이너일 뿐이다. 모든 상태는 자식 컴포넌트 (GameSceneUI, GameSceneCanvas) 내부 또는 Zustand 스토어에서 관리한다.
-
----
-
-## 6. 적 이동 / 공격 패턴
-
-### 적 이동 (Enemy.tsx)
-```tsx
-// useFrame에서 플레이어를 향해 setLinvel()로 이동
-const pos = rigidBodyRef.current.translation();
-const playerPos = useLocalPlayerStore.getState().state.position;
-const dx = playerPos.x - pos.x;
-const dz = playerPos.z - pos.z;
-const dist = Math.sqrt(dx*dx + dz*dz);
-rigidBodyRef.current.setLinvel({
-  x: (dx/dist) * enemy.speed,
-  y: 0,
-  z: (dz/dist) * enemy.speed
-}, true);
-```
-
-### 플레이어 근접 공격 (Player.tsx)
-```tsx
-// meleeAttack 액션 감지 → enemyPositionRegistry에서 거리 확인
-const justAttacked = currentAttack && !prevAttackRef.current;
-if (justAttacked && cooldown <= 0) {
-  enemies.forEach(enemy => {
-    const pos = enemyPositionRegistry.get(enemy.id);
-    if (!pos) return;
-    const dist = distance(playerPos, pos);
-    if (dist < ATTACK_RANGE) killEnemy(enemy.id, pos);
-  });
-}
-```
-
----
-
-## 7. CROSS 토큰 연동 체크포인트
-
-게임 콘셉트를 변경할 때 반드시 4개 지점을 동기화한다:
-
-| 파일 | 변경 사항 |
-|------|-----------|
-| `gameStore.ts` → `spawnGemAtPosition()` | 수집품 종류/가치 조정 |
-| `GameOverScreen.tsx` | `claimGems(gemsPending)` 호출 — 함수명 변경 금지 |
-| `server/src/server.ts` | `$asset.mint('gem', amount)` — 에셋 키 `.crossramp`와 동기화 |
-| `WalletScreen.tsx` | "100 GEMS = 1 GDT" 표시 업데이트 |
-
-> `.crossramp` 파일은 반드시 `read_gameserver_sdk_crossramp` 도구로 생성한다. 수동으로 만들지 말 것.
-
----
-
-## 8. 기술 규칙 (위반 시 게임 파손)
-
-- `App.tsx`의 `GameServerProvider` 제거 금지 — CROSS 연동 불가
-- `gameStore.ts`의 `startGame()` / `restartGame()` 함수 서명 변경 금지
-- `enemyPositionRegistry` 를 Zustand로 교체하지 말 것 — 프레임마다 업데이트되므로 리렌더링 폭주
-- `useGameStore` 구독 시 `useGameStore((s) => s.enemies)` 형태 사용 — 불필요한 전체 구독 피하기
-- 적 위치를 Zustand state로 저장하지 말 것 — `enemyPositionRegistry` (plain Map) 사용
+</userRequest>

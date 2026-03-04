@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
 import './App.css';
-import { GameServerProvider } from '@agent8/gameserver';
 import GameScene from './components/scene/GameScene';
 import PreloadScene from './components/scene/PreloadScene';
+import TitleScene from './components/scene/TitleScene';
+
+type AppPhase = 'loading' | 'title' | 'game';
 
 const App: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [phase, setPhase] = useState<AppPhase>('loading');
 
   const handleLoadingComplete = () => {
-    setIsLoading(false);
+    setPhase('title');
+  };
+
+  const handleGameStart = () => {
+    setPhase('game');
   };
 
   return (
-    <GameServerProvider>
-      <div style={{ width: '100vw', height: '100vh' }}>
-        {isLoading ? <PreloadScene onComplete={handleLoadingComplete} /> : <GameScene />}
-      </div>
-    </GameServerProvider>
+    <div style={{ width: '100vw', height: '100vh' }}>
+      {phase === 'loading' && <PreloadScene onComplete={handleLoadingComplete} />}
+      {phase === 'title' && <TitleScene onStart={handleGameStart} />}
+      {phase === 'game' && <GameScene />}
+    </div>
   );
 };
 
