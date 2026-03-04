@@ -1,5 +1,9 @@
 # Project Structure
 
+## Project Summary
+
+This project is a boilerplate for vertical scrolling shmup (top-down) mobile games with CROSS blockchain token integration. Built with Phaser 3 and React overlays, it includes auto-shoot gameplay, enemy waves with boss fights, stardust collectibles, and a Wallet scene for token exchange. An AI agent can receive a game concept and fully recreate the visual theme, overlays, and token branding — all without touching the core engine.
+
 Files are marked as **[CHANGE]** (must be replaced per concept) or **[DO NOT MODIFY]** (engine/infrastructure).
 
 > **Critical**: `assets.json` and overlay components are a **pair**. When you replace assets, you must also fully redesign overlays (TitleOverlay, HUDOverlay, GameOverOverlay, WalletOverlay) to match the chosen concept. **Do both on the first prompt** — do not defer UI to a later prompt. Never update assets without updating overlays.

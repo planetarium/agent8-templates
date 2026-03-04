@@ -1,5 +1,9 @@
 # Project Structure
 
+## Project Summary
+
+This project is a boilerplate for building Vampire Survivors-like 2D top-down mobile games. It is built with Phaser 3 and React, and is designed so that an AI agent can receive a game concept and fully recreate the visual theme, enemy types, skill system, wave design, and UI — all without touching the core engine. The same boilerplate can produce entirely different games depending on the concept applied.
+
 Files are marked as **[CHANGE]** (must be replaced per concept) or **[DO NOT MODIFY]** (engine/infrastructure).
 
 > **Critical**: `App.tsx` and `assets.json` are a **pair**. When you replace assets, you must also fully redesign `App.tsx` (HUD, layout, colors, modals, joystick) to match the chosen concept. **Do both on the first prompt** — do not defer UI to a later prompt. Never update assets without updating App.tsx.
