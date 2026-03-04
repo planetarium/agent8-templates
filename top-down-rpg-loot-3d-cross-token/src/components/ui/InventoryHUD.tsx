@@ -77,7 +77,7 @@ const InventoryHUD: React.FC = () => {
         /* Top-left with safe-area support */
         top: 'max(14px, env(safe-area-inset-top))',
         left: 'max(14px, env(safe-area-inset-left))',
-        zIndex: 100,
+        zIndex: 1002,
         display: 'flex',
         alignItems: 'center',
         gap: '8px',

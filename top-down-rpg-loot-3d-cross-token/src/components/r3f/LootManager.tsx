@@ -90,8 +90,13 @@ const CrystalItem: React.FC<CrystalItemProps> = React.memo(({ loot, isBeingMined
   // One-time material clone per crystal instance
   const instanceMat = useMemo(() => {
     const m = new MeshStandardMaterial({
+      color: new Color(colors.emissive),
       emissive: new Color(colors.emissive),
       emissiveIntensity: 1.2,
+      roughness: 0.1,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.9,
     });
     matRef.current = m;
     return m;

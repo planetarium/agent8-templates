@@ -27,18 +27,21 @@
 
 ### Phase 2 — 오브젝트 컨셉 교체
 - [ ] **Step 3**: 세계관/수집품/환경 컨셉 결정 (에이전트가 창의적으로 선정 — `docs/project-3d-rules.md` 섹션 1-B 참조)
-- [ ] **Step 4**: `src/assets.json` 업데이트
-  - `objects.crystal.url` → 새 수집품 GLB
+- [ ] **Step 4**: `src/assets.json` 업데이트 — **URL을 실제로 교체해야 외형이 바뀜**
+  - `objects.crystal.url` → 새 수집품 GLB (에셋 생성 도구 또는 라이브러리에서 URL 획득)
   - `objects.tree.url` → 새 환경 오브젝트1 GLB
   - `objects.rock.url` → 새 환경 오브젝트2 GLB
-  - `characters.base-model.url` → 새 플레이어 GLB (필요 시)
+  - `characters.base-model.url` → **새 플레이어 GLB (반드시 교체 — URL 그대로면 기존 기사 캐릭터 유지됨)**
 - [ ] **Step 5**: `LootManager.tsx` → `VARIANT_COLORS` 3종을 컨셉 색상으로 교체
+  - `emissive`와 `glow` 모두 컨셉 색상으로 설정 (이 값이 수집품 실제 표시 색상)
 - [ ] **Step 6**: `server/src/server.ts` → `$asset.mint('crystal')` 키를 새 수집품 키로 변경
   - **함수명 `collectCrystal` / `getMyAssets`는 절대 변경 금지**
 
 ### Phase 3 — UI 전면 재설계 (Phase 2와 동시 진행 — 절대 나중으로 미루지 말 것)
-- [ ] **Step 7**: `TitleScene.tsx` 재설계
-  - 게임명 (h1), 부제, 크리스탈 SVG 아이콘, 배경 색상, 파티클 색상, 버튼 텍스트
+- [ ] **Step 7**: `TitleScene.tsx` **전면 재작성** — 텍스트/색상만 바꾸는 것은 금지
+  - 배경 연출 스타일 자체를 바꿀 것 (별빛 보라 그라데이션 → 컨셉 세계관 배경)
+  - SVG 아이콘: 크리스탈 폴리곤 → 수집품 형태 완전히 새로운 SVG
+  - 게임명, 부제, 파티클 색상, 버튼 텍스트, 폰트 모두 교체
   - "Crystals" 라벨 → 새 수집품명으로
 - [ ] **Step 8**: `InventoryHUD.tsx` 재설계
   - `assets?.crystal` → 새 에셋 키로

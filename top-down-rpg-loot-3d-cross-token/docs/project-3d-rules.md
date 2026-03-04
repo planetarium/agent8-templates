@@ -104,55 +104,90 @@ async collectCrystal(_crystalId: string): Promise<Record<string, number>> {
 // ⚠️ 함수명 collectCrystal / getMyAssets는 절대 변경 금지
 ```
 
-### Step 3 — assets.json 업데이트
+### Step 3 — assets.json 업데이트 (에셋 URL 전부 교체 필수)
+
+> **⚠️ 에셋 URL을 실제로 교체해야 한다.** 기존 URL을 그대로 두면 게임 외형이 바뀌지 않는다.
+> 이미지 생성 도구(나노바나나프로 등)로 3D GLB 에셋을 생성하거나, 에셋 라이브러리에서 URL을 가져와야 한다.
 
 ```json
 {
   "objects": {
-    "crystal": { "url": "새 수집품 GLB URL" },
-    "tree":    { "url": "새 환경 오브젝트1 GLB URL" },
-    "rock":    { "url": "새 환경 오브젝트2 GLB URL" }
+    "crystal": { "url": "새 수집품 GLB URL" },      ← 반드시 교체
+    "tree":    { "url": "새 환경 오브젝트1 GLB URL" }, ← 반드시 교체
+    "rock":    { "url": "새 환경 오브젝트2 GLB URL" }  ← 반드시 교체
   },
   "characters": {
-    "base-model": { "url": "새 플레이어 GLB URL" }
+    "base-model": { "url": "새 플레이어 GLB URL" }   ← 반드시 교체
   }
 }
 ```
 
+**캐릭터 에셋 교체 주의사항:**
+- `characters.base-model.url`에 새 GLB URL을 지정하면 `Player.tsx`가 자동으로 해당 모델을 로드함
+- 에셋 생성 도구로 컨셉에 맞는 3D 캐릭터 GLB를 생성하거나 에셋 라이브러리에서 적합한 모델 URL을 선택할 것
+- URL을 교체하지 않으면 기존 기사 캐릭터가 그대로 표시됨
+
 ### Step 4 — LootManager.tsx 수집품 비주얼
 
+**수집품 GLB 모델**: `Assets.objects.crystal.url` → Step 3에서 교체한 URL이 자동 반영됨
+
+**수집품 색상 변형 (VARIANT_COLORS)**: 3종의 색상을 컨셉에 맞게 반드시 교체.
+
 ```typescript
-// VARIANT_COLORS — 수집품 색상 변형 3종 (컨셉 색상으로 교체)
+// LootManager.tsx의 VARIANT_COLORS 교체
+// emissive = 수집품 발광 색상, glow = 글로우 색상 (보통 emissive의 밝은 버전)
 const VARIANT_COLORS: Array<{ emissive: string; glow: string }> = [
-  { emissive: '#ff8844', glow: '#ffcc88' }, // 변형 1 (컨셉 색상)
-  { emissive: '#ffee44', glow: '#ffffaa' }, // 변형 2
-  { emissive: '#ff4444', glow: '#ffaaaa' }, // 변형 3
+  { emissive: '#ff8844', glow: '#ffcc88' }, // 변형 1 — 컨셉 주 색상
+  { emissive: '#ffee44', glow: '#ffffaa' }, // 변형 2 — 컨셉 보조 색상
+  { emissive: '#ff4444', glow: '#ffaaaa' }, // 변형 3 — 컨셉 희귀 색상
 ];
 ```
 
-### Step 5 — UI 전면 재설계 (첫 프롬프트에서 Step 3과 함께 완료, 절대 미루지 말 것)
+> `color`와 `emissive`가 모두 이 팔레트에서 설정되므로, 색상이 올바르게 표시되려면 반드시 교체해야 함.
 
-**`TitleScene.tsx`** 교체 항목:
-- `h1` 텍스트 "REALM" + "OF RELICS" → 새 게임명
-- `p` 부제 "COLLECT · EXPLORE · TRANSCEND" → 컨셉에 맞게
-- 크리스탈 SVG 아이콘 → 수집품 형태 SVG로 교체
-- 배경 `linear-gradient` 색상 → 컨셉 분위기
-- 파티클 `hue` 범위 → 컨셉 색상 영역
-- "ENTER THE REALM" 버튼 텍스트 → 컨셉에 맞게
-- "⇄ EXCHANGE CRYSTALS" → 수집품명으로
-- crystalCount 배지의 "Crystals" 라벨 → 수집품명으로
+### Step 5 — TitleScene.tsx 전면 재작성 (완전히 새로 만들 것)
+
+> **⚠️ TitleScene.tsx는 텍스트/색상만 바꾸는 것이 아님. 기존 레이아웃과 애니메이션 스타일을 그대로 재사용하지 말 것.**
+> 컨셉에 맞는 완전히 다른 배경 연출, 아이콘 SVG, 레이아웃으로 재작성해야 한다.
+
+재작성 필수 항목:
+
+| 항목 | 기존 기본값 | 교체 방향 |
+|------|-----------|----------|
+| 배경 스타일 | 보라/남색 별빛 그라데이션 + 떠오르는 파티클 | 컨셉 세계관에 맞는 완전히 다른 배경 연출 |
+| 타이틀 SVG 아이콘 | 파란 크리스탈 폴리곤 | 컨셉 수집품 형태 SVG (직접 작성) |
+| 게임명 h1 | "REALM" / "OF RELICS" | 새 게임명 (2줄 구성 유지하거나 변경) |
+| 부제 p | "COLLECT · EXPLORE · TRANSCEND" | 컨셉 키워드 3개 |
+| 배경 색상 팔레트 | 남색/보라 계열 | 컨셉 세계관 색상 |
+| 글로우 오브 색상 | `rgba(100, 0, 255, ...)` | 컨셉 색상 |
+| 버튼 텍스트 | "ENTER THE REALM" | 컨셉에 맞는 입장 문구 |
+| 교환 버튼 텍스트 | "⇄ EXCHANGE CRYSTALS" | 수집품명으로 |
+| 배지의 수집품 라벨 | "Crystals" | 새 수집품명 |
+| 폰트 패밀리 | Georgia serif | 컨셉에 맞는 폰트 |
+
+**나쁜 예 (텍스트만 바꿈 — 금지)**:
+```tsx
+// ❌ "REALM" → "FOREST" 로만 바꾸고 나머지 그대로 = 재사용이지 재설계가 아님
+```
+
+**좋은 예 (전면 재설계)**:
+- 해저 컨셉: 어두운 청록 배경 + 거품 파티클 + 조개껍데기 SVG 아이콘 + sans-serif 폰트
+- 화산 컨셉: 오렌지/빨강 배경 + 불꽃 파티클 + 용암 결정 SVG + 굵은 Impact 폰트
+- 마법 숲: 진초록 배경 + 반딧불이 파티클 + 잎사귀 SVG + 필기체 폰트
+
+### Step 6 — InventoryHUD.tsx + MiningProgressUI.tsx 재설계
 
 **`InventoryHUD.tsx`** 교체 항목:
-- `assets?.crystal` → 새 에셋 키로 (서버 키와 동일)
-- 크리스탈 SVG 아이콘 → 수집품 형태로 교체
+- `assets?.crystal` → 새 에셋 키로 (서버 키와 동일, 필수)
+- SVG 아이콘 → 수집품 형태로 완전히 새로운 SVG 작성
 - "Crystals" 라벨 → 수집품명으로
-- 색상 (`#4488ff`, `rgba(100, 160, 255, ...)`) → 컨셉 색상
-- "⇄ Exchange" 버튼 텍스트 → 수집품명으로
+- 색상 팔레트 (`#4488ff`, `rgba(100, 160, 255, ...)`) → 컨셉 색상
+- "⇄ Exchange" 버튼 텍스트 → "⇄ EXCHANGE [수집품명]" 으로
 
 **`MiningProgressUI.tsx`** 교체 항목:
-- "⛏ Mining…" → 컨셉에 맞는 채집 동사 (예: "🌿 Harvesting…", "⚒ Excavating…")
+- "⛏ Mining…" → 컨셉 채집 동사 (예: "🌿 Harvesting…", "⚒ Excavating…", "🔱 Gathering…")
 - "✓ Collected!" → 컨셉에 맞게
-- 색상 `#2266ff, #66aaff` → 컨셉 색상
+- 진행 바 색상 `#2266ff, #66aaff` → 컨셉 색상
 - 완료 색상 `#44ff88` → 컨셉 색상
 
 ### Step 6 — JUICE 효과 추가 (섹션 4 참조)
@@ -170,27 +205,32 @@ const VARIANT_COLORS: Array<{ emissive: string; glow: string }> = [
 
 ## 섹션 3 — UI 재설계 상세 가이드
 
-**UI는 이름/색상만 바꾸는 것이 아님.** 컨셉에 맞게 아이콘, 레이아웃, CSS 전체를 재설계.
+**UI는 이름/색상만 바꾸는 것이 아님.** 컨셉에 맞게 아이콘, 레이아웃, 애니메이션 스타일 전체를 재설계.
+**기존 TitleScene의 "별빛 배경 + 크리스탈 아이콘 + 보라 그라데이션" 조합을 그대로 유지하는 것은 금지.**
 
-### TitleScene.tsx
+### TitleScene.tsx — 완전 재작성 기준
 
-- **배경**: `background: 'linear-gradient(...)'` — 컨셉 분위기 색상
-- **타이틀 SVG 아이콘**: 수집품 형태 SVG 직접 작성 (크리스탈 → 허브/보석/광석 등)
-- **파티클**: `hue` 범위를 컨셉 색상 영역으로 조정
-- **글로우 오브**: `rgba(100, 0, 255, ...)` → 컨셉 색상
-- **버튼 그라데이션, 보더 색상** → 컨셉 테마
-- **폰트 패밀리** → 컨셉 분위기에 맞는 폰트 (serif / sans-serif / monospace)
+배경 연출 방향 예시 (컨셉에 따라 하나 선택 또는 새 아이디어):
+
+| 컨셉 유형 | 배경 스타일 | 파티클 | 색상 |
+|----------|-----------|--------|------|
+| 자연/숲 | 녹색 안개 레이어 | 반딧불이 (작은 원형 점) | 초록/황록 |
+| 해저 | 깊은 청록 그라데이션 + 빛 굴절 | 거품 (원형 위로) | 청록/민트 |
+| 화산/용암 | 주황-빨강 하단 빛 | 불꽃 파티클 (위로) | 주황/빨강 |
+| 고대 신전 | 황금빛 사막 하늘 | 모래 먼지 | 황금/황토 |
+| 빙하/눈 | 차가운 청백 | 눈송이 (아래로) | 흰색/아이스블루 |
+| 우주 | 검정 + 성운 오버레이 | 별빛 (깜빡임) | 은색/네온 |
 
 ### InventoryHUD.tsx
 
-- **배경/보더**: `rgba(5, 10, 30, ...)`, `rgba(100, 160, 255, ...)` → 컨셉 색상
-- **SVG 아이콘**: 크리스탈 폴리곤 SVG → 수집품 형태로 교체
+- **배경/보더**: `rgba(5, 10, 30, ...)`, `rgba(100, 160, 255, ...)` → 컨셉 색상으로 전면 교체
+- **SVG 아이콘**: 크리스탈 폴리곤 SVG → 수집품 형태 완전히 새로 작성
 - **글로우**: `drop-shadow(0 0 4px #4488ff)` → 컨셉 색상
 - **교환 버튼**: 보라 계열 → 컨셉 색상
 
 ### MiningProgressUI.tsx
 
-- **이모지 + 텍스트**: ⛏, ✓ → 컨셉 동사 (채집/발굴/수확)
+- **이모지 + 텍스트**: ⛏, ✓ → 컨셉 동사 (채집/발굴/수확/채집)
 - **진행 바 색상**: `#2266ff → #66aaff` → 컨셉 색상
 - **완료 색상**: `#44ff88` → 컨셉 색상
 
