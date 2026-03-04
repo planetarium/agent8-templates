@@ -1,0 +1,42 @@
+{
+  "characters": {
+    "base-model": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb",
+      "description": "[REPLACE] Player hero model — replace with concept-appropriate character (knight, mage, ranger, etc.)"
+    }
+  },
+  "animations": {
+    "idle-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
+      "description": "Idle 00"
+    },
+    "idle-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-01.glb",
+      "description": "Idle 01"
+    },
+    "walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+      "description": "Walk"
+    },
+    "run-medium": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
+      "description": "Run Medium"
+    },
+    "run-fast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb",
+      "description": "Run Fast"
+    },
+    "melee-attack": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
+      "description": "Melee Attack — player's primary attack animation"
+    },
+    "hit-to-body": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit-to-body.glb",
+      "description": "Hit — player takes damage"
+    },
+    "death-backward": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death-backward.glb",
+      "description": "Death — player dies"
+    }
+  }
+}
