@@ -24,6 +24,7 @@ YOU MUST follow these rules when working with this template.
 ### 절대 변경 금지
 
 - `src/game/Game.ts` 전체 (Phaser 엔진 오버라이드)
+- `src/game/scenes/BootScene.ts` — 에셋 로딩은 `assets.json`의 모든 키를 자동 순회하므로 수정 불필요. **BootScene을 수정하지 말고 `assets.json`만 변경할 것**
 - `EventBus` 이벤트 키 이름 (SCENE_CHANGE, HUD_UPDATE, GAME_OVER, BOOT_PROGRESS, OPEN_CROSS_RAMP, STARDUST_BALANCE)
 - 씬 키: `BootScene`, `TitleScene`, `GameScene`, `GameOverScene`, `WalletScene`
 - Phaser 물리 엔진 설정 (gravity: { x: 0, y: 0 })
