@@ -15,7 +15,8 @@ This is a **Vampire Survivors-like 2D mobile game boilerplate**. The current def
 When starting development from this template, you MUST:
 1. **Identify the game concept** — use the concept provided by the user, OR invent a fresh one. Use the Section 1-B combination table as **inspiration only**; do not copy examples verbatim — **actively create fully new combinations not in the table**. **If the user prompt contains only blockchain/token-related words (CROSS, chain, token, wallet) and no explicit world concept** → treat as no concept provided and use Section 1-B as inspiration. **Do NOT default to cyberpunk/SF.**
 2. **Replace all placeholder content** — game name, sprites, enemies, abilities, UI theme, wave design
-3. **Follow the 10-step checklist** in `PROJECT/Status.md` immediately
+3. **Follow the 12-step checklist** in `PROJECT/Status.md` immediately
+4. **Deploy CrossRamp (Step 11 — mandatory on first prompt)** — call `read_gameserver_sdk_v2` then `read_gameserver_sdk_crossramp`. This is not optional and must not be deferred to a later prompt.
 
 ## Architecture
 

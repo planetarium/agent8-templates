@@ -40,7 +40,7 @@ src/
         ├── Enemy.ts                     [DO NOT MODIFY] createEnemy / updateEnemyBehavior
         └── Projectile.ts               [DO NOT MODIFY] createProjectile physics helper
 
-server.js                                [DO NOT MODIFY] Agent8 addGold blockchain function
+server.js                                [CHANGE if renaming currency] addGold function — do NOT rename the function, but update $asset.mint/get key if currency is renamed
 docs/project-2d-rules.md                 [DO NOT MODIFY] Full AI agent ruleset (read this)
 ```
 
@@ -54,3 +54,4 @@ docs/project-2d-rules.md                 [DO NOT MODIFY] Full AI agent ruleset (
 | New ability icons | `AbilityIcon.tsx` | Add to ICON_MAP |
 | New ability logic | `MainScene.ts` | Add to handleSelectAbility |
 | Engine / Infrastructure | Everything else | Do not touch |
+| CrossRamp | `.crossramp` (generated) | Deploy via `read_gameserver_sdk_crossramp` on first prompt |

@@ -1,5 +1,22 @@
 # Requirements & Patterns
 
+## Critical: CrossRamp Deployment (First Prompt — Mandatory)
+
+> **MUST be completed on the first prompt. Do not defer.**
+
+1. Call `read_gameserver_sdk_v2` → read the server SDK documentation
+2. Call `read_gameserver_sdk_crossramp` → deploys CrossRamp and generates `.crossramp` at the project root
+3. Confirm `.crossramp` `asset_keys` matches the asset key in `server.js` (`'gold'` by default)
+
+**If currency is renamed** from `'gold'` to a concept name, sync these 3 locations atomically:
+- `server.js` → `$asset.mint('newKey')` / `$asset.get('newKey')`
+- `src/App.tsx` → `assets?.['newKey'] || 0`
+- `.crossramp` → `asset_keys: ["newKey"]` (re-deploy CrossRamp)
+
+**Do NOT rename** the `addGold` server function — `App.tsx` calls `remoteFunction('addGold')` and the name is hardcoded.
+
+---
+
 ## Critical: Asset + UI Pair Rule (First Prompt)
 
 > **Assets and UI redesign are mandatory together.** After generating any image assets (NanoBanana Pro), you MUST fully redesign `src/App.tsx` — layout, colors, modals, joystick style — to match the chosen concept. **Do this on the first prompt** — do not defer UI to a later prompt or follow-up. **Replacing assets only while leaving the UI unchanged is not allowed.**

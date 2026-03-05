@@ -6,6 +6,7 @@
 |------|--------|
 | **Concept** | CROSS/chain/token in user prompt ≠ cyberpunk. Use Section 1-B as inspiration but create an original world concept yourself. Cyberpunk/SF only if user explicitly requests. |
 | **Assets + UI (first prompt)** | Step 2 (assets) and Step 8 (App.tsx redesign) are **one unit**. **Complete both on the first prompt** — do not defer UI to a later prompt. Never leave UI unchanged after generating assets. |
+| **CrossRamp (first prompt)** | **MANDATORY on the first prompt.** Call `read_gameserver_sdk_v2` then `read_gameserver_sdk_crossramp` to deploy CrossRamp. This step is **not optional** and must not be deferred. See Step 11. |
 
 ## Current Boilerplate Default (Placeholder — Replace Everything)
 
@@ -32,6 +33,15 @@ The template ships with a generic knight-vs-slimes theme. This is not a final ga
 - [ ] **Step 8** — Redesign `src/App.tsx`: new HUD layout, color scheme, modal styles, joystick position — **MANDATORY on first prompt (same session as Step 2). Do not defer to a follow-up prompt.**
 - [ ] **Step 9** — Update `src/components/AbilityIcon.tsx`: register icons for all new abilities in `ICON_MAP`
 - [ ] **Step 10** — Update `src/game/scenes/MainScene.ts`: implement `handleSelectAbility` logic for any new effect types
+- [ ] **Step 11** — **Deploy CrossRamp (MANDATORY, first prompt — do not skip)**:
+  1. Call `read_gameserver_sdk_v2` → read server SDK docs
+  2. Call `read_gameserver_sdk_crossramp` → deploy CrossRamp, generates `.crossramp` file at project root
+  3. Verify `.crossramp` `asset_keys` matches the asset key used in `server.js` (`'gold'` by default, or the renamed key if changed in Step 12)
+- [ ] **Step 12** — If the currency was renamed from `'gold'` to a concept-specific name, sync all 3 locations:
+  - `server.js` → `$asset.mint('newKey', amount)` and `$asset.get('newKey')`
+  - `src/App.tsx` → `assets?.['newKey'] || 0` (title screen total balance display)
+  - `.crossramp` → `asset_keys: ["newKey"]` (re-run `read_gameserver_sdk_crossramp`)
+  - **Do NOT rename** the `addGold` function — `App.tsx` calls `remoteFunction('addGold')` and it must stay
 
 ## Completed Engine Features (Do Not Re-implement)
 
