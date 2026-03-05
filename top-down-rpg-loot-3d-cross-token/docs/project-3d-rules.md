@@ -29,6 +29,8 @@ YOU MUST follow these rules when working with this template.
 | 채집 진행 라벨 | `MiningProgressUI.tsx` | "⛏ Mining…" 텍스트, 색상 |
 | 환경 오브젝트 모델 | `src/assets.json` → `objects.tree.url`, `objects.rock.url` | GLB URLs |
 | 플레이어 모델 | `src/assets.json` → `characters.base-model.url` | GLB URL |
+| **지형 색상** | `GameEnvironment.tsx` → `<Terrain color="...">` | 바닥/지형 기본 색상 (현재 `#2e4a22` 녹색) |
+| **지형 시드** | `GameEnvironment.tsx` → `<Terrain seed="...">` | 지형 모양 결정 (현재 `"realm-relics"`) |
 | 서버 에셋 키 | `server/src/server.ts` → `$asset.mint('crystal')` | 수집품 키 변경 |
 | InventoryHUD 에셋 키 | `InventoryHUD.tsx` → `assets?.crystal` | 서버 키와 동일하게 |
 | TitleScene 아이콘/색상 | `TitleScene.tsx` | SVG 아이콘, 그라데이션, 파티클 |
@@ -127,6 +129,41 @@ async collectCrystal(_crystalId: string): Promise<Record<string, number>> {
 - 에셋 생성 도구로 컨셉에 맞는 3D 캐릭터 GLB를 생성하거나 에셋 라이브러리에서 적합한 모델 URL을 선택할 것
 - URL을 교체하지 않으면 기존 기사 캐릭터가 그대로 표시됨
 
+### Step 3-B — GameEnvironment.tsx 지형(바닥) 색상 + 시드 교체
+
+> **⚠️ 지형 색상을 교체하지 않으면 바닥이 기본 녹색(`#2e4a22`)으로 표시된다.** 컨셉 세계관에 맞는 색상으로 반드시 교체.
+
+`GameEnvironment.tsx`의 `<Terrain>` 컴포넌트에서 교체:
+
+```tsx
+<Terrain
+  width={128}
+  depth={128}
+  maxHeight={5}
+  seed="realm-relics"      ← 컨셉명으로 교체 (예: "desert-ruins", "underwater-grove", "volcanic-wastes")
+  roughness={0.5}
+  detail={4}
+  color="#2e4a22"           ← 컨셉 지형 색상으로 교체 (아래 팔레트 참조)
+  friction={1}
+  restitution={0}
+  onTerrainDataReady={handleTerrainDataReady}
+/>
+```
+
+**컨셉별 지형 색상 예시:**
+
+| 컨셉 | color 값 | 분위기 |
+|------|---------|--------|
+| 마법 숲 / 자연 | `#2e4a22` | 진초록 |
+| 사막 / 신전 | `#c2a06e` | 황토 |
+| 화산 / 용암 | `#1a0800` | 짙은 검붉음 |
+| 해저 / 수중 | `#0a1a2a` | 깊은 남색 |
+| 빙하 / 설원 | `#c8dce8` | 차가운 청백 |
+| 고대 신전 | `#7a6a4a` | 돌/황금 황토 |
+| 우주 / SF | `#101018` | 짙은 우주 어둠 |
+
+> `seed` 값도 컨셉에 맞게 바꿀 것 — seed는 지형 모양(언덕 위치/높이)을 결정하며 같은 seed면 항상 같은 지형이 생성됨.
+
 ### Step 4 — LootManager.tsx 수집품 비주얼
 
 **수집품 GLB 모델**: `Assets.objects.crystal.url` → Step 3에서 교체한 URL이 자동 반영됨
@@ -147,7 +184,9 @@ const VARIANT_COLORS: Array<{ emissive: string; glow: string }> = [
 
 ### Step 5 — TitleScene.tsx 전면 재작성 (완전히 새로 만들 것)
 
-> **⚠️ TitleScene.tsx는 텍스트/색상만 바꾸는 것이 아님. 기존 레이아웃과 애니메이션 스타일을 그대로 재사용하지 말 것.**
+> **🚫 절대 금지: 텍스트/색상만 교체하고 넘어가는 것.**
+> **⚠️ TitleScene.tsx는 첫 프롬프트에서 반드시 전면 재작성한다. 나중에 "필요하면" 바꾸는 것이 아님.**
+> 기존의 "별빛 보라/남색 배경 + 크리스탈 SVG + Georgia 폰트" 조합을 그대로 두는 것은 재사용이지 재설계가 아니다.
 > 컨셉에 맞는 완전히 다른 배경 연출, 아이콘 SVG, 레이아웃으로 재작성해야 한다.
 
 재작성 필수 항목:
@@ -199,7 +238,11 @@ const VARIANT_COLORS: Array<{ emissive: string; glow: string }> = [
 | `server.ts` → `$asset.mint('키')` | `.crossramp` asset_keys와 동일한가 |
 | `InventoryHUD.tsx` → `assets?.키` | 서버 에셋 키와 동일한가 |
 | `TitleScene.tsx`, `InventoryHUD.tsx` | "Crystals" 텍스트 모두 수집품명으로 교체됐는가 |
+| `TitleScene.tsx` | 배경/SVG/폰트가 기존 별빛 보라 스타일에서 완전히 벗어났는가 |
 | `LootManager.tsx` → `VARIANT_COLORS` | 컨셉 색상으로 교체됐는가 |
+| `GameEnvironment.tsx` → `<Terrain color>` | 기본 녹색 `#2e4a22` 에서 컨셉 색상으로 교체됐는가 |
+| `GameEnvironment.tsx` → `<Terrain seed>` | `"realm-relics"` 에서 컨셉 시드로 교체됐는가 |
+| `assets.json` → 모든 4개 URL | 기존 placeholder URL에서 실제 컨셉 에셋 URL로 교체됐는가 |
 
 ---
 

@@ -1,20 +1,23 @@
 # Boilerplate Context
 
-## ⚠️ 첫 프롬프트 필수 작업 (3가지, 동시 완료)
+## ⚠️ 첫 프롬프트 필수 작업 — 전부 동시 완료, 누락 금지
 
-> **첫 프롬프트에서 아래를 반드시 함께 완료. 나중으로 미루지 말 것.**
+> **아래 항목 중 하나라도 빠지면 게임의 외형이 기본 placeholder에서 벗어나지 않는다.**
+> **"나중에 바꾸겠다"는 없다. 첫 프롬프트에서 전부 완료.**
 >
 > 1. **CrossRamp 배포**: `read_gameserver_sdk_v2` → `read_gameserver_sdk_crossramp` 호출
 > 2. **assets.json URL 전부 교체**: `objects.crystal.url`, `objects.tree.url`, `objects.rock.url`, `characters.base-model.url` — 기존 URL 유지 금지
-> 3. **LootManager.tsx VARIANT_COLORS 교체**: 수집품 색상 3종 (emissive + glow) → 컨셉 색상
-> 4. **TitleScene.tsx 전면 재작성**: 배경 스타일, SVG 아이콘, 레이아웃 완전히 새로 — 텍스트/색상만 바꾸는 것은 금지
-> 5. **InventoryHUD.tsx + MiningProgressUI.tsx 재설계**: 에셋 키, SVG 아이콘, 색상, 텍스트 교체
-> 6. **CROSS 3-way 동기화**: server.ts 에셋 키 + InventoryHUD.tsx 에셋 키 + .crossramp asset_keys
+> 3. **GameEnvironment.tsx 지형 색상 + 시드 교체**: `<Terrain color="컨셉색상" seed="컨셉시드">` — 기본 `#2e4a22` 녹색 유지 금지
+> 4. **LootManager.tsx VARIANT_COLORS 교체**: 수집품 색상 3종 (emissive + glow) → 컨셉 색상
+> 5. **TitleScene.tsx 전면 재작성**: 배경 스타일, SVG 아이콘, 레이아웃 완전히 새로 — 텍스트/색상만 바꾸는 것은 금지
+> 6. **InventoryHUD.tsx + MiningProgressUI.tsx 재설계**: 에셋 키, SVG 아이콘, 색상, 텍스트 교체
+> 7. **CROSS 3-way 동기화**: server.ts 에셋 키 + InventoryHUD.tsx 에셋 키 + .crossramp asset_keys
 >
 > **외형이 달라지지 않는 흔한 실수:**
 > - `assets.json` URL을 교체하지 않으면 → 기존 캐릭터/크리스탈/나무/바위 그대로
+> - `GameEnvironment.tsx` color를 교체하지 않으면 → 바닥이 기본 녹색 그대로
 > - `VARIANT_COLORS`를 교체하지 않으면 → 수집품이 기본 파란/초록/보라색
-> - `TitleScene.tsx`를 텍스트만 바꾸면 → 기존 별빛 보라 스타일 그대로
+> - `TitleScene.tsx`를 텍스트만 바꾸면 → 기존 별빛 보라 스타일 그대로 (🚫 재사용 금지)
 
 ---
 
