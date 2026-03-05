@@ -1,4 +1,14 @@
 export class Server {
+  // Return game configuration including CrossRamp exchange rate.
+  // IMPORTANT: Keep exchangeRate in sync with the `exchange_rate` value in .crossramp
+  async getGameConfig(): Promise<{ exchangeRate: number; tokenSymbol: string; collectibleName: string }> {
+    return {
+      exchangeRate: 100,      // Must match exchange_rate in .crossramp
+      tokenSymbol: 'SBT',     // On-chain token symbol shown in WalletOverlay
+      collectibleName: 'STARDUST', // In-game collectible name shown in WalletOverlay
+    };
+  }
+
   // Award stardust crystals after defeating enemies
   async claimStardust(amount: number): Promise<{ balance: number }> {
     if (amount <= 0 || amount > 1000) throw new Error('Invalid stardust amount');

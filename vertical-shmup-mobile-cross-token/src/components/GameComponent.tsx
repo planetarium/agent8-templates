@@ -21,6 +21,15 @@ const GameComponent: React.FC = () => {
   const [currentScene, setCurrentScene] = useState<Scene>('BootScene');
   const claimPendingRef = useRef(false);
   const [gameOverData, setGameOverData] = useState<import('../game/EventBus').GameOverData | null>(null);
+  const [gameConfig, setGameConfig] = useState<{ exchangeRate: number; tokenSymbol: string; collectibleName: string } | null>(null);
+
+  // ── Fetch game config (exchange rate etc.) ───────────────────
+  useEffect(() => {
+    if (!connected || !server) return;
+    server.remoteFunction('getGameConfig', []).then((cfg: any) => {
+      if (cfg) setGameConfig(cfg);
+    }).catch(() => {});
+  }, [connected, server]);
 
   // ── CrossRamp handler ────────────────────────────────────────
   const openCrossRamp = useCallback(async () => {
@@ -125,6 +134,9 @@ const GameComponent: React.FC = () => {
           gameRef={gameInstanceRef}
           onOpenCrossRamp={openCrossRamp}
           crossRampLoading={crossRampLoading}
+          exchangeRate={gameConfig?.exchangeRate ?? 100}
+          tokenSymbol={gameConfig?.tokenSymbol ?? 'SBT'}
+          collectibleName={gameConfig?.collectibleName ?? 'STARDUST'}
         />
       )}
 

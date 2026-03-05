@@ -5,9 +5,19 @@ interface Props {
   gameRef: React.RefObject<Phaser.Game | null>;
   onOpenCrossRamp: () => void;
   crossRampLoading: boolean;
+  exchangeRate?: number;
+  tokenSymbol?: string;
+  collectibleName?: string;
 }
 
-const WalletOverlay: React.FC<Props> = ({ gameRef, onOpenCrossRamp, crossRampLoading }) => {
+const WalletOverlay: React.FC<Props> = ({
+  gameRef,
+  onOpenCrossRamp,
+  crossRampLoading,
+  exchangeRate = 100,
+  tokenSymbol = 'SBT',
+  collectibleName = 'STARDUST',
+}) => {
   const goBack = () => {
     const game = gameRef.current;
     if (!game) return;
@@ -31,7 +41,7 @@ const WalletOverlay: React.FC<Props> = ({ gameRef, onOpenCrossRamp, crossRampLoa
           <div className={styles.headerAccent}>CROSS MINI HUB</div>
           <h2 className={styles.title}>
             <span className={styles.titleStar}>✦</span>
-            STARDUST EXCHANGE
+            {collectibleName} EXCHANGE
             <span className={styles.titleStar}>✦</span>
           </h2>
           <div className={styles.titleLine} />
@@ -41,19 +51,19 @@ const WalletOverlay: React.FC<Props> = ({ gameRef, onOpenCrossRamp, crossRampLoa
         <div className={styles.infoCards}>
           <div className={styles.card}>
             <div className={styles.cardIcon}>🎮</div>
-            <div className={styles.cardText}>Collect Stardust Crystals during gameplay</div>
+            <div className={styles.cardText}>Collect {collectibleName} during gameplay</div>
           </div>
           <div className={styles.card}>
             <div className={styles.cardIcon}>🔗</div>
-            <div className={styles.cardText}>Exchange for SBT on-chain tokens</div>
+            <div className={styles.cardText}>Exchange for {tokenSymbol} on-chain tokens</div>
           </div>
         </div>
 
         {/* Exchange rate */}
         <div className={styles.rateBox}>
           <div className={styles.rateItem}>
-            <div className={styles.rateValue}>100</div>
-            <div className={styles.rateLabel}>STARDUST</div>
+            <div className={styles.rateValue}>{exchangeRate}</div>
+            <div className={styles.rateLabel}>{collectibleName}</div>
           </div>
           <div className={styles.rateArrow}>
             <span className={styles.arrowLine} />
@@ -62,14 +72,14 @@ const WalletOverlay: React.FC<Props> = ({ gameRef, onOpenCrossRamp, crossRampLoa
           </div>
           <div className={styles.rateItem}>
             <div className={`${styles.rateValue} ${styles.rateValueGold}`}>1</div>
-            <div className={`${styles.rateLabel} ${styles.rateLabelGold}`}>SBT TOKEN</div>
+            <div className={`${styles.rateLabel} ${styles.rateLabelGold}`}>{tokenSymbol} TOKEN</div>
           </div>
         </div>
 
         {/* Token badge */}
         <div className={styles.tokenBadge}>
-          <span className={styles.tokenSymbol}>SBT</span>
-          <span className={styles.tokenName}>Star Blaster Token</span>
+          <span className={styles.tokenSymbol}>{tokenSymbol}</span>
+          <span className={styles.tokenName}>{collectibleName} Token</span>
           <span className={styles.tokenChain}>CROSS NETWORK</span>
         </div>
 

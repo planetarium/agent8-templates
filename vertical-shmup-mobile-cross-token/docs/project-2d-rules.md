@@ -18,7 +18,7 @@ YOU MUST follow these rules when working with this template.
 | 투사체 (플레이어/적) | `src/assets.json` | items.playerBullet, enemyBullet |
 | 수집 아이템 | `src/assets.json` | items.stardust (토큰명 변경 가능) |
 | 배경 | `src/assets.json` | backgrounds |
-| UI 레이아웃/스타일/위치 | `src/components/overlays/*` | 전체 UI 구조 |
+| UI 레이아웃/스타일/위치 | `src/components/overlays/*` | TitleOverlay, HUDOverlay, GameOverOverlay, **WalletOverlay** — 전체 CSS·레이아웃·색상 전면 재설계 |
 | 파워업/스킬 | GameScene | spread shot, shield 등 |
 
 ### 절대 변경 금지
@@ -76,6 +76,10 @@ YOU MUST follow these rules when working with this template.
 5. **`GameScene.ts`** — 보스 패턴 재설계
 6. **`GameScene.ts`** — 파워업 시스템 (spread shot, shield, speed boost 등) 재설계
 7. **`src/components/overlays/*`** — UI 전면 재설계 (레이아웃, 색상, CSS, 아이콘, 폰트) — **첫 프롬프트에서 Step 2와 함께 완료. 미루지 말 것.**
+   - `TitleOverlay.tsx` + `TitleOverlay.module.css` — 배경, 제목, 버튼 전면 재설계 (필수)
+   - `HUDOverlay.tsx` + `HUDOverlay.module.css` — 체력·스코어·웨이브 레이아웃·색상 재설계 (필수)
+   - `GameOverOverlay.tsx` + `GameOverOverlay.module.css` — 배경·메시지·버튼 재설계 (필수)
+   - **`WalletOverlay.tsx` + `WalletOverlay.module.css` — 컨셉 테마에 맞게 TitleOverlay와 동일한 수준으로 전면 재설계 필수. 기본 사이버블루 스타일을 그대로 두는 것은 허용되지 않는다.** (교환비·토큰명은 서버 props로 자동 반영되므로 TSX 로직은 수정하지 말고 스타일만 재설계)
 8. **JUICE 효과 추가** — 파티클, 카메라 쉐이크, 트윈, 사운드 (섹션 4 참조)
 9. **Deploy CrossRamp (mandatory, first prompt)** — 반드시 수행:
    - Call `read_gameserver_sdk_v2` → read server SDK docs
@@ -85,7 +89,7 @@ YOU MUST follow these rules when working with this template.
 10. **CROSS Integration 동기화 (필수)** — 컨셉 변경 시 반드시 수행:
    - A. `server/src/server.ts` — `$asset.mint('stardust')`, `$asset.get('stardust')` 에셋 키를 컨셉 수집품명으로 변경
    - B. `GameScene.ts` — drop type `'stardust'` 문자열을 A와 동일하게 변경
-   - C. `WalletOverlay.tsx` — 토큰명, 교환 비율 텍스트 업데이트 시 **반드시 `.crossramp`의 `exchange_rate` 필드 값을 먼저 읽고** 그 숫자를 그대로 사용할 것 (예: exchange_rate가 50이면 "50 수집품 = 1 TOKEN"으로 표시)
+   - C. `server/src/server.ts` → `getGameConfig()` 함수의 `exchangeRate`, `tokenSymbol`, `collectibleName` 세 값을 **반드시 `.crossramp`의 `exchange_rate` 값 및 수집품명과 일치하도록** 수정. WalletOverlay는 서버에서 이 값을 동적으로 읽어 표시하므로, `WalletOverlay.tsx` 직접 수정 불필요.
    - D. **절대 변경 금지**: `server.ts` 함수명 `claimStardust`, `getStardustBalance` — GameComponent가 `remoteFunction('claimStardust')` 로 호출
    - E. **절대 변경 금지**: `GameComponent.tsx` — claimStardust, openCrossRamp 로직 수정 금지
 
@@ -114,9 +118,16 @@ UI는 **이름/색상만 바꾸는 것이 아님**. 컨셉에 맞게 **위치, C
 - 통계 표시 (Session Score, Wave 등)
 - 재시도 버튼 스타일
 
-### 지갑/교환 화면 (WalletOverlay)
-- CROSS Mini Hub 버튼 스타일
-- 수집 아이템 → 토큰 교환 비율 표시
+### 지갑/교환 화면 (WalletOverlay) — TitleOverlay와 동일 수준 재설계 필수
+
+**⚠️ 기본 사이버블루 우주 스타일을 그대로 두는 것은 금지.** 게임 컨셉 테마에 맞게 아래 모든 항목을 전면 재설계.
+
+- **배경/패널**: 컨셉에 맞는 색상, 테두리, 글로우, 장식 (사이버블루 기본 패널 사용 금지)
+- **헤더/타이틀**: 폰트 스타일, 컬러, 장식 심볼 (✦ 대신 컨셉에 맞는 이모지·문자)
+- **교환비 박스**: 배경색, 테두리 색상, 수치 폰트 스타일
+- **토큰 뱃지**: 배경, 테두리, 색상 테마
+- **버튼 스타일**: 그라데이션, 그림자, 호버 효과 — TitleOverlay 버튼과 통일감 유지
+- **교환비·토큰명**: `exchangeRate`, `tokenSymbol`, `collectibleName` props가 서버에서 자동 주입되므로 TSX 로직 수정 금지, CSS·레이아웃만 변경
 
 ---
 
