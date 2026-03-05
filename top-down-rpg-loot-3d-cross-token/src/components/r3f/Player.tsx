@@ -95,6 +95,7 @@ const animationConfigMap: AnimationConfigMap = {
   [CharacterState.MELEE_ATTACK]: {
     url: Assets.animations['melee-attack'].url,
     loop: true,
+    duration: 0.6,
   },
   [CharacterState.CAST]: {
     url: Assets.animations['cast'].url,
