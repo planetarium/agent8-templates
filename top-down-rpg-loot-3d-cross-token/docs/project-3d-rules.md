@@ -129,40 +129,144 @@ async collectCrystal(_crystalId: string): Promise<Record<string, number>> {
 - 에셋 생성 도구로 컨셉에 맞는 3D 캐릭터 GLB를 생성하거나 에셋 라이브러리에서 적합한 모델 URL을 선택할 것
 - URL을 교체하지 않으면 기존 기사 캐릭터가 그대로 표시됨
 
-### Step 3-B — GameEnvironment.tsx 지형(바닥) 색상 + 시드 교체
+### Step 3-B — GameEnvironment.tsx 지형(바닥) 텍스처 설정
 
-> **⚠️ 지형 색상을 교체하지 않으면 바닥이 기본 녹색(`#2e4a22`)으로 표시된다.** 컨셉 세계관에 맞는 색상으로 반드시 교체.
+> **⚠️ 지형 텍스처를 교체하지 않으면 바닥이 기본 녹색 잔디로 표시된다.** 컨셉 세계관에 맞는 텍스처로 반드시 교체.
 
-`GameEnvironment.tsx`의 `<Terrain>` 컴포넌트에서 교체:
+`splatting` prop으로 고도/경사에 따라 최대 4개의 텍스처를 자동 블렌딩한다.
+
+**`GameEnvironment.tsx` 상단에 import 추가:**
+
+```tsx
+import { Terrain, Water, ModelPlacer, TerrainData, terrainUtil, DEFAULT_TEXTURE_PATHS } from 'vibe-starter-3d-environment';
+```
+
+#### 텍스처 URL 획득 방법
+
+**1순위 — 패키지 내장 텍스처 (`DEFAULT_TEXTURE_PATHS.TERRAIN`):**
+
+| 키 | 사용 용도 |
+|----|-----------|
+| `GRASS` / `GRASS_NORMAL` / `GRASS_AO` | 잔디 평지 |
+| `DIRT` / `DIRT_NORMAL` / `DIRT_AO` | 흙 경사 |
+| `STONE` / `STONE_NORMAL` / `STONE_AO` | 돌/암석 절벽 |
+| `GRAVEL` / `GRAVEL_NORMAL` / `GRAVEL_AO` | 자갈 |
+| `SAND` / `SAND_NORMAL` / `SAND_AO` | 모래 |
+| `SNOW` / `SNOW_NORMAL` / `SNOW_AO` | 눈 |
+| `ASPHALT` / `ASPHALT_NORMAL` / `ASPHALT_AO` | 아스팔트/도시 |
+
+**2순위 — vectordb/에셋 라이브러리 검색:**
+
+내장 텍스처로 컨셉을 표현하기 어려운 경우(용암, 얼음 크랙, 달 표면 등) → **에셋 검색 도구로 텍스처 URL을 검색**:
+- 검색 키워드 예: `"lava texture"`, `"ice crack ground"`, `"mud terrain"`, `"volcanic rock"`, `"cobblestone"`, `"sand dunes"`
+- 검색된 텍스처 PNG/JPG URL을 `materialProps.map`에 직접 사용 가능
+
+#### `splatting` prop 구조
 
 ```tsx
 <Terrain
-  width={128}
-  depth={128}
+  seed="desert-ruins"         {/* 컨셉명으로 교체 — 지형 모양 결정 (문자열 아무거나) */}
+  color="#c2a06e"             {/* 텍스처 위 기본 색조 */}
   maxHeight={5}
-  seed="realm-relics"      ← 컨셉명으로 교체 (예: "desert-ruins", "underwater-grove", "volcanic-wastes")
   roughness={0.5}
   detail={4}
-  color="#2e4a22"           ← 컨셉 지형 색상으로 교체 (아래 팔레트 참조)
+  width={128}
+  depth={128}
   friction={1}
   restitution={0}
   onTerrainDataReady={handleTerrainDataReady}
+  splatting={{
+    textures: [
+      {
+        materialProps: {
+          map: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND,        // 또는 검색한 텍스처 URL
+          normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND_NORMAL,
+          aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND_AO,
+          roughness: 0.9,   // 0~1
+          metalness: 0.0,   // 0~1
+        },
+        repeat: 20,                    // 타일 반복 횟수
+        heightRange: [0.0, 0.5],       // 적용 고도 범위 (0.0~1.0 비율)
+        slopeRange: [0.0, 0.3],        // 적용 경사 범위 (라디안, 0~Math.PI/2)
+        heightBlendRange: 0.15,        // 경계 블렌드 너비
+      },
+      // ... 최대 4개까지
+    ],
+    mode: 'both',            // 'height' | 'slope' | 'both'
+    defaultBlendRange: 0.15,
+  }}
 />
 ```
 
-**컨셉별 지형 색상 예시:**
+#### 컨셉별 완성 예시
 
-| 컨셉 | color 값 | 분위기 |
-|------|---------|--------|
-| 마법 숲 / 자연 | `#2e4a22` | 진초록 |
-| 사막 / 신전 | `#c2a06e` | 황토 |
-| 화산 / 용암 | `#1a0800` | 짙은 검붉음 |
-| 해저 / 수중 | `#0a1a2a` | 깊은 남색 |
-| 빙하 / 설원 | `#c8dce8` | 차가운 청백 |
-| 고대 신전 | `#7a6a4a` | 돌/황금 황토 |
-| 우주 / SF | `#101018` | 짙은 우주 어둠 |
+**사막/신전 — 모래(평지) + 자갈(경사) + 돌(절벽):**
 
-> `seed` 값도 컨셉에 맞게 바꿀 것 — seed는 지형 모양(언덕 위치/높이)을 결정하며 같은 seed면 항상 같은 지형이 생성됨.
+```tsx
+splatting={{
+  textures: [
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND_AO, roughness: 0.9 },
+      repeat: 20, heightRange: [0.0, 0.5], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
+    },
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL_NORMAL, roughness: 0.85 },
+      repeat: 15, heightRange: [0.4, 0.75], slopeRange: [0.2, Math.PI / 2], heightBlendRange: 0.15,
+    },
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.8 },
+      repeat: 12, heightRange: [0.6, 1.0], slopeRange: [0.4, Math.PI / 2], heightBlendRange: 0.1,
+    },
+  ],
+  mode: 'both', defaultBlendRange: 0.15,
+}}
+```
+
+**빙하/설원 — 눈(평지) + 자갈(경사) + 돌(절벽):**
+
+```tsx
+splatting={{
+  textures: [
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.SNOW, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SNOW_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SNOW_AO, roughness: 0.95 },
+      repeat: 18, heightRange: [0.0, 0.6], slopeRange: [0.0, 0.35], heightBlendRange: 0.15,
+    },
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL_NORMAL, roughness: 0.8 },
+      repeat: 14, slopeRange: [0.3, 0.6], heightBlendRange: 0.1,
+    },
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.75 },
+      repeat: 10, slopeRange: [0.55, Math.PI / 2], heightBlendRange: 0.1,
+    },
+  ],
+  mode: 'both', defaultBlendRange: 0.15,
+}}
+```
+
+**마법 숲 — 잔디(평지) + 흙(경사) + 돌(절벽):**
+
+```tsx
+splatting={{
+  textures: [
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_AO, roughness: 0.85 },
+      repeat: 20, heightRange: [0.0, 0.55], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
+    },
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_AO, roughness: 0.9 },
+      repeat: 16, slopeRange: [0.25, 0.55], heightBlendRange: 0.12,
+    },
+    {
+      materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.75 },
+      repeat: 12, slopeRange: [0.5, Math.PI / 2], heightBlendRange: 0.1,
+    },
+  ],
+  mode: 'both', defaultBlendRange: 0.15,
+}}
+```
+
+> `seed` 값: 컨셉명을 영어로 넣으면 됨 (`"volcanic-wastes"`, `"frozen-tundra"` 등). 같은 seed → 항상 같은 지형 모양.
 
 ### Step 4 — LootManager.tsx 수집품 비주얼
 

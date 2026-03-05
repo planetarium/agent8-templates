@@ -7,7 +7,7 @@
 >
 > 1. **CrossRamp 배포**: `read_gameserver_sdk_v2` → `read_gameserver_sdk_crossramp` 호출
 > 2. **assets.json URL 전부 교체**: `objects.crystal.url`, `objects.tree.url`, `objects.rock.url`, `characters.base-model.url` — 기존 URL 유지 금지
-> 3. **GameEnvironment.tsx 지형 색상 + 시드 교체**: `<Terrain color="컨셉색상" seed="컨셉시드">` — 기본 `#2e4a22` 녹색 유지 금지
+> 3. **GameEnvironment.tsx 지형 텍스처 교체**: `<Terrain splatting={...} seed="컨셉시드">` — 기본 녹색 잔디 유지 금지. 내장 `DEFAULT_TEXTURE_PATHS.TERRAIN` 또는 vectordb/에셋 라이브러리에서 텍스처 검색하여 사용 (`docs/project-3d-rules.md` Step 3-B 참조)
 > 4. **LootManager.tsx VARIANT_COLORS 교체**: 수집품 색상 3종 (emissive + glow) → 컨셉 색상
 > 5. **TitleScene.tsx 전면 재작성**: 배경 스타일, SVG 아이콘, 레이아웃 완전히 새로 — 텍스트/색상만 바꾸는 것은 금지
 > 6. **InventoryHUD.tsx + MiningProgressUI.tsx 재설계**: 에셋 키, SVG 아이콘, 색상, 텍스트 교체
@@ -15,7 +15,7 @@
 >
 > **외형이 달라지지 않는 흔한 실수:**
 > - `assets.json` URL을 교체하지 않으면 → 기존 캐릭터/크리스탈/나무/바위 그대로
-> - `GameEnvironment.tsx` color를 교체하지 않으면 → 바닥이 기본 녹색 그대로
+> - `GameEnvironment.tsx` splatting을 설정하지 않으면 → 바닥이 기본 녹색 잔디 그대로
 > - `VARIANT_COLORS`를 교체하지 않으면 → 수집품이 기본 파란/초록/보라색
 > - `TitleScene.tsx`를 텍스트만 바꾸면 → 기존 별빛 보라 스타일 그대로 (🚫 재사용 금지)
 

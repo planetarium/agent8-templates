@@ -32,32 +32,38 @@
   - `objects.tree.url` → 새 환경 오브젝트1 GLB
   - `objects.rock.url` → 새 환경 오브젝트2 GLB
   - `characters.base-model.url` → **새 플레이어 GLB (반드시 교체 — URL 그대로면 기존 기사 캐릭터 유지됨)**
-- [ ] **Step 5**: `LootManager.tsx` → `VARIANT_COLORS` 3종을 컨셉 색상으로 교체
+- [ ] **Step 5**: `GameEnvironment.tsx` → `<Terrain>` 지형 텍스처 교체 — **기본 녹색 잔디 그대로 두는 것 금지**
+  - `splatting` prop으로 고도/경사별 텍스처 설정 (`docs/project-3d-rules.md` Step 3-B 참조)
+  - 내장 텍스처(`DEFAULT_TEXTURE_PATHS.TERRAIN`) 또는 **vectordb/에셋 라이브러리에서 텍스처 URL 검색**하여 사용
+  - `seed` prop: 컨셉명 영어로 교체 (예: `"desert-ruins"`, `"frozen-tundra"`)
+- [ ] **Step 6**: `LootManager.tsx` → `VARIANT_COLORS` 3종을 컨셉 색상으로 교체
   - `emissive`와 `glow` 모두 컨셉 색상으로 설정 (이 값이 수집품 실제 표시 색상)
-- [ ] **Step 6**: `server/src/server.ts` → `$asset.mint('crystal')` 키를 새 수집품 키로 변경
+- [ ] **Step 7**: `server/src/server.ts` → `$asset.mint('crystal')` 키를 새 수집품 키로 변경
   - **함수명 `collectCrystal` / `getMyAssets`는 절대 변경 금지**
 
 ### Phase 3 — UI 전면 재설계 (Phase 2와 동시 진행 — 절대 나중으로 미루지 말 것)
-- [ ] **Step 7**: `TitleScene.tsx` **전면 재작성** — 텍스트/색상만 바꾸는 것은 금지
-  - 배경 연출 스타일 자체를 바꿀 것 (별빛 보라 그라데이션 → 컨셉 세계관 배경)
-  - SVG 아이콘: 크리스탈 폴리곤 → 수집품 형태 완전히 새로운 SVG
-  - 게임명, 부제, 파티클 색상, 버튼 텍스트, 폰트 모두 교체
-  - "Crystals" 라벨 → 새 수집품명으로
-- [ ] **Step 8**: `InventoryHUD.tsx` 재설계
-  - `assets?.crystal` → 새 에셋 키로
+- [ ] **Step 8**: `TitleScene.tsx` **전면 재작성** — 🚫 텍스트/색상만 바꾸고 넘어가는 것 절대 금지
+  - **기존 "별빛 보라/남색 배경 + 크리스탈 SVG + Georgia 폰트" 조합을 그대로 두는 것은 재사용이지 재설계가 아님**
+  - 배경 연출, SVG 아이콘, 레이아웃, 파티클, 폰트 모두 컨셉에 맞게 완전히 새로 작성
+  - 게임명, 부제, 버튼 텍스트, "Crystals" 라벨 → 새 수집품명으로
+- [ ] **Step 9**: `InventoryHUD.tsx` 재설계
+  - `assets?.crystal` → 새 에셋 키로 (필수)
   - SVG 아이콘, "Crystals" 라벨, 색상 테마, 교환 버튼 텍스트
-- [ ] **Step 9**: `MiningProgressUI.tsx` 재설계
+- [ ] **Step 10**: `MiningProgressUI.tsx` 재설계
   - "⛏ Mining…" 라벨, 색상, 완료 텍스트
 
 ### Phase 4 — 검증
-- [ ] **Step 10**: 에셋 키 3-way 동기화 최종 확인
+- [ ] **Step 11**: 에셋 키 3-way 동기화 + 외형 변경 최종 확인
 
 | 파일 | 확인 사항 |
 |------|----------|
 | `server.ts` → `$asset.mint('키')` | `.crossramp` asset_keys와 동일 |
 | `InventoryHUD.tsx` → `assets?.키` | 서버 에셋 키와 동일 |
 | `TitleScene.tsx`, `InventoryHUD.tsx` | "Crystals" 텍스트 모두 교체됨 |
+| `TitleScene.tsx` | 배경/SVG/폰트가 기존 보라 스타일에서 완전히 벗어났는가 |
 | `LootManager.tsx` → `VARIANT_COLORS` | 컨셉 색상 적용됨 |
+| `GameEnvironment.tsx` → `<Terrain splatting>` | 지형 텍스처가 기본 잔디에서 교체됐는가 |
+| `assets.json` → 4개 URL | 기존 placeholder URL에서 교체됐는가 |
 
 ---
 

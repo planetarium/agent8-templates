@@ -1,5 +1,9 @@
 # Structure
 
+> **⚠️ 이 문서는 첫 프롬프트에 포함됩니다.**
+> 변경 가능/불가 파일 목록: `docs/project-3d-rules.md` 섹션 0 참조.
+> 첫 프롬프트 필수 작업 체크리스트: `Status.md` 참조.
+
 ## File Organization
 
 ### Core Application
