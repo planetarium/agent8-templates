@@ -166,6 +166,9 @@ UI는 **이름/색상만 바꾸는 것이 아님**. 컨셉에 맞게 **위치, C
      - `details` 필드에 `clean edges`, `vibrant colors`, `professional sprite quality` 등 품질 관련 묘사 추가
      - **금지**: `style: "pixel art"` 단독 사용, `low-res`, `retro low quality`, `simple`, `minimal` 등 품질 저하 키워드
      - **권장 예시**: `style: "high-quality pixel art, clean edges, vibrant palette, professional game sprite, HD rendering"`
+   - **배경 이미지 생성 규칙 (CRITICAL)**: 배경은 위→아래로 무한 반복 스크롤되므로, **상단과 하단이 끊김 없이 자연스럽게 이어지는 seamless loop 이미지**로 생성해야 한다.
+     - `details` 필드에 **반드시** `seamlessly tileable vertically, top and bottom edges blend perfectly for infinite loop scrolling, no visible seam` 포함
+     - 경계선이 보이는 배경은 플레이 중 루프 지점에서 끊겨 보임 — **반드시 tileable 구조로 생성**
 2. **displayWidth/displayHeight만 사용**: Tween에서 `scaleX`/`scaleY` 금지
 3. **setDisplaySize() 필수**: 이미지/스프라이트 추가 시 즉시 크기 지정
 4. **Tween 애니메이션**: 부드러운 애니메이션, 페이드, 바운스 적용
