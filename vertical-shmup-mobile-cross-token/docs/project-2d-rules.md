@@ -167,13 +167,12 @@ UI는 **이름/색상만 바꾸는 것이 아님**. 컨셉에 맞게 **위치, C
      - **금지**: `style: "pixel art"` 단독 사용, `low-res`, `retro low quality`, `simple`, `minimal` 등 품질 저하 키워드
      - **권장 예시**: `style: "high-quality pixel art, clean edges, vibrant palette, professional game sprite, HD rendering"`
    - **배경 이미지 생성 규칙 (CRITICAL)**: 배경은 Phaser `tileSprite`로 렌더링되어 위→아래로 무한 반복 스크롤된다. 이미지가 seamless하지 않으면 타일 경계에 격자선(grid seam)이 그대로 노출되므로 반드시 아래 규칙을 따를 것.
-     - **퀄리티**: `style` 필드에 `highly detailed, rich atmospheric depth, cinematic quality, HD` 포함. 단순하거나 밋밋한 단색 그라데이션 금지 — 성운, 구름, 별, 안개 등 풍성한 디테일로 화면 전체를 가득 채울 것
+     - **퀄리티**: `style` 필드에 `highly detailed, rich atmospheric depth, cinematic quality, HD, professional game art` 포함. 단순하거나 밋밋한 단색 그라데이션 금지 — 성운, 구름, 별, 안개 등 풍성한 디테일로 화면 전체를 가득 채울 것
+     - **저퀄리티 키워드 금지**: `style` 또는 `details`에 `pixel`, `pixel art`, `classic`, `arcade`, `retro`, `8-bit`, `16-bit`, `low-res`, `simple` 등 포함 절대 금지 — 해당 키워드가 포함되면 극도로 저화질 이미지가 생성됨
      - **Seamless 필수**: `details` 필드에 반드시 다음 문구 포함:
        `seamlessly tileable vertically, top and bottom edges blend perfectly with no visible seam, designed for infinite loop scrolling, no hard edges at borders`
      - **그리드·패턴 금지**: `details` 필드에 반드시 다음 문구 추가:
        `no grid lines, no checkerboard pattern, no repeating tile artifacts, no visible borders, smooth continuous texture`
-     - **배경 필드**: `background` 파라미터는 비워두거나 `none` — 배경 이미지 자체가 배경이므로 별도 배경색 지정 금지
-     - **확인**: 생성된 이미지 URL을 브라우저에서 열어 상·하단 가장자리를 육안으로 확인. 경계가 어색하면 재생성
 2. **displayWidth/displayHeight만 사용**: Tween에서 `scaleX`/`scaleY` 금지
 3. **setDisplaySize() 필수**: 이미지/스프라이트 추가 시 즉시 크기 지정
 4. **Tween 애니메이션**: 부드러운 애니메이션, 페이드, 바운스 적용
