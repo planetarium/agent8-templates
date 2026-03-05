@@ -346,34 +346,34 @@ function App() {
 
       {/* Title Overlay */}
       {gameState === 'TITLE' && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
           {/* Total Gold Display */}
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-8 py-3 rounded-full border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-            <Wallet className="w-7 h-7 text-yellow-400" />
-            <span className="text-yellow-400 font-black text-2xl">{assets?.gold || 0}</span>
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-6 py-2 md:px-8 md:py-3 rounded-full border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+            <Wallet className="w-5 h-5 md:w-7 md:h-7 text-yellow-400" />
+            <span className="text-yellow-400 font-black text-xl md:text-2xl">{assets?.gold || 0}</span>
           </div>
 
           <h1
-            className={`text-7xl md:text-8xl font-black italic tracking-wider text-transparent bg-clip-text bg-gradient-to-b ${GAME_CONFIG.ui.titleGradient} drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)] mb-12 text-center select-none`}
-            style={{ WebkitTextStroke: '2px black' }}
+            className={`text-4xl sm:text-6xl md:text-8xl font-black italic tracking-wide md:tracking-wider text-transparent bg-clip-text bg-gradient-to-b ${GAME_CONFIG.ui.titleGradient} drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)] mb-8 md:mb-12 text-center select-none w-full`}
+            style={{ WebkitTextStroke: '1px black' }}
           >
             {GAME_CONFIG.name.replace(GAME_CONFIG.subtitle, '').trim() || GAME_CONFIG.name.split(' ')[0]}
             <br />
             <span style={{ color: GAME_CONFIG.ui.accentColor }}>{GAME_CONFIG.subtitle}</span>
           </h1>
-          <div className="flex flex-col items-center gap-6">
-            <button 
+          <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-xs md:max-w-none">
+            <button
               onClick={handleStartGame}
-              className="group flex items-center gap-3 px-8 py-4 bg-white text-black font-black text-2xl rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.6)] transition-all transform hover:-translate-y-1 hover:scale-105 active:scale-95"
+              className="group flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-white text-black font-black text-xl md:text-2xl rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.6)] transition-all transform hover:-translate-y-1 hover:scale-105 active:scale-95 w-full justify-center"
             >
-              <Play className="w-8 h-8 fill-black" />
+              <Play className="w-6 h-6 md:w-8 md:h-8 fill-black" />
               START GAME
             </button>
-            <button 
+            <button
               onClick={openShop}
-              className="flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-extrabold text-xl rounded-full shadow-[0_0_20px_rgba(234,179,8,0.5)] transition-all transform hover:scale-105 active:scale-95 uppercase tracking-wider"
+              className="flex items-center gap-3 px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-extrabold text-lg md:text-xl rounded-full shadow-[0_0_20px_rgba(234,179,8,0.5)] transition-all transform hover:scale-105 active:scale-95 uppercase tracking-wider w-full justify-center"
             >
-              <Wallet className="w-6 h-6" />
+              <Wallet className="w-5 h-5 md:w-6 md:h-6" />
               CROSS Exchange
             </button>
           </div>
