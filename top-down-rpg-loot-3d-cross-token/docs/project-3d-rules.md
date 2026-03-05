@@ -185,7 +185,7 @@ import { Terrain, Water, ModelPlacer, TerrainData, terrainUtil, DEFAULT_TEXTURE_
           roughness: 0.9,   // 0~1
           metalness: 0.0,   // 0~1
         },
-        repeat: 20,                    // 타일 반복 횟수
+        repeat: 2,                     // 타일 반복 횟수 (1~2 권장)
         heightRange: [0.0, 0.5],       // 적용 고도 범위 (0.0~1.0 비율)
         slopeRange: [0.0, 0.3],        // 적용 경사 범위 (라디안, 0~Math.PI/2)
         heightBlendRange: 0.15,        // 경계 블렌드 너비
@@ -207,15 +207,15 @@ splatting={{
   textures: [
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND_AO, roughness: 0.9 },
-      repeat: 20, heightRange: [0.0, 0.5], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
+      repeat: 2, heightRange: [0.0, 0.5], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
     },
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL_NORMAL, roughness: 0.85 },
-      repeat: 15, heightRange: [0.4, 0.75], slopeRange: [0.2, Math.PI / 2], heightBlendRange: 0.15,
+      repeat: 2, heightRange: [0.4, 0.75], slopeRange: [0.2, Math.PI / 2], heightBlendRange: 0.15,
     },
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.8 },
-      repeat: 12, heightRange: [0.6, 1.0], slopeRange: [0.4, Math.PI / 2], heightBlendRange: 0.1,
+      repeat: 1, heightRange: [0.6, 1.0], slopeRange: [0.4, Math.PI / 2], heightBlendRange: 0.1,
     },
   ],
   mode: 'both', defaultBlendRange: 0.15,
@@ -229,15 +229,15 @@ splatting={{
   textures: [
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.SNOW, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SNOW_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SNOW_AO, roughness: 0.95 },
-      repeat: 18, heightRange: [0.0, 0.6], slopeRange: [0.0, 0.35], heightBlendRange: 0.15,
+      repeat: 2, heightRange: [0.0, 0.6], slopeRange: [0.0, 0.35], heightBlendRange: 0.15,
     },
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRAVEL_NORMAL, roughness: 0.8 },
-      repeat: 14, slopeRange: [0.3, 0.6], heightBlendRange: 0.1,
+      repeat: 2, slopeRange: [0.3, 0.6], heightBlendRange: 0.1,
     },
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.75 },
-      repeat: 10, slopeRange: [0.55, Math.PI / 2], heightBlendRange: 0.1,
+      repeat: 1, slopeRange: [0.55, Math.PI / 2], heightBlendRange: 0.1,
     },
   ],
   mode: 'both', defaultBlendRange: 0.15,
@@ -251,15 +251,15 @@ splatting={{
   textures: [
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_AO, roughness: 0.85 },
-      repeat: 20, heightRange: [0.0, 0.55], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
+      repeat: 2, heightRange: [0.0, 0.55], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
     },
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_AO, roughness: 0.9 },
-      repeat: 16, slopeRange: [0.25, 0.55], heightBlendRange: 0.12,
+      repeat: 2, slopeRange: [0.25, 0.55], heightBlendRange: 0.12,
     },
     {
       materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.75 },
-      repeat: 12, slopeRange: [0.5, Math.PI / 2], heightBlendRange: 0.1,
+      repeat: 1, slopeRange: [0.5, Math.PI / 2], heightBlendRange: 0.1,
     },
   ],
   mode: 'both', defaultBlendRange: 0.15,
