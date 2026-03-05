@@ -81,10 +81,11 @@ YOU MUST follow these rules when working with this template.
    - Call `read_gameserver_sdk_v2` → read server SDK docs
    - Call `read_gameserver_sdk_crossramp` → deploy CrossRamp, creates `.crossramp` at root
    - Confirm asset_keys in `.crossramp` matches the collectible key
+   - **⚠️ `.crossramp` 생성 후 반드시 파일을 열어 `exchange_rate` 값을 확인할 것** — 이 값이 WalletOverlay에 표시할 실제 교환비이며, 임의로 작성하거나 기본값(100:1)을 그대로 쓰는 것은 금지
 10. **CROSS Integration 동기화 (필수)** — 컨셉 변경 시 반드시 수행:
    - A. `server/src/server.ts` — `$asset.mint('stardust')`, `$asset.get('stardust')` 에셋 키를 컨셉 수집품명으로 변경
    - B. `GameScene.ts` — drop type `'stardust'` 문자열을 A와 동일하게 변경
-   - C. `WalletOverlay.tsx` — 토큰명("SBT"), 교환 비율("100 STARDUST = 1 SBT") 텍스트 업데이트
+   - C. `WalletOverlay.tsx` — 토큰명, 교환 비율 텍스트 업데이트 시 **반드시 `.crossramp`의 `exchange_rate` 필드 값을 먼저 읽고** 그 숫자를 그대로 사용할 것 (예: exchange_rate가 50이면 "50 수집품 = 1 TOKEN"으로 표시)
    - D. **절대 변경 금지**: `server.ts` 함수명 `claimStardust`, `getStardustBalance` — GameComponent가 `remoteFunction('claimStardust')` 로 호출
    - E. **절대 변경 금지**: `GameComponent.tsx` — claimStardust, openCrossRamp 로직 수정 금지
 
