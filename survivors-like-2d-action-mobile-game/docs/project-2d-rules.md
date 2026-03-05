@@ -30,6 +30,16 @@ YOU MUST follow these rules when working with this template.
 
 ---
 
+## 섹션 0-1 — 첫 프롬프트 필수 완료 항목 (절대 누락 금지)
+
+> ⚠️ 아래 항목은 첫 프롬프트에서 반드시 완료해야 합니다. 나중으로 미루지 마십시오.
+
+1. **CrossRamp 배포**: `read_gameserver_sdk_v2` → `read_gameserver_sdk_crossramp` 순서로 호출
+2. **에셋 생성 + UI 재설계**: 섹션 2의 Step 2·8·9 는 세트 — 에셋만 교체하고 UI를 그대로 두는 것 금지
+3. **통화명 변경 시 3-way 동기화**: `server.js` → `App.tsx` → `.crossramp` 동시 반영
+
+---
+
 ## 섹션 1 — 컨셉 수령 절차
 
 ### 1-A. 사용자가 주요 컨셉을 제공한 경우
@@ -83,6 +93,15 @@ YOU MUST follow these rules when working with this template.
 8. **`src/App.tsx`** — UI 전면 재설계 (레이아웃, 색상, CSS, 아이콘, 폰트, 배경 효과) — **첫 프롬프트에서 Step 2와 함께 완료. 미루지 말 것.**
 9. **`src/components/AbilityIcon.tsx`** — 새 능력 아이콘 추가 시 `ICON_MAP`에 등록
 10. **`MainScene`** — 새 ability effect 타입 추가 시 `handleSelectAbility`에 처리 로직 추가
+11. **Deploy CrossRamp (mandatory, first prompt)** — 반드시 수행:
+    - Call `read_gameserver_sdk_v2` → server SDK 문서 확인
+    - Call `read_gameserver_sdk_crossramp` → CrossRamp 배포, 루트에 `.crossramp` 파일 생성
+    - `.crossramp`의 `asset_keys`가 `server.js`의 `$asset.mint()` 키(`'gold'` 또는 변경한 키)와 일치하는지 확인
+12. **CROSS Integration 동기화 (필수)** — 통화명/수집품명 변경 시 3곳 동기화:
+    - A. `server.js` — `$asset.mint('새키', amount)` / `$asset.get('새키')`
+    - B. `src/App.tsx` — `assets?.['새키'] || 0` (타이틀 화면 총 골드 표시)
+    - C. `.crossramp` — `asset_keys: ["새키"]` (CrossRamp 재배포)
+    - **절대 변경 금지**: `server.js` 함수명 `addGold` — App.tsx가 `remoteFunction('addGold')` 로 호출
 
 ---
 

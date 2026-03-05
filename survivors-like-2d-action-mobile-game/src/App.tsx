@@ -382,22 +382,22 @@ function App() {
 
       {/* Game Over Overlay */}
       {gameState === 'GAMEOVER' && (
-        <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center ${GAME_CONFIG.ui.gameOverBgClass} backdrop-blur-md`}>
-          <h1 className="text-8xl font-black text-red-500 tracking-widest drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4 select-none animate-pulse">
+        <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center px-4 ${GAME_CONFIG.ui.gameOverBgClass} backdrop-blur-md`}>
+          <h1 className="text-5xl md:text-8xl font-black text-red-500 tracking-widest drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4 select-none animate-pulse text-center">
             {GAME_CONFIG.ui.gameOverTitle}
           </h1>
           <div
-            className="flex items-center gap-3 mb-12 text-2xl font-bold bg-black/50 px-8 py-4 rounded-full border shadow-[0_0_15px_rgba(234,179,8,0.2)]"
+            className="flex items-center gap-2 md:gap-3 mb-6 md:mb-12 text-lg md:text-2xl font-bold bg-black/50 px-4 md:px-8 py-2 md:py-4 rounded-full border shadow-[0_0_15px_rgba(234,179,8,0.2)]"
             style={{ color: GAME_CONFIG.ui.accentColor, borderColor: `${GAME_CONFIG.ui.accentColor}40` }}
           >
-            <Coins className="w-8 h-8" />
+            <Coins className="w-6 h-6 md:w-8 md:h-8" />
             <span>Session {GAME_CONFIG.ui.currencyLabel}: {sessionGold}</span>
           </div>
           <button
             onClick={handleRestartGame}
-            className="flex items-center gap-3 px-8 py-4 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black font-black text-2xl rounded-full transition-all transform hover:-translate-y-1 hover:scale-105 active:scale-95"
+            className="flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black font-black text-lg md:text-2xl rounded-full transition-all transform hover:-translate-y-1 hover:scale-105 active:scale-95"
           >
-            <RotateCcw className="w-8 h-8" />
+            <RotateCcw className="w-6 h-6 md:w-8 md:h-8" />
             {GAME_CONFIG.ui.tryAgainLabel}
           </button>
         </div>
