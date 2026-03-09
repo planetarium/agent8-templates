@@ -1,57 +1,70 @@
 # Project Structure
 
-## Project Summary
+## ⚠️ Pre-Built Game — Do NOT Recreate on First Prompt
 
-This project is a boilerplate for building Vampire Survivors-like 2D top-down mobile games. It is built with Phaser 3 and React, and is designed so that an AI agent can receive a game concept and fully recreate the visual theme, enemy types, skill system, wave design, and UI — all without touching the core engine. The same boilerplate can produce entirely different games depending on the concept applied.
+**You MUST on first prompt:**
+1. Read existing code → report current implementation to user
+2. Ask what changes the user wants
+3. Deploy CrossRamp (MANDATORY — never skip):
+   - Call `read_gameserver_sdk_v2`
+   - Call `read_gameserver_sdk_crossramp`
+   - Verify `.crossramp` `asset_keys` matches `server.js` (`'gold'`)
 
-Files are marked as **[CHANGE]** (must be replaced per concept) or **[DO NOT MODIFY]** (engine/infrastructure).
+**You MUST NOT on first prompt:**
+- Generate assets, redesign App.tsx, rewrite config files, or modify any code
 
-> **Critical**: `App.tsx` and `assets.json` are a **pair**. When you replace assets, you must also fully redesign `App.tsx` (HUD, layout, colors, modals, joystick) to match the chosen concept. **Do both on the first prompt** — do not defer UI to a later prompt. Never update assets without updating App.tsx.
+---
+
+## Current Game: Neon Strikers
+
+| Element | Implementation |
+|---------|---------------|
+| Theme | Cyberpunk / Sci-fi |
+| Player | Cyber space marine |
+| Enemies | Alien Bug, Cyber Drone, Mech Brute |
+| Abilities | 8 Sci-fi themed skills |
+| UI | Cyan/Purple neon glow style |
+| CrossRamp | NOT deployed — deploy on first prompt |
+
+---
+
+## File Map
 
 ```
 src/
-├── assets.json                          [CHANGE] All sprite/image URLs — replace every asset
-├── App.tsx                              [CHANGE] Full UI redesign: HUD layout, colors, modals, joystick style — MANDATORY with assets
-├── main.tsx                             [DO NOT MODIFY]
-│
-├── components/
-│   ├── GameComponent.tsx                [DO NOT MODIFY] Mounts Phaser canvas into React
-│   └── AbilityIcon.tsx                  [CHANGE if new ability] Add icon entries to ICON_MAP
-│
-├── config/                              ← ALL 4 FILES MUST BE REPLACED
-│   ├── gameConfig.ts                    [CHANGE] Game name, subtitle, player stats, UI theme tokens
-│   ├── enemyTypes.ts                    [CHANGE] Min 3 enemy types with behavior, stats, sprite
-│   ├── abilities.ts                     [CHANGE] Min 6 abilities — invent new effect types
-│   └── waves.ts                         [CHANGE] 10-wave progression, difficulty curve
-│
+├── assets.json          [CHANGE] sprite/image URLs
+├── App.tsx              [CHANGE] full UI — redesign with assets
+├── config/
+│   ├── gameConfig.ts    [CHANGE] name, player stats, UI theme
+│   ├── enemyTypes.ts    [CHANGE] enemy types
+│   ├── abilities.ts     [CHANGE] ability definitions
+│   └── waves.ts         [CHANGE] wave progression
 └── game/
-    ├── Game.ts                          [DO NOT MODIFY] Engine overrides — modifying breaks everything
-    │
+    ├── Game.ts          [DO NOT MODIFY]
     ├── scenes/
-    │   ├── TitleScene.ts                [DO NOT MODIFY] Listens for startGameFromUI event
-    │   ├── MainScene.ts                 [CHANGE if new ability] Add new effect type logic in handleSelectAbility
-    │   └── GameOverScene.ts             [DO NOT MODIFY] Listens for restartGameFromUI event
-    │
-    ├── systems/
-    │   └── WaveSystem.ts                [DO NOT MODIFY] Time-based wave engine
-    │
-    └── entities/
-        ├── Player.ts                    [DO NOT MODIFY] createPlayer / registerPlayerAnimations
-        ├── Enemy.ts                     [DO NOT MODIFY] createEnemy / updateEnemyBehavior
-        └── Projectile.ts               [DO NOT MODIFY] createProjectile physics helper
+    │   ├── TitleScene.ts     [DO NOT MODIFY]
+    │   ├── MainScene.ts      [CHANGE if new ability type]
+    │   └── GameOverScene.ts  [DO NOT MODIFY]
+    └── entities/        [DO NOT MODIFY]
 
-server.js                                [CHANGE if renaming currency] addGold function — do NOT rename the function, but update $asset.mint/get key if currency is renamed
-docs/project-2d-rules.md                 [DO NOT MODIFY] Full AI agent ruleset (read this)
+server.js                [CHANGE if renaming currency key]
 ```
 
-## Summary
+---
 
-| Category | Files | Action |
-|----------|-------|--------|
-| Config (concept data) | `config/*.ts` | Replace all 4 |
-| Assets | `assets.json` | Replace all URLs |
-| UI | `App.tsx` | **Full redesign (mandatory with assets)** |
-| New ability icons | `AbilityIcon.tsx` | Add to ICON_MAP |
-| New ability logic | `MainScene.ts` | Add to handleSelectAbility |
-| Engine / Infrastructure | Everything else | Do not touch |
-| CrossRamp | `.crossramp` (generated) | Deploy via `read_gameserver_sdk_crossramp` on first prompt |
+## Absolute Constraints
+
+- `src/game/Game.ts` — do not touch (engine overrides)
+- `gameEvents` key names — never rename (breaks React ↔ Phaser)
+- Scene keys: `TitleScene`, `MainScene`, `GameOverScene`
+- `addGold` function in `server.js` — hardcoded in App.tsx, never rename
+- Physics: `gravity: { x: 0, y: 0 }`
+
+---
+
+## CrossRamp: Currency Rename (if user requests)
+
+Sync 3 locations atomically:
+1. `server.js` → `$asset.mint('newKey')`
+2. `src/App.tsx` → `assets?.['newKey']`
+3. `.crossramp` → `asset_keys: ["newKey"]` (re-deploy)
