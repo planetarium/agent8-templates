@@ -251,6 +251,20 @@
     ]
   },
   {
+    "name": "survivors-like-2d-action-alien-survivor",
+    "label": "Survivors-like 2D Action Alien Survivor Template (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) Survivors-like 2D action game, (2) mobile devices, (3) earned gold exchangeable with a CROSS chain token. Example prompt: Create a Survivors-like 2D action game for mobile devices. Make the earned gold exchangeable with a CROSS chain token. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "survivors-like-2d-action-alien-survivor",
+    "tags": [
+      "survivors",
+      "CROSS",
+      "2d",
+      "mobile",
+      "pre-built"
+    ]
+  },
+  {
     "name": "vertical-shmup-mobile-cross-token",
     "label": "Vertical Shmup Mobile Game Template (Requires CROSS Token Economy)",
     "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' Non-match example: If the user asks for a vertical shmup game but does not mention CROSS token redemption, do not use this template.",
