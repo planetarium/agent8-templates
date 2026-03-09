@@ -1,5 +1,15 @@
 # Project Structure
 
+## 🚨 CROSSRAMP — FIRST PROMPT MANDATORY
+
+> **NEVER skip CrossRamp deployment. Required on every first prompt without exception.**
+
+- Call `read_gameserver_sdk_v2`
+- Call `read_gameserver_sdk_crossramp`
+- Verify `.crossramp` `asset_keys` matches server asset key (see table below)
+
+---
+
 ## ⚠️ Pre-Built Game — Do NOT Recreate on First Prompt
 
 **You MUST on first prompt:**
