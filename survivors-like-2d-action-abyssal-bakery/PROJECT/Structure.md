@@ -43,25 +43,25 @@
 
 ```
 src/
-├── assets.json                          [CHANGE if new assets needed] Sprite/image URLs
-├── App.tsx                              [CHANGE if UI redesign requested]
+├── assets.json                          [CHANGE] sprite/image URLs
+├── App.tsx                              [CHANGE] UI HUD, modals, layout
 ├── main.tsx                             [DO NOT MODIFY]
 │
 ├── components/
-│   ├── GameComponent.tsx                [DO NOT MODIFY]
-│   └── AbilityIcon.tsx                  [CHANGE if new ability icons needed]
+│   ├── GameComponent.tsx                [DO NOT MODIFY] Phaser canvas mount
+│   └── AbilityIcon.tsx                  [CHANGE if new ability] ICON_MAP
 │
 ├── config/
-│   ├── gameConfig.ts                    [CHANGE if concept overhaul] Game name, player stats, UI tokens
-│   ├── enemyTypes.ts                    [CHANGE if new enemies] ENEMY_TYPES array
-│   ├── abilities.ts                     [CHANGE if new abilities] ABILITIES array + AbilityEffect types
-│   └── waves.ts                         [CHANGE if wave rebalance] WAVES progression
+│   ├── gameConfig.ts                    [CHANGE] name, stats, UI theme tokens
+│   ├── enemyTypes.ts                    [CHANGE] enemy definitions
+│   ├── abilities.ts                     [CHANGE] level-up abilities
+│   └── waves.ts                         [CHANGE] wave progression
 │
 └── game/
     ├── Game.ts                          [DO NOT MODIFY]
     ├── scenes/
     │   ├── TitleScene.ts                [DO NOT MODIFY]
-    │   ├── MainScene.ts                 [CHANGE if new ability logic] handleSelectAbility
+    │   ├── MainScene.ts                 [CHANGE if new ability type]
     │   └── GameOverScene.ts             [DO NOT MODIFY]
     ├── systems/
     │   └── WaveSystem.ts                [DO NOT MODIFY]
@@ -70,27 +70,25 @@ src/
         ├── Enemy.ts                     [DO NOT MODIFY]
         └── Projectile.ts               [DO NOT MODIFY]
 
-server.js                                [CHANGE if currency renamed] addGold — do NOT rename function
+server.js                                [CHANGE if renaming currency] asset key: 'magic_flour'
+docs/project-2d-rules.md                 AI agent ruleset
 ```
 
 ---
 
 ## Absolute Constraints
 
-- `src/game/Game.ts` — do not modify (engine overrides)
-- `gameEvents` event keys — do not rename (React ↔ Phaser bridge)
+- `src/game/Game.ts` — do not modify
+- `gameEvents` event key names — hardcoded in both React and Phaser
 - Scene keys: `TitleScene`, `MainScene`, `GameOverScene`
-- `server.js` function name `addGold` — never rename (called via `remoteFunction('addGold')`)
-- Phaser gravity: `{ x: 0, y: 0 }`
+- Physics config: `gravity: { x: 0, y: 0 }`
+- `addGold` server function name — hardcoded in App.tsx
 
 ---
 
 ## CrossRamp: Currency Rename (if user requests)
 
-If user wants to rename "Magic Flour" to something else, sync 3 locations:
-
-```
-1. server.js       → $asset.mint('새키', amount) / $asset.get('새키')
-2. App.tsx         → assets?.['새키'] || 0
-3. .crossramp      → asset_keys: ["새키"]  (re-run read_gameserver_sdk_crossramp)
-```
+If renaming `'magic_flour'` to another key, sync 3 locations atomically:
+1. `server.js` → `$asset.mint('newKey')` / `$asset.get('newKey')`
+2. `src/App.tsx` → `assets?.['newKey'] || 0`
+3. `.crossramp` → `asset_keys: ["newKey"]` (re-deploy CrossRamp)
