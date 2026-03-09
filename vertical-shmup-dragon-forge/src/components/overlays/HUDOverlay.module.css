@@ -1,0 +1,123 @@
+/* ── HUDOverlay — Dragon Forge ──────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* ── Score ── */
+.scoreBlock {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.label {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(13px, 3.5vw, 17px);
+  letter-spacing: 3px;
+  color: rgba(204, 136, 68, 0.55);
+}
+
+.scoreValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow:
+    0 0 6px rgba(255, 136, 0, 0.6),
+    0 0 14px rgba(200, 80, 0, 0.3);
+  letter-spacing: 1px;
+}
+
+/* ── Wave ── */
+.waveBlock {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.waveLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(13px, 3.5vw, 17px);
+  letter-spacing: 4px;
+  color: rgba(255, 170, 68, 0.55);
+}
+
+.waveValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(32px, 8vw, 44px);
+  font-weight: 900;
+  color: #ff8833;
+  text-shadow:
+    0 0 8px rgba(255, 136, 51, 0.8),
+    0 0 20px rgba(255, 80, 0, 0.4);
+  line-height: 1;
+}
+
+/* ── Embers ── */
+.emberBlock {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.emberIcon {
+  font-size: clamp(20px, 5.5vw, 28px);
+  animation: emberPulse 1.6s ease-in-out infinite;
+}
+@keyframes emberPulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.15); }
+}
+
+.emberValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 700;
+  color: #ff8844;
+  text-shadow: 0 0 6px rgba(255, 136, 68, 0.5);
+}
+
+/* ── HP Orbs ── */
+.hpBlock {
+  position: absolute;
+  bottom: 16px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hpOrb {
+  width: clamp(18px, 4.5vw, 24px);
+  height: clamp(18px, 4.5vw, 24px);
+  border-radius: 50%;
+  transition: all 0.25s ease;
+}
+
+.hpAlive {
+  background: radial-gradient(circle at 35% 35%, #ffcc44, #ff6600, #cc2200);
+  box-shadow:
+    0 0 6px rgba(255, 102, 0, 0.9),
+    0 0 16px rgba(255, 60, 0, 0.5);
+}
+
+.hpDead {
+  background: radial-gradient(circle at 35% 35%, #332211, #1a0d00);
+  box-shadow: none;
+  opacity: 0.4;
+  transform: scale(0.8);
+}

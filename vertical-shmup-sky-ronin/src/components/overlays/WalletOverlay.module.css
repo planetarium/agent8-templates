@@ -1,0 +1,335 @@
+/* ── WalletOverlay — SKY RONIN ──────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  background: rgba(10, 3, 2, 0.55);
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 5px,
+    rgba(180,100,30,0.03) 5px,
+    rgba(180,100,30,0.03) 6px
+  );
+  pointer-events: none;
+}
+
+/* Panel — lacquered scroll */
+.panel {
+  position: relative;
+  width: min(88vw, 360px);
+  background: linear-gradient(160deg, rgba(15,4,2,0.97) 0%, rgba(6,2,1,0.97) 100%);
+  border: 1px solid rgba(196, 75, 42, 0.5);
+  border-radius: 2px;
+  padding: 26px 22px 22px;
+  box-shadow:
+    0 0 0 1px rgba(196,75,42,0.14),
+    0 0 30px rgba(180, 50, 10, 0.25),
+    0 0 80px rgba(100, 20, 0, 0.15),
+    inset 0 1px 0 rgba(232,184,75,0.08);
+  animation: panelIn 0.4s cubic-bezier(0.2, 1.3, 0.5, 1) forwards;
+}
+
+@keyframes panelIn {
+  from { transform: scale(0.88) translateY(18px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+
+.panel::before, .panel::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border-color: rgba(196, 75, 42, 0.65);
+  border-style: solid;
+}
+.panel::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.panel::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+/* Header */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.headerAccent {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(8px, 2.2vw, 10px);
+  letter-spacing: 6px;
+  color: rgba(196, 75, 42, 0.6);
+  margin-bottom: 2px;
+}
+
+.title {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(13px, 4vw, 18px);
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #e8b84b;
+  text-shadow:
+    0 0 10px rgba(232, 184, 75, 0.8),
+    0 0 24px rgba(196, 140, 30, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.titleStar {
+  color: #7adfb0;
+  font-size: 0.75em;
+  text-shadow: 0 0 8px rgba(122,223,176,0.8);
+  animation: orbPulse 2.2s ease-in-out infinite;
+}
+@keyframes orbPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.titleLine {
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196,75,42,0.6), transparent);
+  margin-top: 4px;
+}
+
+/* Info cards */
+.infoCards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(20, 8, 2, 0.55);
+  border: 1px solid rgba(196, 75, 42, 0.2);
+  border-radius: 2px;
+  padding: 10px 14px;
+}
+
+.cardIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.cardText {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(10px, 2.7vw, 12px);
+  color: rgba(220, 185, 120, 0.8);
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+/* Exchange rate */
+.rateBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  background: rgba(15, 5, 2, 0.7);
+  border: 1px solid rgba(196, 75, 42, 0.3);
+  border-radius: 2px;
+  padding: 14px 12px;
+}
+
+.rateItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 70px;
+}
+
+.rateValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(24px, 7vw, 32px);
+  font-weight: 900;
+  color: #7adfb0;
+  text-shadow: 0 0 10px rgba(122,223,176,0.7);
+  line-height: 1;
+}
+
+.rateValueGold {
+  color: #e8b84b;
+  text-shadow: 0 0 12px rgba(232,184,75,0.8);
+}
+
+.rateLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(7px, 2vw, 9px);
+  letter-spacing: 2px;
+  color: rgba(220, 185, 120, 0.5);
+}
+
+.rateLabelGold {
+  color: rgba(232, 184, 75, 0.6);
+}
+
+.rateArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.arrowLine {
+  width: 30px;
+  height: 1px;
+  background: rgba(196, 75, 42, 0.35);
+  display: block;
+}
+
+.arrowText {
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: rgba(196, 75, 42, 0.5);
+}
+
+/* Token badge */
+.tokenBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 8px 16px;
+  background: rgba(8, 3, 15, 0.7);
+  border: 1px solid rgba(168, 136, 255, 0.3);
+  border-radius: 20px;
+}
+
+.tokenSymbol {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(12px, 3.5vw, 15px);
+  font-weight: 900;
+  color: #a888ff;
+  text-shadow: 0 0 8px rgba(168,136,255,0.7);
+  letter-spacing: 2px;
+}
+
+.tokenName {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.5vw, 11px);
+  color: rgba(180, 160, 255, 0.7);
+  letter-spacing: 1px;
+}
+
+.tokenChain {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(7px, 2vw, 9px);
+  letter-spacing: 2px;
+  color: rgba(140, 120, 220, 0.5);
+  border-left: 1px solid rgba(140, 100, 220, 0.3);
+  padding-left: 8px;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(11px, 3vw, 14px);
+  font-weight: 700;
+  letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.btnCross {
+  background: linear-gradient(135deg, #1a0e30 0%, #2d1a55 50%, #1a0e30 100%);
+  color: #c8a8ff;
+  border: 1px solid rgba(168, 136, 255, 0.5);
+  box-shadow: 0 0 14px rgba(130,80,240,0.42), inset 0 1px 0 rgba(255,255,255,0.1);
+  text-shadow: 0 0 8px rgba(200,168,255,0.7);
+}
+.btnCross:hover:not(:disabled) {
+  box-shadow: 0 0 26px rgba(150,100,255,0.65), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.btnLoading {
+  animation: loadingPulse 1.2s ease-in-out infinite;
+}
+@keyframes loadingPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(130,80,240,0.42); }
+  50%       { box-shadow: 0 0 30px rgba(160,110,255,0.7); }
+}
+
+.btnBack {
+  background: linear-gradient(135deg, #100804 0%, #1e1008 50%, #100804 100%);
+  color: rgba(220, 185, 120, 0.7);
+  border: 1px solid rgba(180, 130, 50, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.btnBack:hover {
+  box-shadow: 0 0 12px rgba(180,120,30,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.btnShine {
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%);
+  animation: shineSweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shineSweep {
+  0%   { left: -75%; }
+  40%  { left: 125%; }
+  100% { left: 125%; }
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(200, 168, 255, 0.3);
+  border-top-color: #c8a8ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

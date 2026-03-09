@@ -1,0 +1,49 @@
+{
+  "sprites": {},
+  "characters": {
+    "player": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773031400706.png",
+      "description": "Sky Ronin player ship — top-down dragon-winged battle kite, dark red and black lacquered hull, golden dragon wings, teal spirit energy core. Anime style.",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "enemy": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773031403388.png",
+      "description": "Shinobi clan enemy sky barge — dark triangular war vessel, purple and black lacquered wood, crimson paper lanterns, shuriken-shaped hull fins. Anime style.",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "boss": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773031390269.png",
+      "description": "Demon Yokai boss fortress — giant airborne armored castle shaped like oni demon face, massive curved iron horns, green lightning energy cannons. Anime style.",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "items": {
+    "stardust": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773031405163.png",
+      "description": "Spirit Orb collectible — translucent jade-green and golden soul orb, swirling kanji inside, radiating ethereal light, spirit energy wisps. Collectible for Sky Ronin game.",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "crystal": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773031405163.png",
+      "description": "Spirit Orb bonus crystal — reuses spirit orb asset for crystal drops.",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "playerBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773031401688.png",
+      "description": "Player spirit arrow bullet — vertical teal ki energy arrow with ofuda charm glow, pointing upward. Sky Ronin player projectile.",
+      "metadata": { "width": 768, "height": 1376 }
+    },
+    "enemyBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773031400710.png",
+      "description": "Enemy cursed spirit orb bullet — round purple-black orb with dark lightning and red demonic fire wisps. Sky Ronin enemy projectile.",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "backgrounds": {
+    "space": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773031392005.png",
+      "description": "Feudal Japan dusk sky background — indigo and coral sky, ukiyo-e woodblock print style clouds, floating temple ruins, cherry blossom petals. Vertically tileable.",
+      "metadata": { "width": 768, "height": 1376 }
+    }
+  }
+}
