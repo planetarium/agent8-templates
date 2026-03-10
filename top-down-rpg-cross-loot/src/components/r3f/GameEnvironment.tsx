@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { Vector3 } from 'three';
 import { Terrain, Water, ModelPlacer, TerrainData, terrainUtil, DEFAULT_TEXTURE_PATHS } from 'vibe-starter-3d-environment';
 import { useGameStore } from '../../stores/gameStore';
@@ -13,6 +13,25 @@ const GameEnvironment: React.FC = () => {
   const [playerPosition, setPlayerPosition] = useState<[number, number, number]>([0, 100, 0]);
   const setMapPhysicsReady = useGameStore((state) => state.setMapPhysicsReady);
   const { config } = useQualityStore();
+
+  const splattingSettings = useMemo(() => ({
+    textures: [
+      {
+        materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_AO, roughness: 0.85 },
+        repeat: 2, heightRange: [0.0, 0.55] as [number, number], slopeRange: [0.0, 0.3] as [number, number], heightBlendRange: 0.15,
+      },
+      {
+        materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_AO, roughness: 0.9 },
+        repeat: 2, slopeRange: [0.25, 0.55] as [number, number], heightBlendRange: 0.12,
+      },
+      {
+        materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.75 },
+        repeat: 1, slopeRange: [0.5, Math.PI / 2] as [number, number], heightBlendRange: 0.1,
+      },
+    ],
+    mode: 'both' as const,
+    defaultBlendRange: 0.15,
+  }), []);
 
   const handleTerrainDataReady = useCallback(
     (newTerrainData: TerrainData) => {
@@ -40,23 +59,7 @@ const GameEnvironment: React.FC = () => {
         friction={1}
         restitution={0}
         onTerrainDataReady={handleTerrainDataReady}
-        splatting={{
-          textures: [
-            {
-              materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.GRASS_AO, roughness: 0.85 },
-              repeat: 2, heightRange: [0.0, 0.55], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
-            },
-            {
-              materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_AO, roughness: 0.9 },
-              repeat: 2, slopeRange: [0.25, 0.55], heightBlendRange: 0.12,
-            },
-            {
-              materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.75 },
-              repeat: 1, slopeRange: [0.5, Math.PI / 2], heightBlendRange: 0.1,
-            },
-          ],
-          mode: 'both', defaultBlendRange: 0.15,
-        }}
+        splatting={splattingSettings}
       />
       {isReadyTerrainData && terrainDataRef.current && (
         <>
