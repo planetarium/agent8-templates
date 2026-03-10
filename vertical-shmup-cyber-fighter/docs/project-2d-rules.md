@@ -1,8 +1,35 @@
 <userRequest>
+## 🚨 PRE-BUILT TEMPLATE — FIRST PROMPT SCOPE (READ THIS FIRST)
+
+This is a COMPLETE, FULLY PLAYABLE game. The first prompt ONLY requires CrossRamp integration.
+
+### ✅ FIRST PROMPT: DO exactly these steps (nothing more)
+
+1. Write `.crossramp` file with token config
+2. Call `read_gameserver_sdk_v2`
+3. Call `read_gameserver_sdk_crossramp` → deploys CrossRamp
+4. Read `server/src/server.ts` → confirm stardust asset key
+5. If user specifies a new token/drop name: rename `stardust` key in `server/src/server.ts`, `GameScene.ts`, and `.crossramp` (3-way sync)
+6. Generate EXACTLY 2 images: **drop item icon** + **token logo** — update `assets.json` drop URL
+7. Run `bun run build` to verify
+
+### 🚫 FIRST PROMPT: DO NOT do any of the following
+
+- Generate player ship / enemy / boss / bullet / background images — game is already built
+- Modify `TitleOverlay.tsx`, `HUDOverlay.tsx`, `GameOverOverlay.tsx`, `WalletOverlay.tsx`
+- Rewrite or retheme `GameScene.ts`
+- Run `npx @agent8/gameserver-node init` — server is already initialized
+- Redesign UI layout, colors, or CSS
+- Rename mechanics, labels, or scene text
+
+---
+
+## Rules for subsequent prompts
+
 YOU MUST follow these rules EXACTLY:
 
 1. 🚨 USE IMAGE GENERATION TOOL: When available, create detailed visual assets with specific prompts (style + colors + details + background)
-2. 🔥 DISPLAY SIZE ONLY: NEVER use scaleX/scaleY in tweens - ONLY use displayWidth/displayHeight 
+2. 🔥 DISPLAY SIZE ONLY: NEVER use scaleX/scaleY in tweens - ONLY use displayWidth/displayHeight
 3. 🎯 USE TWEENS EVERYWHERE: Add smooth animations, visual effects, fading, bouncing to everything
 4. 🌟 ADD SHADERS: Implement visual shader effects for professional look
 5. 🚨 COMPLETE GAME STATES: Build full game flow with title/menu → game → gameover scenes
