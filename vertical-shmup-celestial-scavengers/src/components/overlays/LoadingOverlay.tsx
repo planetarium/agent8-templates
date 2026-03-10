@@ -16,11 +16,11 @@ const LoadingOverlay: React.FC = () => {
       <div className={styles.stars} />
       <div className={styles.content}>
         <div className={styles.logo}>
-          <span className={styles.logoStar}>★</span>
-          <span className={styles.logoText}>STAR BLASTER</span>
-          <span className={styles.logoStar}>★</span>
+          <span className={styles.logoStar}>✧</span>
+          <span className={styles.logoText}>CELESTIAL SCAVENGERS</span>
+          <span className={styles.logoStar}>✧</span>
         </div>
-        <div className={styles.subtitle}>ARCADE SHMUP</div>
+        <div className={styles.subtitle}>MYSTICAL ARCADE</div>
 
         <div className={styles.barWrap}>
           <div
