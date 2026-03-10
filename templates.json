@@ -320,14 +320,6 @@
     ]
   },
   {
-    "name": "vertical-shmup-star-blaster",
-    "label": "STAR BLASTER (Pre-built)",
-    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Retro space shooter — classic arcade-style starship blasts through asteroid fields and alien fleets in deep space. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
-    "githubRepo": "planetarium/agent8-templates",
-    "path": "vertical-shmup-star-blaster",
-    "tags": ["shmup", "shoot-em-up", "shooting", "vertical", "mobile", "CROSS", "2d", "phaser", "bullet-hell", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
-  },
-  {
     "name": "vertical-shmup-sky-ronin",
     "label": "Vertical Shmup Sky Ronin Template (Pre-built)",
     "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Feudal Japan aerial combat — lone samurai pilot soars through ancient skies battling mythical aerial beasts and rival clans. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
@@ -374,6 +366,14 @@
       "onchain-economy",
       "pre-built"
     ]
+  },
+  {
+    "name": "vertical-shmup-star-blaster",
+    "label": "Vertical Shmup Star Blaster Template (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Retro space shooter — lone starship blasts through asteroid fields and alien fleets in deep space. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-star-blaster",
+    "tags": ["shmup", "shoot-em-up", "shooting", "vertical", "mobile", "CROSS", "2d", "phaser", "bullet-hell", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
   },
   {
     "name": "vertical-shmup-celestial-scavengers",
