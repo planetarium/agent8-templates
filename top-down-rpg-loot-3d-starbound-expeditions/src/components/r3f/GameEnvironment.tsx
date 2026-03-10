@@ -42,13 +42,19 @@ const GameEnvironment: React.FC = () => {
         splatting={{
           textures: [
             {
-              diffuseMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE,
-              normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL,
-              aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO,
-              scale: 5,
-              weight: 1
-            }
-          ]
+              materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.SAND_NORMAL, roughness: 0.9 },
+              repeat: 3, heightRange: [0.0, 0.4], slopeRange: [0.0, 0.3], heightBlendRange: 0.15,
+            },
+            {
+              materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.DIRT_AO, roughness: 0.85 },
+              repeat: 2, slopeRange: [0.25, 0.55], heightBlendRange: 0.12,
+            },
+            {
+              materialProps: { map: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE, normalMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_NORMAL, aoMap: DEFAULT_TEXTURE_PATHS.TERRAIN.STONE_AO, roughness: 0.75 },
+              repeat: 1, slopeRange: [0.5, Math.PI / 2], heightBlendRange: 0.1,
+            },
+          ],
+          mode: 'both', defaultBlendRange: 0.15,
         }}
         onTerrainDataReady={handleTerrainDataReady}
       />
