@@ -1,0 +1,340 @@
+/* ── TitleOverlay ───────────────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: clamp(32px, 8vh, 64px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Leaf pattern */
+.leafPattern {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 5px,
+    rgba(30,60,20,0.04) 5px,
+    rgba(30,60,20,0.04) 6px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(5,15,5,0.7) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header / Title */
+.header {
+  position: absolute;
+  top: clamp(28px, 8vh, 64px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+}
+
+.badge {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.5vw, 13px);
+  letter-spacing: 6px;
+  color: #aadd55;
+  text-shadow: 0 0 8px rgba(150,220,60,0.8);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.88;
+  gap: 0;
+  margin: 0;
+}
+
+.titleLine1 {
+  font-family: 'Georgia', serif;
+  font-size: clamp(48px, 16vw, 88px);
+  font-weight: 900;
+  letter-spacing: 12px;
+  color: #ffffff;
+  text-shadow:
+    0 0 8px  rgba(100, 220, 60, 0.9),
+    0 0 20px rgba(60, 180, 40, 0.7),
+    0 0 50px rgba(30, 120, 20, 0.4);
+  animation: titleFlicker 6s ease-in-out infinite;
+}
+
+.titleLine2 {
+  font-family: 'Georgia', serif;
+  font-size: clamp(28px, 9.5vw, 54px);
+  font-weight: 700;
+  letter-spacing: 14px;
+  color: #66cc33;
+  text-shadow:
+    0 0 10px rgba(100, 200, 50, 1),
+    0 0 30px rgba(80, 180, 40, 0.7),
+    0 0 60px rgba(40, 120, 20, 0.4);
+}
+
+@keyframes titleFlicker {
+  0%, 95%, 100% { opacity: 1; }
+  96%            { opacity: 0.85; }
+  97%            { opacity: 1; }
+  98%            { opacity: 0.9; }
+}
+
+.titleGlow {
+  width: clamp(160px, 50vw, 280px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #66aa33, transparent);
+  margin-top: 6px;
+  animation: scanBar 2.5s linear infinite;
+  opacity: 0.7;
+}
+@keyframes scanBar {
+  0%   { transform: scaleX(0.3); opacity: 0.3; }
+  50%  { transform: scaleX(1);   opacity: 0.9; }
+  100% { transform: scaleX(0.3); opacity: 0.3; }
+}
+
+/* Best score */
+.bestScore {
+  position: absolute;
+  top: clamp(140px, 38vh, 260px);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Petal balance card */
+.balanceCard {
+  position: absolute;
+  top: clamp(172px, 46vh, 310px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(15, 40, 10, 0.55);
+  border: 1px solid rgba(100, 200, 60, 0.2);
+  border-radius: 8px;
+  padding: 8px 18px;
+  min-width: 200px;
+}
+
+.balanceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.balanceIcon {
+  font-size: clamp(14px, 3vw, 18px);
+}
+
+.balanceLabel {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.3vw, 11px);
+  letter-spacing: 4px;
+  color: rgba(150, 220, 100, 0.55);
+}
+
+.balanceValue {
+  font-family: 'Georgia', serif;
+  font-size: clamp(18px, 5vw, 26px);
+  font-weight: 700;
+  color: #ff88aa;
+  text-shadow: 0 0 10px rgba(255,130,170,0.8);
+}
+
+.balanceMgt {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.3vw, 11px);
+  color: rgba(255, 200, 80, 0.75);
+  letter-spacing: 1px;
+}
+
+.mgtCount {
+  color: #ffcc44;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(255,200,60,0.8);
+}
+
+.balanceMgtHint {
+  font-family: 'Georgia', serif;
+  font-size: clamp(8px, 2vw, 10px);
+  color: rgba(150, 200, 120, 0.5);
+  letter-spacing: 1px;
+}
+
+.bestLabel {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.5vw, 12px);
+  letter-spacing: 4px;
+  color: rgba(170,220,150,0.6);
+}
+
+.bestValue {
+  font-family: 'Georgia', serif;
+  font-size: clamp(16px, 4.5vw, 24px);
+  font-weight: 700;
+  color: #ffcc44;
+  text-shadow: 0 0 8px rgba(255,200,60,0.7);
+}
+
+/* Nav Buttons */
+.nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 340px;
+  padding: 0 20px;
+  pointer-events: all;
+  z-index: 1;
+  margin-top: clamp(280px, 60vh, 380px);
+  position: relative;
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+  font-size: clamp(13px, 3.5vw, 16px);
+  font-weight: 700;
+  letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 8px;
+  overflow: visible;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btnIcon {
+  font-size: 1.1em;
+}
+
+/* Play button */
+.btnPlay {
+  background: linear-gradient(135deg, #1a3310 0%, #2a5518 50%, #1a3310 100%);
+  color: #88ee55;
+  border: 1px solid rgba(100, 200, 60, 0.5);
+  box-shadow:
+    0 0 12px rgba(80, 180, 50, 0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  text-shadow: 0 0 8px rgba(130, 240, 80, 0.8);
+}
+.btnPlay:hover {
+  background: linear-gradient(135deg, #224411 0%, #33aa22 50%, #224411 100%);
+  box-shadow:
+    0 0 20px rgba(80, 200, 60, 0.7),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Badge on exchange button */
+.btnBadge {
+  position: absolute;
+  top: -12px;
+  right: -10px;
+  background: #ff88aa;
+  color: #220011;
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.2vw, 11px);
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 12px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(255,130,170,0.9);
+  animation: badgeBounce 1.4s ease-in-out infinite;
+  z-index: 2;
+}
+@keyframes badgeBounce {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.12); }
+}
+
+/* Exchange button */
+.btnExchange {
+  background: linear-gradient(135deg, #2a1530 0%, #44225a 50%, #2a1530 100%);
+  color: #dd88cc;
+  border: 1px solid rgba(200, 120, 180, 0.4);
+  box-shadow:
+    0 0 10px rgba(180, 100, 160, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  text-shadow: 0 0 8px rgba(220, 140, 200, 0.7);
+}
+.btnExchange:hover {
+  background: linear-gradient(135deg, #3a2040 0%, #6633aa 50%, #3a2040 100%);
+  box-shadow:
+    0 0 18px rgba(200, 120, 200, 0.6),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Shine sweep on buttons */
+.btnShine {
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.12) 50%,
+    transparent 100%
+  );
+  animation: shineSweep 3s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 8px;
+  overflow: hidden;
+}
+@keyframes shineSweep {
+  0%   { left: -75%; }
+  40%  { left: 125%;  }
+  100% { left: 125%;  }
+}
+
+/* Hint */
+.hint {
+  position: absolute;
+  bottom: clamp(10px, 3vh, 20px);
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 4px;
+  color: rgba(130, 200, 100, 0.4);
+  pointer-events: none;
+  z-index: 1;
+}

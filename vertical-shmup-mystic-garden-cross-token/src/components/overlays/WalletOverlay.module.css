@@ -1,0 +1,332 @@
+/* ── WalletOverlay ──────────────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.leafOverlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 5px,
+    rgba(20,40,15,0.06) 5px,
+    rgba(20,40,15,0.06) 6px
+  );
+  pointer-events: none;
+}
+
+/* Panel */
+.panel {
+  position: relative;
+  width: min(88vw, 360px);
+  background: linear-gradient(160deg, rgba(10,25,10,0.97) 0%, rgba(5,15,5,0.97) 100%);
+  border: 1px solid rgba(80, 160, 60, 0.45);
+  border-radius: 8px;
+  padding: 26px 22px 22px;
+  box-shadow:
+    0 0 0 1px rgba(80,160,60,0.12),
+    0 0 30px rgba(50, 120, 40, 0.22),
+    0 0 80px rgba(30, 80, 20, 0.15),
+    inset 0 1px 0 rgba(100,200,80,0.1);
+  animation: panelIn 0.4s cubic-bezier(0.2, 1.3, 0.5, 1) forwards;
+}
+
+@keyframes panelIn {
+  from { transform: scale(0.88) translateY(18px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+
+.panel::before, .panel::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border-color: rgba(100, 200, 80, 0.6);
+  border-style: solid;
+}
+.panel::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-radius: 8px 0 0 0; }
+.panel::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 8px 0; }
+
+/* Header */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.headerAccent {
+  font-family: 'Georgia', serif;
+  font-size: clamp(8px, 2.2vw, 10px);
+  letter-spacing: 6px;
+  color: rgba(100, 180, 80, 0.55);
+  margin-bottom: 2px;
+}
+
+.title {
+  font-family: 'Georgia', serif;
+  font-size: clamp(14px, 4.5vw, 20px);
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #88cc55;
+  text-shadow:
+    0 0 10px rgba(130, 200, 80, 0.8),
+    0 0 24px rgba(80, 160, 50, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.titleFlower {
+  font-size: 0.85em;
+  animation: flowerPulse 2s ease-in-out infinite;
+}
+@keyframes flowerPulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.2); }
+}
+
+.titleLine {
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100,200,80,0.6), transparent);
+  margin-top: 4px;
+}
+
+/* Info cards */
+.infoCards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(15, 35, 12, 0.5);
+  border: 1px solid rgba(80, 160, 60, 0.2);
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+
+.cardIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.cardText {
+  font-family: 'Georgia', serif;
+  font-size: clamp(10px, 2.7vw, 12px);
+  color: rgba(170, 220, 150, 0.8);
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+/* Exchange rate */
+.rateBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  background: rgba(10, 25, 10, 0.7);
+  border: 1px solid rgba(80, 160, 60, 0.3);
+  border-radius: 6px;
+  padding: 14px 12px;
+}
+
+.rateItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 70px;
+}
+
+.rateValue {
+  font-family: 'Georgia', serif;
+  font-size: clamp(24px, 7vw, 32px);
+  font-weight: 900;
+  color: #ff88aa;
+  text-shadow: 0 0 10px rgba(255,130,170,0.7);
+  line-height: 1;
+}
+
+.rateValueGold {
+  color: #ffcc44;
+  text-shadow: 0 0 12px rgba(255,200,60,0.8);
+}
+
+.rateLabel {
+  font-family: 'Georgia', serif;
+  font-size: clamp(7px, 2vw, 9px);
+  letter-spacing: 2px;
+  color: rgba(150, 200, 130, 0.55);
+}
+
+.rateLabelGold {
+  color: rgba(255, 200, 60, 0.6);
+}
+
+.rateArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.arrowLine {
+  width: 30px;
+  height: 1px;
+  background: rgba(100, 180, 80, 0.35);
+  display: block;
+}
+
+.arrowText {
+  font-family: 'Georgia', serif;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: rgba(120, 180, 100, 0.5);
+}
+
+/* Token badge */
+.tokenBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 8px 16px;
+  background: rgba(20, 10, 30, 0.7);
+  border: 1px solid rgba(120, 80, 160, 0.35);
+  border-radius: 20px;
+}
+
+.tokenSymbol {
+  font-family: 'Georgia', serif;
+  font-size: clamp(12px, 3.5vw, 15px);
+  font-weight: 900;
+  color: #aa88dd;
+  text-shadow: 0 0 8px rgba(170,130,220,0.7);
+  letter-spacing: 2px;
+}
+
+.tokenName {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.5vw, 11px);
+  color: rgba(180, 160, 220, 0.7);
+  letter-spacing: 1px;
+}
+
+.tokenChain {
+  font-family: 'Georgia', serif;
+  font-size: clamp(7px, 2vw, 9px);
+  letter-spacing: 2px;
+  color: rgba(120, 120, 180, 0.5);
+  border-left: 1px solid rgba(100, 80, 160, 0.35);
+  padding-left: 8px;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+  font-size: clamp(11px, 3vw, 14px);
+  font-weight: 700;
+  letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.btnCross {
+  background: linear-gradient(135deg, #0a3310 0%, #1a5522 50%, #0a3310 100%);
+  color: #88cc88;
+  border: 1px solid rgba(80, 180, 80, 0.5);
+  box-shadow: 0 0 12px rgba(60,150,60,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  text-shadow: 0 0 8px rgba(130,200,130,0.7);
+}
+.btnCross:hover:not(:disabled) {
+  box-shadow: 0 0 24px rgba(80,180,80,0.65), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.btnLoading {
+  animation: loadingPulse 1.2s ease-in-out infinite;
+}
+@keyframes loadingPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(60,150,60,0.4); }
+  50%       { box-shadow: 0 0 28px rgba(80,180,80,0.65); }
+}
+
+.btnBack {
+  background: linear-gradient(135deg, #111511 0%, #1a221a 50%, #111511 100%);
+  color: rgba(170, 220, 160, 0.7);
+  border: 1px solid rgba(100, 160, 100, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.btnBack:hover {
+  box-shadow: 0 0 12px rgba(100,160,100,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.btnShine {
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  animation: shineSweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shineSweep {
+  0%   { left: -75%; }
+  40%  { left: 125%; }
+  100% { left: 125%; }
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(130, 200, 130, 0.3);
+  border-top-color: #88cc88;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

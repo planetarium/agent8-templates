@@ -1,0 +1,54 @@
+{
+  "sprites": {},
+  "characters": {
+    "player": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773221353321.png",
+      "description": "Magical guardian flower plant character, top-down view, glowing enchanted sunflower with green leaf armor, golden petals",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "enemy": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773221362127.png",
+      "description": "Evil garden pest beetle enemy, top-down view, dark chitinous shell with crimson red markings, menacing mandibles",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "boss": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773221343792.png",
+      "description": "Giant corrupted moth boss creature, massive dark wings with toxic purple-green patterns, demonic moth boss",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "items": {
+    "petal": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221352072.png",
+      "description": "Magical glowing petal collectible, pink-magenta luminous flower petal with sparkle effects",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "seed": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221333388.png",
+      "description": "Enchanted seed power-up item, golden seed with green sparkle aura",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "token": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1773221413306.png",
+      "description": "Mystic Garden Token MGT coin icon for CrossRamp",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "playerBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221337568.png",
+      "description": "Magical thorn projectile, green-gold glowing thorn spike with magical energy trail, pointing upward",
+      "metadata": { "width": 768, "height": 1376 }
+    },
+    "enemyBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221354694.png",
+      "description": "Toxic poison orb enemy projectile, purple-green poisonous bubble with dark energy",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "backgrounds": {
+    "forest": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773221374518.png",
+      "description": "Enchanted forest background for vertical scrolling, lush green canopy, magical mushrooms, glowing fireflies",
+      "metadata": { "width": 768, "height": 1376 }
+    }
+  }
+}
