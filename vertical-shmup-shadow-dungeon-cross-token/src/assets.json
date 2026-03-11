@@ -1,0 +1,54 @@
+{
+  "sprites": {},
+  "characters": {
+    "player": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773220735998.png",
+      "description": "Dark necromancer wizard top-down view, tattered black robes with glowing purple runes, skull staff, ethereal purple flame aura",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "enemy": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773220707994.png",
+      "description": "Skeleton warrior enemy top-down view, dark bone armor with red glowing eyes, jagged bone sword, undead monster",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "boss": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773220748812.png",
+      "description": "Massive demon lord boss top-down view, hulking dark red demonic body with black horns, molten lava veins, massive claws",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "items": {
+    "soulgem": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773220815014.png",
+      "description": "Glowing soul gem collectible, ethereal purple crystal diamond with swirling ghostly energy inside",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "crystal": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773220710958.png",
+      "description": "Dark mana crystal collectible power-up, deep blue-purple hexagonal crystal with arcane energy wisps",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "token": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773220815014.png",
+      "description": "Shadow Dungeon Token SDT coin icon for CrossRamp",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "playerBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773220692395.png",
+      "description": "Purple arcane magic bolt projectile, vertical elongated energy beam with swirling purple-violet magical particles",
+      "metadata": { "width": 768, "height": 1376 }
+    },
+    "enemyBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773220739161.png",
+      "description": "Red demonic fireball projectile, glowing crimson-orange fire orb with dark smoke trail and ember particles",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "backgrounds": {
+    "dungeon": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773220713506.png",
+      "description": "Dark dungeon stone corridor background for vertical scrolling, ancient stone walls with green moss, torchlit floor tiles",
+      "metadata": { "width": 768, "height": 1376 }
+    }
+  }
+}

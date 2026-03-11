@@ -1,0 +1,166 @@
+{
+  "characters": {
+    "base-model": {
+      "url": "https://agent8-games.verse8.io/assets/3D/characters/realistic style/elven-sorceress-robes.glb",
+      "description": "Elven sorceress with flowing green robes and silver belt, forest spirit keeper"
+    }
+  },
+  "animations": {
+    "idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb",
+      "description": "Idle"
+    },
+    "idle-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
+      "description": "Idle 00"
+    },
+    "idle-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-01.glb",
+      "description": "Idle 01"
+    },
+    "walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+      "description": "Walk"
+    },
+    "run-medium": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
+      "description": "Run Medium"
+    },
+    "run-fast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb",
+      "description": "Run Fast"
+    },
+    "jump": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb",
+      "description": "Jump"
+    },
+    "punch-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-00.glb",
+      "description": "Spell Gather"
+    },
+    "punch-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-01.glb",
+      "description": "Spell Cast"
+    },
+    "kick-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-00.glb",
+      "description": "Nature Push"
+    },
+    "kick-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-01.glb",
+      "description": "Root Strike"
+    },
+    "kick-02": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-02.glb",
+      "description": "Vine Whip"
+    },
+    "melee-attack": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
+      "description": "Spirit Channel"
+    },
+    "cast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/cast.glb",
+      "description": "Arcane Ritual"
+    },
+    "dance-wave": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/dance-wave.glb",
+      "description": "Forest Dance"
+    },
+    "death-backward": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death-backward.glb",
+      "description": "Spirit Fade"
+    },
+    "hit-to-body": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit-to-body.glb",
+      "description": "Nature Recoil"
+    },
+    "swim": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/swim.glb",
+      "description": "Water Glide"
+    }
+  },
+  "objects": {
+    "mushroom_house": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/mushroom_house_blue_dome.glb",
+      "description": "Blue mushroom dome house - whimsical fairy dwelling"
+    },
+    "mystic_mushroom": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/mystic_forest_mushroom.glb",
+      "description": "Dark mushroom hut with green glowing windows"
+    },
+    "fairy_village": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/mushroom_fairy_village.glb",
+      "description": "Purple capped mushroom village cluster"
+    },
+    "forest_log": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/forest_log_mushroom.glb",
+      "description": "Moss-covered fallen log with orange mushrooms"
+    },
+    "red_mushroom": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/mushroom_single_red.glb",
+      "description": "Classic red-capped mushroom with white spots"
+    },
+    "stump_serenity": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/stump_of_serenity.glb",
+      "description": "Ancient tree stump with exposed growth rings"
+    },
+    "stump_moss": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/stump_with_moss.glb",
+      "description": "Wooden stump with attached acorns and carved surface"
+    },
+    "twilight_flower": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/twilight_flower_lamp.glb",
+      "description": "Glowing bell-shaped flower, magical night light"
+    },
+    "floral_altar": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/forest/floral_mechanica_altar.glb",
+      "description": "Broken forest log with glowing mushrooms and colorful flora"
+    },
+    "ancient_sanctuary": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/fantasy/ancient_stone_sanctuary.glb",
+      "description": "Sacred standing stones with rune engravings"
+    },
+    "forest_sanctuary": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/temple/forest_sanctuary.glb",
+      "description": "Overgrown circular stone sanctuary with moss-covered steps"
+    },
+    "wishing_well": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/medieval/wishingwellenchanted.glb",
+      "description": "Enchanted wishing well with glowing runes and vines"
+    },
+    "ruined_pillars": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/scene props/fantasy_ruined_twin_pillars.glb",
+      "description": "Broken twin stone pillars from ancient ruins"
+    },
+    "druid_pillar": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/scene props/mossy_druid_pillar_totem_base.glb",
+      "description": "Carved stone pillar with green moss and swirl patterns"
+    },
+    "treehouse_stump": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/fantasy/treehouse_fantasy_stump.glb",
+      "description": "Fantasy treehouse carved into a hollow stump"
+    },
+    "magic_mushroom": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/fantasy/bioluminescent_magic_mushroom.glb",
+      "description": "Bioluminescent glowing pink and blue mushroom"
+    },
+    "collectible_rune": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/artifact/sunflare_crystal_growth.glb",
+      "description": "Amber-orange crystal on mossy base - sacred forest gem collectible"
+    }
+  },
+  "textures": {
+    "rune_icon": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1773218737193.png",
+      "description": "Ancient rune stone UI icon - golden mystical symbol"
+    },
+    "star_shard_icon": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1773218737193.png",
+      "description": "Spirit essence asset icon for CrossRamp"
+    },
+    "shard_token": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1773218737193.png",
+      "description": "Grove Token image for CrossRamp"
+    }
+  }
+}

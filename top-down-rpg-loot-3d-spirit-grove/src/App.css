@@ -1,0 +1,28 @@
+#root {
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Spirit Grove global styles */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 162, 101, 0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(196, 162, 101, 0.3);
+  border-radius: 4px;
+}
+
+::selection {
+  background: rgba(107, 143, 78, 0.3);
+  color: #c4a265;
+}

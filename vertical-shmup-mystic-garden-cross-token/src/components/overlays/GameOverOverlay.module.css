@@ -1,0 +1,265 @@
+/* ── GameOverOverlay ────────────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.leafOverlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 5px,
+    rgba(30,10,10,0.04) 5px,
+    rgba(30,10,10,0.04) 6px
+  );
+  pointer-events: none;
+}
+
+/* Panel */
+.panel {
+  position: relative;
+  width: min(86vw, 340px);
+  background: linear-gradient(160deg, rgba(30,10,10,0.97) 0%, rgba(20,5,5,0.97) 100%);
+  border: 1px solid rgba(180, 60, 40, 0.45);
+  border-radius: 8px;
+  padding: 28px 24px 24px;
+  box-shadow:
+    0 0 0 1px rgba(180,60,40,0.15),
+    0 0 30px rgba(150, 40, 20, 0.25),
+    0 0 80px rgba(100, 20, 10, 0.15),
+    inset 0 1px 0 rgba(200,80,40,0.12);
+  animation: panelIn 0.45s cubic-bezier(0.2, 1.4, 0.5, 1) forwards;
+}
+
+@keyframes panelIn {
+  from { transform: scale(0.85) translateY(20px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0px);  opacity: 1; }
+}
+
+/* Corner accents */
+.panel::before,
+.panel::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: rgba(180, 80, 40, 0.7);
+  border-style: solid;
+}
+.panel::before {
+  top: -1px; left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 8px 0 0 0;
+}
+.panel::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 8px 0;
+}
+
+/* Header */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.title {
+  font-family: 'Georgia', serif;
+  font-size: clamp(22px, 8vw, 34px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #cc5533;
+  text-shadow:
+    0 0 10px rgba(200, 80, 50, 1),
+    0 0 24px rgba(180, 50, 20, 0.7),
+    0 0 60px rgba(120, 30, 10, 0.4);
+  animation: titleFlicker 3s ease-in-out infinite;
+}
+
+@keyframes titleFlicker {
+  0%, 90%, 100% { opacity: 1; }
+  91%            { opacity: 0.7; }
+  92%            { opacity: 1; }
+  93%            { opacity: 0.8; }
+}
+
+.titleUnderline {
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,80,40,0.8), transparent);
+  margin-top: 6px;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.statLabel {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 3px;
+  color: rgba(180, 200, 160, 0.5);
+}
+
+.statValue {
+  font-family: 'Georgia', serif;
+  font-size: clamp(16px, 4.5vw, 22px);
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statGold {
+  color: #ffcc44;
+  text-shadow: 0 0 8px rgba(255,200,60,0.8);
+}
+
+.statGreen {
+  color: #66cc33;
+  text-shadow: 0 0 8px rgba(100,200,50,0.6);
+}
+
+.statPink {
+  color: #ff88aa;
+  text-shadow: 0 0 8px rgba(255,130,170,0.6);
+}
+
+.petalIcon {
+  font-size: 0.75em;
+}
+
+.newBest {
+  text-align: center;
+  font-family: 'Georgia', serif;
+  font-size: clamp(10px, 2.8vw, 13px);
+  letter-spacing: 5px;
+  color: #ffcc44;
+  text-shadow: 0 0 10px rgba(255,200,60,0.9);
+  animation: bestPulse 1s ease-in-out infinite;
+  padding: 2px 0;
+}
+@keyframes bestPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100,150,80,0.3), transparent);
+  margin: 4px 0;
+}
+
+.exchangeHint {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.3vw, 11px);
+  color: rgba(200, 140, 180, 0.6);
+  text-align: center;
+  background: rgba(40, 15, 30, 0.5);
+  border: 1px solid rgba(150, 80, 120, 0.25);
+  border-radius: 4px;
+  padding: 6px 12px;
+  letter-spacing: 1px;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+  font-size: clamp(11px, 3vw, 14px);
+  font-weight: 700;
+  letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+
+.btnPlay {
+  background: linear-gradient(135deg, #1a3310 0%, #2a5518 50%, #1a3310 100%);
+  color: #88ee55;
+  border: 1px solid rgba(100, 200, 60, 0.45);
+  box-shadow: 0 0 10px rgba(80,180,50,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+  text-shadow: 0 0 8px rgba(130,240,80,0.7);
+}
+.btnPlay:hover {
+  box-shadow: 0 0 20px rgba(80,200,60,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.btnExchange {
+  background: linear-gradient(135deg, #2a1530 0%, #44225a 50%, #2a1530 100%);
+  color: #dd88cc;
+  border: 1px solid rgba(200, 120, 180, 0.4);
+  box-shadow: 0 0 10px rgba(180,100,160,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  text-shadow: 0 0 8px rgba(220,140,200,0.6);
+}
+.btnExchange:hover {
+  box-shadow: 0 0 18px rgba(200,120,200,0.55), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.btnMenu {
+  background: linear-gradient(135deg, #1a1200 0%, #332200 50%, #1a1200 100%);
+  color: #ddaa44;
+  border: 1px solid rgba(180, 140, 40, 0.35);
+  box-shadow: 0 0 8px rgba(150,120,30,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+  text-shadow: 0 0 8px rgba(220,170,60,0.6);
+}
+.btnMenu:hover {
+  box-shadow: 0 0 16px rgba(180,140,40,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.btnShine {
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  animation: shineSweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shineSweep {
+  0%   { left: -75%; }
+  40%  { left: 125%; }
+  100% { left: 125%; }
+}

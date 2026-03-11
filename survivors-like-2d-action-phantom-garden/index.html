@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;900&family=MedievalSharp&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phantom Garden</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'MedievalSharp', cursive, serif;
+      }
+      .loading-container {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0517 50%, #050208 100%);
+        color: #c4b5fd;
+      }
+      .loading-title {
+        font-family: 'Cinzel Decorative', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #a78bfa;
+        text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+        letter-spacing: 0.15em;
+      }
+      .loading-subtitle {
+        font-family: 'MedievalSharp', cursive;
+        font-size: 0.85rem;
+        color: #6d28d9;
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+      }
+      .spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid rgba(167, 139, 250, 0.2);
+        border-radius: 50%;
+        border-top-color: #a78bfa;
+        border-right-color: #34d399;
+        animation: spin 1.2s ease-in-out infinite;
+        box-shadow: 0 0 15px rgba(167, 139, 250, 0.3);
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script>
+      (function () {
+        function reportGameSize() {
+          const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+
+          const width = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+
+          window.parent.postMessage(
+            {
+              type: 'GAME_SIZE_RESPONSE',
+              height: height,
+              width: width,
+            },
+            '*',
+          );
+        }
+
+        window.addEventListener('load', reportGameSize);
+
+        window.addEventListener('resize', reportGameSize);
+
+        window.addEventListener('message', function (event) {
+          if (event.data && event.data.type === 'REQUEST_GAME_SIZE') {
+            reportGameSize();
+          }
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div class="loading-container">
+        <h2 class="loading-title">Phantom Garden</h2>
+        <p class="loading-subtitle">Awakening the roots...</p>
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+/* ── CrossRampOverlay ───────────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 15, 5, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.25s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Animated logo ring */
+.logo {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #66aa33;
+  border-right-color: rgba(100,180,50,0.4);
+  animation: ringPulse 1s linear infinite;
+}
+@keyframes ringPulse {
+  to { transform: rotate(360deg); }
+}
+
+.logoInner {
+  font-size: 22px;
+  animation: innerPulse 1.4s ease-in-out infinite;
+}
+@keyframes innerPulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.2); }
+}
+
+.title {
+  font-family: 'Georgia', serif;
+  font-size: clamp(14px, 4vw, 18px);
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: #88cc55;
+  text-shadow: 0 0 10px rgba(130,200,80,0.7);
+}
+
+.sub {
+  font-family: 'Georgia', serif;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 3px;
+  color: rgba(150, 220, 100, 0.55);
+  animation: subPulse 1.5s ease-in-out infinite;
+}
+@keyframes subPulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+.bar {
+  width: clamp(120px, 40vw, 200px);
+  height: 3px;
+  background: rgba(60, 120, 40, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #336622, #66aa33, #336622);
+  background-size: 200% 100%;
+  border-radius: 2px;
+  animation: barSlide 1.2s linear infinite;
+}
+@keyframes barSlide {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}

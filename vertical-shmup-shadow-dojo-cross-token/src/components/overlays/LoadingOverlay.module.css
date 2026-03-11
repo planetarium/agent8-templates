@@ -1,0 +1,143 @@
+/* ── LoadingOverlay ─── Shadow Dojo Theme ──────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  background: #0a0008;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  overflow: hidden;
+}
+
+/* Floating ember particles */
+.embers {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, rgba(255,60,80,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 60%, rgba(204,0,60,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 10%, rgba(255,100,60,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 45%, rgba(180,0,80,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 80%, rgba(255,60,100,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 35%, rgba(200,40,80,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 75%, rgba(255,80,60,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 5%  55%, rgba(160,0,60,0.4) 0%, transparent 100%);
+  animation: embersFloat 3s ease-in-out infinite alternate;
+}
+@keyframes embersFloat {
+  0%   { opacity: 0.5; }
+  100% { opacity: 1;   }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(24px, 7vw, 42px);
+  font-weight: 700;
+  color: #ff3355;
+  text-shadow:
+    0 0 12px rgba(255, 40, 80, 0.9),
+    0 0 30px rgba(200, 0, 60, 0.5);
+  letter-spacing: 4px;
+  animation: titlePulse 1.8s ease-in-out infinite;
+}
+@keyframes titlePulse {
+  0%, 100% { text-shadow: 0 0 12px rgba(255,40,80,0.9), 0 0 30px rgba(200,0,60,0.5); }
+  50%       { text-shadow: 0 0 24px rgba(255,40,80,1),   0 0 60px rgba(200,0,60,0.8); }
+}
+
+.logoKanji {
+  color: #cc0044;
+  font-size: 1.1em;
+  text-shadow: 0 0 14px rgba(200, 0, 60, 0.9);
+  animation: kanjiFloat 3s ease-in-out infinite;
+  display: inline-block;
+}
+@keyframes kanjiFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+.logoText {
+  color: #ff3355;
+}
+
+.subtitle {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(10px, 3vw, 15px);
+  color: #884466;
+  letter-spacing: 8px;
+  opacity: 0.8;
+}
+
+/* Progress bar */
+.barWrap {
+  position: relative;
+  width: clamp(200px, 55vw, 320px);
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  border: 1px solid rgba(200, 0, 60, 0.3);
+  overflow: visible;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #440022 0%, #cc0044 60%, #ff3355 100%);
+  border-radius: 3px;
+  transition: width 0.15s ease-out;
+  position: relative;
+}
+.barFill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 100%);
+  border-radius: 3px;
+}
+
+.barGlow {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff4466;
+  box-shadow: 0 0 10px 4px rgba(255, 60, 80, 0.7);
+  pointer-events: none;
+}
+
+.barLabel {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: rgba(200, 120, 150, 0.6);
+  letter-spacing: 3px;
+  margin-top: -6px;
+}
+
+/* Dark scanlines */
+.scanline {
+  position: absolute;
+  inset: -40px -100px;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.15) 3px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+}

@@ -1,0 +1,124 @@
+/* ── HUDOverlay — Deep Reef Raiders ─────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* ── Score — top left ── */
+.scoreBlock {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.label {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(11px, 3vw, 15px);
+  letter-spacing: 3px;
+  color: rgba(100, 210, 230, 0.55);
+}
+
+.scoreValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(24px, 6.5vw, 34px);
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow:
+    0 0 6px rgba(0, 220, 240, 0.6),
+    0 0 14px rgba(0, 160, 200, 0.3);
+  letter-spacing: 1px;
+}
+
+/* ── Depth (Wave) — top center ── */
+.waveBlock {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.waveLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(11px, 3vw, 15px);
+  letter-spacing: 4px;
+  color: rgba(0, 255, 200, 0.55);
+}
+
+.waveValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(28px, 7.5vw, 40px);
+  font-weight: 900;
+  color: #00ffee;
+  text-shadow:
+    0 0 8px rgba(0, 255, 238, 0.9),
+    0 0 20px rgba(0, 200, 210, 0.5);
+  line-height: 1;
+}
+
+/* ── Pearls — top right ── */
+.stardustBlock {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.starIcon {
+  font-size: clamp(22px, 6vw, 30px);
+  color: #00ffee;
+  text-shadow: 0 0 8px rgba(0, 255, 238, 0.9);
+  animation: pearlPulse 1.8s ease-in-out infinite;
+}
+@keyframes pearlPulse {
+  0%, 100% { text-shadow: 0 0 8px rgba(0,255,238,0.9); }
+  50%       { text-shadow: 0 0 18px rgba(0,255,238,1), 0 0 34px rgba(0,200,220,0.6); }
+}
+
+.starValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(24px, 6.5vw, 34px);
+  font-weight: 700;
+  color: #88ffee;
+  text-shadow: 0 0 6px rgba(0, 255, 220, 0.5);
+}
+
+/* ── HP — bottom left (hull integrity) ── */
+.hpBlock {
+  position: absolute;
+  bottom: 16px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hpHeart {
+  font-size: clamp(26px, 7vw, 36px);
+  line-height: 1;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.hpAlive {
+  color: #00ffcc;
+  text-shadow:
+    0 0 6px rgba(0, 255, 200, 0.95),
+    0 0 16px rgba(0, 200, 180, 0.6);
+  transform: scale(1);
+}
+
+.hpDead {
+  color: rgba(0, 60, 55, 0.45);
+  text-shadow: none;
+  transform: scale(0.8);
+}

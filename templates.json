@@ -320,6 +320,66 @@
     ]
   },
   {
+    "name": "survivors-like-2d-action-shadow-ninja",
+    "label": "Survivors-like 2D Action Shadow Ninja Template (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) Survivors-like 2D action game, (2) mobile devices, (3) earned gold exchangeable with a CROSS chain token. Example prompt: Create a Survivors-like 2D action game for mobile devices. Make the earned gold exchangeable with a CROSS chain token. ⚠️ RANDOM SELECTION REQUIRED: Multiple survivors-like templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Dark Japanese fantasy survival — a shadow ninja slays relentless waves of demons (Oni, Yurei, Dai-Tengu), collecting Demon Gold as currency. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "survivors-like-2d-action-shadow-ninja",
+    "tags": [
+      "survivors",
+      "CROSS",
+      "2d",
+      "mobile",
+      "action",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
+    "name": "survivors-like-2d-action-shadow-dynasty",
+    "label": "Survivors-like 2D Action Shadow Dynasty Template (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) Survivors-like 2D action game, (2) mobile devices, (3) earned gold exchangeable with a CROSS chain token. Example prompt: Create a Survivors-like 2D action game for mobile devices. Make the earned gold exchangeable with a CROSS chain token. ⚠️ RANDOM SELECTION REQUIRED: Multiple survivors-like templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Dark necromancer fantasy — shadow-wielding necromancer survives relentless waves of holy crusaders on a cursed battlefield, collecting soul essence. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "survivors-like-2d-action-shadow-dynasty",
+    "tags": [
+      "survivors",
+      "CROSS",
+      "2d",
+      "mobile",
+      "action",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
+    "name": "survivors-like-2d-action-phantom-garden",
+    "label": "Survivors-like 2D Action Phantom Garden Template (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) Survivors-like 2D action game, (2) mobile devices, (3) earned gold exchangeable with a CROSS chain token. Example prompt: Create a Survivors-like 2D action game for mobile devices. Make the earned gold exchangeable with a CROSS chain token. ⚠️ RANDOM SELECTION REQUIRED: Multiple survivors-like templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Enchanted forest defense — Forest Spirit hero battles waves of Shadow Imps, Cursed Wisps, and Blighted Treants to gather Enchanted Petals in a moonlit garden. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "survivors-like-2d-action-phantom-garden",
+    "tags": [
+      "survivors",
+      "CROSS",
+      "2d",
+      "mobile",
+      "action",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
     "name": "vertical-shmup-sky-ronin",
     "label": "Vertical Shmup Sky Ronin Template (Pre-built)",
     "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Feudal Japan aerial combat — lone samurai pilot soars through ancient skies battling mythical aerial beasts and rival clans. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
@@ -424,6 +484,110 @@
     ]
   },
   {
+    "name": "vertical-shmup-aether-wings",
+    "label": "Aether Wings (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Celestial aerial combat — lone pilot soars through radiant cosmic skies in the ship Aether Wings, battling waves of alien forces and collecting luminous stardust to redeem for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-aether-wings",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
+    "name": "vertical-shmup-shadow-dojo-cross-token",
+    "label": "Shadow Dojo (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Shadow Dojo — a ninja warrior battles waves of shadow enemies descending from above, collecting stardust souls to redeem for CROSS tokens in a dark, ember-lit dojo setting. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-shadow-dojo-cross-token",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "arcade",
+      "ninja",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
+    "name": "vertical-shmup-shadow-dungeon-cross-token",
+    "label": "Shadow Dungeon (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Gothic dungeon shooter — necromancer character battles descending undead waves in a dark gothic dungeon, collecting soul gems to redeem for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-shadow-dungeon-cross-token",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "arcade",
+      "dungeon",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
+    "name": "vertical-shmup-mystic-garden-cross-token",
+    "label": "Mystic Garden (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Enchanted forest shooter — guardian flower spirit soars through a mystical garden, battling pest invaders and collecting magical petals to redeem for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-mystic-garden-cross-token",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "arcade",
+      "fantasy",
+      "nature",
+      "garden",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
     "name": "top-down-rpg-loot-3d-crystal-realm",
     "label": "REALM OF RELICS (Pre-built)",
     "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) top-down mobile RPG game, (2) players collect resources or rare loot from enemies, (3) earned items/loot/currency exchangeable with a CROSS chain token. Example prompt: 'Let's make a top-down mobile RPG where players collect resources and rare loot. Allow players to redeem earned items into a token on CROSS blockchain.' ⚠️ RANDOM SELECTION REQUIRED: Multiple top-down-rpg templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Crystal cavern mining RPG — explorer delves into gem-filled underground realms, collecting rare crystals and relics to exchange for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
@@ -462,5 +626,72 @@
     "githubRepo": "planetarium/agent8-templates",
     "path": "top-down-rpg-loot-3d-mystic-glade",
     "tags": ["rpg", "top-down", "mining", "loot", "3d", "three.js", "CROSS", "quarterview", "resources", "react-three-fiber", "rapier", "vibe-starter-3d", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
+  },
+  {
+    "name": "top-down-rpg-loot-3d-inferno-descent",
+    "label": "Inferno Descent (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) top-down mobile RPG game, (2) players collect resources or rare loot from enemies, (3) earned items/loot/currency exchangeable with a CROSS chain token. Example prompt: 'Let's make a top-down mobile RPG where players collect resources and rare loot. Allow players to redeem earned items into a token on CROSS blockchain.' ⚠️ RANDOM SELECTION REQUIRED: Multiple top-down-rpg templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Volcanic hellscape RPG — demon hunter descends into a fiery inferno realm, harvesting rare fire souls from molten rock formations scattered across a volcanic wasteland to exchange for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "top-down-rpg-loot-3d-inferno-descent",
+    "tags": ["rpg", "top-down", "mining", "loot", "3d", "three.js", "CROSS", "quarterview", "resources", "react-three-fiber", "rapier", "vibe-starter-3d", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
+  },
+  {
+    "name": "top-down-rpg-loot-3d-neon-drift",
+    "label": "Neon Drift: Cyber Arena (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) top-down mobile RPG game, (2) players collect resources or rare loot from enemies, (3) earned items/loot/currency exchangeable with a CROSS chain token. Example prompt: 'Let's make a top-down mobile RPG where players collect resources and rare loot. Allow players to redeem earned items into a token on CROSS blockchain.' ⚠️ RANDOM SELECTION REQUIRED: Multiple top-down-rpg templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Cyberpunk neon arena RPG — cyber-runner navigates a dark neon-lit dystopian arena, hacking and collecting glowing data fragments scattered across a gritty cyber wasteland to exchange for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "top-down-rpg-loot-3d-neon-drift",
+    "tags": ["rpg", "top-down", "mining", "loot", "3d", "three.js", "CROSS", "quarterview", "resources", "react-three-fiber", "rapier", "vibe-starter-3d", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
+  },
+  {
+    "name": "top-down-rpg-loot-3d-frost-garden",
+    "label": "Frost Garden (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) top-down mobile RPG game, (2) players collect resources or rare loot from enemies, (3) earned items/loot/currency exchangeable with a CROSS chain token. Example prompt: 'Let's make a top-down mobile RPG where players collect resources and rare loot. Allow players to redeem earned items into a token on CROSS blockchain.' ⚠️ RANDOM SELECTION REQUIRED: Multiple top-down-rpg templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Frozen botanical RPG — lone explorer wanders an ethereal frost-covered garden, harvesting rare starflowers from icy crystalline formations scattered across a serene winter landscape to exchange for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "top-down-rpg-loot-3d-frost-garden",
+    "tags": ["rpg", "top-down", "mining", "loot", "3d", "three.js", "CROSS", "quarterview", "resources", "react-three-fiber", "rapier", "vibe-starter-3d", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
+  },
+  {
+    "name": "top-down-rpg-loot-3d-desert-ruins",
+    "label": "Desert Ruins (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) top-down mobile RPG game, (2) players collect resources or rare loot from enemies, (3) earned items/loot/currency exchangeable with a CROSS chain token. Example prompt: 'Let's make a top-down mobile RPG where players collect resources and rare loot. Allow players to redeem earned items into a token on CROSS blockchain.' ⚠️ RANDOM SELECTION REQUIRED: Multiple top-down-rpg templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Desert ruins open world where players excavate ancient ember relics across sand dunes and crumbling temple structures. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "top-down-rpg-loot-3d-desert-ruins",
+    "tags": ["rpg", "top-down", "mining", "loot", "3d", "three.js", "CROSS", "quarterview", "resources", "react-three-fiber", "rapier", "vibe-starter-3d", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
+  },
+  {
+    "name": "top-down-rpg-loot-3d-spirit-grove",
+    "label": "Spirit Grove (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) top-down mobile RPG game, (2) players collect resources or rare loot from enemies, (3) earned items/loot/currency exchangeable with a CROSS chain token. Example prompt: 'Let's make a top-down mobile RPG where players collect resources and rare loot. Allow players to redeem earned items into a token on CROSS blockchain.' ⚠️ RANDOM SELECTION REQUIRED: Multiple top-down-rpg templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: A mystical ancient forest open world where players explore sacred groves and channel glowing spirit runes as collectible on-chain assets. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "top-down-rpg-loot-3d-spirit-grove",
+    "tags": ["rpg", "top-down", "mining", "loot", "3d", "three.js", "CROSS", "quarterview", "resources", "react-three-fiber", "rapier", "vibe-starter-3d", "token", "blockchain", "wallet", "redeem", "onchain-economy", "pre-built"]
+  },
+  {
+    "name": "vertical-shmup-deep-reef-raiders",
+    "label": "Deep Reef Raiders (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Deep ocean submarine shooter — sleek submersible navigates the bioluminescent abyss, blasting through jellyfish swarms and deep-sea creatures while collecting glowing pearls to exchange for REEF tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-deep-reef-raiders",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built",
+      "ocean",
+      "underwater",
+      "submarine"
+    ]
   }
 ]

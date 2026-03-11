@@ -1,0 +1,174 @@
+{
+  "characters": {
+    "base-model": {
+      "url": "https://agent8-games.verse8.io/assets/3D/characters/casual style/02/female_scout_white_robes.glb",
+      "description": "SD style female adventurer scout - white tunic with red trim, leather belt, explorer archetype"
+    }
+  },
+  "animations": {
+    "idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb",
+      "description": "Idle"
+    },
+    "idle-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
+      "description": "Idle 00"
+    },
+    "idle-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-01.glb",
+      "description": "Idle 01"
+    },
+    "walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+      "description": "Walk"
+    },
+    "run-medium": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
+      "description": "Run Medium"
+    },
+    "run-fast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb",
+      "description": "Run Fast"
+    },
+    "jump": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb",
+      "description": "Jump"
+    },
+    "punch-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-00.glb",
+      "description": "Punch 00"
+    },
+    "kick-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-00.glb",
+      "description": "Kick 00"
+    },
+    "melee-attack": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
+      "description": "Melee Attack"
+    },
+    "cast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/cast.glb",
+      "description": "Cast"
+    },
+    "hit-to-body": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit-to-body.glb",
+      "description": "Hit to Body"
+    },
+    "death-backward": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death-backward.glb",
+      "description": "Death Backward"
+    }
+  },
+  "objects": {
+    "desert_cactus": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/desert_cactus_bloom.glb",
+      "description": "Tall cactus plant with yellow flowers"
+    },
+    "giant_cactus": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/giant_cactus_bloom.glb",
+      "description": "Towering blooming saguaro cactus"
+    },
+    "canyon_stone_stack": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/canyon_stone_stack.glb",
+      "description": "Layered orange sandstone cliff formation"
+    },
+    "massive_natural_arch": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/massive_natural_arch.glb",
+      "description": "Grand sandstone arch landmark"
+    },
+    "stepped_plateau_pillar": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/stepped_plateau_pillar.glb",
+      "description": "Stepped desert column, eroded mesa top"
+    },
+    "flat_tan_rock": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/flat_tan_rock_large.glb",
+      "description": "Cracked sandstone flat top rock"
+    },
+    "desert_monolith": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/desert_monolith_rocks.glb",
+      "description": "Stacked sandstone monolith surrounded by rock formations"
+    },
+    "desert_shelter": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/desert_shelter_with_door.glb",
+      "description": "Adobe shelter with wooden door and pottery"
+    },
+    "oasis_well": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/thatch_roof_oasis_well.glb",
+      "description": "Desert well with thatched canopy"
+    },
+    "ruined_building": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/desert/ruined_desert_building.glb",
+      "description": "Collapsed adobe structure, sand-buried remnants"
+    },
+    "temple_stone_circle": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/temple/temple_stone_circle_gold.glb",
+      "description": "Ancient stone circle with gold platform and central orb"
+    },
+    "forest_sanctuary": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/temple/forest_sanctuary.glb",
+      "description": "Sacred circular stone sanctuary with arcane altar"
+    },
+    "rune_pedestal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/temple/ancient_rune_pedestal.glb",
+      "description": "Moss-covered pedestal with glowing cyan glyphs"
+    },
+    "rune_pillar_gold": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/temple/temple_rune_pillar_gold.glb",
+      "description": "Tall rune pillar with golden braid pattern"
+    },
+    "campfire_circle": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/temple/campfire_circle.glb",
+      "description": "Primitive stone circle with ceremonial fire pit"
+    },
+    "ember_crystal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/fantasy/ember_crystal_node.glb",
+      "description": "Glowing amber ember crystal node - collectible relic"
+    },
+    "ruined_twin_pillars": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/scene props/fantasy_ruined_twin_pillars.glb",
+      "description": "Broken twin stone pillars, ancient temple ruins"
+    },
+    "treasure_chest": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/treasure box/gemstone_mystic_loot_box.glb",
+      "description": "Golden frame treasure chest with ruby gem and blue crystal"
+    }
+  },
+  "textures": {
+    "sand_ground": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/floor/sand_02_diff_2k.jpg",
+      "description": "HD 2K sandy desert floor diffuse texture - gritty granular sand"
+    },
+    "sand_ground_normal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/floor/sand_02_nor_2k.jpg",
+      "description": "HD 2K sandy desert floor normal map"
+    },
+    "sand_ground_ao": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/floor/sand_02_arm_2k.jpg",
+      "description": "HD 2K sandy desert floor AO/Roughness/Metallic map"
+    },
+    "dark_sand": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/outdoor/sandy_gravel_02_diff_2k.jpg",
+      "description": "HD 2K sandy gravel diffuse texture - stony gravelly dusty desert ground"
+    },
+    "dark_sand_normal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/outdoor/sandy_gravel_02_nor_2k.jpg",
+      "description": "HD 2K sandy gravel normal map"
+    },
+    "dark_sand_ao": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/outdoor/sandy_gravel_02_arm_2k.jpg",
+      "description": "HD 2K sandy gravel AO/Roughness/Metallic map"
+    },
+    "gray_sand": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/terrain/dry_ground_01_diff_2k.jpg",
+      "description": "HD 2K dry cracked ground diffuse texture - arid desert terrain"
+    },
+    "gray_sand_normal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/terrain/dry_ground_01_nor_2k.jpg",
+      "description": "HD 2K dry cracked ground normal map"
+    },
+    "gray_sand_ao": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/terrain/dry_ground_01_arm_2k.jpg",
+      "description": "HD 2K dry cracked ground AO/Roughness/Metallic map"
+    }
+  }
+}
