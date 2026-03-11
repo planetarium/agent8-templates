@@ -1,0 +1,465 @@
+/* ── TitleOverlay ───────────────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: clamp(32px, 8vh, 64px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* CRT scanlines */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.06) 3px,
+    rgba(0,0,0,0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,15,0.7) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header / Title */
+.header {
+  position: absolute;
+  top: clamp(28px, 8vh, 64px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+}
+
+.badge {
+  font-family: 'serif', serif;
+  font-size: clamp(9px, 2.5vw, 13px);
+  letter-spacing: 6px;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255,215,0,0.8);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+.titleLine1 {
+  font-family: 'serif', serif;
+  font-size: clamp(48px, 16vw, 88px);
+  font-weight: 900;
+  letter-spacing: 12px;
+  color: #ffffff;
+  text-shadow:
+    0 0 8px  rgba(255, 215, 0, 0.9),
+    0 0 20px rgba(218, 165, 32, 0.7),
+    0 0 50px rgba(184, 134, 11, 0.4);
+  animation: titleFlicker 6s ease-in-out infinite;
+}
+
+.titleLine2 {
+  font-family: 'serif', serif;
+  font-size: clamp(28px, 9.5vw, 54px);
+  font-weight: 700;
+  letter-spacing: 14px;
+  color: #ffd700;
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, 1),
+    0 0 30px rgba(218, 165, 32, 0.7),
+    0 0 60px rgba(184, 134, 11, 0.4);
+}
+
+.titleGlow {
+  width: clamp(160px, 50vw, 280px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  margin-top: 6px;
+  animation: scanBar 2.5s linear infinite;
+  opacity: 0.7;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(55,40,0,0.5) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.balanceCard {
+  position: absolute;
+  top: clamp(172px, 46vh, 310px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(40, 30, 0, 0.55);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 4px;
+  padding: 8px 18px;
+  min-width: 200px;
+}
+
+.balanceIcon {
+  font-size: clamp(11px, 3vw, 14px);
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255,215,0,0.9);
+}
+
+.balanceValue {
+  font-family: 'serif', serif;
+  font-size: clamp(18px, 5vw, 26px);
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255,215,0,0.8);
+}
+
+.btnPlay {
+  background: linear-gradient(135deg, #443300 0%, #886600 50%, #443300 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  box-shadow:
+    0 0 12px rgba(218, 165, 32, 0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+.btnPlay:hover {
+  background: linear-gradient(135deg, #554400 0%, #daa520 50%, #554400 100%);
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.7),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.btnBadge {
+  position: absolute;
+  top: -12px;
+  right: -10px;
+  background: #ffd700;
+  color: #000000;
+  font-family: 'serif', serif;
+  font-size: clamp(9px, 2.2vw, 11px);
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 12px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(255,215,0,0.9);
+  animation: badgeBounce 1.4s ease-in-out infinite;
+  z-index: 2;
+}
+
+.btnExchange {
+  background: linear-gradient(135deg, #1a1a1a 0%, #333333 50%, #1a1a1a 100%);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  box-shadow:
+    0 0 10px rgba(184, 134, 11, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+.btnExchange:hover {
+  background: linear-gradient(135deg, #2a2a2a 0%, #444444 50%, #2a2a2a 100%);
+  box-shadow:
+    0 0 18px rgba(218, 165, 32, 0.6),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.88;
+  gap: 0;
+  margin: 0;
+}
+
+.titleLine1 {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(48px, 16vw, 88px);
+  font-weight: 900;
+  letter-spacing: 12px;
+  color: #ffffff;
+  text-shadow:
+    0 0 8px  rgba(0, 221, 255, 0.9),
+    0 0 20px rgba(0, 150, 220, 0.7),
+    0 0 50px rgba(0, 80, 180, 0.4);
+  animation: titleFlicker 6s ease-in-out infinite;
+}
+
+.titleLine2 {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(28px, 9.5vw, 54px);
+  font-weight: 700;
+  letter-spacing: 14px;
+  color: #00ddff;
+  text-shadow:
+    0 0 10px rgba(0, 221, 255, 1),
+    0 0 30px rgba(0, 170, 255, 0.7),
+    0 0 60px rgba(0, 100, 200, 0.4);
+}
+
+@keyframes titleFlicker {
+  0%, 95%, 100% { opacity: 1; }
+  96%            { opacity: 0.85; }
+  97%            { opacity: 1; }
+  98%            { opacity: 0.9; }
+}
+
+.titleGlow {
+  width: clamp(160px, 50vw, 280px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00aaff, transparent);
+  margin-top: 6px;
+  animation: scanBar 2.5s linear infinite;
+  opacity: 0.7;
+}
+@keyframes scanBar {
+  0%   { transform: scaleX(0.3); opacity: 0.3; }
+  50%  { transform: scaleX(1);   opacity: 0.9; }
+  100% { transform: scaleX(0.3); opacity: 0.3; }
+}
+
+/* Best score */
+.bestScore {
+  position: absolute;
+  top: clamp(140px, 38vh, 260px);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Stardust balance card */
+.balanceCard {
+  position: absolute;
+  top: clamp(172px, 46vh, 310px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(0, 20, 60, 0.55);
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  border-radius: 4px;
+  padding: 8px 18px;
+  min-width: 200px;
+}
+
+.balanceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.balanceIcon {
+  font-size: clamp(11px, 3vw, 14px);
+  color: #55ddff;
+  text-shadow: 0 0 8px rgba(85,221,255,0.9);
+}
+
+.balanceLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.3vw, 11px);
+  letter-spacing: 4px;
+  color: rgba(136, 200, 255, 0.55);
+}
+
+.balanceValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(18px, 5vw, 26px);
+  font-weight: 700;
+  color: #55ddff;
+  text-shadow: 0 0 10px rgba(85,221,255,0.8);
+}
+
+.balanceSbt {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.3vw, 11px);
+  color: rgba(255, 220, 68, 0.75);
+  letter-spacing: 1px;
+}
+
+.sbtCount {
+  color: #ffdd44;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(255,220,68,0.8);
+}
+
+.balanceSbtHint {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(8px, 2vw, 10px);
+  color: rgba(136, 170, 220, 0.5);
+  letter-spacing: 1px;
+}
+
+.bestLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.5vw, 12px);
+  letter-spacing: 4px;
+  color: rgba(170,221,255,0.6);
+}
+
+.bestValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(16px, 4.5vw, 24px);
+  font-weight: 700;
+  color: #ffdd44;
+  text-shadow: 0 0 8px rgba(255,220,68,0.7);
+}
+
+/* Nav Buttons */
+.nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 340px;
+  padding: 0 20px;
+  pointer-events: all;
+  z-index: 1;
+  /* Push down to avoid overlap with balance card */
+  margin-top: clamp(280px, 60vh, 380px);
+  position: relative;
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(13px, 3.5vw, 16px);
+  font-weight: 700;
+  letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 3px;
+  overflow: visible;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btnIcon {
+  font-size: 0.85em;
+}
+
+/* Play button */
+.btnPlay {
+  background: linear-gradient(135deg, #004422 0%, #006633 50%, #004422 100%);
+  color: #55ffaa;
+  border: 1px solid rgba(0, 200, 100, 0.5);
+  box-shadow:
+    0 0 12px rgba(0, 180, 80, 0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  text-shadow: 0 0 8px rgba(85, 255, 170, 0.8);
+}
+.btnPlay:hover {
+  background: linear-gradient(135deg, #005533 0%, #00aa55 50%, #005533 100%);
+  box-shadow:
+    0 0 20px rgba(0, 200, 100, 0.7),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Badge on exchange button */
+.btnBadge {
+  position: absolute;
+  top: -12px;
+  right: -10px;
+  background: #55ddff;
+  color: #001122;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.2vw, 11px);
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 12px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(85,221,255,0.9);
+  animation: badgeBounce 1.4s ease-in-out infinite;
+  z-index: 2;
+}
+@keyframes badgeBounce {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.12); }
+}
+
+/* Exchange button */
+.btnExchange {
+  background: linear-gradient(135deg, #0d1f44 0%, #1a3366 50%, #0d1f44 100%);
+  color: #55bbff;
+  border: 1px solid rgba(85, 170, 255, 0.4);
+  box-shadow:
+    0 0 10px rgba(50, 100, 200, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  text-shadow: 0 0 8px rgba(85, 170, 255, 0.7);
+}
+.btnExchange:hover {
+  background: linear-gradient(135deg, #162244 0%, #2244aa 50%, #162244 100%);
+  box-shadow:
+    0 0 18px rgba(50, 120, 220, 0.6),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Shine sweep on buttons */
+.btnShine {
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.12) 50%,
+    transparent 100%
+  );
+  animation: shineSweep 3s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 3px;
+  overflow: hidden;
+}
+@keyframes shineSweep {
+  0%   { left: -75%; }
+  40%  { left: 125%;  }
+  100% { left: 125%;  }
+}
+
+/* Hint */
+.hint {
+  position: absolute;
+  bottom: clamp(10px, 3vh, 20px);
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 4px;
+  color: rgba(136, 187, 255, 0.4);
+  pointer-events: none;
+  z-index: 1;
+}

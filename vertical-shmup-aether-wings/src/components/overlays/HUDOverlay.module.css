@@ -1,0 +1,186 @@
+/* ── HUDOverlay ─────────────────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* ── Score ── */
+.scoreBlock {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.label {
+  font-family: 'serif', serif;
+  font-size: clamp(13px, 3.5vw, 17px);
+  letter-spacing: 3px;
+  color: rgba(255, 215, 0, 0.55);
+}
+
+.scoreValue {
+  font-family: 'serif', serif;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow:
+    0 0 6px rgba(255, 215, 0, 0.6),
+    0 0 14px rgba(218, 165, 32, 0.3);
+  letter-spacing: 1px;
+}
+
+.waveLabel {
+  font-family: 'serif', serif;
+  font-size: clamp(13px, 3.5vw, 17px);
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.waveValue {
+  font-family: 'serif', serif;
+  font-size: clamp(32px, 8vw, 44px);
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow:
+    0 0 8px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(218, 165, 32, 0.4);
+  line-height: 1;
+}
+
+.starIcon {
+  font-size: clamp(24px, 6.5vw, 34px);
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+  animation: starPulse 1.6s ease-in-out infinite;
+}
+@keyframes starPulse {
+  0%, 100% { text-shadow: 0 0 8px rgba(255,215,0,0.9); }
+  50%       { text-shadow: 0 0 18px rgba(255,215,0,1), 0 0 34px rgba(218,165,32,0.5); }
+}
+
+.starValue {
+  font-family: 'serif', serif;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
+
+.hpAlive {
+  color: #ffd700;
+  text-shadow:
+    0 0 6px rgba(255, 215, 0, 0.9),
+    0 0 16px rgba(218, 165, 32, 0.5);
+  transform: scale(1);
+}
+
+.hpDead {
+  color: rgba(100, 80, 0, 0.3);
+  text-shadow: none;
+  transform: scale(0.8);
+}
+
+.scoreValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow:
+    0 0 6px rgba(0, 200, 255, 0.6),
+    0 0 14px rgba(0, 150, 220, 0.3);
+  letter-spacing: 1px;
+}
+
+/* ── Wave ── */
+.waveBlock {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.waveLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(13px, 3.5vw, 17px);
+  letter-spacing: 4px;
+  color: rgba(255, 220, 68, 0.55);
+}
+
+.waveValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(32px, 8vw, 44px);
+  font-weight: 900;
+  color: #ffdd44;
+  text-shadow:
+    0 0 8px rgba(255, 220, 68, 0.8),
+    0 0 20px rgba(255, 180, 0, 0.4);
+  line-height: 1;
+}
+
+/* ── Stardust ── */
+.stardustBlock {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.starIcon {
+  font-size: clamp(24px, 6.5vw, 34px);
+  color: #55ddff;
+  text-shadow: 0 0 8px rgba(85, 221, 255, 0.9);
+  animation: starPulse 1.6s ease-in-out infinite;
+}
+@keyframes starPulse {
+  0%, 100% { text-shadow: 0 0 8px rgba(85,221,255,0.9); }
+  50%       { text-shadow: 0 0 18px rgba(85,221,255,1), 0 0 34px rgba(0,170,220,0.5); }
+}
+
+.starValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 700;
+  color: #88ddff;
+  text-shadow: 0 0 6px rgba(85, 221, 255, 0.5);
+}
+
+/* ── HP Hearts ── */
+.hpBlock {
+  position: absolute;
+  bottom: 16px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hpHeart {
+  font-size: clamp(30px, 7.5vw, 42px);
+  line-height: 1;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.hpAlive {
+  color: #ff4455;
+  text-shadow:
+    0 0 6px rgba(255, 60, 80, 0.9),
+    0 0 16px rgba(255, 0, 40, 0.5);
+  transform: scale(1);
+}
+
+.hpDead {
+  color: rgba(80, 30, 40, 0.5);
+  text-shadow: none;
+  transform: scale(0.8);
+}
