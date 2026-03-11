@@ -1,0 +1,64 @@
+{
+  "images": {
+    "shadowbolt": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773219670649.png",
+      "description": "Dark purple swirling shadow bolt projectile, ethereal dark magic energy sphere"
+    },
+    "bloodrune": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773219763114.png",
+      "description": "Glowing blood-red mystical rune stone, ancient arcane XP crystal"
+    },
+    "soul": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773219685136.png",
+      "description": "Floating ethereal purple soul essence orb, dark fantasy currency"
+    },
+    "background": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773219692923.png",
+      "description": "Dark fantasy graveyard battlefield, crumbling tombstones, dead trees, purple fog, hellfire cracks"
+    }
+  },
+  "spritesheets": {
+    "necromancer": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/spritesheet-1773219688321.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "gridRows": 4,
+      "gridCols": 4,
+      "animations": {
+        "walk": { "start": 0, "end": 3 },
+        "idle": { "start": 4, "end": 7 },
+        "attack": { "start": 8, "end": 11 },
+        "dead": { "start": 12, "end": 15 }
+      },
+      "description": "Dark necromancer in tattered black hooded robe with glowing purple runes"
+    },
+    "crusader": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/spritesheet-1773219703999.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "gridRows": 2,
+      "gridCols": 2,
+      "animations": {
+        "walk": { "start": 0, "end": 3 }
+      },
+      "description": "Holy crusader knight in shining golden armor with radiant sword"
+    },
+    "archangel": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/spritesheet-1773219674754.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "gridRows": 2,
+      "gridCols": 2,
+      "animations": {
+        "walk": { "start": 0, "end": 3 }
+      },
+      "description": "Massive archangel boss with white wings, golden armor, glowing halo, holy spear"
+    }
+  }
+}
