@@ -1,0 +1,150 @@
+{
+  "characters": {
+    "base-model": {
+      "url": "https://agent8-games.verse8.io/assets/3D/characters/casual style/02/male_darkblue_muscular_knight.glb",
+      "description": "Dark blue armored knight - infernal realm warrior, SD style"
+    }
+  },
+  "animations": {
+    "idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle.glb",
+      "description": "Idle"
+    },
+    "idle-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
+      "description": "Idle 00"
+    },
+    "idle-01": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-01.glb",
+      "description": "Idle 01"
+    },
+    "walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+      "description": "Walk"
+    },
+    "run-medium": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
+      "description": "Run Medium"
+    },
+    "run-fast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb",
+      "description": "Run Fast"
+    },
+    "jump": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb",
+      "description": "Jump"
+    },
+    "punch-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-00.glb",
+      "description": "Punch 00"
+    },
+    "kick-00": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/kick-00.glb",
+      "description": "Kick 00"
+    },
+    "melee-attack": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
+      "description": "Melee Attack"
+    },
+    "cast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/cast.glb",
+      "description": "Cast"
+    },
+    "hit-to-body": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/hit-to-body.glb",
+      "description": "Hit to Body"
+    },
+    "death-backward": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/death-backward.glb",
+      "description": "Death Backward"
+    }
+  },
+  "objects": {
+    "volcanic_spike": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/lava/volcanic_spike_mountain.glb",
+      "description": "Jagged volcanic spire with glowing magma veins"
+    },
+    "molten_monolith": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/hell/hell_molten_monolith.glb",
+      "description": "Jagged volcanic monolith with lava fissures"
+    },
+    "lava_pebbles": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/lava/lava_pebble_mound.glb",
+      "description": "Scattered molten lava pebbles and scorched rocks"
+    },
+    "volcano_peak": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/lava/cracked_volcano_peak.glb",
+      "description": "Active lava peak with fissured slopes"
+    },
+    "molten_gold_rock": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/gold collection/molten_gold_rock_set.glb",
+      "description": "Collectible molten gold rock with glowing cracks - loot item"
+    },
+    "obsidian_spire": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/hell/hell_obsidian_spire.glb",
+      "description": "Obsidian monolith spire with carved demonic runes"
+    },
+    "blood_altar": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/hell/hell_blood_altar.glb",
+      "description": "Circular bone altar with skull horns"
+    },
+    "demon_shrine": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/dungeon/demon_shrine.glb",
+      "description": "Stone shrine with demonic statue, green glow"
+    },
+    "dark_pillar": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/dungeon/dark_mystic_pillar.glb",
+      "description": "Dark mystic basalt pillar with arcane runes"
+    },
+    "flame_cauldron": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/temple/stylized_flame_cauldron.glb",
+      "description": "Flaming ritual cauldron with celtic runes"
+    },
+    "skull_emblem": {
+      "url": "https://agent8-games.verse8.io/assets/3D/objects/statue_emblem/infernal_demon_skull_emblem.glb",
+      "description": "Hellfire demon emblem with flaming skull crest"
+    }
+  },
+  "textures": {
+    "fire_soul_icon": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1773214857111.png",
+      "description": "Fire soul orb UI icon - glowing orange flame"
+    },
+    "inferno_token": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1773214859208.png",
+      "description": "Dark volcanic token coin with lava cracks"
+    },
+    "burned_ground": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/terrain/burned_ground_01_diff_2k.jpg",
+      "description": "Burned ground diffuse texture - mud, ash, fire terrain"
+    },
+    "burned_ground_normal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/terrain/burned_ground_01_nor_2k.jpg",
+      "description": "Burned ground normal map"
+    },
+    "burned_ground_ao": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/terrain/burned_ground_01_arm_2k.jpg",
+      "description": "Burned ground AO/Roughness/Metallic map"
+    },
+    "cracked_magma": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/terrain/cracked_magma_floor.png",
+      "description": "Cracked magma floor texture with glowing red lava veins"
+    },
+    "cracked_magma_normal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/terrain/cracked_magma_floor_normal.png",
+      "description": "Cracked magma floor normal map"
+    },
+    "volcanic_rock": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/wall/volcanic_rock_tiles_diff_2k.jpg",
+      "description": "Volcanic rock tiles diffuse texture"
+    },
+    "volcanic_rock_normal": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/wall/volcanic_rock_tiles_nor_2k.jpg",
+      "description": "Volcanic rock tiles normal map"
+    },
+    "volcanic_rock_ao": {
+      "url": "https://agent8-games.verse8.io/assets/3D/textures/polyhaven/wall/volcanic_rock_tiles_arm_2k.jpg",
+      "description": "Volcanic rock tiles AO/Roughness/Metallic map"
+    }
+  }
+}

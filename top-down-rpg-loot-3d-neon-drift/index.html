@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0014" />
+    <title>NEON DRIFT: Cyber Arena</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Orbitron', system-ui, sans-serif;
+        background: #0a0014;
+      }
+      .loading-container {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0a0014 0%, #1a0030 50%, #0a0014 100%);
+        color: #ff00ff;
+      }
+      .loading-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff80;
+        letter-spacing: 4px;
+      }
+      .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid rgba(255, 0, 255, 0.2);
+        border-radius: 50%;
+        border-top-color: #ff00ff;
+        animation: spin 0.8s linear infinite;
+        box-shadow: 0 0 15px #ff00ff40;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+    <script>
+      (function () {
+        function reportGameSize() {
+          var height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+          var width = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+          window.parent.postMessage({ type: 'GAME_SIZE_RESPONSE', height: height, width: width }, '*');
+        }
+        window.addEventListener('load', reportGameSize);
+        window.addEventListener('resize', reportGameSize);
+        window.addEventListener('message', function (event) {
+          if (event.data && event.data.type === 'REQUEST_GAME_SIZE') reportGameSize();
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div class="loading-container">
+        <h2 class="loading-title">INITIALIZING</h2>
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
