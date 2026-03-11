@@ -508,6 +508,58 @@
     ]
   },
   {
+    "name": "vertical-shmup-shadow-dojo-cross-token",
+    "label": "Shadow Dojo (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Shadow Dojo — a ninja warrior battles waves of shadow enemies descending from above, collecting stardust souls to redeem for CROSS tokens in a dark, ember-lit dojo setting. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-shadow-dojo-cross-token",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "arcade",
+      "ninja",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
+    "name": "vertical-shmup-shadow-dungeon-cross-token",
+    "label": "Shadow Dungeon (Pre-built)",
+    "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) arcade-style vertical shooting game (shmup / shoot-em-up), (2) mobile devices, (3) earned currency exchangeable with a CROSS chain token. Example prompt: 'Create an arcade vertical shooting game for mobile. Make the earned coins exchangeable with a CROSS chain token.' ⚠️ RANDOM SELECTION REQUIRED: Multiple vertical-shmup templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Gothic dungeon shooter — necromancer character battles descending undead waves in a dark gothic dungeon, collecting soul gems to redeem for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "vertical-shmup-shadow-dungeon-cross-token",
+    "tags": [
+      "shmup",
+      "shoot-em-up",
+      "shooting",
+      "vertical",
+      "arcade",
+      "dungeon",
+      "mobile",
+      "CROSS",
+      "2d",
+      "phaser",
+      "bullet-hell",
+      "token",
+      "blockchain",
+      "wallet",
+      "redeem",
+      "onchain-economy",
+      "pre-built"
+    ]
+  },
+  {
     "name": "top-down-rpg-loot-3d-crystal-realm",
     "label": "REALM OF RELICS (Pre-built)",
     "description": "⚠️ STRICT TRIGGER CONDITIONS - DO NOT use unless the prompt explicitly mentions CROSS/token/blockchain redemption. ONLY use this template when the user EXPLICITLY mentions ALL of the following: (1) top-down mobile RPG game, (2) players collect resources or rare loot from enemies, (3) earned items/loot/currency exchangeable with a CROSS chain token. Example prompt: 'Let's make a top-down mobile RPG where players collect resources and rare loot. Allow players to redeem earned items into a token on CROSS blockchain.' ⚠️ RANDOM SELECTION REQUIRED: Multiple top-down-rpg templates match this condition — you MUST randomly pick one each time, do NOT always select the same template. Theme: Crystal cavern mining RPG — explorer delves into gem-filled underground realms, collecting rare crystals and relics to exchange for CROSS tokens. This template contains a fully pre-built game — do NOT recreate assets or UI on the first prompt.",

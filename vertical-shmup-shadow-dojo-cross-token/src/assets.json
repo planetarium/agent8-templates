@@ -1,0 +1,54 @@
+{
+  "sprites": {},
+  "characters": {
+    "player": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773221173023.png",
+      "description": "Ninja warrior top-down view, dark hooded ninja with glowing crimson eyes, black and purple outfit, katana, shadowy aura",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "enemy": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773221217196.png",
+      "description": "Yokai oni demon enemy top-down view, horned demon with glowing green eyes, dark red and black skin, supernatural aura",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "boss": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773221187386.png",
+      "description": "Giant yokai shogun demon boss top-down view, multiple horns, toxic green energy, crimson and black armor, skull mask",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "items": {
+    "soulEssence": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221166527.png",
+      "description": "Glowing soul essence collectible orb, ethereal purple and magenta spirit energy with wisps",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "crystal": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221174498.png",
+      "description": "Dark energy crystal power-up, deep violet and black crystal with inner glow and arcane runes",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "token": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1772093503273.png",
+      "description": "Shadow Dojo Token SDT coin icon for CrossRamp",
+      "metadata": { "width": 128, "height": 128 }
+    },
+    "playerBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221186193.png",
+      "description": "Shuriken ninja star projectile, metallic dark steel throwing star with crimson red energy glow trails",
+      "metadata": { "width": 768, "height": 768 }
+    },
+    "enemyBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773221163626.png",
+      "description": "Demonic fireball projectile, dark green and black hell fire orb with crackling dark energy sparks",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "backgrounds": {
+    "dojo": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773221186908.png",
+      "description": "Dark Japanese dojo temple background, nighttime with dark purple and crimson sky, pagodas and torii gates, mystical fog",
+      "metadata": { "width": 768, "height": 1376 }
+    }
+  }
+}
