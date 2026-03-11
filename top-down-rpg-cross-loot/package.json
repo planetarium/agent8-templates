@@ -1,0 +1,40 @@
+{
+  "name": "quarterview",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@agent8/gameserver": "^1.10.2",
+    "@dimforge/rapier3d-compat": "0.14.0",
+    "@react-three/drei": "9.122.0",
+    "@react-three/fiber": "8.18.0",
+    "@react-three/postprocessing": "2.19.1",
+    "@react-three/rapier": "1.5.0",
+    "lucide-react": "0.482.0",
+    "nipplejs": "0.10.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.174.0",
+    "three-stdlib": "2.35.14",
+    "vibe-starter-3d": "^0.8.22",
+    "vibe-starter-3d-environment": "^3.0.9",
+    "zustand": "5.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "@types/three": "^0.174.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.27",
+    "globals": "^16.5.0",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.8.3",
+    "vite": "^6.4.1"
+  }
+}

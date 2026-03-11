@@ -1,0 +1,220 @@
+/* ── GameOverOverlay ────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
+
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(10, 20, 50, 0.85) 100%);
+  pointer-events: none;
+}
+
+/* Panel */
+.panel {
+  position: relative;
+  width: min(88vw, 360px);
+  background: linear-gradient(160deg, rgba(15, 30, 60, 0.98) 0%, rgba(10, 20, 40, 0.98) 100%);
+  border: 1px solid rgba(136, 221, 255, 0.4);
+  border-radius: 8px;
+  padding: 32px 28px 28px;
+  box-shadow:
+    0 0 40px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(136, 221, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: panelIn 0.5s cubic-bezier(0.2, 1.2, 0.5, 1) forwards;
+}
+
+@keyframes panelIn {
+  from { transform: scale(0.9) translateY(30px); opacity: 0; }
+  to   { transform: scale(1) translateY(0px);  opacity: 1; }
+}
+
+/* Header */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(24px, 8vw, 34px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #ffcc00;
+  text-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
+}
+
+.titleUnderline {
+  width: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffcc00, transparent);
+  margin-top: 8px;
+  opacity: 0.6;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.statLabel {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(9px, 2.5vw, 12px);
+  letter-spacing: 2px;
+  color: rgba(200, 235, 255, 0.6);
+}
+
+.statValue {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statGold {
+  color: #ffcc00;
+  text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+}
+
+.statBlue {
+  color: #88ddff;
+  text-shadow: 0 0 10px rgba(136, 221, 255, 0.6);
+}
+
+.statCyan {
+  color: #ccffff;
+  text-shadow: 0 0 10px rgba(200, 255, 255, 0.6);
+}
+
+.starIcon {
+  font-size: 0.9em;
+  color: #88ddff;
+}
+
+.newBest {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(10px, 2.8vw, 13px);
+  letter-spacing: 3px;
+  color: #ffcc00;
+  text-shadow: 0 0 12px rgba(255, 204, 0, 0.8);
+  animation: bestPulse 1.2s infinite;
+  padding: 4px 0;
+}
+@keyframes bestPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.05); opacity: 0.7; }
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(136, 221, 255, 0.3), transparent);
+  margin: 6px 0;
+}
+
+.exchangeHint {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(9px, 2.3vw, 11px);
+  color: rgba(136, 221, 255, 0.65);
+  text-align: center;
+  background: rgba(136, 221, 255, 0.08);
+  border: 1px solid rgba(136, 221, 255, 0.2);
+  border-radius: 4px;
+  padding: 8px 14px;
+  letter-spacing: 1px;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(12px, 3.2vw, 16px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.97); }
+
+.btnPlay {
+  background: linear-gradient(135deg, #1a4477 0%, #2a66aa 50%, #1a4477 100%);
+  color: #ffffff;
+  border: 1px solid rgba(136, 221, 255, 0.5);
+  box-shadow: 0 0 12px rgba(68, 136, 255, 0.3);
+}
+
+.btnExchange {
+  background: linear-gradient(135deg, #554411 0%, #886622 50%, #554411 100%);
+  color: #ffdd44;
+  border: 1px solid rgba(255, 204, 0, 0.4);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.25);
+}
+
+.btnMenu {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(136, 221, 255, 0.8);
+  border: 1px solid rgba(136, 221, 255, 0.2);
+}
+.btnMenu:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.btnShine {
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shine 3.5s infinite;
+}
+@keyframes shine {
+  0% { left: -100%; }
+  30% { left: 100%; }
+  100% { left: 100%; }
+}

@@ -1,0 +1,64 @@
+{
+  "images": {
+    "plasma": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773030625987.png",
+      "description": "Glowing plasma energy orb projectile, neon blue energy ball"
+    },
+    "crystal": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773030637971.png",
+      "description": "XP crystal gem, glowing green alien energy crystal shard"
+    },
+    "credit": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773030625162.png",
+      "description": "Space credit coin, futuristic metallic gold coin with holographic alien symbol"
+    },
+    "background": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773030620198.png",
+      "description": "Top-down alien planet surface background, dark purple rocky terrain with glowing green lava cracks"
+    }
+  },
+  "spritesheets": {
+    "marine": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/spritesheet-1773030618474.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "gridRows": 4,
+      "gridCols": 4,
+      "animations": {
+        "walk": { "start": 0, "end": 3 },
+        "idle": { "start": 4, "end": 7 },
+        "attack": { "start": 8, "end": 11 },
+        "dead": { "start": 12, "end": 15 }
+      },
+      "description": "Space marine soldier in futuristic power armor, glowing blue visor"
+    },
+    "alien": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/spritesheet-1773030633108.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "gridRows": 2,
+      "gridCols": 2,
+      "animations": {
+        "walk": { "start": 0, "end": 3 }
+      },
+      "description": "Alien insectoid xenomorph with glowing red eyes"
+    },
+    "alien_boss": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/spritesheet-1773030673186.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "gridRows": 2,
+      "gridCols": 2,
+      "animations": {
+        "walk": { "start": 0, "end": 3 }
+      },
+      "description": "Large boss alien creature, massive tentacled horror"
+    }
+  }
+}

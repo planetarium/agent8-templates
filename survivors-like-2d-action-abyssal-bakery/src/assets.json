@@ -1,0 +1,69 @@
+{
+  "images": {
+    "projectile": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1772773860020.png"
+    },
+    "gem": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1772773858376.png"
+    },
+    "magic_flour": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1772773934012.png"
+    },
+    "background": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1772773851898.png"
+    }
+  },
+  "spritesheets": {
+    "baker": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1772773811611.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 1024,
+      "frameHeight": 1024,
+      "gridRows": 1,
+      "gridCols": 1,
+      "animations": {
+        "walk": { "start": 0, "end": 0 },
+        "idle": { "start": 0, "end": 0 },
+        "attack": { "start": 0, "end": 0 },
+        "dead": { "start": 0, "end": 0 }
+      }
+    },
+    "croissant": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1772773856084.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 1024,
+      "frameHeight": 1024,
+      "gridRows": 1,
+      "gridCols": 1,
+      "animations": {
+        "walk": { "start": 0, "end": 0 }
+      }
+    },
+    "baguette": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1772773878079.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 1024,
+      "frameHeight": 1024,
+      "gridRows": 1,
+      "gridCols": 1,
+      "animations": {
+        "walk": { "start": 0, "end": 0 }
+      }
+    },
+    "doughnut": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1772773876413.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameWidth": 1024,
+      "frameHeight": 1024,
+      "gridRows": 1,
+      "gridCols": 1,
+      "animations": {
+        "walk": { "start": 0, "end": 0 }
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+/* ── CrossRampOverlay ───────────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 20, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.25s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Animated logo ring */
+.logo {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #55aaff;
+  border-right-color: rgba(85,170,255,0.4);
+  animation: ringPulse 1s linear infinite;
+}
+@keyframes ringPulse {
+  to { transform: rotate(360deg); }
+}
+
+.logoInner {
+  font-size: 22px;
+  color: #55aaff;
+  text-shadow: 0 0 10px rgba(85,170,255,0.9);
+  animation: innerPulse 1.4s ease-in-out infinite;
+}
+@keyframes innerPulse {
+  0%, 100% { text-shadow: 0 0 10px rgba(85,170,255,0.9); }
+  50%       { text-shadow: 0 0 22px rgba(85,200,255,1); }
+}
+
+.title {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(14px, 4vw, 18px);
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: #55bbff;
+  text-shadow: 0 0 10px rgba(85,187,255,0.7);
+}
+
+.sub {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 3px;
+  color: rgba(136, 187, 255, 0.55);
+  animation: subPulse 1.5s ease-in-out infinite;
+}
+@keyframes subPulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+.bar {
+  width: clamp(120px, 40vw, 200px);
+  height: 3px;
+  background: rgba(50, 100, 200, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #0055bb, #55aaff, #0055bb);
+  background-size: 200% 100%;
+  border-radius: 2px;
+  animation: barSlide 1.2s linear infinite;
+}
+@keyframes barSlide {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}

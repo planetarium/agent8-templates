@@ -1,0 +1,266 @@
+/* ── GameOverOverlay — SKY RONIN ────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  background: rgba(10, 3, 2, 0.55);
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Parchment texture overlay */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 5px,
+    rgba(180,100,30,0.03) 5px,
+    rgba(180,100,30,0.03) 6px
+  );
+  pointer-events: none;
+}
+
+/* Panel — lacquered scroll */
+.panel {
+  position: relative;
+  width: min(86vw, 340px);
+  background: linear-gradient(160deg, rgba(18,4,2,0.97) 0%, rgba(8,2,1,0.97) 100%);
+  border: 1px solid rgba(196, 75, 42, 0.5);
+  border-radius: 2px;
+  padding: 28px 24px 24px;
+  box-shadow:
+    0 0 0 1px rgba(196,75,42,0.15),
+    0 0 30px rgba(180, 50, 10, 0.3),
+    0 0 80px rgba(120, 20, 0, 0.2),
+    inset 0 1px 0 rgba(232,184,75,0.1);
+  animation: panelIn 0.45s cubic-bezier(0.2, 1.4, 0.5, 1) forwards;
+}
+
+@keyframes panelIn {
+  from { transform: scale(0.85) translateY(20px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0px);  opacity: 1; }
+}
+
+/* Corner seals */
+.panel::before,
+.panel::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: rgba(196, 75, 42, 0.7);
+  border-style: solid;
+}
+.panel::before {
+  top: -1px; left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.panel::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Header */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.title {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(26px, 9vw, 38px);
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: #c44b2a;
+  text-shadow:
+    0 0 10px rgba(196, 75, 42, 1),
+    0 0 24px rgba(180, 50, 10, 0.8),
+    0 0 60px rgba(150, 20, 0, 0.4);
+  animation: titleFlicker 3s ease-in-out infinite;
+}
+
+@keyframes titleFlicker {
+  0%, 90%, 100% { opacity: 1; }
+  91%            { opacity: 0.72; }
+  92%            { opacity: 1; }
+  93%            { opacity: 0.82; }
+}
+
+.titleUnderline {
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196,75,42,0.8), transparent);
+  margin-top: 6px;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.statLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 3px;
+  color: rgba(220, 180, 100, 0.5);
+}
+
+.statValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(16px, 4.5vw, 22px);
+  font-weight: 700;
+  color: #f5e6c8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statGold {
+  color: #e8b84b;
+  text-shadow: 0 0 8px rgba(232,184,75,0.8);
+}
+
+.statBlue {
+  color: #c44b2a;
+  text-shadow: 0 0 8px rgba(196,75,42,0.6);
+}
+
+.statCyan {
+  color: #7adfb0;
+  text-shadow: 0 0 8px rgba(122,223,176,0.6);
+}
+
+.starIcon {
+  font-size: 0.75em;
+  color: #7adfb0;
+}
+
+.newBest {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(10px, 2.8vw, 13px);
+  letter-spacing: 5px;
+  color: #e8b84b;
+  text-shadow: 0 0 10px rgba(232,184,75,0.9);
+  animation: bestPulse 1s ease-in-out infinite;
+  padding: 2px 0;
+}
+@keyframes bestPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196,75,42,0.25), transparent);
+  margin: 4px 0;
+}
+
+.exchangeHint {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.3vw, 11px);
+  color: rgba(122, 223, 176, 0.65);
+  text-align: center;
+  background: rgba(5, 20, 10, 0.5);
+  border: 1px solid rgba(80, 180, 120, 0.25);
+  border-radius: 2px;
+  padding: 6px 12px;
+  letter-spacing: 1px;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(11px, 3vw, 14px);
+  font-weight: 700;
+  letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  overflow: hidden;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+
+.btnPlay {
+  background: linear-gradient(135deg, #4a0e08 0%, #7a1a10 50%, #4a0e08 100%);
+  color: #f5d070;
+  border: 1px solid rgba(196, 75, 42, 0.5);
+  box-shadow: 0 0 12px rgba(196,75,42,0.4), inset 0 1px 0 rgba(255,200,80,0.1);
+  text-shadow: 0 0 8px rgba(245,208,112,0.7);
+}
+.btnPlay:hover {
+  box-shadow: 0 0 22px rgba(196,75,42,0.65), inset 0 1px 0 rgba(255,200,80,0.15);
+}
+
+.btnExchange {
+  background: linear-gradient(135deg, #0e1530 0%, #1a2450 50%, #0e1530 100%);
+  color: #a888ff;
+  border: 1px solid rgba(168, 136, 255, 0.38);
+  box-shadow: 0 0 10px rgba(120,80,220,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
+  text-shadow: 0 0 8px rgba(168,136,255,0.65);
+}
+.btnExchange:hover {
+  box-shadow: 0 0 20px rgba(140,100,255,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.btnMenu {
+  background: linear-gradient(135deg, #0e0a05 0%, #1a1408 50%, #0e0a05 100%);
+  color: #c8a060;
+  border: 1px solid rgba(180, 130, 50, 0.3);
+  box-shadow: 0 0 8px rgba(150,100,20,0.22), inset 0 1px 0 rgba(255,255,255,0.04);
+  text-shadow: 0 0 8px rgba(200,160,80,0.55);
+}
+.btnMenu:hover {
+  box-shadow: 0 0 16px rgba(180,120,30,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+.btnShine {
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+  animation: shineSweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shineSweep {
+  0%   { left: -75%; }
+  40%  { left: 125%; }
+  100% { left: 125%; }
+}

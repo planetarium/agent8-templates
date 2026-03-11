@@ -1,0 +1,54 @@
+{
+  "sprites": {},
+  "characters": {
+    "player": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773042681113.png",
+      "description": "Top-down view of a majestic celestial phoenix bird, vibrant gold and azure plumage, glowing trails, mystical aura, high-quality game sprite, clean edges, professional 2D art style, sharp silhouette, for vertical shmup player ship replacement",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "enemy": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773042667130.png",
+      "description": "Top-down view of a corrupted stone gargoyle statue enemy, cracked rock texture, glowing purple eyes, menacing pose, high-quality 2D game sprite, clean edges, professional art style, for shmup enemy replacement",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "boss": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773042668282.png",
+      "description": "Top-down view of a massive celestial stone golem boss, multi-armed construct with floating rocks, glowing core, ancient runes, high-quality 2D game boss sprite, clean edges, professional art style, for shmup boss replacement",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "items": {
+    "shards": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773042663701.png",
+      "description": "A glowing blue celestial spirit shard crystal, diamond-shaped, pulsating mystical light, ethereal aura, high-quality game collectible item, transparent background, for shmup stardust replacement",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "crystal": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773042663701.png",
+      "description": "Rare celestial crystal power-up",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "token": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/ui_icon-1773042668575.png",
+      "description": "Celestial Shard Token CST icon, a circular gold coin with a spirit shard engraving, glowing blue center, high-quality game UI icon, for CrossRamp token display",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "playerBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773042665541.png",
+      "description": "Player projectile - a glowing azure mystical feather bolt, elongated, with trails of stardust, pointing upwards, high-quality game projectile sprite, for shmup player bullet replacement",
+      "metadata": { "width": 768, "height": 1376 }
+    },
+    "enemyBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773042751715.png",
+      "description": "Enemy projectile - a jagged dark stone shard, glowing purple energy core, high-quality game projectile sprite, for shmup enemy bullet replacement",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "backgrounds": {
+    "garden": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773042660989.png",
+      "description": "Vertical scrolling background of a celestial garden in the clouds, floating islands with cherry blossoms and mystical temples, soft sun rays, ethereal atmosphere, high-resolution 2D game environment background, for shmup background replacement",
+      "metadata": { "width": 768, "height": 1376 }
+    }
+  }
+}

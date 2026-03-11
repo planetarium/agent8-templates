@@ -1,0 +1,136 @@
+/* ── HUDOverlay — SKY RONIN ─────────────────────────────────── */
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* ── Score ── */
+.scoreBlock {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: rgba(20, 5, 2, 0.55);
+  border: 1px solid rgba(196, 75, 42, 0.28);
+  border-radius: 2px;
+  padding: 4px 10px;
+}
+
+.label {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 3px;
+  color: rgba(232, 184, 75, 0.6);
+}
+
+.scoreValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(22px, 6vw, 32px);
+  font-weight: 700;
+  color: #f5e6c8;
+  text-shadow:
+    0 0 6px rgba(245, 220, 150, 0.5),
+    0 0 14px rgba(200, 140, 40, 0.3);
+  letter-spacing: 1px;
+}
+
+/* ── Wave ── */
+.waveBlock {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  background: rgba(20, 5, 2, 0.55);
+  border: 1px solid rgba(196, 75, 42, 0.28);
+  border-radius: 2px;
+  padding: 4px 14px;
+}
+
+.waveLabel {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 2.5vw, 11px);
+  letter-spacing: 4px;
+  color: rgba(196, 75, 42, 0.7);
+}
+
+.waveValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(28px, 7.5vw, 42px);
+  font-weight: 900;
+  color: #c44b2a;
+  text-shadow:
+    0 0 8px rgba(196, 75, 42, 0.9),
+    0 0 22px rgba(180, 50, 10, 0.5);
+  line-height: 1;
+}
+
+/* ── Spirit Orbs (Stardust) ── */
+.stardustBlock {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(5, 20, 10, 0.55);
+  border: 1px solid rgba(122, 223, 176, 0.28);
+  border-radius: 2px;
+  padding: 4px 10px;
+}
+
+.starIcon {
+  font-size: clamp(20px, 5.5vw, 30px);
+  color: #7adfb0;
+  text-shadow: 0 0 8px rgba(122, 223, 176, 0.9);
+  animation: orbPulse 1.8s ease-in-out infinite;
+}
+@keyframes orbPulse {
+  0%, 100% { text-shadow: 0 0 8px rgba(122,223,176,0.9); }
+  50%       { text-shadow: 0 0 18px rgba(122,223,176,1), 0 0 36px rgba(80,200,140,0.6); }
+}
+
+.starValue {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(22px, 6vw, 32px);
+  font-weight: 700;
+  color: #7adfb0;
+  text-shadow: 0 0 6px rgba(122, 223, 176, 0.6);
+}
+
+/* ── HP — Katana marks ── */
+.hpBlock {
+  position: absolute;
+  bottom: 16px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hpHeart {
+  font-size: clamp(26px, 7vw, 38px);
+  line-height: 1;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.hpAlive {
+  color: #ff4455;
+  text-shadow:
+    0 0 6px rgba(255, 60, 80, 0.9),
+    0 0 16px rgba(200, 0, 30, 0.5);
+  transform: scale(1);
+}
+
+.hpDead {
+  color: rgba(80, 20, 20, 0.4);
+  text-shadow: none;
+  transform: scale(0.75);
+}

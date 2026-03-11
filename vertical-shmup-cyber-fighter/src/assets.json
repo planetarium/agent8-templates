@@ -1,0 +1,54 @@
+{
+  "sprites": {},
+  "characters": {
+    "player": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773034737183.png",
+      "description": "Cyberpunk jet fighter, neon blue and pink",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "enemy": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773034771786.png",
+      "description": "Cyber-drone enemy, glowing red eye",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "boss": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773034810855.png",
+      "description": "Massive boss ship, neon purple and green",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "items": {
+    "stardust": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773034361228.png",
+      "description": "Glowing sci-fi energy core gem, bright blue and cyan colors, pixel art style",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "crystal": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1772093505182.png",
+      "description": "Blue energy crystal collectible power-up item",
+      "metadata": { "width": 128, "height": 128 }
+    },
+    "token": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/character-1773034393438.png",
+      "description": "Prestigious gold coin with a star symbol in the center, pixel art style, GALAX token",
+      "metadata": { "width": 1024, "height": 1024 }
+    },
+    "playerBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773034846499.png",
+      "description": "Vertical straight neon blue laser beam",
+      "metadata": { "width": 768, "height": 1376 }
+    },
+    "enemyBullet": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/item-1773034898623.png",
+      "description": "Glowing red neon plasma ball projectile",
+      "metadata": { "width": 1024, "height": 1024 }
+    }
+  },
+  "backgrounds": {
+    "space": {
+      "url": "https://agent8-games.verse8.io/mcp-agent8-generated/static-assets/background-1773034932481.png",
+      "description": "Retro cyberpunk neon city",
+      "metadata": { "width": 768, "height": 1376 }
+    }
+  }
+}
