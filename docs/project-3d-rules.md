@@ -62,67 +62,88 @@ When using `CharacterRenderer` from `vibe-starter-3d`, the package internally ru
 
 ---
 
-### Per-Model Config — Scale & Collider Must Match
+### NPC / Enemy Character Collider — CapsuleCollider Pattern
 
-Different GLB models ship at different native sizes. **Never use a single global `scale` constant for all NPC models.** Instead, define a per-model config that pairs `scale` (visual) with `colliderHalfH` (physics) so they stay in sync.
+When attaching physics colliders to NPC or enemy characters, **always follow the pattern below.**
 
-```ts
-interface NPCModelConfig {
-  url: string;
-  scale: number;        // uniform scale applied to the visual group
-  colliderHalfH: number; // CuboidCollider args[1] — approx targetWorldHeight / 2
+#### Core Principle
+
+Most 3D character GLBs have their **Y-axis pivot at the feet position (Y=0)**. If `CapsuleCollider`'s `position` is not specified, the collider center aligns with the foot position, causing **the character's upper body to float in the air.**
+
+**Rule:** Set `position={[0, targetHeight / 2, 0]}` to offset the collider center upward by half the character's height.
+
+```
+Character Head  ← Y = targetHeight (e.g., 1.4m)
+     |
+     |      ← CapsuleCollider center (Y = targetHeight / 2 = 0.7m)
+     |
+Character Feet  ← Y = 0 (pivot position)
+```
+
+#### Required Implementation Pattern
+
+```tsx
+import { RigidBodyObject, CharacterRenderer, CharacterUtils } from 'vibe-starter-3d';
+import { CapsuleCollider } from '@react-three/rapier';
+
+const NPC_TARGET_HEIGHT = 1.4;
+
+function NPCCharacter({ position }) {
+  return (
+    <RigidBodyObject
+      type="dynamic"
+      colliders={false}          // ✅ Must disable auto-colliders
+      position={position}
+      lockRotations
+    >
+      {/* Key: position={[0, targetHeight / 2, 0]} */}
+      <CapsuleCollider
+        position={[0, NPC_TARGET_HEIGHT / 2, 0]}
+        args={[
+          CharacterUtils.capsuleHalfHeight(NPC_TARGET_HEIGHT),
+          CharacterUtils.capsuleRadius(NPC_TARGET_HEIGHT),
+        ]}
+      />
+      <CharacterRenderer
+        url={npcModelUrl}
+        animationConfigMap={animationConfigMap}
+        animationState={animationState}
+        targetHeight={NPC_TARGET_HEIGHT}
+      />
+    </RigidBodyObject>
+  );
 }
-
-const NPC_MODEL_CONFIG: Record<string, NPCModelConfig> = {
-  'character-a': { url: '...', scale: 0.6,  colliderHalfH: 0.5  },
-  'character-b': { url: '...', scale: 0.5,  colliderHalfH: 0.4  },
-  'character-c': { url: '...', scale: 0.65, colliderHalfH: 0.55 },
-  // ...
-};
 ```
 
-**Tuning guide:**
-1. Load the model, read its bounding-box height in Three.js devtools (or `box3.getSize()`).
-2. `scale = desiredWorldHeight / nativeBBoxHeight`
-3. `colliderHalfH ≈ desiredWorldHeight / 2`
-
-**SD-style casual models** are intentionally short/chubby. A target world height of **0.9–1.1** (roughly chest-high to the player at 1.6) looks natural.
-
-**Rule:** Spawn Y = `surfaceY + colliderHalfH` (not a fixed `+1.5`). This places the collider bottom exactly at the terrain surface.
+#### Incorrect Patterns
 
 ```tsx
-// ✅ Correct — per-model config drives both visual scale and collider size
-const cfg = getConfig(npc.modelKey);
-<RigidBody position={[x, surfaceY + cfg.colliderHalfH, z]}>
-  <CuboidCollider args={[0.4, cfg.colliderHalfH, 0.4]} position={[0, cfg.colliderHalfH, 0]} />
-</RigidBody>
-<group scale={cfg.scale}>
-  <NPCModel modelKey={npc.modelKey} ... />
-</group>
+// ❌ Auto-generated hull/capsule colliders — mesh-based sizing causes floating
+<RigidBodyObject type="dynamic" colliders="hull" ...>
+  <CharacterRenderer ... />
+</RigidBodyObject>
 
-// ❌ Wrong — single global scale for all models
-<group scale={1.4}> {/* may not fit all model proportions */}
+// ❌ CapsuleCollider added without colliders={false} — double collider conflict
+<RigidBodyObject type="dynamic" ...>
+  <CapsuleCollider ... />
+  <CharacterRenderer ... />
+</RigidBodyObject>
+
+// ❌ CapsuleCollider without position — collider center at feet, body floats upward
+<CapsuleCollider args={[halfH, radius]} /> {/* position missing */}
 ```
 
-### Problem: Lower Body Buried Underground
+#### CharacterUtils Usage
 
-When a character GLB (e.g., Mixamo rig) is placed inside a `RigidBody` + `CuboidCollider`, rendering the visual group at the raw `RigidBody` translation buries the lower half of the model underground.
-
-**Root cause:** Many character GLBs have their skeleton root (hips) near the model center, not at the feet. If the `CuboidCollider` is offset to `position=[0, halfH, 0]` and the visual group is placed at the RigidBody origin, the model origin sits at terrain surface level but the model's visual center (hips) is at mid-body, pushing the lower half underground.
-
-**Rule:** Always set `CuboidCollider position=[0, halfH, 0]` where `halfH = args[1]`. This makes the collider bottom sit exactly at the RigidBody origin. When the body rests on terrain, the RigidBody origin = terrain surface, and the model's Y=0 (feet) aligns with the surface naturally.
+`CharacterUtils` automatically calculates the correct collider dimensions for the given `targetHeight`:
 
 ```tsx
-// RigidBody spawned at surfaceY + colliderHalfH so collider bottom starts at terrain surface
-<RigidBody position={[x, surfaceY + colliderHalfH, z]} ...>
-  <CuboidCollider args={[0.4, colliderHalfH, 0.4]} position={[0, colliderHalfH, 0]} />
-</RigidBody>
+import { CharacterUtils } from 'vibe-starter-3d';
 
-// Visual group placed at RigidBody translation directly — no extra Y offset needed
-visualGroupRef.current.position.set(t.x, t.y, t.z);
+// For targetHeight = 1.4
+CharacterUtils.capsuleHalfHeight(1.4) // ≈ 0.42
+CharacterUtils.capsuleRadius(1.4)     // ≈ 0.28
 ```
-
-**Do NOT** use `surfaceY + 1.5` or arbitrary large Y offsets for NPC spawn positions — these cause the body to fall from height and can penetrate terrain.
 
 ---
 
