@@ -62,9 +62,13 @@ When using `CharacterRenderer` from `vibe-starter-3d`, the package internally ru
 
 ---
 
-### NPC / Enemy Character Collider — CapsuleCollider Pattern
+### Animated Model Collider — CapsuleCollider Pattern
 
-When attaching physics colliders to NPC or enemy characters, **always follow the pattern below.**
+This rule applies to **animated GLB models** (characters, animals, creatures — any model containing `SkinnedMesh`, bones, or armatures) placed inside a physics body, whether rendered via `CharacterRenderer`, `<primitive object={glb.scene}>`, or `<Clone>`. **Always use `colliders={false}` with a manual `CapsuleCollider`.**
+
+> **⚠ Critical crash:** Using auto-colliders (`colliders="hull"`, `"trimesh"`, or even the default `"cuboid"`) on animated GLB models causes a fatal `TypeError: Cannot read properties of undefined (reading 'count')` in `mergeVertices → getColliderArgsFromGeometry`. `@react-three/rapier` calls `traverseVisible()` on all children and attempts to read `geometry.attributes.position` from every node — including bones and armatures that have **no geometry**. The only fix is `colliders={false}` with explicit collider shapes.
+
+> **Static GLB models are safe:** Simple prop models (trees, rocks, buildings, furniture) that contain only regular `Mesh` nodes (no `SkinnedMesh`, no bones) can use auto-colliders like `colliders="trimesh"` or `colliders="cuboid"` without issues.
 
 #### Core Principle
 
@@ -118,12 +122,18 @@ function NPCCharacter({ position }) {
 #### Incorrect Patterns
 
 ```tsx
-// ❌ Auto-generated hull/capsule colliders — mesh-based sizing causes floating
+// ❌ CRASHES — auto-colliders on SkinnedMesh → "Cannot read properties of undefined (reading 'count')"
+// This applies to colliders="hull", "trimesh", "ball", "cuboid", or omitting colliders entirely
 <RigidBodyObject type="dynamic" colliders="hull" ...>
   <CharacterRenderer ... />
 </RigidBodyObject>
 
-// ❌ CapsuleCollider added without colliders={false} — double collider conflict
+// ❌ CRASHES — same crash with useGLTF + <primitive> (bones have no geometry)
+<RigidBody>
+  <primitive object={animalGLB.scene} />
+</RigidBody>
+
+// ❌ CRASHES — default auto-colliders still generated without colliders={false}
 <RigidBodyObject type="dynamic" ...>
   <CapsuleCollider ... />
   <CharacterRenderer ... />
@@ -132,6 +142,41 @@ function NPCCharacter({ position }) {
 // ❌ CapsuleCollider without position — collider center at feet, body floats upward
 <CapsuleCollider args={[halfH, radius]} /> {/* position missing */}
 ```
+
+#### useGLTF + primitive Pattern (Without CharacterRenderer)
+
+When loading a GLB model directly with `useGLTF` and `<primitive>` instead of `CharacterRenderer`, the same `colliders={false}` rule applies. The physics body must never auto-generate colliders from GLB scene children.
+
+```tsx
+import { useGLTF } from '@react-three/drei';
+import { RigidBodyObject } from 'vibe-starter-3d';
+import { CapsuleCollider } from '@react-three/rapier';
+import { SkeletonUtils } from 'three-stdlib';
+
+const ANIMAL_HEIGHT = 1.0;
+
+function AnimalEntity({ url, position }) {
+  const { scene } = useGLTF(url);
+  const cloned = useMemo(() => SkeletonUtils.clone(scene), [scene]);
+
+  return (
+    <RigidBodyObject
+      type="dynamic"
+      colliders={false}          // ✅ REQUIRED — prevents crash
+      position={position}
+      lockRotations
+    >
+      <CapsuleCollider
+        position={[0, ANIMAL_HEIGHT / 2, 0]}
+        args={[ANIMAL_HEIGHT * 0.3, ANIMAL_HEIGHT * 0.2]}
+      />
+      <primitive object={cloned} scale={ANIMAL_HEIGHT} />
+    </RigidBodyObject>
+  );
+}
+```
+
+> **Note:** Always clone with `SkeletonUtils.clone()` (see [GLB Model Cloning](#glb-model-cloning--always-use-skeletonutilsclone) rule). Never use `scene.clone(true)`.
 
 #### CharacterUtils Usage
 
