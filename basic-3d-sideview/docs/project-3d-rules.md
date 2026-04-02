@@ -8,12 +8,6 @@ The primary reason for this is to simplify event handling for collisions and int
 
 In contrast, `RigidBodyObject` abstracts this complexity. It allows you to handle all physics-based interactions uniformly through just two simple trigger events: `onTriggerEnter` and `onTriggerExit`. This makes the interaction logic significantly cleaner and easier to manage.
 
-## Rendering Any Living Entity — Always Use `CharacterRenderer`
-
-Every living entity — humanoid NPCs, SD-style animals (bears, rabbits, dogs, etc.), monsters, creatures, bosses — **must** be rendered with `CharacterRenderer` from `vibe-starter-3d`. This includes non-humanoid and quadruped models. Never use `useGLTF` + `<primitive>` for any living entity.
-
-`CharacterRenderer` requires an `animationConfigMap` (mapping states like IDLE, WALK to animation URLs) and an `animationState`. All living entities must have at least IDLE and WALK animation states.
-
 ## Canvas Component Structure Rules
 
 **Core Requirement:** Components that render HTML tags (e.g., `<div>`, `<button>`) must NEVER be placed inside React Three Fiber's `<Canvas>` component.
