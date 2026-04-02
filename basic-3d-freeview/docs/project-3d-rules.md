@@ -8,29 +8,11 @@ The primary reason for this is to simplify event handling for collisions and int
 
 In contrast, `RigidBodyObject` abstracts this complexity. It allows you to handle all physics-based interactions uniformly through just two simple trigger events: `onTriggerEnter` and `onTriggerExit`. This makes the interaction logic significantly cleaner and easier to manage.
 
-## Rendering Characters — Always Use `CharacterRenderer`
+## Rendering Any Living Entity — Always Use `CharacterRenderer`
 
-All characters, NPCs, animals, and creatures **must** be rendered using `CharacterRenderer` from `vibe-starter-3d`. Do not load GLB models manually with `useGLTF` + `<primitive>` for animated characters — `CharacterRenderer` handles animation retargeting, skeleton cloning, and proportion scaling internally.
+Every living entity — humanoid NPCs, SD-style animals (bears, rabbits, dogs, etc.), monsters, creatures, bosses — **must** be rendered with `CharacterRenderer` from `vibe-starter-3d`. This includes non-humanoid and quadruped models. Never use `useGLTF` + `<primitive>` for any living entity.
 
-When placing a `CharacterRenderer` inside a physics body, you **must** set `colliders={false}` and add an explicit `CapsuleCollider`. Without this, `@react-three/rapier` tries to auto-generate colliders from bone nodes that have no geometry, causing a fatal crash: `TypeError: Cannot read properties of undefined (reading 'count')`.
-
-```tsx
-// ✅ Correct — CharacterRenderer + colliders={false} + CapsuleCollider
-<RigidBodyObject type="dynamic" colliders={false} position={position} lockRotations>
-  <CapsuleCollider
-    position={[0, targetHeight / 2, 0]}
-    args={[targetHeight * 0.3, targetHeight * 0.2]}
-  />
-  <CharacterRenderer url={modelUrl} targetHeight={targetHeight} ... />
-</RigidBodyObject>
-
-// ❌ CRASHES — missing colliders={false}
-<RigidBodyObject type="dynamic">
-  <CharacterRenderer url={modelUrl} ... />
-</RigidBodyObject>
-```
-
-**Note:** Static prop GLBs (trees, rocks, buildings) without bones/armatures are safe with auto-colliders.
+`CharacterRenderer` requires an `animationConfigMap` (mapping states like IDLE, WALK to animation URLs) and an `animationState`. All living entities must have at least IDLE and WALK animation states.
 
 ## Canvas Component Structure Rules
 
