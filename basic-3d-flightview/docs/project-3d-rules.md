@@ -8,14 +8,14 @@ The primary reason for this is to simplify event handling for collisions and int
 
 In contrast, `RigidBodyObject` abstracts this complexity. It allows you to handle all physics-based interactions uniformly through just two simple trigger events: `onTriggerEnter` and `onTriggerExit`. This makes the interaction logic significantly cleaner and easier to manage.
 
-## Animated GLB Models in Physics Bodies — Must Use `colliders={false}`
+## Rendering Characters — Always Use `CharacterRenderer`
 
-When placing any animated GLB model (characters, NPCs, animals, creatures) inside `RigidBodyObject`, you **must** set `colliders={false}` and add an explicit `CapsuleCollider`. This applies whether you use `CharacterRenderer`, `<primitive object={glb.scene}>`, or `<Clone>`.
+All characters, NPCs, animals, and creatures **must** be rendered using `CharacterRenderer` from `vibe-starter-3d`. Do not load GLB models manually with `useGLTF` + `<primitive>` for animated characters — `CharacterRenderer` handles animation retargeting, skeleton cloning, and proportion scaling internally.
 
-Without `colliders={false}`, `@react-three/rapier` auto-generates colliders by traversing all child nodes. Animated models contain bone/armature nodes with no geometry, causing a fatal crash: `TypeError: Cannot read properties of undefined (reading 'count')` at `mergeVertices`.
+When placing a `CharacterRenderer` inside a physics body, you **must** set `colliders={false}` and add an explicit `CapsuleCollider`. Without this, `@react-three/rapier` tries to auto-generate colliders from bone nodes that have no geometry, causing a fatal crash: `TypeError: Cannot read properties of undefined (reading 'count')`.
 
 ```tsx
-// ✅ Correct — colliders={false} with explicit CapsuleCollider
+// ✅ Correct — CharacterRenderer + colliders={false} + CapsuleCollider
 <RigidBodyObject type="dynamic" colliders={false} position={position} lockRotations>
   <CapsuleCollider
     position={[0, targetHeight / 2, 0]}
@@ -24,14 +24,9 @@ Without `colliders={false}`, `@react-three/rapier` auto-generates colliders by t
   <CharacterRenderer url={modelUrl} targetHeight={targetHeight} ... />
 </RigidBodyObject>
 
-// ❌ CRASHES — auto-colliders on animated model
+// ❌ CRASHES — missing colliders={false}
 <RigidBodyObject type="dynamic">
   <CharacterRenderer url={modelUrl} ... />
-</RigidBodyObject>
-
-// ❌ CRASHES — same issue with useGLTF + primitive
-<RigidBodyObject type="dynamic">
-  <primitive object={animalGLB.scene} />
 </RigidBodyObject>
 ```
 
