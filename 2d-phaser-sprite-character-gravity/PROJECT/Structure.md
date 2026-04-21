@@ -1,51 +1,29 @@
-# [PROJECT TITLE]
+# Structure — 2d-phaser-sprite-character-gravity
 
-## Project Summary
+## `src/main.tsx`, `src/App.tsx`
 
-[THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+Entry point and root component. `App` renders `GameComponent` inside a full-viewport `.app` container.
 
-This project is a template project with a basic 2D sprite character. It is implemented using Phaser, and the character has gravity and collision detection applied by default. It can be used to implement games like platformers where characters move on a flat view, stepping on obstacles.
+## `src/App.css`, `src/index.css`
 
-## Implementation Strategy
+Component styles and global base. `index.css` pulls in Tailwind directives; `App.css` locks `body/html` to no-scroll full-viewport.
 
-- [THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+## `src/assets.json`
 
-## Implemented Features
+Asset manifest — sprite sheet URL and `frameWidth`/`frameHeight` metadata for the `2dbasic` character.
 
-- [THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+## `src/components/GameComponent.tsx`
 
-## File Structure Overview
+React host for Phaser. Renders `<div id="phaser-game">`, calls `createGame(containerId)` once via `useEffect`, and destroys the game instance on unmount. Guarded by a `gameInstanceRef` so StrictMode double-invoke does not create two games.
 
-### src/main.tsx
+## `src/game/Game.ts`
 
-- Entry point for the application
-- Sets up React rendering with React 18's createRoot API
-- Imports and applies global CSS
+Exports `createGame(parent)`. Builds the `Phaser.Game` config: `Phaser.AUTO` renderer, full-window size, Arcade Physics with `gravity.y = 2000`, `Phaser.Scale.RESIZE` + `CENTER_BOTH`, and `MainScene` as the only scene. Contains a marked critical section that monkey-patches `Sprite/Image.setDisplaySize`, `setScale`, and `TweenManager.add` to preserve a base display size under scaling.
 
-### src/App.tsx
+## `src/game/scenes/MainScene.ts`
 
-- Root component of the application
-- Responsible for loading the GameComponent.
+Single scene. `preload()` loads the sprite sheet from `assets.json`. `create()` enables the physics debug graphic, sets world bounds to canvas size, paints a sky-blue background, builds a static green ground rectangle at the bottom, spawns one `SpriteCharacter`, registers a player–ground collider, and creates the cursor keys handler. `update()` forwards cursors to the character.
 
-### src/components/GameComponent.tsx
+## `src/game/characters/SpriteCharacter.ts`
 
-- Sets up the container to start Phaser in HTML and calls createGame from src/game/Game.ts.
-
-### src/game/Game.ts
-
-- Provides the createGame function, which executes `new Phaser.Game(config)` with Phaser settings.
-
-### src/game/scenes/MainScene.ts
-
-- Manages the main scene of the game.
-- Loads and controls the main character.
-
-### src/game/characters/SpriteCharacter.ts
-
-- Declares a reusable sprite character.
-- Implemented by extending `Phaser.Physics.Arcade.Sprite`.
-
-### src/App.css
-
-- Contains component-specific styles for the App component
-- Demonstrates how to use component-scoped CSS
+`Phaser.Physics.Arcade.Sprite` subclass. Registers five animations keyed by texture name (`-left`, `-right`, `-turn`, `-jump`, `-attack`) from fixed frame ranges of the `2dbasic` sheet. Handles `moveLeft` / `moveRight` / `stop` / `jump` (ground-checked) / `attack` (spawns a rectangular hitbox via `createAttackHitbox`, auto-destroys after 300ms, with a 500ms safety timer if `animationcomplete` never fires). `update(cursors)` maps Arrow keys to movement/jump and Space to attack, and ignores input while `isAttacking`.

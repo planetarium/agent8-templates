@@ -1,109 +1,71 @@
-# Basic 3D Free View
+# Structure — basic-3d-minecraft-multiplay
 
-## Project Summary
+## `src/main.tsx`, `src/App.tsx`
 
-This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, and hit reactions. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space. This project is intended for multi-player gameplay.
+Entry point and root component. `App` owns the connection state machine: not-connected spinner → `NicknameSetup` → `RoomManager` → `LobbyRoom` → `GameScene`. It bridges the `@agent8/gameserver` client into `networkSyncStore` and subscribes to `roomState.gameStarted` to decide when to enter the 3D scene.
 
-## Implementation Strategy
+## `src/App.css`, `src/index.css`
 
-This project uses a **Three.js-based 3D approach** because:
+Component styles and global base (Tailwind directives).
 
-- It requires real-time 3D character animation and control
-- Three.js provides efficient 3D rendering in web browsers
-- React Three Fiber simplifies integration with React components
-- The vibe-starter-3d library provides essential character rendering and animation tools
+## `src/assets.json`
 
-Key technologies:
+Asset manifest — character GLBs, mixamorig animations, and the `minecraft` sprite sheet (80×80 px, 16 px cells) used for block textures.
 
-- Three.js for 3D rendering
-- React Three Fiber for React integration
-- @react-three/rapier for physics simulation
-- @react-three/drei for useful Three.js helpers
-- vibe-starter-3d for character rendering and animation
-- Tailwind CSS for styling
+## `src/constants/`
 
-## Implemented Features
+- **`character.ts`** — animation state ids (`IDLE`, `WALK`, `RUN`, `JUMP`, `PUNCH`, `HIT`, `DIE`) and `DEFAULT_HEIGHT = 1.6`.
+- **`controls.ts`** — `keyboardMap` for `KeyboardControls` (WASD/arrows, `Space`, `Shift`, `1`–`4`, `KeyE` for magic).
 
-- Keyboard-controlled character movement (WASD/Arrow keys)
-- Character animations (idle, walk, run, jump, punch, hit, die)
-- Free view camera that follows the character
-- Physics-based character movement with collision detection
-- Character state management system
-- 3D environment with grid floor
-- Directional and ambient lighting
-- Animation system with support for looping and one-shot animations
-- Character bounding box calculations
-- Pointer lock for immersive control
+## `src/types/`
 
-## File Structure Overview
+- **`user.ts`** — `UserState` (nickname, character, transform, state, stats).
+- **`room.ts`** — `RoomState` (`gameStarted`, `cubes: Record<string, CubeInfo>`).
+- **`player.ts`** — `PlayerInputs`, `PlayerRef`.
+- **`effect.ts`** — `EffectType` enum (`FIREBALL`, `EXPLOSION`), `EffectData`, `ActiveEffect`.
+- **`index.ts`** — barrel re-export of `user` / `player` / `effect`.
 
-### `src/main.tsx`
+## `src/hooks/`
 
-- Entry point for the application.
-- Sets up React rendering and mounts the `App` component.
+- **`useCubeRaycaster.tsx`** — throttled (150 ms) screen-center raycast against the scene; filters for cubes / floor / chunk colliders; emits `previewPosition` and on left-click calls `server.remoteFunction('addCube', …)`.
+- **`useNetworkSync.ts`** — periodic `handlePing` RTT sampler with a rolling 3-value average. Installed but not currently mounted by any component.
 
-### `src/App.tsx`
+## `src/utils/`
 
-- Main application component.
-- Sets up the Colyseus client and manages the room state (`RoomManager`) and the game scene (`GameScene`).
-- Handles routing or state-based rendering between nickname setup, lobby screen, and game screen.
+- **`terrainGenerator.ts`** — `simplex-noise` + Alea PRNG. Exports `TILE_TYPES` (25 block ids), `generateTerrain(seed, width, depth)` that builds height map, water plane, surface tiles, sub-surface dirt/stone, and rare trees.
+- **`tileTextureLoader.ts`** — sprite-sheet-backed `TextureLoader` with per-tile UV cache; exposes `getSpriteInfo`, `getTileCoordinates`, `getTileTexture`, `getTotalTileCount`.
 
-### `src/App.css`
+## `src/store/` (Zustand)
 
-- Defines the main styles for the `App` component and its child UI elements.
+- **`cubeStore.ts`** — `cubes: CubeInfo[]`, `selectedTile`, `TERRAIN_CONFIG` (80×80), `DEFAULT_SEED` (from `VITE_AGENT8_VERSE`). CRUD actions `addCube` / `removeCube` / `updateCubes` / `regenerateTerrain`.
+- **`effectStore.ts`** — `activeEffects` list + `addEffect` / `removeEffect` with an auto-incrementing key.
+- **`networkSyncStore.ts`** — holds the `GameServer` reference and maintains a ping-based RTT rolling average (ping loop is currently inert — `sendPing` returns early).
 
-### `src/index.css`
+## `src/components/` (DOM overlay)
 
-- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
+- **`Crosshair.tsx`** — fixed-center DOM crosshair for aiming block placement.
+- **`TileSelector.tsx`** — bottom-center 7-tile carousel backed by the sprite sheet; `Q`/`E` cycle selection and write to `cubeStore.selectedTile`.
 
-### `src/assets.json`
+## `src/components/scene/`
 
-- File for managing asset metadata. Includes character model and animation information.
+- **`NicknameSetup.tsx`** — nickname entry form.
+- **`RoomManager.tsx`** — create-new-room / join-by-id form.
+- **`LobbyRoom.tsx`** — character picker, ready toggle, participants list, and a side `Canvas` running `CharacterPreview` for the chosen model.
+- **`GameScene.tsx`** — active-game shell: full-viewport `Canvas` with `<Physics debug>`, `<Suspense>` wrapping `Experience` + `NetworkContainer` + `EffectContainer`; overlays `TileSelector`, `Crosshair`, leave button, and `StatsGl`. Requests pointer lock on `pointerdown`.
 
-### `src/vite-env.d.ts`
+## `src/components/r3f/` (inside `Canvas`)
 
-- Type definition file related to Vite.
+- **`Experience.tsx`** — local player stack. Mounts `KeyboardControls`, `Environment` (sunset), `FirstPersonViewController` wrapping `Player`, `Floor`, and the `CubePreview` anchored to `useCubeRaycaster().previewPosition`.
+- **`Player.tsx`** — local-player logic: keyboard polling, state-machine for `CharacterState`, throttled `updatePlayerTransform` sync, magic cast trigger (`KeyE` → `FIREBALL`), `CharacterRenderer` rendered invisibly (first-person).
+- **`Floor.tsx`** — wide `boxGeometry` ground plane with the dirt texture, `RigidBody type="fixed" colliders="cuboid"`, tagged `userData.isFloor = true` for the raycaster.
+- **`NetworkContainer.tsx`** — subscribes to `subscribeRoomAllUserStates` / `subscribeRoomState`; manages per-account `RemotePlayer` refs, bootstraps terrain on first empty-room load (`generateTerrain` → `initializeCubes`), and diffs `room.cubes` against `prevCubesRef` to reconcile `cubeStore`. Also mounts `InstancedCubes`.
+- **`RemotePlayer.tsx`** — `NetworkObject`-based remote character with capsule collider, animation map, and a billboarded nickname label. Exposes `syncState(state, position, rotation)` via ref.
+- **`InstancedCubes.tsx`** — the world. Camera-chunk tracker splits cubes into 10³ chunks, activates up to 27 chunks in a sphere of radius 3 around the camera, generates per-chunk trimesh/face data, and renders a single `InstancedMesh` with a custom `uvOffsetScale` shader against the sprite sheet. `onClick` adds a cube on the hit face (client-side fallback).
+- **`CubePreview.tsx`** — semi-transparent preview mesh positioned at `useCubeRaycaster`'s `previewPosition`; textured from the currently selected tile.
+- **`CharacterPreview.tsx`** — idle-only `CharacterRenderer` used by `LobbyRoom` for the character picker.
+- **`EffectContainer.tsx`** — renders `activeEffects` from `effectStore`; subscribes to `effect-event` room messages to mirror remote casts; handles fireball hits into `EXPLOSION` spawns.
+- **`effects/FireBallEffectController.tsx`**, **`effects/FireBall.tsx`**, **`effects/Explosion.tsx`** — projectile + impact VFX with lifetime + hit callbacks.
 
-### `src/constants/`
+## `server.js`
 
-- Directory defining constant values used throughout the application.
-  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
-  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
-
-### `src/types/`
-
-- Directory defining TypeScript types used in the application (e.g., `PlayerState`, `PlayerInput`).
-
-### `src/hooks/`
-
-- Directory defining reusable React hooks (e.g., `useKeyboardControls`).
-
-### `src/store/`
-
-- Directory containing state management logic (e.g., Zustand).
-  - **`playerStore.ts`**: Manages player-related state (nickname, selected character, etc.).
-  - **`roomStore.ts`**: Manages Colyseus Room related state (room info, player list, etc.).
-
-### `src/components/`
-
-- Directory managing React components categorized by function.
-
-  - **`r3f/`**: Contains 3D components related to React Three Fiber.
-
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environmental elements, the local player (`Player`), remote players (`NetworkContainer`), the floor (`Floor`), and manages physics engine settings.
-    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
-    - **`Player.tsx`**: Component handling the logic related to the local player character model (movement, rotation, animation state management, input processing, and sending to the server).
-    - **`RemotePlayer.tsx`**: Component rendering remote player character models, animations, positions, etc., based on the state received from the server.
-    - **`NetworkContainer.tsx`**: Manages all remote player states received from the server and renders a `RemotePlayer` component for each remote player.
-    - **`CharacterPreview.tsx`**: Component for previewing character models, e.g., on the character selection screen.
-    - **`EffectContainer.tsx`**: Component managing and applying postprocessing effects (e.g., Bloom, SSR).
-    - **`effects/`**: Directory containing individual visual effect components (specific effect files can be added).
-
-  - **`scene/`**: Contains components related to 3D scene setup and game state.
-
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component, implements the Pointer Lock feature, and loads the `Experience` component using `Suspense` to initialize the 3D rendering environment. Can receive the Colyseus Room instance and pass it to `Experience`.
-    - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character.
-    - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
-    - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
-
-  - **`ui/`**: Directory containing components related to the user interface (UI). (Currently empty)
+Verse room server: `joinRoom`, `leaveRoom`, `toggleReady`, `setCharacter`, `updatePlayerTransform`, `addCube`, `initializeCubes`, `sendEffectEvent`, `handlePing`.

@@ -1,106 +1,56 @@
-# Basic 3D Free View
+# Structure — basic-3d-freeview-multiplay
 
-## Project Summary
+## `src/main.tsx`, `src/App.tsx`
 
-This project is a 3D character controller with free view camera, built using Three.js and React Three Fiber. It features a player character that can be controlled with keyboard inputs in a 3D environment. The character supports various animations including idle, walking, running, jumping, punching, and hit reactions. The camera follows the character with a free-view perspective, allowing users to navigate through the 3D space. This project is intended for multi-player gameplay.
+Entry point and root component. `App` wires `@agent8/gameserver` via `useGameServer`, drives the screen state machine (nickname → room manager → lobby → game), feeds the active server into `networkSyncStore`, and subscribes to room + room-my-state to track `gameStarted`, `isReady`, and selected character.
 
-## Implementation Strategy
+## `src/App.css`, `src/index.css`
 
-This project uses a **Three.js-based 3D approach** because:
+Component styles and global base (Tailwind directives, fonts).
 
-- It requires real-time 3D character animation and control
-- Three.js provides efficient 3D rendering in web browsers
-- React Three Fiber simplifies integration with React components
-- The vibe-starter-3d library provides essential character rendering and animation tools
+## `src/assets.json`
 
-Key technologies:
+Asset manifest — character model URLs (15 presets) and animation URLs (idle, walk, run, jump, punch, melee_attack, aim, shoot, aim_run, hit, die).
 
-- Three.js for 3D rendering
-- React Three Fiber for React integration
-- @react-three/rapier for physics simulation
-- @react-three/drei for useful Three.js helpers
-- vibe-starter-3d for character rendering and animation
-- Tailwind CSS for styling
+## `src/constants/`
 
-## Implemented Features
+- **`character.ts`** — `CharacterState` animation-state ids (IDLE, WALK, RUN, JUMP, PUNCH, HIT, DIE) and `DEFAULT_HEIGHT` (1.6).
+- **`controls.ts`** — `keyboardMap` for `KeyboardControls` (WASD/arrows, Space jump, Shift run, 1–4 actions, E magic).
 
-- Keyboard-controlled character movement (WASD/Arrow keys)
-- Character animations (idle, walk, run, jump, punch, hit, die)
-- Free view camera that follows the character
-- Physics-based character movement with collision detection
-- Character state management system
-- 3D environment with floor
-- Directional and ambient lighting
-- Animation system with support for looping and one-shot animations
-- Character bounding box calculations
-- Pointer lock for immersive control
+## `src/types/`
 
-## File Structure Overview
+- **`user.ts`** — `UserState` (account, nickname, isReady, character, position, rotation, state, stats) shared with the server.
+- **`player.ts`** — `PlayerInputs` (movement/action booleans) and `PlayerRef` (exposes `boundingBox`).
+- **`effect.ts`** — `EffectType` enum and effect message shapes (declared, not yet used in runtime code).
+- **`index.ts`** — barrel re-exports.
 
-### `src/main.tsx`
+## `src/hooks/`
 
-- Entry point for the application.
-- Sets up React rendering and mounts the `App` component.
+- **`useNetworkSync.ts`** — standalone RTT ping hook. Present but unused; `App.tsx` uses `networkSyncStore` instead.
 
-### `src/App.tsx`
+## `src/stores/` (Zustand)
 
-- Main application component.
-- Sets up the Colyseus client and manages the room state (`RoomManager`) and the game scene (`GameScene`).
-- Handles routing or state-based rendering between nickname setup, lobby screen, and game screen.
+- **`networkSyncStore.ts`** — holds the `GameServer` reference, runs the periodic `handlePing` loop (3 s interval, 5-sample rolling average with high/low trimmed), exposes `rtt` for the HUD.
+- **`playerStore.ts`** — registry of local rigid-body refs keyed by account (`registerPlayerRef` / `unregisterPlayerRef` / `getPlayerRef`).
 
-### `src/App.css`
+## `src/components/r3f/` (inside `Canvas`)
 
-- Defines the main styles for the `App` component and its child UI elements.
+- **`Experience.tsx`** — scene content: ambient light, `FollowLight`, sunset `Environment`, `Floor`, and the local `Player` wrapped in `FreeViewController` at `targetHeight = 1.6`.
+- **`Player.tsx`** — local player. Reads keyboard inputs, runs a `usePlayerStates` transition function, animates via `CharacterRenderer` + `AnimationConfigMap`, and throttles `server.remoteFunction('updateMyState', …)` to 100 ms with position (0.01 m) / rotation (0.01 rad) dirty-check thresholds.
+- **`RemotePlayer.tsx`** — remote player. Built on `NetworkObject` with a `CapsuleCollider`; exposes a `RemotePlayerHandle` whose `syncState` is called imperatively by `NetworkContainer` to drive position/rotation/animation. Renders a billboarded nickname label.
+- **`NetworkContainer.tsx`** — subscribes to `subscribeRoomState` and `subscribeRoomAllUserStates`; maintains the map of ready remote users, owns one ref per remote account, and mounts a `RemotePlayer` per entry.
+- **`CharacterPreview.tsx`** — IDLE-only preview renderer for the lobby character-selection modal.
+- **`Floor.tsx`** — fixed-body trimesh ground plane (100 × 100).
 
-### `src/index.css`
+## `src/components/scene/`
 
-- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
+- **`GameScene.tsx`** — in-game layout. Renders the Leave/RoomID/RTT HUD, the R3F `Canvas` (pointer-lock on click), `KeyboardControls`, `Physics`, then `Experience` + `NetworkContainer` under `Suspense`. Also mounts `StatsGl` for debugging.
+- **`NicknameSetup.tsx`** — first-screen form for entering a nickname.
+- **`RoomManager.tsx`** — create-room / join-by-id UI after nickname is set.
+- **`LobbyRoom.tsx`** — in-room screen: character list, `CharacterPreview` modal, ready toggle, participant list. Calls `setCharacter` and `toggleReady` remote functions.
 
-### `src/assets.json`
+## `src/components/ui/` (DOM overlay)
 
-- File for managing asset metadata. Includes character model and animation information.
-
-### `src/constants/`
-
-- Directory defining constant values used throughout the application.
-  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, jump, etc.).
-  - **`character.ts`**: Defines character-related constants (animation states, speed, etc.).
-
-### `src/types/`
-
-- Directory defining TypeScript types used in the application (e.g., `PlayerState`, `PlayerInput`).
-
-### `src/hooks/`
-
-- Directory defining reusable React hooks (e.g., `useKeyboardControls`).
-
-### `src/stores/`
-
-- Directory containing state management logic (e.g., Zustand).
-  - **`playerStore.ts`**: Manages player-related state (nickname, selected character, etc.).
-  - **`roomStore.ts`**: Manages Colyseus Room related state (room info, player list, etc.).
-
-### `src/components/`
-
-- Directory managing React components categorized by function.
-
-  - **`r3f/`**: Contains 3D components related to React Three Fiber.
-
-    - **`Experience.tsx`**: Main component responsible for setting up the 3D environment. Includes lighting `ambientLight`, environmental elements `Environment`, the local player `Player` wrapped in `FreeViewController`, the floor `Floor`, and the `FollowLight` component that follows the player.
-    - **`Floor.tsx`**: Component defining and visually representing the ground plane in the 3D space. Has physical properties.
-    - **`Player.tsx`**: Component handling the logic related to the local player character model (movement, rotation, animation state management, input processing, and sending to the server).
-    - **`RemotePlayer.tsx`**: Component rendering remote player character models, animations, positions, etc., based on the state received from the server.
-    - **`NetworkContainer.tsx`**: Manages all remote player states received from the server and renders a `RemotePlayer` component for each remote player.
-    - **`CharacterPreview.tsx`**: Component for previewing character models, e.g., on the character selection screen.
-    - **`EffectContainer.tsx`**: Component managing and applying postprocessing effects (e.g., Bloom, SSR).
-    - **`effects/`**: Directory containing individual visual effect components (specific effect files can be added).
-
-  - **`scene/`**: Contains components related to 3D scene setup and game state.
-
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the network container `NetworkContainer` and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
-    - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character.
-    - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
-    - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
-
-  - **`ui/`**: Contains general UI components.
-    - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).
+- **`RTT.tsx`** — displays rolling-average ping pulled from `networkSyncStore`.
+</content>
+</invoke>

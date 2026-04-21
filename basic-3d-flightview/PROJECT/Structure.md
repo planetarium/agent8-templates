@@ -1,106 +1,58 @@
-# Basic 3D Flight View
+# Structure — basic-3d-flightview
 
-## Project Summary
+## `src/main.tsx`, `src/App.tsx`
 
-This project is a single-player game where you can control and fly an aircraft in a 3D space. It is built using Three.js and React Three Fiber.
+Entry point and root component. `App` renders `GameScene` inside a full-viewport container.
 
-## Implementation Strategy
+## `src/App.css`, `src/index.css`
 
-This project uses a **Three.js-based 3D approach** because:
+Component styles and global base (Tailwind directives, fonts).
 
-- It requires real-time 3D character animation and control
-- Three.js provides efficient 3D rendering in web browsers
-- React Three Fiber simplifies integration with React components
-- The vibe-starter-3d library provides essential character rendering and animation tools
+## `src/constants/`
 
-Key technologies:
+- **`aircraft.ts`** — aircraft state ids (`ACTIVE`, `DIE`), `DEFAULT_BODY_LENGTH`, `HIT_BODY_SIZE`.
+- **`controls.ts`** — `KeyboardControlsEntry[]` list (forward, yaw, pitch, roll, attack, reset, action1–4). Not currently wired; flight keys live inside `GameSceneCanvas`.
+- **`rigidBodyObjectType.ts`** — rigid-body category enum (`LOCAL_PLAYER`, `ENEMY`, `MONSTER`, `WALL`, `OBSTACLE`, `ITEM`, `BULLET`, `FLOOR`, `SEA`, `PLOTTING_BOARD`).
 
-- Three.js for 3D rendering
-- React Three Fiber for React integration
-- @react-three/rapier for physics simulation
-- @react-three/drei for useful Three.js helpers
-- vibe-starter-3d for character rendering and animation
-- @agent8/gameserver for multiplayer functionality
-- Zustand for state management
-- Tailwind CSS for styling
+## `src/types/`
 
-## Implemented Features
+- **`effect.ts`** — `EffectType` enum (`BULLET`, `EXPLOSION`), `EffectData`, `ActiveEffect`, `EffectEventMessage`.
+- **`index.ts`** — re-exports from `./effect`.
 
-- Keyboard-controlled aircraft movement (WASD/Arrow keys) and attack (Spacebar)
-- Free view camera that follows the aircraft
-- Pointer lock for immersive control
+## `src/utils/`
 
-## File Structure Overview
+- **`effectUtils.ts`** — `createBulletEffectConfig` and `createExplosionEffectConfig`; serialize `THREE.Vector3` into array form for the effect store.
 
-### `src/main.tsx`
+## `src/stores/` (Zustand)
 
-- Entry point for the application.
-- Sets up React rendering and mounts the `App` component.
+- **`gameStore.ts`** — global lifecycle; holds `isMapPhysicsReady`.
+- **`localPlayerStore.ts`** — local player position and speed (m/s; multiply by 3.6 for km/h).
+- **`multiPlayerStore.ts`** — registry of remote-player `RigidBody` refs.
+- **`effectStore.ts`** — queue of active effects (`activeEffects`) keyed by an incrementing counter; `addEffect` / `removeEffect`.
 
-### `src/App.tsx`
+## `src/components/r3f/` (inside `Canvas`)
 
-- Main application component and entry point.
-- Sets up a full-screen container and renders the `GameScene` component, which handles all 3D scene setup and UI elements.
+- **`GameSceneCanvas.tsx`** — R3F `Canvas` root. Declares `FlightControllerKeyMapping` (W/S throttle, A/D yaw, Arrows pitch/roll), hosts Rapier `Physics` (paused until `isMapPhysicsReady`), `FlightViewController`, `Sky`, ambient + `FollowLight`, and mounts `MapPhysicsReadyChecker`, `EffectContainer`, `Player`, `FloatingShapes`, `Ground`. Requests pointer lock on `pointerdown`.
+- **`MapPhysicsReadyChecker.tsx`** — downward raycast from `(0, 50, 0)` each frame; flips `isMapPhysicsReady` on the first non-sensor, non-Capsule hit or after 180 frames.
+- **`Player.tsx`** — wraps `RigidBodyPlayer` + `Aircraft`. Kinematic (no gravity, sensor), uses a manual `CuboidCollider`. Registers into `multiPlayerStore`, streams position and 5-frame averaged speed into `localPlayerStore`, fires bullets on `Space` with a 200 ms cooldown via `effectStore`, and resets pose on `R` (edge-triggered).
+- **`Aircraft.tsx`** — procedural plane mesh (body, wings, cockpit, tail, nose cone, propeller). Spins the propeller each frame (scaled by `localPlayerStore.state.speed` when `localPlayer` is true, otherwise fixed) and renders two `Trail`s off the wingtip targets.
+- **`FloatingShapes.tsx`** — spawns 150 kinematic `RigidBodyObject`s (balloon / bird / plane) across a 3000×3000 area between `y ≈ 100–400`, each with one of three motion types: `oscillate`, `circle`, `drift`.
+- **`Ground.tsx`** — world geometry and decor: a `SEA`-tagged plane (10000×10000), a `FLOOR`-tagged grass plane (1000×1000), a 6×1000 runway with 100 lane markings, and 500 randomly scattered decorative meshes (box / sphere / cone) that avoid the runway corridor.
+- **`EffectContainer.tsx`** — renders effects from `effectStore`. Dispatches `BULLET` to `BulletEffectController` (wires `owner` via `multiPlayerStore.getConnectedPlayerRef`) and `EXPLOSION` to `Explosion`; on bullet hit, spawns an explosion at the contact point (skipping self-hits).
 
-### `src/App.css`
+## `src/components/r3f/effects/`
 
-- Defines the main styles for the `App` component and its child UI elements.
+- **`Bullet.tsx`** — kinematic-velocity `RigidBodyObject` with a `BULLET` tag. Moves via `castRay` per frame for accurate fast-body hit detection, freezes for up to 3 frames on hit to let `onTriggerEnter` resolve, and fires `onHit` / `onComplete`.
+- **`BulletEffectController.tsx`** — deserializes config, offsets the start position forward by 1 unit, renders `Bullet` and an optional `MuzzleFlash`.
+- **`MuzzleFlash.tsx`** — short-lived cone-petal + inner-glow flash oriented along the fire direction; fades out over `duration`.
+- **`Explosion.tsx`** — two instanced particle clouds (white + grey) that expand from the hit point and fade out over 500 ms.
 
-### `src/index.css`
+## `src/components/scene/`
 
-- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
+- **`GameScene.tsx`** — layout shell stitching `GameSceneCanvas` (3D) and `GameSceneUI` (DOM overlay). Contains performance warnings against holding state in this node.
 
-### `src/constants/`
+## `src/components/ui/` (DOM overlay)
 
-- Directory defining constant values used throughout the application.
-  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
-  - **`aircraft.ts`**: Defines constant values related to the aircraft, such as speed, rotation limits, etc.
-  - **`rigidBodyObjectType.ts`**: Defines constant values for different types of rigid body objects used in physics simulation (player, enemy, wall, floor, sea, etc.).
-
-### `src/components/`
-
-- Directory managing React components categorized by function.
-
-  - **`r3f/`**: Contains 3D components related to React Three Fiber.
-
-    - **`Aircraft.tsx`**: Component handling the logic related to the player-controlled aircraft model (movement, rotation, bullet firing trigger).
-    - **`MapPhysicsReadyChecker.tsx`**: Component that checks if the map physics system is ready by performing raycasting from above downward to detect map geometry and ensures physics interactions are properly initialized before gameplay begins. Performs checks every frame until valid map geometry is detected, with a timeout after 180 frames to prevent infinite checking. Excludes Capsule shapes (likely characters/objects) and sensor colliders from the inspection.
-    - **`Player.tsx`**: Main player component that uses `RigidBodyPlayer` from `vibe-starter-3d` for physics-based player control. It handles player registration, bullet firing with cooldown, position tracking, and reset functionality. **Key feature**: Uses `onTriggerEnter` and `onTriggerExit` events to handle player interactions with other objects in the scene (collision detection, area triggers, etc.). The component includes a custom `CuboidCollider` for precise collision detection and wraps the `Aircraft` component for visual representation.
-    - **`Experience.tsx`**: Component that sets up the core 3D scene elements. Includes ambient lighting, Sky environment, Player, Ground, and FloatingShapes components.
-    - **`FloatingShapes.tsx`**: Component generating and managing various 3D shapes floating randomly in the scene.
-    - **`GameSceneCanvas.tsx`**: React Three Fiber Canvas component that renders the 3D game world with physics simulation and controller setup.
-    - **`Ground.tsx`**: Component defining and visually representing the ground plane, runway, and scattered objects in the 3D space. It includes a sea plane, grass ground, runway with markings, and randomly generated objects (boxes, spheres, cones) scattered across the terrain. Has physical properties for collision detection.
-    - **`EffectContainer.tsx`**: Container component managing and rendering various visual effects like bullet firing and hit effects.
-    - **`effects/`**: Directory containing specific visual effect components.
-      - **`Bullet.tsx`**: Component defining the visual representation and individual behavior (movement, collision detection) of bullets fired from the airplane.
-      - **`BulletEffectController.tsx`**: Controller component responsible for creating and managing bullet-related effects (e.g., firing, collision). (Potential for Object Pooling usage)
-      - **`MuzzleFlash.tsx`**: Component representing the muzzle flash effect.
-      - **`Explosion.tsx`**: Component creating explosion and smoke particle effects when bullets hit targets or objects.
-
-  - **`scene/`**: Contains components related to scene setup.
-
-    - **`GameScene.tsx`**: Main game scene component that serves as a layout container arranging the game UI and 3D Canvas. Contains critical performance warnings and guidelines to prevent re-rendering issues. Includes the `GameSceneCanvas` and `GameSceneUI` components in a proper layered structure where the Canvas renders the 3D world and UI components render as overlays.
-
-  - **`ui/`**: Contains UI components for the game interface.
-    - **`GameSceneUI.tsx`**: Component that manages UI overlays for the game scene.
-    - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) on the screen.
-    - **`LoadingScreen.tsx`**: Loading screen component displayed during game loading.
-
-### `src/stores/`
-
-- Directory containing state management logic (e.g., Zustand).
-  - **`effectStore.ts`**: Store for managing effect-related state (e.g., bullets, explosions).
-  - **`gameStore.ts`**: Store that manages the overall game state. Tracks and controls the readiness state of the map physics system (`isMapPhysicsReady`). This state is used to determine physics simulation pause/resume and loading screen display.
-  - **`localPlayerStore.ts`**: Store that manages the local player's state, such as position tracking and speed tracking.
-  - **`multiPlayerStore.ts`**: Store that manages multiple connected players' rigid body references for multiplayer functionality, including registration, unregistration, and retrieval of player references.
-
-### `src/types/`
-
-- Directory containing TypeScript type definitions.
-  - **`effect.ts`**: Defines effect-related types.
-  - **`index.ts`**: Exports types from the `types` directory.
-
-### `src/utils/`
-
-- Directory containing utility functions used across the application.
-  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.
+- **`GameSceneUI.tsx`** — shows `LoadingScreen` while `isMapPhysicsReady` is `false`, otherwise `StatusDisplay`.
+- **`LoadingScreen.tsx`** — full-screen spinner; auto-wraps in `<Html center>` when rendered inside `Canvas`.
+- **`StatusDisplay.tsx`** — HUD overlay. Reads speed (km/h) and altitude (m) from `localPlayerStore` via `requestAnimationFrame`, HP and player count from `@agent8/gameserver` (`subscribeRoomMyState`, `subscribeRoomState`), and lists the control scheme.

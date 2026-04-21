@@ -1,32 +1,21 @@
-# [PROJECT TITLE]
+# Structure — basic-vite-react
 
-## Project Summary
+## `src/main.tsx`
 
-[THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+Entry point. Mounts `<App />` into `#root` via `createRoot`, wrapped in `StrictMode`. Imports `index.css`.
 
-## Implementation Strategy
+## `src/App.tsx`
 
-- [THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+Root component. Renders a single counter button styled with Tailwind utility classes.
 
-## Implemented Features
+## `src/App.css`
 
-- [THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+Component-scoped styles for `App` (root layout: max-width, centered, padded).
 
-## File Structure Overview
+## `src/index.css`
 
-### src/main.tsx
+Global stylesheet — Tailwind `base`, `components`, `utilities` directives only.
 
-- Entry point for the application
-- Sets up React rendering with React 18's createRoot API
-- Imports and applies global CSS
+## `src/assets.json`
 
-### src/App.tsx
-
-- Root component of the application
-- Demonstrates basic React component structure
-- Shows how to handle state and events in a React component
-
-### src/App.css
-
-- Contains component-specific styles for the App component
-- Demonstrates how to use component-scoped CSS
+Asset manifest. Empty (`{ "images": {} }`) in the baseline template.
