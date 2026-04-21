@@ -1,111 +1,64 @@
-# Basic 3D First Person View (FPV) - FPS
+# Structure — basic-3d-firstpersonview-multiplay
 
-## Project Summary
+## `src/main.tsx`, `src/App.tsx`
 
-This project is a multi-player First Person View (FPV) 3D FPS game built using Three.js and React Three Fiber.
+Entry point and root component. `App` owns the session state machine: it reads `useGameServer`, wires the server into `networkSyncStore`, subscribes to room state (`gameStarted`) and my-state (`isReady`, `character`), and conditionally renders `NicknameSetup` → `RoomManager` → `LobbyRoom` → `GameScene`. Room actions (`joinRoom`, `leaveRoom`) are called via `server.remoteFunction`.
 
-## Implementation Strategy
+## `src/App.css`, `src/index.css`
 
-This project uses a **Three.js-based 3D approach** because:
+Component styles and global base (Tailwind directives).
 
-- It requires real-time 3D character animation and control
-- Three.js provides efficient 3D rendering in web browsers
-- React Three Fiber simplifies integration with React components
-- The vibe-starter-3d library provides essential character rendering and animation tools
+## `src/assets.json`
 
-Key technologies:
+Asset manifest — character model URLs (15 entries) and animation URLs (idle, walk, run, jump, punch, melee_attack, aim, shoot, aim_run, hit, die).
 
-- Three.js for 3D rendering
-- React Three Fiber for React integration
-- @react-three/rapier for physics simulation
-- @react-three/drei for useful Three.js helpers
-- vibe-starter-3d for character rendering and animation
-- Tailwind CSS for styling
+## `src/constants/`
 
-## Implemented Features
+- **`character.ts`** — `CharacterState` animation ids (IDLE, WALK, RUN, JUMP, PUNCH, HIT, DIE) and `DEFAULT_HEIGHT = 1.6`.
+- **`controls.ts`** — `keyboardMap` for `@react-three/drei`'s `KeyboardControls` (WASD/arrows, jump, run, action1–4).
 
-- Keyboard-controlled character movement (WASD/Arrow keys)
-- Attack by clicking the left mouse button
-- First person view camera that follows the character
-- Physics-based character movement with collision detection
-- 3D environment with floor
-- Pointer lock for immersive control
+## `src/stores/` (Zustand)
 
-## File Structure Overview
+- **`networkSyncStore.ts`** — holds the `GameServer` instance and runs a 3 s ping loop via `handlePing` remote function, maintaining a 5-sample RTT history with min/max trimming.
+- **`playerStore.ts`** — registry mapping account → `RigidBody` ref for both local and remote players (used by effect hit tests).
+- **`effectStore.ts`** — local queue of active effects (`BULLET`, `EXPLOSION`) with incrementing keys.
 
-### `src/main.tsx`
+## `src/types/`
 
-- Entry point for the application.
-- Sets up React rendering and mounts the `App` component.
+- **`user.ts`** — `UserState` (account, nickname, isReady, character, position/rotation/state, stats).
+- **`player.ts`** — `PlayerInputs` (derived input flags), `PlayerRef` (boundingBox accessor).
+- **`effect.ts`** — `EffectType` enum, `EffectData`, `ActiveEffect`, `EffectEventMessage`.
+- **`index.ts`** — barrel re-exports.
 
-### `src/App.tsx`
+## `src/utils/`
 
-- Main application component.
-- Configures the overall layout and includes the `RoomManager` component.
+- **`effectUtils.ts`** — builders for bullet / explosion effect configs (serializes Vector3 → arrays for network transport).
 
-### `src/App.css`
+## `src/components/scene/` (flow + DOM overlays)
 
-- Defines the main styles for the `App` component and its child UI elements.
+- **`NicknameSetup.tsx`** — nickname entry form, submits back to `App`.
+- **`RoomManager.tsx`** — create / join room form; delegates to `App`'s `onJoinRoom(roomId?)`.
+- **`LobbyRoom.tsx`** — subscribes via `useRoomAllUserStates`, lets the user pick a character (calls `setCharacter` remote function) and toggle ready (`toggleReady`). Renders a mini R3F `Canvas` with `CharacterPreview` + `OrbitControls` for the selected character.
+- **`GameScene.tsx`** — in-game shell. Mounts `KeyboardControls`, the R3F `Canvas` (with pointer-lock on `pointerdown`), `Physics`, `Experience`, `NetworkContainer`, `EffectContainer`. Renders the HTML crosshair, a "Leave Game" button, `RTT`, and room id.
 
-### `src/index.css`
+## `src/components/r3f/` (inside `Canvas`)
 
-- Defines global base styles, Tailwind CSS directives, fonts, etc., applied throughout the application.
+- **`Experience.tsx`** — ambient light + `FollowLight` + sunset `Environment`, wraps `Player` in `FirstPersonViewController` (`targetHeight = 1.6`), mounts `Floor`.
+- **`Player.tsx`** — local FPV character. Reads keyboard via `useKeyboardControls`, mouse via `useMouseControls`, transform via `useControllerState`. Determines `CharacterState` each frame, throttles `updateMyState` (100 ms + dirty threshold), fires bullets on left-click with a 200 ms cooldown using the camera's world direction, and subscribes to `subscribeRoomMyState` to react to server-driven DIE / revive transitions. `CharacterRenderer` is rendered with `visible={false}`.
+- **`RemotePlayer.tsx`** — other players. `forwardRef` exposing `syncState(state, position, rotation)`, which forwards to `NetworkObject.syncTransform`. Registers its rigid body in `playerStore` and stamps `userData.account` for hit attribution. Renders the nickname as a billboarded `Text`.
+- **`NetworkContainer.tsx`** — subscribes to `subscribeRoomState` (removal on user leave) and `subscribeRoomAllUserStates` (add/remove by `isReady`, forward transforms through refs). Creates / destroys `RemotePlayer` refs keyed by account.
+- **`CharacterPreview.tsx`** — IDLE-only `CharacterRenderer` used inside `LobbyRoom`'s preview canvas.
+- **`Floor.tsx`** — 100 × 100 fixed `RigidBody` ground plane.
+- **`EffectContainer.tsx`** — renders active effects from `effectStore`. Subscribes to the `'effect-event'` room channel to mirror remote bullets, calls `applyDamage` remote function on local-owned hits, and spawns a follow-up `EXPLOSION` effect at impact.
 
-### `src/assets.json`
+## `src/components/r3f/effects/`
 
-- File for managing asset metadata. (Currently empty)
+- **`Bullet.tsx`** — ray-cast projectile (`world.castRay` each frame), fires `onHit` with collider + rigid body, auto-removes on duration timeout.
+- **`BulletEffectController.tsx`** — parses serialized config, composes `Bullet` + `MuzzleFlash`.
+- **`MuzzleFlash.tsx`** — short-lived flame-petal flash at the spawn position.
+- **`Explosion.tsx`** — particle burst spawned on bullet impact.
 
-### `src/constants/`
+## `src/components/ui/`
 
-- Directory defining constant values used throughout the application.
-  - **`character.ts`**: Defines character-related settings (e.g., movement speed, jump height).
-  - **`controls.ts`**: Defines settings that map keyboard inputs (WASD, arrow keys, etc.) to corresponding actions (movement, firing, etc.).
-
-### `src/components/`
-
-- Directory managing React components categorized by function.
-
-  - **`r3f/`**: Contains 3D components related to React Three Fiber.
-
-    - **`CharacterPreview.tsx`**: Component for displaying a character preview in the UI.
-    - **`EffectContainer.tsx`**: Groups and manages various visual effect components like bullets, muzzle flash, and explosions.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. Includes lighting, environment `Environment`, the floor `Floor` component, and the `FollowLight` component that provides dynamic lighting following the player. It also renders the `Player` component within the `FirstPersonViewController`.
-    - **`Floor.tsx`**: Defines and visually represents the ground plane in the 3D space. Has physical properties.
-    - **`NetworkContainer.tsx`**: Manages the local player `Player` and remote players `RemotePlayer` within the scene.
-    - **`Player.tsx`**: Represents the local player's character, handling movement, camera, and interactions based on user input and network state. Implements FirstPersonViewController logic.
-    - **`RemotePlayer.tsx`**: Represents other players in the game, synchronizing their state based on network updates.
-    - **`effects/`**: Sub-directory containing components related to visual effects.
-      - **`Bullet.tsx`**: Component defining the visual representation and behavior of bullets fired from the player.
-      - **`BulletEffectController.tsx`**: Manages the entire bullet effect system, including creation, state updates, and recycling (Object Pooling).
-      - **`Explosion.tsx`**: Component generating visual explosion effects.
-      - **`MuzzleFlash.tsx`**: Component that generates and manages the flash effect occurring at the muzzle when firing a gun.
-
-  - **`scene/`**: Contains components related to 3D scene setup and game state.
-
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the network container `NetworkContainer`, effect container `EffectContainer` and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
-    - **`LobbyRoom.tsx`**: Component that joins the Colyseus lobby room, displays the list of available game rooms, and provides UI for creating/joining rooms.
-    - **`NicknameSetup.tsx`**: UI component where the user enters their nickname and selects a character, utilizing `CharacterPreview`.
-    - **`RoomManager.tsx`**: Component responsible for Colyseus Room connection and state management. Conditionally renders `NicknameSetup`, `LobbyRoom`, `GameScene`, etc., based on the connection status with the server.
-
-  - **`ui/`**: Contains general UI components.
-    - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).
-
-### `src/stores/`
-
-- Directory containing Zustand stores for application state management.
-  - **`effectStore.ts`**: Store that manages the state of visual effects like bullets and explosions (e.g., creation, active/inactive).
-  - **`networkSyncStore.ts`**: Store that manages network-related state synchronization, including player data and room status.
-  - **`playerStore.ts`**: Store that manages the local player's state, such as nickname, character selection, and input actions.
-
-### `src/types/`
-
-- Directory containing TypeScript type definitions.
-  - **`effect.ts`**: Defines types related to visual effects (Effect).
-  - **`index.ts`**: Exports types from within the `types` directory.
-  - **`player.ts`**: Defines types related to player data and state.
-  - **`user.ts`**: Defines types related to user information (e.g., session ID, nickname).
-
-### `src/utils/`
-
-- Directory containing utility functions used across the application.
-  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.
+- **`RTT.tsx`** — reads `networkSyncStore.rtt` and shows current ping.
+</content>

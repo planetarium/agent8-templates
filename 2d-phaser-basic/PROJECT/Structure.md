@@ -1,45 +1,44 @@
-# [PROJECT TITLE]
+# Structure — 2d-phaser-basic
 
-## Project Summary
+## `src/main.tsx`
 
-[THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+Entry point. Mounts `<App />` into `#root` with React 18 `createRoot` under `StrictMode`. Imports `index.css`.
 
-This project is a template project with a basic 2D. It is implemented using Phaser. It can be used to implement games like boardgame or simple 2d game.
+## `src/App.tsx`
 
-## Implementation Strategy
+Root component. Wraps `<GameComponent />` in a full-viewport `.app` container.
 
-- [THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+## `src/App.css`, `src/index.css`
 
-## Implemented Features
+Component/global styles. `App.css` pins `html`/`body`/`.app` to `100vw` / `100vh` with `overflow: hidden`. `index.css` holds the Tailwind directives.
 
-- [THIS IS TEMPLATE PROJECT, PLEASE UPDATE HERE]
+## `src/assets.json`
 
-## File Structure Overview
+Asset manifest (`{ "sprites": {} }`). Consumed by `MainScene` — populate entries here and load them in `preload()`.
 
-### src/main.tsx
+## `src/components/GameComponent.tsx`
 
-- Entry point for the application
-- Sets up React rendering with React 18's createRoot API
-- Imports and applies global CSS
+React host for Phaser. Renders a `#phaser-game` div (100% × 100vh), calls `createGame(containerId)` in a `useEffect` guarded by a ref, and tears the game down with `game.destroy(true)` on unmount.
 
-### src/App.tsx
+## `src/game/Game.ts`
 
-- Root component of the application
-- Responsible for loading the GameComponent.
+Exports `createGame(parent)`. Builds the `Phaser.Types.Core.GameConfig`:
 
-### src/components/GameComponent.tsx
+- `type: Phaser.AUTO`, full-window `width`/`height`, `parent` set to the React container id
+- `physics.default: 'arcade'` with `gravity.y: 2000` and `debug: false`
+- `scene: [MainScene]`
+- `scale.mode: Phaser.Scale.RESIZE`, `autoCenter: Phaser.Scale.CENTER_BOTH`
 
-- Sets up the container to start Phaser in HTML and calls createGame from src/game/Game.ts.
+Also installs a `game.events.once('ready', …)` patch that overrides `Sprite`/`Image` `setDisplaySize` + `setScale` and `TweenManager.add` so `scale`/`scaleX`/`scaleY` operate relative to a stored `baseDisplayWidth` / `baseDisplayHeight`. Marked `CRITICAL — LLM/AI MODIFICATION PROHIBITED`.
 
-### src/game/Game.ts
+## `src/game/scenes/MainScene.ts`
 
-- Provides the createGame function, which executes `new Phaser.Game(config)` with Phaser settings.
+Sole scene (`key: 'MainScene'`). In `create()` it sets physics world bounds to the canvas size, paints a `#87CEEB` (sky blue) background, and adds a `60px` tall green (`0x00ff00`) rectangle across the bottom with a static Arcade body. `preload()` and `update()` are empty. Declares private `cursors` and `ground` fields; `cursors` is unused until input wiring is added.
 
-### src/game/scenes/MainScene.ts
+## `index.html`
 
-- Manages the main scene of the game.
+Vite HTML shell. Serves `/src/main.tsx`, renders an inline `Loading` spinner inside `#root` for pre-mount, and posts `GAME_SIZE_RESPONSE` messages to `window.parent` on `load` / `resize` / `REQUEST_GAME_SIZE` for embedding hosts.
 
-### src/App.css
+## `vite.config.ts`, `tsconfig*.json`, `tailwind.config.js`, `postcss.config.js`
 
-- Contains component-specific styles for the App component
-- Demonstrates how to use component-scoped CSS
+Standard Vite + React + TypeScript + Tailwind toolchain configuration.
