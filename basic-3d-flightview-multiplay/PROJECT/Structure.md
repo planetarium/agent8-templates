@@ -1,115 +1,65 @@
-# Basic 3D Flight View
+# Structure — basic-3d-flightview-multiplay
 
-## Project Summary
+## `src/main.tsx`, `src/App.tsx`
 
-This project is a multi-player game where you can control and fly an aircraft in a 3D space. It is built using Three.js and React Three Fiber.
+Entry point and root flow controller. `App` uses `useGameServer` from `@agent8/gameserver`, wires `networkSyncStore.setServer`, and switches between `NicknameSetup`, `RoomManager`, `LobbyRoom`, and `GameScene` based on connection / nickname / room / `roomStarted` / `isReady` state. Exposes `joinRoom`, `leaveRoom` remote-function calls and subscribes to `subscribeRoomState` + `subscribeRoomMyState`.
 
-## Implementation Strategy
+## `src/App.css`, `src/index.css`
 
-This project uses a **Three.js-based 3D approach** because:
+Component styles and global base (Tailwind directives).
 
-- It requires real-time 3D character animation and control
-- Three.js provides efficient 3D rendering in web browsers
-- React Three Fiber simplifies integration with React components
-- The vibe-starter-3d library provides essential character rendering and animation tools
+## `src/assets.json`
 
-Key technologies:
+Asset manifest — character / animation URLs. Not used by the current aircraft scene but shipped for future extension.
 
-- Three.js for 3D rendering
-- React Three Fiber for React integration
-- @react-three/rapier for physics simulation
-- @react-three/drei for useful Three.js helpers
-- vibe-starter-3d for character rendering and animation
-- @agent8/gameserver for multiplayer functionality
-- Zustand for state management
-- Tailwind CSS for styling
+## `src/constants/`
 
-## Implemented Features
+- **`aircraft.ts`** — `AircraftState` enum (`ACTIVE`, `DIE`), `DEFAULT_BODY_LENGTH`, `HIT_BODY_SIZE`.
+- **`controls.ts`** — keyboard map for `KeyboardControls`: forward/back, yawLeft/yawRight, pitchUp/pitchDown, rollLeft/rollRight, attack (Space), action1–4.
 
-- Keyboard-controlled character movement (WASD/Arrow keys) and attack (Spacebar)
-- Free view camera that follows the character
-- Pointer lock for immersive control
+## `src/stores/` (Zustand)
 
-## File Structure Overview
+- **`playerStore.ts`** — `usePlayerStore`: registry of local + remote player `RigidBody` refs keyed by account.
+- **`effectStore.ts`** — `useEffectStore`: `activeEffects` list with `addEffect` / `removeEffect` and monotonic `effectKeyCounter`.
+- **`networkSyncStore.ts`** — `networkSyncStore`: holds `GameServer`, drives a 3 s ping loop against `handlePing`, keeps last 5 RTT samples and an outlier-trimmed average.
 
-This overview details the key files and directories within the `src/` directory.
+## `src/types/`
 
-### `src/main.tsx`
+- **`user.ts`** — `UserState` (account, nickname, isReady, position, rotation, state, stats with `maxHp` / `currentHp`).
+- **`player.ts`** — `PlayerInputs` flags (isRevive, isDying, isHit, isMoving).
+- **`effect.ts`** — `EffectType` (`BULLET`, `EXPLOSION`), `EffectData`, `ActiveEffect`, `EffectEventMessage`.
+- **`index.ts`** — barrel exports.
 
-- Entry point for the React application.
-- Sets up React rendering and mounts the `App` component.
+## `src/utils/effectUtils.ts`
 
-### `src/App.tsx`
+`createBulletEffectConfig` and `createExplosionEffectConfig` — serialize `THREE.Vector3` into plain arrays so effect configs can travel over the wire.
 
-- Main application component.
-- Configures the overall layout, routing (using `RoomManager`), and includes UI components.
+## `src/components/r3f/` (inside `Canvas`)
 
-### `src/App.css`
+- **`Experience.tsx`** — 3D scene root. Ambient light + `FollowLight` + `Sky`, wraps `<Player>` in `<FlightViewController minSpeed={0} maxSpeed={120} hitBodySize=[1, 0.6, 3]>`, and mounts `Ground` and `FloatingShapes`.
+- **`Player.tsx`** — local-player logic. Pulls transform via `useControllerState`, registers the ref in `usePlayerStore`, subscribes to `subscribeRoomMyState` to toggle `AircraftState.DIE` / revive, throttle-syncs transform via `updateMyState`, fires bullets on `attack` input (200 ms cooldown) through `useEffectStore.addEffect` + `sendEffectEvent`. Renders `<Aircraft localPlayer>` when alive.
+- **`Aircraft.tsx`** — visual-only aircraft model (body, cockpit, wings, tail, propeller, twin `Trail`s). Propeller spin rate tracks `userData.speed` for the local player.
+- **`RemotePlayer.tsx`** — `forwardRef` wrapper around `NetworkObject` + `CuboidCollider` + `<Aircraft>` + nickname `Billboard`. Exposes `syncState(state, position, rotation)` via `useImperativeHandle` so `NetworkContainer` can push transforms imperatively.
+- **`NetworkContainer.tsx`** — subscribes to `subscribeRoomState` (user leave cleanup) and `subscribeRoomAllUserStates`, maintains a `RemotePlayerHandle` ref map keyed by account, and drives `syncState` on every update. Skips self and non-ready players.
+- **`EffectContainer.tsx`** — Zustand-driven renderer for `activeEffects`. Routes `BULLET` to `BulletEffectController` and `EXPLOSION` to `Explosion`. Listens to room `effect-event` messages, adds incoming effects locally, and on local bullet hits calls `applyDamage` + spawns an explosion.
+- **`Ground.tsx`** — fixed sea plane (`RigidBody` "SEA"), visual ground, runway stripes, 500 procedurally-scattered decoration meshes.
+- **`FloatingShapes.tsx`** — 150 kinematic balloons / birds / planes with oscillate / circle / drift motion profiles driven in `useFrame`.
 
-- Styles specific to the `App` component.
+### `src/components/r3f/effects/`
 
-### `src/index.css`
+- **`Bullet.tsx`** — ray-cast projectile. Uses `useRapier`'s `world.castRay` each frame, calls `onHit(pos, rigidBody, collider)` and `onComplete` on impact or timeout.
+- **`BulletEffectController.tsx`** — parses effect config, offsets the start position, renders `<Bullet>` + optional `<MuzzleFlash>`.
+- **`MuzzleFlash.tsx`** — short-lived additive-blended petal / inner-glow cone group with opacity fade.
+- **`Explosion.tsx`** — two groups of `instancedMesh` particles (`white`, `grey`) that drift outward and fade over 500 ms.
 
-- Global styles, including Tailwind CSS directives and base styles.
+## `src/components/scene/`
 
-### `src/assets.json`
+- **`GameScene.tsx`** — in-game shell. Renders a Leave button + `RTT` + room-id banner, mounts `StatusDisplay`, then a `KeyboardControls` + `Canvas` (pointer-lock on pointerdown) containing `Physics` → `Suspense` → `Experience` + `NetworkContainer` + `EffectContainer`.
+- **`RoomManager.tsx`** — create-new-room / join-by-id form shown after nickname setup.
+- **`LobbyRoom.tsx`** — pre-game lobby. Lists all users via `useRoomAllUserStates`, toggles `isReady` through `server.remoteFunction('toggleReady', [])`.
+- **`NicknameSetup.tsx`** — nickname entry form; surfaces loading + error state from `App`.
 
-- Metadata for assets (currently may be unused or planned for future use).
+## `src/components/ui/` (DOM overlay)
 
-### `src/constants/`
-
-- Directory defining constant values used throughout the application.
-  - **`aircraft.ts`**: Defines constants related to aircraft properties.
-  - **`controls.ts`**: Maps keyboard inputs to game actions (e.g., movement, firing).
-
-### `src/components/`
-
-- React components categorized by function.
-
-  - **`r3f/`**: React Three Fiber components for the 3D scene.
-
-    - **`Player.tsx`**: Logic for the player-controlled character (movement, animation, potentially includes aircraft logic).
-    - **`Aircraft.tsx`**: Logic for the player-controlled airplane model and behavior (movement, rotation, firing).
-    - **`RemotePlayer.tsx`**: Logic for rendering and synchronizing remote players.
-    - **`Experience.tsx`**: Main component responsible for the primary 3D scene configuration. It sets up the sky environment using `Sky` from `@react-three/drei` and provides basic lighting with `ambientLight`. It utilizes `FlightViewController` from `vibe-starter-3d` to wrap the `Player` component, handling flight control logic. It also includes the `Ground`, `FloatingShapes`, and `FollowLight` components to complete the scene. The `FollowLight` component provides a light source that follows the player.
-    - **`FloatingShapes.tsx`**: Manages floating 3D shapes in the scene.
-    - **`Ground.tsx`**: Defines the ground plane with physical properties.
-    - **`EffectContainer.tsx`**: Manages visual effects rendering.
-    - **`NetworkContainer.tsx`**: Handles network-related logic within the 3D scene.
-    - **`effects/`**: Specific visual effect components.
-      - **`Bullet.tsx`**: Visual representation and behavior of bullets.
-      - **`BulletEffectController.tsx`**: Manages bullet effect creation and lifecycle (potential for object pooling).
-      - **`MuzzleFlash.tsx`**: Represents the muzzle flash effect.
-      - **`Explosion.tsx`**: Represents the explosion effect.
-
-  - **`scene/`**: Components managing different application scenes or stages.
-
-    - **`GameScene.tsx`**: Sets up the React Three Fiber `Canvas` component (implementing the Pointer Lock feature), utilizes `KeyboardControls` for handling keyboard inputs, configures the physics simulation using the `Physics` component from `@react-three/rapier`, includes the network container `NetworkContainer`, effect container `EffectContainer` and loads the `Experience` component with `Suspense` to initialize the 3D rendering environment.
-    - **`RoomManager.tsx`**: Handles routing or switching between different rooms/scenes like Lobby, Game, etc., based on game state.
-    - **`LobbyRoom.tsx`**: Component representing the game lobby UI and logic (e.g., player list, room selection).
-    - **`NicknameSetup.tsx`**: Component for players to set up their nickname before entering the lobby or game.
-
-  - **`ui/`**: General user interface components.
-    - **`StatusDisplay.tsx`**: UI component displaying game state information (e.g., airplane speed, altitude) during gameplay.
-    - **`RTT.tsx`**: UI component for displaying Round Trip Time (network latency).
-
-### `src/stores/`
-
-- State management logic (using Zustand).
-  - **`playerStore.ts`**: Manages state related to the local player.
-  - **`effectStore.ts`**: Manages state related to visual effects (bullets, explosions).
-  - **`networkSyncStore.ts`**: Manages state synchronization for multiplayer functionality.
-
-### `src/types/`
-
-- TypeScript type definitions.
-
-  - **`effect.ts`**: Defines types for visual effects.
-  - **`user.ts`**: Defines types related to users/players.
-  - **`player.ts`**: Defines types specific to player data.
-  - **`index.ts`**: Exports types from the directory.
-
-### `src/utils/`
-
-- Directory containing utility functions used across the application.
-  - **`effectUtils.ts`**: Contains utility functions specifically related to managing and calculating visual effects.
+- **`StatusDisplay.tsx`** — reads `useControllerState` for speed / altitude, `subscribeRoomState` for player count, `subscribeRoomMyState` for HP. Renders control hints.
+- **`RTT.tsx`** — subscribes to `networkSyncStore.rtt` and shows ping in ms.
