@@ -13,7 +13,7 @@
     "description": "Template with animated sprite characters using Phaser, featuring gravity for jumping mechanics. Ideal for basic PLATFORMER games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "2d-phaser-sprite-character-gravity",
-    "tags": ["vite", "react", "typescript", "phaser", "platformer"]
+    "tags": ["vite", "react", "typescript", "phaser", "platformer", "maplestory"]
   },
   {
     "name": "2d-phaser-basic",
