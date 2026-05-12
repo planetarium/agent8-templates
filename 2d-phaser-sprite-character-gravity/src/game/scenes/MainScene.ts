@@ -11,7 +11,6 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.physics.world.createDebugGraphic();
     this.load.spritesheet(
       "2dbasic",
       Assets.sprites["2dbasic"].url,
