@@ -10,5 +10,8 @@ export default defineConfig({
   base: "./",
   build: {
     outDir: "dist",
+    // Skip gzip-size reporting: our users don't optimize by bundle size,
+    // and it only slows the build. Output is byte-identical.
+    reportCompressedSize: false,
   },
 });
