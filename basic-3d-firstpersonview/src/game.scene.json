@@ -1,0 +1,139 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "FirstPersonView",
+  "environment": {
+    "preset": "sunset",
+    "ambient": { "color": "#ffffff", "intensity": 0.7 },
+    "background": "#ffffff"
+  },
+  "physics": { "gravity": [0, -9.81, 0] },
+  "input": {
+    "move": {
+      "type": "vector2",
+      "keys": {
+        "up": ["KeyW", "ArrowUp"],
+        "down": ["KeyS", "ArrowDown"],
+        "left": ["KeyA", "ArrowLeft"],
+        "right": ["KeyD", "ArrowRight"]
+      }
+    },
+    "jump": { "type": "button", "keys": ["Space"] },
+    "sprint": { "type": "button", "keys": ["ShiftLeft", "ShiftRight"] },
+    "attack": { "type": "button", "keys": ["Mouse0", "KeyF"] }
+  },
+  "assets": {
+    "characters/base": {
+      "type": "model",
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb"
+    },
+    "anims/idle": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb"
+    },
+    "anims/walk": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb"
+    },
+    "anims/run": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb"
+    },
+    "anims/runFast": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb"
+    },
+    "anims/jump": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb"
+    }
+  },
+  "root": {
+    "name": "FirstPersonView",
+    "type": "Node3D",
+    "uid": "n_cf0zo4p35ixbw6jh",
+    "children": [
+      {
+        "name": "Floor",
+        "type": "StaticBody3D",
+        "uid": "n_rye2nl7nbaw4wzvy",
+        "props": {
+          "collider": { "shape": "box", "size": [100, 0.1, 100] },
+          "position": [0, -0.05, 0]
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_tjlzvs60flrennlg",
+            "props": {
+              "mesh": "box",
+              "size": [100, 0.1, 100],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Player",
+        "type": "RigidBody3D",
+        "uid": "n_a3c3sbgdmjdjijg7",
+        "props": {
+          "position": [0, 1.8, 0],
+          "fixedRotation": true,
+          "friction": 0,
+          "collider": { "shape": "capsule", "radius": 0.32, "height": 0.96 }
+        },
+        "children": [
+          {
+            "name": "Controller",
+            "type": "CharacterController3D",
+            "uid": "n_cw9nmt41ovgy3g12",
+            "props": {
+              "view": "firstPerson",
+              "camDistance": 0.01,
+              "coyoteSeconds": 0.12,
+              "jumpBufferSeconds": 0.15
+            },
+            "script": { "name": "CharacterAnimator" }
+          },
+          {
+            "name": "Skin",
+            "type": "ModelInstance3D",
+            "uid": "n_7lphp1a2xv9cdgcn",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.6,
+              "animation": "$anims/idle",
+              "castShadow": true,
+              "position": [0, -0.8, 0],
+              "visible": false
+            }
+          },
+          { "name": "Catch", "type": "Respawn", "uid": "n_ptci9qy8e87khk8g" }
+        ],
+        "script": { "name": "BulletGun" }
+      },
+      {
+        "name": "Sun",
+        "type": "DirectionalLight3D",
+        "uid": "n_6urq282vr1p0ndw0",
+        "props": {
+          "position": [30, 100, 30],
+          "intensity": 1,
+          "castShadow": true,
+          "shadowMapSize": 4096
+        },
+        "script": { "name": "FollowLight" }
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "uid": "n_i12at0twgi05eclk",
+        "props": { "position": [0, 2, 6], "fov": 75, "current": true }
+      }
+    ]
+  }
+}

@@ -1,21 +1,30 @@
-# Status — basic-3d-firstpersonview
+# Status — basic-3d-firstpersonview (Incanto)
 
 ## Implemented
 
-- First-person camera (`FirstPersonViewController`) with invisible local `CharacterRenderer`
-- Physics-based character controller (`RigidBodyPlayer`) with extended humanoid animation set (idle, walk, run, fast run, jump, punch, kick, melee attack, cast, hit, dance, swim, die)
-- Left-click shooting: camera-forward bullet spawn with cooldown, routed through `effectStore`
-- Effect pipeline: `EffectContainer` + `BulletEffectController` + `Bullet` (sensor + raycast) + `MuzzleFlash` + `Explosion` on hit
-- FPV crosshair overlay tracked to canvas center
-- Physics-ready bootstrap (`MapPhysicsReadyChecker` + `LoadingScreen`)
-- Desktop input (keyboard + mouse + pointer lock) and mobile input (`nipplejs` joystick + on-screen ATTACK / JUMP buttons)
-- Collision triggers via `RigidBodyPlayer.onTriggerEnter` / `onTriggerExit`
-- Scene lighting: ambient + `FollowLight` + sunset environment preset
+- Preload screen with a real progress bar over all CDN assets
+  (`preloadUrls` + `assetUrls`)
+- `game.scene.json`: sunset IBL + white background, gravity −9.81, input map
+  (move/jump/sprint), model + 5 mixamo animation assets, Floor
+  (StaticBody3D 100×100 + dark-gray skin), Player (dynamic RigidBody3D
+  capsule + CharacterController3D `view: "free"` camDistance 4 +
+  ModelInstance3D skin), FollowLight sun, current Camera3D
+- Behaviors: FollowLight (sun tracks player at [30,100,30]),
+  CharacterAnimator (movement state → clip)
+- Pointer-lock mouse look, wheel zoom disabled (original parity: min==max)
+- Crosshair overlay (12px white plus, black halo), JUMP/ATTACK buttons
+  (ATTACK injects KeyF = fire)
 
-## Installed but not wired
+## Parity vs the original (measured)
 
-- `@agent8/gameserver` — `useGameServer().account` is read for player registration, but no networking / session / effect replication code
-- `@react-three/postprocessing` — no effect pipeline
-- `playerActionStore` fields `punch`, `kick`, `meleeAttack`, `cast` — declared but no input binds or animation triggers (only `attack` is wired)
-- `lucide-react` — imported as a dependency but unused in source
-- World geometry — only a flat `Floor`
+- Eye height 1.64 (body 1 + pivot 0.64), mouse yaw measured live; bullets
+  fly/expire on the original timings (200 u/s, 150ms reveal, 500ms life)
+- Jump apex ≈ +1.25m with visibly faster falls (fallingGravityScale 2.5)
+- Composition: first-person eye view, crosshair center,
+  horizon mid-screen, buttons bottom-right — body invisible — screenshot-compared side by side
+
+## Knowing divergences
+
+- ATTACK button fires nothing (original spawns bullets via a stores+R3F
+  effect system)
+- No camera-blocking pull-in (nothing to block in this scene)
