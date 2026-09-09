@@ -1,26 +1,31 @@
-# Status — basic-3d-minecraft
+# Status — basic-3d-minecraft (Incanto)
 
 ## Implemented
 
-- First-person camera + character controller (`FirstPersonViewController` + `RigidBodyPlayer`) with full humanoid animation set (idle, idle-01, walk, run, fast-run, jump, punch, kick, melee attack, cast, hit, die)
-- Action state machine (`playerActionStore`) with `lockControls` / `unlockControls` around non-looping animations
-- Voxel world: single `InstancedMesh` (capacity 1,000,000) with a custom per-face-color shader and border effect
-- Chunk system: 2D X/Z chunking (`CHUNK_SIZE = 10`), camera-distance activation within `ACTIVE_CHUNKS_RADIUS = 3`, cap `MAX_ACTIVE_CHUNKS = 27`, per-chunk merged `TrimeshCollider` with internal-face culling
-- Seeded procedural terrain via `simplex-noise` (80×80, centered on origin) with bedrock / dirt / grass layering; regenerable with a new seed
-- Screen-center raycaster (`useCubeRaycaster`, throttled 150ms) with translucent `CubePreview` synced to integer placement coordinates
-- Block placement via `F` / `Mouse0` (rising-edge through `playerActionStore.addCube`) and via direct pointer click on the instanced mesh
-- Tile system: 25 block types (`TILE_TYPES`), 7 color themes (`THEMES`), `TileSelector` with live 3D preview, `Q`/`E` cycle, `T` theme toggle
-- Physics-ready bootstrap (`MapPhysicsReadyChecker` + `LoadingScreen`)
-- Asset preloader (`PreloadScene`) with per-extension loader dispatch and shared `LoadingManager` progress
-- Water plane (visual only) at `y = 10`
-- Desktop input (keyboard + mouse + pointer lock) and mobile input (`nipplejs` joystick + `ADD CUBE` / `JUMP` buttons)
-- Scene lighting: ambient + three directional lights + `FollowLight` + dawn `Environment`
-- Crosshair overlay
+- VoxelGrid3D terrain: 65,661 seeded blocks (80×80, height 5..15, bedrock/
+  dirt/grass), one draw call, original shader look (face colors + edge
+  darkening + directional shading)
+- Chunked trimesh colliders (10×10, radius 3, hidden-face culling, 29
+  active at spawn), rebuilt on player chunk change (3-frame throttle) and
+  on block edits
+- First-person controls (pointer lock, standard FPS pitch), float-capsule
+  movement/jump/sprint on the voxel surface
+- Crosshair + translucent preview cube at the raycast placement position,
+  tinted by the selected tile's top color
+- F / left click / ADD CUBE button places; tile bar with 5 tiles; JUMP button
+- Water plane y=10, sky-blue background, 3-light setup + FollowLight shadows
 
-## Installed but not wired
+## Parity vs the original (measured)
 
-- `@agent8/gameserver` — only `account` is read; no session, room, or networking
-- `@react-three/postprocessing` — no effect pipeline
-- `cubeStore.removeCube` + `removeCube` key bindings (`G` / `Mouse2`) — store action exists, keybindings exist, but `playerActionStore` has no `removeCube` flag and no consumer calls it
-- `cubeMapGenerator` extension scaffolds — `BIOMES`, `BIOME_MODIFIERS`, `STRUCTURES`, `getBiomeAt`, `generateStructure`, `generateCaves`, `postProcessCubeMap` are `TODO` stubs
-- `Water` has no physics collider
+- Block count seeded deterministically; preview/place verified at runtime
+  (count +1 at the previewed cell); collision keeps the player on terrain
+- Composition: grass tops + dirt cliffs + water + crosshair + bottom tile
+  bar + corner buttons — screenshot-compared against the original's look
+
+## A structure baked into the JSON (2026-09-04)
+
+`Voxels.voxels` bakes a 19-block beacon tower at (0, 0–18, −8); the `Terrain` generator
+merges it with the noise terrain (`setBlocks([...generated, ...grid.blocks()])`, baked last so
+it wins the column). `verify.ts` proves it is in the grid before anything readies, survives the
+generator, and is SOLID — a ray from the sky lands on it above the terrain's 15. Composing
+the prop found the seed arriving a frame late and wiping generated worlds (engine fix).

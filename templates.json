@@ -25,23 +25,40 @@
   },
   {
     "name": "basic-3d",
-    "label": "3D Basic Minimal Template",
-    "description": "Three.js 3D basic minimal template",
+    "label": "Incanto 3D Empty Stage Template",
+    "description": "Incanto engine 3D empty stage (Three.js underneath, the whole game is scene JSON): a solid ground under a physical sky, a shadow-casting sun, a marker cube and a camera framing the origin — no character. Pick this for a 3D game that is not a character game: puzzle, board game, tower defense, idle, tycoon, simulation, sandbox. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d",
-    "tags": ["vite", "react", "typescript", "three.js", "3d"]
+    "tags": [
+      "vite",
+      "react",
+      "typescript",
+      "3d",
+      "incanto",
+      "scene-json",
+      "three.js",
+      "minimal",
+      "empty-stage",
+      "blank",
+      "puzzle",
+      "board-game",
+      "tower-defense",
+      "idle",
+      "tycoon",
+      "simulation",
+      "sandbox"
+    ]
   },
   {
     "name": "basic-3d-freeview",
-    "label": "3D Character Freeview Template",
-    "description": "Three.js 3D game template with free camera movement. Features character controls and exploration in a 3D environment with unrestricted camera angles.",
+    "label": "Incanto 3D Character Freeview Template",
+    "description": "Incanto engine 3D third-person free-view character template (Three.js underneath, the whole game is scene JSON): an animated character on a floor, WASD relative to an orbiting camera, sprint, jump, pointer-lock mouse look. Pick this for a 3D exploration, action or RPG game seen from behind the character with a free camera. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-freeview",
     "tags": [
       "vite",
       "react",
       "typescript",
-      "three.js",
       "3d",
       "character",
       "animation",
@@ -52,20 +69,22 @@
       "freeview",
       "exploration",
       "free-camera",
-      "third-person"
+      "third-person",
+      "incanto",
+      "scene-json",
+      "three.js"
     ]
   },
   {
     "name": "basic-3d-quarterview",
-    "label": "3D Character Quarterview Template",
-    "description": "Three.js single-player top-down game template similar to Hades. Features character control from a quarter view orthographic camera with keyboard controls.",
+    "label": "Incanto 3D Character Quarterview Template",
+    "description": "Incanto engine 3D quarter-view (isometric, top-down) character template (Three.js underneath, the whole game is scene JSON): a fixed 35° camera, world-relative WASD, sprint, jump, an animated character on a floor. Pick this for a 3D top-down action, MOBA-style, ARPG or isometric game like Hades or League of Legends. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-quarterview",
     "tags": [
       "vite",
       "react",
       "typescript",
-      "three.js",
       "3d",
       "character",
       "animation",
@@ -82,20 +101,22 @@
       "champion",
       "skills",
       "arena",
-      "real-time"
+      "real-time",
+      "incanto",
+      "scene-json",
+      "three.js"
     ]
   },
   {
     "name": "basic-3d-flightview",
-    "label": "3D Airplane Flightview Template",
-    "description": "A Three.js single-player flight airplane game template inspired by Pieter Levels' game, featuring a low-poly plane flying freely.",
+    "label": "Incanto 3D Airplane Flightview Template",
+    "description": "Incanto engine 3D flight template (Three.js underneath, the whole game is scene JSON): a procedural airplane on a runway under an atmospheric sky, throttle, pitch, roll and yaw controls, a chase camera. Pick this for a 3D flight, airplane, dogfight or aerial game. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-flightview",
     "tags": [
       "vite",
       "react",
       "typescript",
-      "three.js",
       "3d",
       "flight",
       "flying",
@@ -108,20 +129,22 @@
       "single-player",
       "keyboard-controls",
       "Pieter Levels",
-      "ace-combat"
+      "ace-combat",
+      "incanto",
+      "scene-json",
+      "three.js"
     ]
   },
   {
     "name": "basic-3d-firstpersonview",
-    "label": "3D First Person View (FPS) Template",
-    "description": "Three.js single-player first-person view (FPS) game template. Control your character through a first-person camera perspective, simulating the player's own eyes, with movement and keyboard controls.",
+    "label": "Incanto 3D First Person View (FPS) Template",
+    "description": "Incanto engine 3D first-person (FPS) template (Three.js underneath, the whole game is scene JSON): the camera is the eye, pointer-lock look, WASD relative to where you face, sprint, jump. Pick this for a 3D first-person shooter, horror, exploration or walking-sim game. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-firstpersonview",
     "tags": [
       "vite",
       "react",
       "typescript",
-      "three.js",
       "3d",
       "fps",
       "FPS",
@@ -140,20 +163,22 @@
       "Overwatch",
       "Valorant",
       "PUBG",
-      "PlayerUnknown's Battlegrounds"
+      "PlayerUnknown's Battlegrounds",
+      "incanto",
+      "scene-json",
+      "three.js"
     ]
   },
   {
     "name": "basic-3d-sideview",
-    "label": "3D Character Sideview Template",
-    "description": "Three.js single-player sideview game template. Features character control from a side view orthographic camera with horizontal movement and keyboard controls.",
+    "label": "Incanto 3D Character Sideview Template",
+    "description": "Incanto engine 3D side-view template (Three.js underneath, the whole game is scene JSON): a ribbon of platforms seen side-on from a fixed camera, run left and right, jump, an animated character. Pick this for a 3D side-scrolling platformer or 2.5D action game. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-sideview",
     "tags": [
       "vite",
       "react",
       "typescript",
-      "three.js",
       "3d",
       "character",
       "animation",
@@ -163,20 +188,22 @@
       "single-player",
       "sideview",
       "mario",
-      "platformer"
+      "platformer",
+      "incanto",
+      "scene-json",
+      "three.js"
     ]
   },
   {
     "name": "basic-3d-minecraft",
-    "description": "Three.js fixed camera game template inspired by Minecraft. A voxel-style 3D Minecraft example is implemented. This templates ready to use, camera system, character system, and map system.",
-    "label": "3D Character Minecraft Template",
+    "description": "Incanto engine 3D voxel template (Three.js underneath, the whole game is scene JSON): a seeded 80×80 voxel world drawn in one instanced draw call, first-person pointer-lock controls, crosshair raycast to place and break blocks. Pick this for a 3D voxel, block-building, Minecraft-like or sandbox-crafting game. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
+    "label": "Incanto 3D Character Minecraft Template",
     "githubRepo": "planetarium/agent8-templates",
     "path": "basic-3d-minecraft",
     "tags": [
       "vite",
       "react",
       "typescript",
-      "three.js",
       "voxel",
       "3d",
       "character",
@@ -188,7 +215,10 @@
       "minecraft",
       "block",
       "building",
-      "survival"
+      "survival",
+      "incanto",
+      "scene-json",
+      "three.js"
     ]
   },
   {

@@ -1,14 +1,28 @@
-# Requirements — basic-3d-freeview
+# Requirements — basic-3d-freeview (Incanto)
 
 ## Coding Patterns
 
-- Stores are concern-split (Zustand): `gameStore`, `localPlayerStore`, `multiPlayerStore`, `playerActionStore` — do not cross-write.
-- R3F goes under `components/r3f/`, DOM under `components/ui/`; `GameScene.tsx` stitches them and must not render 3D directly.
-- Extend `Player.tsx` by adding animation states, not by forking.
-- No magic values — animation ids in `constants/character.ts`, rigid-body types in `constants/rigidBodyObjectType.ts`.
+- STRUCTURE in `src/game.scene.json`; LOGIC in behaviors registered in
+  `src/App.tsx`. The controller node handles movement/camera — don't
+  reimplement it in behaviors; tune its props (maxSpeed, jumpVelocity,
+  camDistance…) in JSON instead.
+- New animations: declare the GLB as an `animation` asset, extend
+  `STATE_CLIPS` in `behaviors.ts` (or set `skin.animation = '$key'` directly
+  for one-shots).
+- New world objects: StaticBody3D + box/sphere/capsule collider + a
+  MeshInstance3D/ModelInstance3D skin child. The character collides with
+  anything that has a collider — no registration step.
+- The on-screen JUMP/ATTACK buttons inject key codes through
+  `engine.input.handleKey` — wire new buttons the same way.
+- uids: `newUid()` from 'incanto'.
 
 ## Known Issues / Constraints
 
-- `vibe-starter-3d` owns keyboard bindings; there is no local `controls.ts` override.
-- `MapPhysicsReadyChecker` has a 180-frame raycast timeout — very slow map loads may expire it.
-- Pointer lock is desktop-only (guarded by `IS_MOBILE`).
+- ATTACK renders for visual parity but fires no gameplay (the original's
+  left-click shoots a bullet system we did not port to this template).
+- The character model is meter-scale; `targetHeight` fit logs a warning and
+  keeps authored scale (skinned rigs defeat bbox measurement) — expected.
+- Camera collision (pull-in when geometry blocks the view) is not
+  implemented; nothing in this scene can block the camera.
+- Shadows are not enabled in this template yet (FollowLight tracks position
+  only).

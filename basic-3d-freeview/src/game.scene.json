@@ -1,0 +1,136 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "Freeview",
+  "environment": {
+    "preset": "sunset",
+    "ambient": { "color": "#ffffff", "intensity": 0.7 },
+    "background": "#ffffff"
+  },
+  "physics": { "gravity": [0, -9.81, 0] },
+  "input": {
+    "move": {
+      "type": "vector2",
+      "keys": {
+        "up": ["KeyW", "ArrowUp"],
+        "down": ["KeyS", "ArrowDown"],
+        "left": ["KeyA", "ArrowLeft"],
+        "right": ["KeyD", "ArrowRight"]
+      }
+    },
+    "jump": { "type": "button", "keys": ["Space"] },
+    "sprint": { "type": "button", "keys": ["ShiftLeft", "ShiftRight"] }
+  },
+  "assets": {
+    "characters/base": {
+      "type": "model",
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb"
+    },
+    "anims/idle": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb"
+    },
+    "anims/walk": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb"
+    },
+    "anims/run": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb"
+    },
+    "anims/runFast": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb"
+    },
+    "anims/jump": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb"
+    }
+  },
+  "root": {
+    "name": "Freeview",
+    "type": "Node3D",
+    "uid": "n_vc3d2cfda69yb8e8",
+    "children": [
+      {
+        "name": "Floor",
+        "type": "StaticBody3D",
+        "uid": "n_7123dpfvw6pby2va",
+        "props": {
+          "collider": { "shape": "box", "size": [100, 0.1, 100] },
+          "position": [0, -0.05, 0]
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_vepx48bjr4iwxek5",
+            "props": {
+              "mesh": "box",
+              "size": [100, 0.1, 100],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Player",
+        "type": "RigidBody3D",
+        "uid": "n_kp610qp3d12k12e3",
+        "props": {
+          "position": [0, 1.8, 0],
+          "fixedRotation": true,
+          "friction": 0,
+          "collider": { "shape": "capsule", "radius": 0.32, "height": 0.96 }
+        },
+        "children": [
+          {
+            "name": "Controller",
+            "type": "CharacterController3D",
+            "uid": "n_ltgcvljq7c8j9o9q",
+            "props": {
+              "view": "free",
+              "camDistance": 4,
+              "coyoteSeconds": 0.12,
+              "jumpBufferSeconds": 0.15
+            },
+            "script": { "name": "CharacterAnimator" }
+          },
+          {
+            "name": "Skin",
+            "type": "ModelInstance3D",
+            "uid": "n_94d9pqmwtmzkyhci",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.6,
+              "animation": "$anims/idle",
+              "castShadow": true,
+              "position": [0, -0.8, 0]
+            }
+          },
+          { "name": "Catch", "type": "Respawn", "uid": "n_2ipp5o3tnc6272sj" }
+        ]
+      },
+      {
+        "name": "Sun",
+        "type": "DirectionalLight3D",
+        "uid": "n_8ybobarqeg8pbwqb",
+        "props": {
+          "position": [30, 100, 30],
+          "intensity": 1,
+          "castShadow": true,
+          "shadowMapSize": 4096
+        },
+        "script": { "name": "FollowLight" }
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "uid": "n_r3ohvq1no3tv1q3z",
+        "props": { "position": [0, 2, 6], "fov": 75, "current": true }
+      }
+    ]
+  }
+}

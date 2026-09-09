@@ -1,28 +1,38 @@
-# Context — basic-3d-minecraft
+# Context — basic-3d-minecraft (Incanto)
 
 ## Project Overview
 
-Three.js + React Three Fiber scaffold for a voxel block world with first-person controls and physics. The world is rendered as a single `InstancedMesh` driven by a seeded `simplex-noise` height-map; active chunks around the camera are given per-chunk `TrimeshCollider` bodies for collision. A face-color custom shader replaces textures, and a screen-center raycaster produces a synced preview cube for placement. The player runs on `RigidBodyPlayer` + `FirstPersonViewController` with a full humanoid animation set. Asset preloading is handled by a dedicated `PreloadScene` before `GameScene` mounts. `@agent8/gameserver` is imported for `account` identity only — no networking is wired.
+A voxel sandbox on the Incanto engine: an 80×80 seeded terrain (65k+ blocks)
+rendered in ONE instanced draw call with the original's exact 26-tile face
+palette and shader (per-face colors, directional shading, darkened edges),
+first-person pointer-lock controls on the floating-capsule character,
+crosshair raycast with a translucent preview cube, and F/left-click placing
+the selected tile. Chunked trimesh colliders follow the player.
 
 ## Tech Stack
 
-_Exact versions are in `package.json`._
-
-- **Rendering**: Three.js, `@react-three/fiber`, `@react-three/drei`
-- **Physics**: `@react-three/rapier`
-- **Character framework**: `vibe-starter-3d` (`FirstPersonViewController`, `RigidBodyPlayer`, `CharacterRenderer`, `FollowLight`)
-- **Terrain**: `simplex-noise` (seeded 2D/3D), `lodash` (throttle)
-- **Multiplayer (identity only)**: `@agent8/gameserver`
-- **State**: Zustand
-- **Build / Lang**: Vite, TypeScript
-- **Styling**: Tailwind CSS
-- **Mobile input**: `nipplejs`
+- `incanto` (`VoxelGrid3D` + `CharacterController3D` firstPerson + trimesh
+  colliders + ray normals do the heavy lifting); Vite + TypeScript.
 
 ## Critical Memory
 
-- Blocks are rendered via a single `InstancedMesh` with a custom shader that reads six per-face color attributes (`colorTop/Bottom/Front/Back/Left/Right`). Do not switch to textures unless explicitly requested — color data lives in `ALL_CUBE_COLORS` in `utils/colorUtils.ts`.
-- Cube positions are integer-coordinate and centered on the origin; `CubePreview`, `useCubeRaycaster`, and `InstancedCube.handleCubeClick` must share the same `hit + normal` coordinate math, or preview and placement will desync.
-- Collision is chunk-based: the world is partitioned into `CHUNK_SIZE = 10` (X/Z only); only chunks within `ACTIVE_CHUNKS_RADIUS = 3` and capped at `MAX_ACTIVE_CHUNKS = 27` get a `TrimeshCollider` built from visible-face merging. New map geometry must fall inside this active set to be collidable.
-- Physics stay paused until `gameStore.isMapPhysicsReady` is `true`. `MapPhysicsReadyChecker` raycasts down from `(0, 50, 0)`; the world's surface must be reachable from there before the 180-frame timeout.
-- `Player` must be built on `RigidBodyPlayer` and the camera on `FirstPersonViewController`; the physics/animation pipeline depends on this pair.
-- Character model and animation URLs come from `src/assets.json` and are preloaded by `PreloadScene` before `GameScene` mounts.
+- READ THE SKILLS FIRST: `node_modules/incanto/skills/`.
+- TERRAIN IS DATA, NOT JSON: `VoxelGrid3D` renders blocks fed at runtime
+  (`setBlocks`/`addBlock`/`tileAt`) — the Terrain behavior generates the
+  seeded map ('minecraft123', the original's LCG+simplex recipe) and owns
+  the chunk colliders (10×10 chunks, radius 3 around the player, exposed
+  faces only).
+- The palette is `VOXEL_PALETTE` (engine, extracted verbatim from the
+  original): tile 1 grass / 2 dirt / 5 bedrock, face order
+  front,right,back,left,top,bottom.
+- Placement = `physics.castRay` (it returns the hit NORMAL): cube =
+  round(point − normal/2), place = cube + round(normal). removeCube is
+  intentionally absent — the ORIGINAL maps KeyG/right-click but never
+  consumes the action.
+- Mouse-down looks DOWN (standard FPS). The engine's firstPerson rig
+  handles the sign — don't double-negate pitch in behaviors (ray dir uses
+  −sin(pitch)).
+- Spawn = highest column near the origin (always above the y=10 water).
+- uids are engine-generated (`newUid()` from 'incanto').
+- `window.game` exposes the `createGame3D` Game handle in the console
+  (`game.engine`, `game.scene`, `game.dispose()`).

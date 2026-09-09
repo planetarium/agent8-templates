@@ -1,0 +1,210 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "FlightView",
+  "environment": {
+    "sky": { "sunPosition": [-20, 30, 10], "turbidity": 0.8, "rayleigh": 0.4 },
+    "ambient": { "color": "#ffffff", "intensity": 1.2 }
+  },
+  "input": {
+    "throttleUp": { "type": "button", "keys": ["KeyW"] },
+    "throttleDown": { "type": "button", "keys": ["KeyS"] },
+    "pitch": {
+      "type": "vector2",
+      "keys": {
+        "up": ["ArrowUp"],
+        "down": ["ArrowDown"],
+        "left": ["ArrowLeft"],
+        "right": ["ArrowRight"]
+      }
+    },
+    "yawLeft": { "type": "button", "keys": ["KeyA"] },
+    "yawRight": { "type": "button", "keys": ["KeyD"] },
+    "fire": { "type": "button", "keys": ["Space"] },
+    "reset": { "type": "button", "keys": ["KeyR"] }
+  },
+  "root": {
+    "name": "FlightView",
+    "type": "Node3D",
+    "uid": "n_ckzhdevbnc3vg3hw",
+    "children": [
+      {
+        "name": "Sea",
+        "type": "Node3D",
+        "uid": "n_xsze97aeooju34cz",
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_4ubym29093wxztft",
+            "props": {
+              "mesh": "box",
+              "size": [10000, 0.02, 10000],
+              "position": [0, -1, 0],
+              "material": { "color": "#77aaff", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Grass",
+        "type": "Node3D",
+        "uid": "n_ws2npiv62fjco2sr",
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_kk54tp6n0zrd5or2",
+            "props": {
+              "mesh": "box",
+              "size": [1000, 0.02, 1000],
+              "position": [0, 0, 0],
+              "material": { "color": "#3d711c", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Runway",
+        "type": "Node3D",
+        "uid": "n_oij5lg2v3mo24hjm",
+        "script": { "name": "RunwayMarkings" },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_rnw6bmawpsl3am11",
+            "props": {
+              "mesh": "box",
+              "size": [6, 0.02, 1000],
+              "position": [0, 0.01, 0],
+              "material": { "color": "#51595c", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Decor",
+        "type": "Node3D",
+        "uid": "n_0hhy2eqsez17glyv",
+        "script": { "name": "DecorSpawner" }
+      },
+      {
+        "name": "Plane",
+        "type": "Node3D",
+        "uid": "n_1yj8a7mksuhbxh4k",
+        "props": { "position": [0, 0.3, 0] },
+        "script": { "name": "FlightControl" },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "uid": "n_c1mjrj1safg317eo",
+            "props": {
+              "mesh": "box",
+              "size": [0.54, 0.54, 3],
+              "position": [0, 0.33, 0],
+              "material": { "color": "#f5f5f5", "roughness": 0.6 },
+              "castShadow": true
+            }
+          },
+          {
+            "name": "Cockpit",
+            "type": "MeshInstance3D",
+            "uid": "n_lp0lr1ow117lkugu",
+            "props": {
+              "mesh": "box",
+              "size": [0.57, 0.48, 0.66],
+              "position": [0, 0.42, -0.96],
+              "material": { "color": "#87ceeb", "roughness": 0.6 },
+              "castShadow": true
+            }
+          },
+          {
+            "name": "Nose",
+            "type": "MeshInstance3D",
+            "uid": "n_41cooq5tig0vxksw",
+            "props": {
+              "mesh": "box",
+              "size": [0.39, 0.39, 0.39],
+              "position": [0, 0.27, -1.62],
+              "material": { "color": "#ffa500", "roughness": 0.6 },
+              "castShadow": true
+            }
+          },
+          {
+            "name": "Wings",
+            "type": "MeshInstance3D",
+            "uid": "n_pe1acaxnzuanhsdm",
+            "props": {
+              "mesh": "box",
+              "size": [4.2, 0.06, 0.78],
+              "position": [0, 0.51, -0.198],
+              "material": { "color": "#f5f5f5", "roughness": 0.6 },
+              "castShadow": true
+            }
+          },
+          {
+            "name": "TailWing",
+            "type": "MeshInstance3D",
+            "uid": "n_8oh1nbg447k8khbm",
+            "props": {
+              "mesh": "box",
+              "size": [1.599, 0.06, 0.48],
+              "position": [0, 0.48, 1.32],
+              "material": { "color": "#f5f5f5", "roughness": 0.6 },
+              "castShadow": true
+            }
+          },
+          {
+            "name": "TailFin",
+            "type": "MeshInstance3D",
+            "uid": "n_xuapkes2s81myojd",
+            "props": {
+              "mesh": "box",
+              "size": [0.06, 0.54, 0.72],
+              "position": [0, 0.66, 1.26],
+              "material": { "color": "#f5f5f5", "roughness": 0.6 },
+              "castShadow": true
+            }
+          },
+          {
+            "name": "Propeller",
+            "type": "MeshInstance3D",
+            "uid": "n_7ttgsvezvwfu6lzy",
+            "props": {
+              "mesh": "box",
+              "size": [0.06, 1.2, 0.06],
+              "position": [0, 0.1, -1.86],
+              "rotation": [0, 0, 90],
+              "material": { "color": "#808080" },
+              "castShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Sun",
+        "type": "DirectionalLight3D",
+        "uid": "n_dtwyo3avbx0mw9re",
+        "props": {
+          "position": [30, 100, 30],
+          "intensity": 1,
+          "castShadow": true,
+          "shadowMapSize": 4096
+        },
+        "script": { "name": "FollowLight" }
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "uid": "n_xgq7ynd7yr13y2x2",
+        "props": { "position": [0, 3, 15], "fov": 30, "far": 5000, "current": true }
+      }
+    ]
+  }
+}

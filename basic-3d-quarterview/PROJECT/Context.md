@@ -1,25 +1,41 @@
-# Context — basic-3d-quarterview
+# Context — basic-3d-quarterview (Incanto)
 
 ## Project Overview
 
-Three.js + React Three Fiber scaffold with a physics-based character controller and a fixed quarter-view camera (angled top-down) that follows the player. Player runs on `RigidBodyPlayer` with a humanoid animation set and a combat-action layer (punch, kick, melee, cast); camera follows via `QuarterViewController`; map physics are gated by a raycast-based ready check. Asset preloading runs before the scene mounts. Zustand stores are pre-split for multiplayer, and `@agent8/gameserver` is installed but no networking is wired.
+The classic QUARTER-VIEW (isometric) character on the Incanto engine: a 100×100 gray
+floor under sunset image-based lighting, one animated character
+(base-model.glb + mixamo clips), a FIXED isometric camera (35.264° pitch, distance 40, FOV 20 — never
+rotates), world-relative WASD movement, Shift sprint, Space jump.
+ALL structure is `src/game.scene.json`; the only game code is two small
+behaviors (FollowLight, CharacterAnimator).
 
 ## Tech Stack
 
 _Exact versions are in `package.json`._
 
-- **Rendering**: Three.js, `@react-three/fiber`, `@react-three/drei`
-- **Physics**: `@react-three/rapier`
-- **Character framework**: `vibe-starter-3d` (`QuarterViewController`, `RigidBodyPlayer`, `CharacterRenderer`, `FollowLight`)
-- **Multiplayer (unwired)**: `@agent8/gameserver`
-- **State**: Zustand
-- **Build / Lang**: Vite, TypeScript
-- **Styling**: Tailwind CSS
+- **Game engine**: `incanto` — `CharacterController3D` does the heavy lifting
+- **Build / Lang**: Vite, TypeScript. No React/shell.
 
 ## Critical Memory
 
-- Player must be built on `RigidBodyPlayer` and camera on `QuarterViewController` with `followCharacter={true}`; the physics bootstrap depends on this pipeline.
-- Physics stay paused until `gameStore.isMapPhysicsReady` is `true`. `MapPhysicsReadyChecker` releases it via a downward raycast — new map geometry must be reachable by it.
-- `App.tsx` gates the scene behind `PreloadScene`; every asset referenced from gameplay must be listed in `src/assets.json` so it is fetched before `GameScene` mounts.
-- Handle player collisions via `RigidBodyPlayer.onTriggerEnter` / `onTriggerExit`, switching on `RigidBodyObjectType` tags.
-- Combat actions (punch, kick, meleeAttack, cast) flow through `playerActionStore`; the `Player` component locks controls during action animations and releases them on `onAnimationComplete`.
+- READ THE SKILLS FIRST: `node_modules/incanto/skills/` — especially
+  `incanto-3d-character.md` (the controller + camera rigs) and
+  `incanto-building-3d-games.md` (HDRI presets, preload).
+- The Player is a DYNAMIC `RigidBody3D` (capsule r0.32 h0.96,
+  `fixedRotation: true`, friction 0) with a `CharacterController3D` child (`view: "quarter"`, camDistance 40, mouseLook false) —
+  NOT a CharacterBody3D. The controller floats the capsule on a spring and
+  moves it with impulses (vibe-starter parity numbers).
+- `environment.preset: "sunset"` is LIGHTING ONLY; the visible background is
+  `background: "#ffffff"` (the original shows the page through a transparent
+  canvas — we paint white explicitly).
+- Animations are mixamo GLBs declared as `animation` assets; the
+  CharacterAnimator behavior maps `movementStateChanged`
+  (idle/walk/run/fastRun/airborne) to clips. The model is ALREADY meter-scale:
+  targetHeight fit detects implausible skinned-rig measurements and renders
+  at authored scale (console warning is expected and fine).
+- There is NO mouse look: the quarter camera is hard-set (rotation.x =
+  −35.264°, the atan(1/√2) isometric pitch); movement is world-relative.
+- The Camera3D has `fov: 20` — the long-lens look IS the quarter-view feel.
+- uids are engine-generated (`newUid()` from 'incanto') — never hand-write.
+- `window.game` exposes the `createGame3D` Game handle in the console
+  (`game.engine`, `game.scene`, `game.dispose()`).

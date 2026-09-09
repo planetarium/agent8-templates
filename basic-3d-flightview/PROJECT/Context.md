@@ -1,25 +1,35 @@
-# Context — basic-3d-flightview
+# Context — basic-3d-flightview (Incanto)
 
 ## Project Overview
 
-Single-player flight scaffold built on Three.js + React Three Fiber + Rapier. The player rides a kinematic `RigidBodyPlayer` that wraps a procedural `Aircraft` mesh (body, wings, cockpit, spinning propeller with `Trail`); flight motion and camera follow are handled by `vibe-starter-3d`'s `FlightViewController`. Space fires bullets through a Zustand-backed effect pipeline (bullet → explosion), R spawns a reset, and `StatusDisplay` reads speed/altitude from `localPlayerStore` and HP/player count from `@agent8/gameserver`. Map physics are gated by a downward raycast until the world is reachable.
+An airplane flight sim on the Incanto engine: a procedural box-built plane
+on a 1000m runway across grass and sea, atmospheric Sky shader, 500 seeded
+ground decorations + 150 drifting sky shapes, banking chase camera (FOV 30),
+HUD panel, Space-fired tracers, R reset. All flight constants mirror the
+original FlightViewController exactly.
 
 ## Tech Stack
 
-_Exact versions are in `package.json`._
-
-- **Rendering**: Three.js, `@react-three/fiber`, `@react-three/drei` (`Sky`, `Trail`, `Html`)
-- **Physics**: `@react-three/rapier`, `@dimforge/rapier3d-compat`
-- **Flight framework**: `vibe-starter-3d` (`FlightViewController`, `RigidBodyPlayer`, `RigidBodyObject`, `FollowLight`, `useControllerState`)
-- **Multiplayer**: `@agent8/gameserver` (used by `StatusDisplay` and `Player` for account / room state)
-- **State**: Zustand
-- **Build / Lang**: Vite, TypeScript
-- **Styling**: Tailwind CSS
+- **Game engine**: `incanto`; behaviors use `three` math directly (allowed
+  in GAME code — only engine core is three-free).
+- Vite + TypeScript, no shell framework.
 
 ## Critical Memory
 
-- Player must ride `RigidBodyPlayer` and camera must come from `FlightViewController`; Physics stays paused until `gameStore.isMapPhysicsReady` flips.
-- `MapPhysicsReadyChecker` raycasts downward from `y = 50` and releases physics on the first non-sensor, non-Capsule hit, or after a 180-frame timeout — new map geometry must be reachable by that ray.
-- `Player` is kinematic (`type="kinematicPosition"`, `gravityScale={0}`, `sensor={true}`) and uses a manual `CuboidCollider` with `autoCreateCollider={false}`; collisions are handled via `onTriggerEnter` / `onTriggerExit` keyed on `RigidBodyObjectType`.
-- Bullet lifecycle flows `Player → effectStore.addEffect(BULLET) → EffectContainer → BulletEffectController → Bullet` and resolves hits back into `EffectContainer` which spawns `EXPLOSION`.
-- Flight key mapping is declared inline in `GameSceneCanvas.tsx` as a `FlightControllerKeyMapping`; `src/constants/controls.ts` exports a `KeyboardControlsEntry[]` that is currently unused.
+- READ THE SKILLS FIRST: `node_modules/incanto/skills/`.
+- Flight is NOT the character controller: `FlightControl` is a plain
+  behavior holding a quaternion attitude (the node's Euler rotation is just
+  a mirror of it — never write node.rotation from elsewhere).
+- Constants are parity-critical: maxSpeed 120 (HUD caps at exactly
+  432.0 km/h), throttle +20/−80 per s, pitch 0.5 rad/s, roll π/2·0.5,
+  yaw accel 0.3, ground authority scales below 20 m/s, camera offset
+  (0,3,15) with slerp 0.08 / lerp 5, FOV 30 far 5000.
+- `environment.sky {sunPosition, turbidity, rayleigh}` is the three Sky
+  shader (drei <Sky> parity) — engine-rendered, not an asset.
+- Decor (500 ground + 150 floating) comes from `DecorSpawner` with seed
+  12345 — deterministic layout, not in the JSON (procedural decor is LOGIC).
+- HUD reads `plane.behavior.measuredSpeed` — a 5-frame rolling average like
+  the original, not the controller's internal speed.
+- uids are engine-generated (`newUid()` from 'incanto').
+- `window.game` exposes the `createGame3D` Game handle in the console
+  (`game.engine`, `game.scene`, `game.dispose()`).
