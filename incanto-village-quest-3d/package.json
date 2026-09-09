@@ -14,7 +14,7 @@
     "@dimforge/rapier2d-compat": "0.19.3",
     "@dimforge/rapier3d-compat": "0.19.3",
     "@pixiv/three-vrm": "^3.5.3",
-    "incanto": "^0.78.0",
+    "incanto": "^0.78.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.184.0"
