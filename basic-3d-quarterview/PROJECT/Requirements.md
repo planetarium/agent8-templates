@@ -1,18 +1,25 @@
-# Requirements — basic-3d-quarterview
+# Requirements — basic-3d-quarterview (Incanto)
 
 ## Coding Patterns
 
-- Stores are concern-split (Zustand): `gameStore`, `localPlayerStore`, `multiPlayerStore`, `playerActionStore` — do not cross-write. `playerActionStore` is a plain object; mutate it only through `setPlayerAction` / `resetAllPlayerActions`.
-- R3F goes under `components/r3f/`, DOM under `components/ui/`; `GameScene.tsx` stitches them and must not render 3D directly.
-- Scene graph lives in `Experience.tsx`; controller, lighting, and physics wiring live in `GameSceneCanvas.tsx` — keep them separate.
-- Extend `Player.tsx` by adding animation states and action branches (update `animationConfigMap`, `handleAnimationComplete`, and `updatePlayerState`), not by forking.
-- New gameplay actions go through `playerActionStore` and `InputController` key/action maps, not ad-hoc listeners.
-- No magic values — animation ids in `constants/character.ts`, rigid-body types in `constants/rigidBodyObjectType.ts`.
-- Every new runtime asset must be registered in `src/assets.json` so `PreloadScene` covers it.
+- STRUCTURE in `src/game.scene.json`; LOGIC in behaviors registered in
+  `src/App.tsx`. The controller node handles movement/camera — don't
+  reimplement it in behaviors; tune its props (maxSpeed, jumpVelocity,
+  camDistance…) in JSON instead.
+- New animations: declare the GLB as an `animation` asset, extend
+  `STATE_CLIPS` in `behaviors.ts` (or set `skin.animation = '$key'` directly
+  for one-shots).
+- New world objects: StaticBody3D + box/sphere/capsule collider + a
+  MeshInstance3D/ModelInstance3D skin child. The character collides with
+  anything that has a collider — no registration step.
+- The on-screen JUMP/ATTACK buttons inject key codes through
+  `engine.input.handleKey` — wire new buttons the same way.
+- uids: `newUid()` from 'incanto'.
 
 ## Known Issues / Constraints
 
-- `QuarterViewController` owns camera angle and follow behavior; there is no in-repo camera override.
-- `MapPhysicsReadyChecker` has a 180-frame raycast timeout — very slow map loads may expire it.
-- Camera does not orbit, so the nipplejs joystick occupies the left half of the screen on mobile; there is no right-side look stick.
-- `usePlayerActionStore` is module-level shared state; it does not trigger React re-renders on change.
+- ATTACK renders for visual parity but fires no gameplay (the original's
+  left-click shoots a bullet system we did not port to this template).
+- The character model is meter-scale; `targetHeight` fit logs a warning and
+  keeps authored scale (skinned rigs defeat bbox measurement) — expected.
+- Shadows ARE on here (sun castShadow, mapSize 4096, ±75 frustum).

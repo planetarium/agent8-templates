@@ -1,0 +1,581 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "SideView",
+  "environment": {
+    "preset": "sunset",
+    "ambient": { "color": "#ffffff", "intensity": 0.7 },
+    "background": "#ffffff"
+  },
+  "physics": { "gravity": [0, -9.81, 0] },
+  "input": {
+    "move": {
+      "type": "vector2",
+      "keys": {
+        "up": ["KeyW", "ArrowUp"],
+        "down": ["KeyS", "ArrowDown"],
+        "left": ["KeyA", "ArrowLeft"],
+        "right": ["KeyD", "ArrowRight"]
+      }
+    },
+    "jump": { "type": "button", "keys": ["Space"] },
+    "sprint": { "type": "button", "keys": ["ShiftLeft", "ShiftRight"] },
+    "punch": { "type": "button", "keys": ["KeyF", "Mouse0"] }
+  },
+  "assets": {
+    "characters/base": {
+      "type": "model",
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb"
+    },
+    "anims/idle": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb"
+    },
+    "anims/walk": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb"
+    },
+    "anims/run": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb"
+    },
+    "anims/runFast": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb"
+    },
+    "anims/jump": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb"
+    },
+    "anims/punch": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-00.glb"
+    }
+  },
+  "root": {
+    "name": "SideView",
+    "type": "Node3D",
+    "uid": "n_9m2mbm6t3qtf5tok",
+    "children": [
+      {
+        "name": "Block00",
+        "type": "StaticBody3D",
+        "uid": "n_jk6bi8ve1v5m2lb6",
+        "props": { "position": [0, -0.4, 0], "collider": { "shape": "box", "size": [6, 0.8, 2] } },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_r6ns7duasyjehutl",
+            "props": {
+              "mesh": "box",
+              "size": [6, 0.8, 2],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block01",
+        "type": "StaticBody3D",
+        "uid": "n_hipo1nq5v00k62gu",
+        "props": {
+          "position": [7.832, -0.441, 0],
+          "collider": { "shape": "box", "size": [5.664, 0.585, 1.829] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_riiiw4hcjwb0y288",
+            "props": {
+              "mesh": "box",
+              "size": [5.664, 0.585, 1.829],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block02",
+        "type": "StaticBody3D",
+        "uid": "n_caejxov0ofhqcwh4",
+        "props": {
+          "position": [16.022, 0.043, 0],
+          "collider": { "shape": "box", "size": [4.103, 0.638, 2.231] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_l43u3wa3u5c6trro",
+            "props": {
+              "mesh": "box",
+              "size": [4.103, 0.638, 2.231],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block03",
+        "type": "StaticBody3D",
+        "uid": "n_0m6b4nmrn2hhjd8r",
+        "props": {
+          "position": [23.251, -0.841, 0],
+          "collider": { "shape": "box", "size": [4.169, 0.566, 2.172] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_01zzrnawc621ogpu",
+            "props": {
+              "mesh": "box",
+              "size": [4.169, 0.566, 2.172],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block04",
+        "type": "StaticBody3D",
+        "uid": "n_i3bsemtd9el9t8cv",
+        "props": {
+          "position": [30.159, -0.222, 0],
+          "collider": { "shape": "box", "size": [4.309, 0.565, 1.621] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_mkyjbe6q7rpnx3sw",
+            "props": {
+              "mesh": "box",
+              "size": [4.309, 0.565, 1.621],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block05",
+        "type": "StaticBody3D",
+        "uid": "n_p4l83vfmh87ui1cl",
+        "props": {
+          "position": [37.006, -0.402, 0],
+          "collider": { "shape": "box", "size": [4.927, 0.783, 2.012] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_oafkhc8uy6fcsoeg",
+            "props": {
+              "mesh": "box",
+              "size": [4.927, 0.783, 2.012],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block06",
+        "type": "StaticBody3D",
+        "uid": "n_zmxeqtixchs3jlzh",
+        "props": {
+          "position": [44.784, -0.334, 0],
+          "collider": { "shape": "box", "size": [5.875, 0.566, 2.362] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_3l9s7ytqdkny4oe9",
+            "props": {
+              "mesh": "box",
+              "size": [5.875, 0.566, 2.362],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block07",
+        "type": "StaticBody3D",
+        "uid": "n_n0xep4gs7ij4bt3f",
+        "props": {
+          "position": [54.409, -0.335, 0],
+          "collider": { "shape": "box", "size": [4.423, 0.522, 1.807] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_ekzwrlx1fioqf9vj",
+            "props": {
+              "mesh": "box",
+              "size": [4.423, 0.522, 1.807],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block08",
+        "type": "StaticBody3D",
+        "uid": "n_0ha54ucn0hf6e76u",
+        "props": {
+          "position": [61.521, -0.694, 0],
+          "collider": { "shape": "box", "size": [4.801, 0.646, 1.97] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_fvjxyqzwzklb2ckm",
+            "props": {
+              "mesh": "box",
+              "size": [4.801, 0.646, 1.97],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block09",
+        "type": "StaticBody3D",
+        "uid": "n_7pupm9np7alcvli2",
+        "props": {
+          "position": [68.553, -0.194, 0],
+          "collider": { "shape": "box", "size": [5.215, 0.549, 1.635] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_sl2tu3sldoppkdl3",
+            "props": {
+              "mesh": "box",
+              "size": [5.215, 0.549, 1.635],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block10",
+        "type": "StaticBody3D",
+        "uid": "n_heksmyy7a47yjsjq",
+        "props": {
+          "position": [76.781, 0.213, 0],
+          "collider": { "shape": "box", "size": [4.506, 0.713, 2.277] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_0btzfu504tuxware",
+            "props": {
+              "mesh": "box",
+              "size": [4.506, 0.713, 2.277],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block11",
+        "type": "StaticBody3D",
+        "uid": "n_9c29klol6ttw31cv",
+        "props": {
+          "position": [84.402, 0.047, 0],
+          "collider": { "shape": "box", "size": [4.425, 0.519, 2.057] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_przugsivjbrp6hzk",
+            "props": {
+              "mesh": "box",
+              "size": [4.425, 0.519, 2.057],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block12",
+        "type": "StaticBody3D",
+        "uid": "n_gnpq3dquydd1kcos",
+        "props": {
+          "position": [93.127, -0.457, 0],
+          "collider": { "shape": "box", "size": [4.845, 0.508, 2.246] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_h1n394f4anys1ok0",
+            "props": {
+              "mesh": "box",
+              "size": [4.845, 0.508, 2.246],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block13",
+        "type": "StaticBody3D",
+        "uid": "n_tc1bbyfb9rqmtg92",
+        "props": {
+          "position": [99.807, -0.785, 0],
+          "collider": { "shape": "box", "size": [4.33, 0.543, 1.84] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_cl34v8x4labtgf9w",
+            "props": {
+              "mesh": "box",
+              "size": [4.33, 0.543, 1.84],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block14",
+        "type": "StaticBody3D",
+        "uid": "n_7s7h8ii2wqr9glmq",
+        "props": {
+          "position": [108.4, -0.915, 0],
+          "collider": { "shape": "box", "size": [4.188, 0.767, 2.125] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_hstt5fslnd1aojkc",
+            "props": {
+              "mesh": "box",
+              "size": [4.188, 0.767, 2.125],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block15",
+        "type": "StaticBody3D",
+        "uid": "n_aveczerzju6ha8f0",
+        "props": {
+          "position": [115.533, -0.087, 0],
+          "collider": { "shape": "box", "size": [4.224, 0.693, 2.295] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_z5swy1pe9n9569mv",
+            "props": {
+              "mesh": "box",
+              "size": [4.224, 0.693, 2.295],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block16",
+        "type": "StaticBody3D",
+        "uid": "n_q7vsuvt0msamzzmp",
+        "props": {
+          "position": [-13.188, -0.96, 0],
+          "collider": { "shape": "box", "size": [5.288, 0.731, 2.376] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_vzukneyl4qlomgpx",
+            "props": {
+              "mesh": "box",
+              "size": [5.288, 0.731, 2.376],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block17",
+        "type": "StaticBody3D",
+        "uid": "n_pgiea38kuduzu2f1",
+        "props": {
+          "position": [-20.645, 0.183, 0],
+          "collider": { "shape": "box", "size": [4.843, 0.635, 2.094] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_sdmt0h34yurvjpyj",
+            "props": {
+              "mesh": "box",
+              "size": [4.843, 0.635, 2.094],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block18",
+        "type": "StaticBody3D",
+        "uid": "n_bf36l9ocxd3m7033",
+        "props": {
+          "position": [-29.407, -0.37, 0],
+          "collider": { "shape": "box", "size": [4.367, 0.573, 1.523] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_1ra487p2uuxul3av",
+            "props": {
+              "mesh": "box",
+              "size": [4.367, 0.573, 1.523],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block19",
+        "type": "StaticBody3D",
+        "uid": "n_rcl0n6deav7tm63l",
+        "props": {
+          "position": [-38.948, -0.272, 0],
+          "collider": { "shape": "box", "size": [5.646, 0.518, 2.35] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_icdlqlxdyeep5m6f",
+            "props": {
+              "mesh": "box",
+              "size": [5.646, 0.518, 2.35],
+              "material": { "color": "#4a4a4a", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Block20",
+        "type": "StaticBody3D",
+        "uid": "n_ewlil3wyjfyn4jt5",
+        "props": {
+          "position": [-48.948, 0.086, 0],
+          "collider": { "shape": "box", "size": [5.745, 0.542, 1.635] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_5h07mvk7pauqhbs7",
+            "props": {
+              "mesh": "box",
+              "size": [5.745, 0.542, 1.635],
+              "material": { "color": "#3f3f3f", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Player",
+        "type": "RigidBody3D",
+        "uid": "n_sr2ucyzw4bj27vxz",
+        "props": {
+          "position": [0, 1.8, 0],
+          "fixedRotation": true,
+          "friction": 0,
+          "collider": { "shape": "capsule", "radius": 0.32, "height": 0.96 }
+        },
+        "children": [
+          {
+            "name": "Controller",
+            "type": "CharacterController3D",
+            "uid": "n_kny2m05j810ort1d",
+            "props": {
+              "view": "side",
+              "camDistance": 10,
+              "eyeHeight": 1,
+              "mouseLook": false,
+              "camLerp": 5,
+              "coyoteSeconds": 0.12,
+              "jumpBufferSeconds": 0.15
+            },
+            "script": { "name": "CharacterAnimator" }
+          },
+          {
+            "name": "Skin",
+            "type": "ModelInstance3D",
+            "uid": "n_3qwp56cylhs6tgp1",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.6,
+              "animation": "$anims/idle",
+              "castShadow": true,
+              "position": [0, -0.8, 0]
+            }
+          },
+          { "name": "Catch", "type": "Respawn", "uid": "n_k4dsre5lfa30fs0j" }
+        ]
+      },
+      {
+        "name": "Sun",
+        "type": "DirectionalLight3D",
+        "uid": "n_tgaje4pfkk3scpt8",
+        "props": {
+          "position": [30, 100, 30],
+          "intensity": 1,
+          "castShadow": true,
+          "shadowMapSize": 4096
+        },
+        "script": { "name": "FollowLight" }
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "uid": "n_pqs5hnv7qg312hyr",
+        "props": { "position": [0, 2, 10], "fov": 60, "current": true }
+      }
+    ]
+  }
+}

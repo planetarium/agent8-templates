@@ -1,27 +1,43 @@
-# Context — basic-3d-firstpersonview
+# Context — basic-3d-firstpersonview (Incanto)
 
 ## Project Overview
 
-Three.js + React Three Fiber scaffold with a physics-based first-person character controller, pointer-lock aiming, and an effect pipeline wired for shooting. Player runs on `RigidBodyPlayer` with `CharacterRenderer` rendered invisible (FPV); camera follows via `FirstPersonViewController`; left-click fires bullets spawned at the camera along its forward vector, routed through a Zustand-backed effect store. Zustand stores are pre-split for multiplayer, and `@agent8/gameserver` is installed but no networking is wired.
+The FIRST-PERSON character (camera at the eye, body invisible) on the Incanto engine: a 100×100 gray
+floor under sunset image-based lighting, one animated character
+(base-model.glb + mixamo clips), pointer-lock mouse look from inside the body (eyeHeight 0.64, camDistance
+0.01), WASD relative to where you face, a white crosshair, and a left-click
+tracer gun (200ms cooldown), Shift sprint, Space jump.
+ALL structure is `src/game.scene.json`; the only game code is two small
+behaviors (FollowLight, CharacterAnimator).
 
 ## Tech Stack
 
 _Exact versions are in `package.json`._
 
-- **Rendering**: Three.js, `@react-three/fiber`, `@react-three/drei`
-- **Physics**: `@react-three/rapier`
-- **Character framework**: `vibe-starter-3d` (`FirstPersonViewController`, `RigidBodyPlayer`, `CharacterRenderer`, `RigidBodyObject`, `FollowLight`)
-- **Multiplayer (unwired)**: `@agent8/gameserver`
-- **State**: Zustand
-- **Build / Lang**: Vite, TypeScript
-- **Styling**: Tailwind CSS
+- **Game engine**: `incanto` — `CharacterController3D` does the heavy lifting
+- **Build / Lang**: Vite, TypeScript. No React/shell.
 
 ## Critical Memory
 
-- Player must be built on `RigidBodyPlayer` and camera on `FirstPersonViewController`; the physics bootstrap depends on this pipeline.
-- `CharacterRenderer` on the local player must stay `visible={false}` — the FPV camera sits inside the character.
-- Physics stay paused until `gameStore.isMapPhysicsReady` is `true`. `MapPhysicsReadyChecker` releases it via a downward raycast — new map geometry must be reachable by it.
-- Shooting flows through `effectStore.addEffect` → `EffectContainer` → `BulletEffectController`; do not spawn bullets as ad-hoc R3F children.
-- Bullet hit detection is via `RigidBodyObject` sensor triggers; the firer is excluded by passing the player `RigidBody` as `owner`.
-- Handle player collisions via `RigidBodyPlayer.onTriggerEnter` / `onTriggerExit`, switching on `RigidBodyObjectType` tags.
-- Character model and animation URLs are loaded via the `src/assets.json` manifest.
+- READ THE SKILLS FIRST: `node_modules/incanto/skills/` — especially
+  `incanto-3d-character.md` (the controller + camera rigs) and
+  `incanto-building-3d-games.md` (HDRI presets, preload).
+- The Player is a DYNAMIC `RigidBody3D` (capsule r0.32 h0.96,
+  `fixedRotation: true`, friction 0) with a `CharacterController3D` child (`view: "firstPerson"`) —
+  NOT a CharacterBody3D. The controller floats the capsule on a spring and
+  moves it with impulses (vibe-starter parity numbers).
+- `environment.preset: "sunset"` is LIGHTING ONLY; the visible background is
+  `background: "#ffffff"` (the original shows the page through a transparent
+  canvas — we paint white explicitly).
+- Animations are mixamo GLBs declared as `animation` assets; the
+  CharacterAnimator behavior maps `movementStateChanged`
+  (idle/walk/run/fastRun/airborne) to clips. The model is ALREADY meter-scale:
+  targetHeight fit detects implausible skinned-rig measurements and renders
+  at authored scale (console warning is expected and fine).
+- `createGame3D({ pointer: true })` gives lock-on-click mouse look
+  (click the canvas to lock) — yaw/pitch live on the controller node.
+- The model Skin is `visible: false` — animations still run (original
+  parity) but you see nothing from inside; flip it on if you add a mirror.
+- uids are engine-generated (`newUid()` from 'incanto') — never hand-write.
+- `window.game` exposes the `createGame3D` Game handle in the console
+  (`game.engine`, `game.scene`, `game.dispose()`).

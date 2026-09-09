@@ -1,0 +1,25 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "Pillar",
+  "root": {
+    "name": "Pillar",
+    "type": "StaticBody3D",
+    "props": { "collider": { "shape": "box", "size": [1.1, 4, 1.1] } },
+    "children": [
+      {
+        "name": "Skin",
+        "type": "MeshInstance3D",
+        "props": {
+          "mesh": "box",
+          "size": [1.1, 4, 1.1],
+          "material": { "color": "#454f61", "roughness": 0.95 },
+          "castShadow": true
+        },
+        "uid": "n_lfda1tis5dtjjebu"
+      }
+    ],
+    "uid": "n_k1evvnmzx0j4bzpq"
+  }
+}

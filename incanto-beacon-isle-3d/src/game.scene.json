@@ -1,0 +1,3060 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "BeaconIsle",
+  "environment": {
+    "sky": {
+      "type": "atmosphere",
+      "elevationDeg": 17,
+      "azimuthDeg": 224,
+      "turbidity": 3.2,
+      "rayleigh": 2.1
+    },
+    "fog": { "near": 110, "far": 560 },
+    "shadows": { "mapSize": 2048, "radius": 1.2 },
+    "exposure": 1.12,
+    "ambient": { "color": "#ffe8d4", "intensity": 0.85 },
+    "iblIntensity": 0.9,
+    "bloom": { "threshold": 1.2, "strength": 0.55 },
+    "post": { "vignette": 0.28, "saturation": 1.12, "contrast": 1.02 }
+  },
+  "physics": { "gravity": [0, -9.81, 0] },
+  "input": {
+    "move": {
+      "type": "vector2",
+      "keys": {
+        "up": ["KeyW", "ArrowUp"],
+        "down": ["KeyS", "ArrowDown"],
+        "left": ["KeyA", "ArrowLeft"],
+        "right": ["KeyD", "ArrowRight"]
+      },
+      "touch": "joystick"
+    },
+    "jump": { "type": "button", "keys": ["Space"], "touch": "button" },
+    "sprint": { "type": "button", "keys": ["ShiftLeft", "ShiftRight"] },
+    "interact": { "type": "button", "keys": ["KeyE"], "touch": "button" },
+    "attack": { "type": "button", "keys": ["Mouse0", "KeyF"], "touch": "button" },
+    "pause": { "type": "button", "keys": ["Escape"] },
+    "restart": { "type": "button", "keys": ["KeyR"] }
+  },
+  "assets": {
+    "characters/base": {
+      "type": "model",
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb"
+    },
+    "anims/idle": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb"
+    },
+    "anims/walk": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb"
+    },
+    "anims/run": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb"
+    },
+    "anims/runFast": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb"
+    },
+    "anims/jump": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb"
+    },
+    "anims/attack": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb"
+    },
+    "anims/swim": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/swim.glb"
+    }
+  },
+  "root": {
+    "name": "Game",
+    "type": "Node",
+    "script": { "name": "IsleDirector" },
+    "children": [
+      {
+        "name": "Terrain",
+        "type": "Node3D",
+        "children": [
+          {
+            "name": "Ground",
+            "type": "StaticBody3D",
+            "props": { "collider": { "shape": "heightfield" }, "static": true },
+            "children": [
+              {
+                "name": "Surface",
+                "type": "Terrain3D",
+                "props": { "size": [240, 240], "maxHeight": 2.66, "seed": 7411, "theme": "island" },
+                "uid": "n_807ji2yx8rf7niam"
+              }
+            ],
+            "uid": "n_n6fx6sqd0md1rjqe"
+          },
+          {
+            "name": "Sea",
+            "type": "Water3D",
+            "props": {
+              "size": [1920, 1920],
+              "position": [0, 9.19, 0],
+              "opacity": 1,
+              "swell": 0.55,
+              "swellWavelength": 42,
+              "swellDirectionDeg": 262,
+              "whitecaps": 0.45,
+              "absorption": 0.28,
+              "reflectionInterval": 400,
+              "colors": { "trough": "#0c3d58", "surface": "#1a7d9c", "peak": "#9adfe0" }
+            },
+            "uid": "n_0rezeypvcsh0a04j"
+          },
+          {
+            "name": "Tree1",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 501533504,
+              "height": 4.84,
+              "position": [67.68, 12.03, 10.83],
+              "canopyColor": "#356a4c",
+              "trunkColor": "#71503a",
+              "static": true
+            },
+            "uid": "n_0wpqdl4a89s9m31h"
+          },
+          {
+            "name": "Tree2",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 997642543,
+              "height": 5.12,
+              "position": [88.36, 12.53, -27.51],
+              "canopyColor": "#3a6b4a",
+              "trunkColor": "#6a4c34",
+              "static": true
+            },
+            "uid": "n_lv6neoqydngpeh6u"
+          },
+          {
+            "name": "Tree3",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 662504208,
+              "height": 5.63,
+              "position": [-56.2, 16.94, -35.76],
+              "canopyColor": "#3a6b4a",
+              "trunkColor": "#6a4c34",
+              "static": true
+            },
+            "uid": "n_5pqkcqlaccrrd10f"
+          },
+          {
+            "name": "Tree4",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 375332673,
+              "height": 5.17,
+              "position": [-57.91, 14.59, -73.12],
+              "canopyColor": "#2f5d44",
+              "trunkColor": "#6e4a32",
+              "static": true
+            },
+            "uid": "n_r4fap4bazix5ejxh"
+          },
+          {
+            "name": "Tree5",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 704176987,
+              "height": 5.74,
+              "position": [-57.05, 18.26, -15.54],
+              "canopyColor": "#2c5740",
+              "trunkColor": "#5f4530",
+              "static": true
+            },
+            "uid": "n_w9jtcyn691uhqcnb"
+          },
+          {
+            "name": "Tree6",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 283343096,
+              "height": 5.22,
+              "position": [34.26, 16.26, 83.81],
+              "canopyColor": "#2f5d44",
+              "trunkColor": "#6e4a32",
+              "static": true
+            },
+            "uid": "n_3k536or9a34b1555"
+          },
+          {
+            "name": "Tree7",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 895789517,
+              "height": 5.53,
+              "position": [-38.82, 17.53, -6.04],
+              "canopyColor": "#356a4c",
+              "trunkColor": "#71503a",
+              "static": true
+            },
+            "uid": "n_f3wvxkk1rq8g1e6w"
+          },
+          {
+            "name": "Clouds",
+            "type": "Node3D",
+            "props": { "snapToGround": false },
+            "children": [
+              {
+                "name": "Cloud1",
+                "type": "Node3D",
+                "props": { "position": [35.79, 42.95, -79.59] },
+                "children": [
+                  {
+                    "name": "Puff1",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-2.65, -0.18, -0.04],
+                      "scale": [2.13, 0.74, 1.34],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_v8n44wrya3a9n14t"
+                  },
+                  {
+                    "name": "Puff2",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-1.07, 0.25, -0.13],
+                      "scale": [2.58, 0.91, 1.66],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_woepaxgvnspq3ha3"
+                  },
+                  {
+                    "name": "Puff3",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [0, 0.18, -0.11],
+                      "scale": [1.83, 0.85, 1.55],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_3rnpk2j4rfwshrtc"
+                  },
+                  {
+                    "name": "Puff4",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [1.58, 0.03, 0.59],
+                      "scale": [1.59, 0.57, 1.04],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_r33ax56viaqr5a1w"
+                  },
+                  {
+                    "name": "Puff5",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [2.75, 0.2, -0.2],
+                      "scale": [2.16, 0.85, 1.55],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_8z59q5r6p02o7kfw"
+                  }
+                ],
+                "uid": "n_tki7wz384qh6m9b0"
+              },
+              {
+                "name": "Cloud2",
+                "type": "Node3D",
+                "props": { "position": [90.37, 42.03, -102.39] },
+                "children": [
+                  {
+                    "name": "Puff1",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-1.61, 0.19, -0.13],
+                      "scale": [1.5, 0.7, 1.27],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_qv4w35bme709zlf8"
+                  },
+                  {
+                    "name": "Puff2",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-0.74, 0.19, -0.16],
+                      "scale": [2.7, 0.93, 1.69],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_sxpp3hx6oes87owy"
+                  },
+                  {
+                    "name": "Puff3",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [0.73, -0.16, 0.04],
+                      "scale": [1.52, 0.65, 1.19],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_22o57zvxfox1uxjz"
+                  },
+                  {
+                    "name": "Puff4",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [1.99, 0.1, -0.38],
+                      "scale": [2.35, 0.9, 1.63],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_r0omp1o4sv0d4vhz"
+                  }
+                ],
+                "uid": "n_b8v0wu2x3kaah3fh"
+              },
+              {
+                "name": "Cloud3",
+                "type": "Node3D",
+                "props": { "position": [-80.57, 38.87, 103.61] },
+                "children": [
+                  {
+                    "name": "Puff1",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-1.6, 0.24, 0.42],
+                      "scale": [2.77, 1.04, 1.89],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_indz8dk17d1ko0pb"
+                  },
+                  {
+                    "name": "Puff2",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-0.57, 0.06, 0.54],
+                      "scale": [1.55, 0.56, 1.01],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_jxgba257pbkjz5ha"
+                  },
+                  {
+                    "name": "Puff3",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [0.53, 0.26, 0.22],
+                      "scale": [3.18, 1.14, 2.08],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_60cmowalexoykq05"
+                  },
+                  {
+                    "name": "Puff4",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [2.15, 0.27, 0.21],
+                      "scale": [2.8, 1.16, 2.1],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_ckzsw8dz0yk9bn58"
+                  }
+                ],
+                "uid": "n_n2iys2fam0yhfol1"
+              },
+              {
+                "name": "Cloud4",
+                "type": "Node3D",
+                "props": { "position": [-62.49, 40.25, -67.89] },
+                "children": [
+                  {
+                    "name": "Puff1",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-2.71, 0.3, 0.14],
+                      "scale": [2.22, 1.1, 2],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_5hh5agupgw2ed3cm"
+                  },
+                  {
+                    "name": "Puff2",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-1.1, -0.04, 0.36],
+                      "scale": [2.29, 0.84, 1.53],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_ayw59gtoghjsjkbj"
+                  },
+                  {
+                    "name": "Puff3",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [0, 0.18, 0.33],
+                      "scale": [1.96, 0.68, 1.23],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_bfed2qwwhtp344qj"
+                  },
+                  {
+                    "name": "Puff4",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [1.03, 0, 0.11],
+                      "scale": [3.25, 1.12, 2.04],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_ljcnw4zwi8qc9fxg"
+                  },
+                  {
+                    "name": "Puff5",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [3.16, -0.17, 0.56],
+                      "scale": [1.44, 0.72, 1.31],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_xlbbab4ojjnzl3se"
+                  }
+                ],
+                "uid": "n_95yajufjee2yb138"
+              },
+              {
+                "name": "Cloud5",
+                "type": "Node3D",
+                "props": { "position": [53.64, 42.45, 30.66] },
+                "children": [
+                  {
+                    "name": "Puff1",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-2.68, 0.2, -0.26],
+                      "scale": [2.53, 0.99, 1.8],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_lgnbp1z5xkndzf7c"
+                  },
+                  {
+                    "name": "Puff2",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-1.45, -0.29, 0.32],
+                      "scale": [3, 1.07, 1.95],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_vfsk0f59q2zhf7yu"
+                  },
+                  {
+                    "name": "Puff3",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [0, 0.06, 0.04],
+                      "scale": [1.57, 0.66, 1.2],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_gbf0b82xuvdrsqzg"
+                  },
+                  {
+                    "name": "Puff4",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [1.39, 0.03, 0.3],
+                      "scale": [2.02, 0.88, 1.6],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_xru4znlfuaa1473z"
+                  },
+                  {
+                    "name": "Puff5",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [3.03, 0.05, 0.44],
+                      "scale": [2.46, 1.03, 1.87],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_18r5cjth2klp88ti"
+                  }
+                ],
+                "uid": "n_n7fj0kqonahp220h"
+              },
+              {
+                "name": "Cloud6",
+                "type": "Node3D",
+                "props": { "position": [-28.53, 42.22, 34.77] },
+                "children": [
+                  {
+                    "name": "Puff1",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-2.01, 0.05, 0.57],
+                      "scale": [1.43, 0.63, 1.15],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_yrvou2k88cqfrwq5"
+                  },
+                  {
+                    "name": "Puff2",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [-1.17, 0.15, -0.5],
+                      "scale": [1.17, 0.56, 1.01],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_iohy6aw9bqcmwhe5"
+                  },
+                  {
+                    "name": "Puff3",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [0, 0.26, -0.55],
+                      "scale": [2.33, 1.16, 2.1],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_mi7bvhepjmc6wozt"
+                  },
+                  {
+                    "name": "Puff4",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [1.5, 0.07, -0.02],
+                      "scale": [1.72, 0.81, 1.48],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_i6ywgmv593u97f1o"
+                  },
+                  {
+                    "name": "Puff5",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [1, 1, 1],
+                      "position": [2.23, -0.09, 0.09],
+                      "scale": [2.15, 0.91, 1.65],
+                      "material": {
+                        "color": "#ffffff",
+                        "roughness": 1,
+                        "emissive": "#ffffff",
+                        "emissiveIntensity": 0.25
+                      }
+                    },
+                    "uid": "n_9icupnhmtz47lvcf"
+                  }
+                ],
+                "uid": "n_dw9l15caic8he6p5"
+              }
+            ],
+            "uid": "n_skgidqijd3ypcuh9"
+          },
+          {
+            "name": "Sun",
+            "type": "DirectionalLight3D",
+            "props": {
+              "position": [192, 360, 144],
+              "intensity": 1.7,
+              "castShadow": true,
+              "shadowArea": 288,
+              "color": "#fff4d6",
+              "static": true
+            },
+            "uid": "n_0ptl73f4qnas7roy"
+          },
+          {
+            "name": "FillLight",
+            "type": "DirectionalLight3D",
+            "props": {
+              "position": [-192, 192, -144],
+              "intensity": 0.4,
+              "color": "#b9d4ff",
+              "static": true
+            },
+            "uid": "n_o2z0h6xzy6vdo7r4"
+          }
+        ],
+        "uid": "n_oxut8orsqzfcuj2p"
+      },
+      {
+        "name": "Dressing",
+        "type": "Node3D",
+        "props": { "static": true },
+        "children": [
+          {
+            "name": "Grove1",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 996154656,
+              "height": 6.696541063416875,
+              "position": [-78.36, 21.57, -3.17],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#86a346",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_a14e4btjptr5rjlk"
+          },
+          {
+            "name": "Grove2",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 357505381,
+              "height": 7.641666956162468,
+              "position": [-50.07, 18.23, 19.13],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_k3finudux56anobl"
+          },
+          {
+            "name": "Grove3",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 961184095,
+              "height": 5.57485830610964,
+              "position": [-72.85, 21.61, 49.29],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#b8862f",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_ugby80718logv2y4"
+          },
+          {
+            "name": "Grove4",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 46928878,
+              "height": 6.582199774818076,
+              "position": [33.24, 12.98, -1.04],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#b8862f",
+              "trunkColor": "#806044",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_axla1a1got9je6dh"
+          },
+          {
+            "name": "Grove5",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 633592312,
+              "height": 6.437556267585037,
+              "position": [-45.22, 11.58, -93.14],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#56883c",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_i018mgbq348p3cti"
+          },
+          {
+            "name": "Grove6",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 365775923,
+              "height": 6.214120347568327,
+              "position": [-76.3, 21.75, 35.88],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#2c5740",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_y7nrwtvvxztc1y3o"
+          },
+          {
+            "name": "Grove7",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 558958830,
+              "height": 5.550441294105361,
+              "position": [35.37, 13.02, 9.35],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_37lnv4nv6z16tkun"
+          },
+          {
+            "name": "Grove8",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 707640274,
+              "height": 5.489254561133975,
+              "position": [31.77, 13.09, -15.27],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#5f4530",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_fmdcjd0hg60x0z2y"
+          },
+          {
+            "name": "Grove9",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 698619637,
+              "height": 5.264061087338268,
+              "position": [-39.53, 14.56, -49.17],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#56883c",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_ounuwwdqz4tsud33"
+          },
+          {
+            "name": "Grove10",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 461486133,
+              "height": 6.32620329510565,
+              "position": [10.63, 16.79, 67.1],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_oypyxhs0u81ql07x"
+          },
+          {
+            "name": "Grove11",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 259170899,
+              "height": 7.0321777085848565,
+              "position": [-26.11, 12.96, -63.63],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#5f4530",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_3vqjaqbwo23hgcq6"
+          },
+          {
+            "name": "Grove12",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 550505838,
+              "height": 7.897651722165209,
+              "position": [86.2, 13.82, 57.1],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_g9m6mhx7z1m2f0jc"
+          },
+          {
+            "name": "Grove13",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 270863015,
+              "height": 6.492842540958161,
+              "position": [-39.31, 19.04, 56.73],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#b8862f",
+              "trunkColor": "#5f4530",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_s3tnk76hbcuglzp3"
+          },
+          {
+            "name": "Grove14",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 407977278,
+              "height": 6.845912222481778,
+              "position": [-34.38, 18.76, 60.02],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#56883c",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_287qi5qvsz3et66x"
+          },
+          {
+            "name": "Grove15",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 426783519,
+              "height": 5.219586386396453,
+              "position": [-33.14, 16.71, -17.79],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#86a346",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_7axje7d72q5ihwrd"
+          },
+          {
+            "name": "Grove16",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 63961802,
+              "height": 5.766203415525659,
+              "position": [-52.46, 20.86, 89.12],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#86a346",
+              "trunkColor": "#806044",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_63doyjq6rl3thbor"
+          },
+          {
+            "name": "Grove17",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 973459530,
+              "height": 7.882665852290268,
+              "position": [-88, 25.67, 90.11],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#56883c",
+              "trunkColor": "#806044",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_cx1ucfpvcey55ded"
+          },
+          {
+            "name": "Grove18",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 498700192,
+              "height": 5.520459832046288,
+              "position": [-0.51, 14.63, -16.44],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_hoal5jsp952mk0io"
+          },
+          {
+            "name": "Grove19",
+            "type": "Tree3D",
+            "props": {
+              "type": "conifer",
+              "seed": 625088266,
+              "height": 5.85006726320136,
+              "position": [1.69, 16.73, 42.83],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#86a346",
+              "trunkColor": "#a39c8e",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_fmlrona1pf2pozio"
+          },
+          {
+            "name": "Grove20",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 900773713,
+              "height": 6.8039215334700245,
+              "position": [-38.35, 19.04, 73.36],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#4a7c3f",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_didm445nzr3wrug8"
+          },
+          {
+            "name": "Grove21",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 426312146,
+              "height": 6.382715192014052,
+              "position": [35.24, 14.67, 42.11],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#56883c",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_szt1vj08lpt1plp1"
+          },
+          {
+            "name": "Grove22",
+            "type": "Tree3D",
+            "props": {
+              "type": "broadleaf",
+              "seed": 798929443,
+              "height": 5.802118046163143,
+              "position": [-15.92, 17.27, 35.97],
+              "count": 7,
+              "area": [14, 14],
+              "canopyColor": "#2c5740",
+              "trunkColor": "#7a5a3a",
+              "leafFadeStart": 160,
+              "leafFadeEnd": 420
+            },
+            "uid": "n_5wp0o5x2feyjbuxl"
+          },
+          {
+            "name": "Grass1",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [83.83, 13.64, 53.8],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_kfrj2jey4rgxj1f9"
+          },
+          {
+            "name": "Grass2",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [48.69, 13.7, 42.89],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_o9f72a63w53ygjpo"
+          },
+          {
+            "name": "Grass3",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [-37.46, 18.04, 29.71],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_vcc1pllkabt6yzcd"
+          },
+          {
+            "name": "Grass4",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [57.21, 16.3, 86.45],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_75byl15m382j9gha"
+          },
+          {
+            "name": "Grass5",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [-67.62, 16.83, -54.03],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_zyl84b786s1krq4f"
+          },
+          {
+            "name": "Grass6",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [0.75, 16.94, 89.68],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_366i82a14rjdm5el"
+          },
+          {
+            "name": "Grass7",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [85.64, 12.48, -28.21],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_tj8wgxqmkmei6btq"
+          },
+          {
+            "name": "Grass8",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [58.99, 12.3, -5.25],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_c9fuxbusrwrzq4px"
+          },
+          {
+            "name": "Grass9",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [75.79, 11.98, -31.54],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_ftpt76xogrq1kz7z"
+          },
+          {
+            "name": "Grass10",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [28.8, 16.05, 70.6],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_crrastkcr4jucjse"
+          },
+          {
+            "name": "Grass11",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [-74.91, 19.52, -21.04],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_por0nr23hs91bwb8"
+          },
+          {
+            "name": "Grass12",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [5.38, 16.51, 37.28],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_sk6hmsrvuuadlkuq"
+          },
+          {
+            "name": "Grass13",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [-9.71, 15.43, -10.63],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_mqbu8dk4mmrquy16"
+          },
+          {
+            "name": "Grass14",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [-61.97, 20.04, 41.88],
+              "area": [34, 34],
+              "density": 10
+            },
+            "uid": "n_n1q84cxrg9e924f3"
+          },
+          {
+            "name": "Flowers1",
+            "type": "Flowers3D",
+            "props": { "position": [33.23, 14.62, 36.95], "area": [12, 12], "seed": 357653252 },
+            "uid": "n_3j6j8g3ktaud0a5g"
+          },
+          {
+            "name": "Flowers2",
+            "type": "Flowers3D",
+            "props": { "position": [-82.3, 19.31, -38.23], "area": [12, 12], "seed": 398696966 },
+            "uid": "n_jfsm8c6sss1rsicl"
+          },
+          {
+            "name": "Flowers3",
+            "type": "Flowers3D",
+            "props": { "position": [-33.36, 18.6, 50.95], "area": [12, 12], "seed": 400708434 },
+            "uid": "n_hqwozio27odvcqnm"
+          },
+          {
+            "name": "Flowers4",
+            "type": "Flowers3D",
+            "props": { "position": [-9.78, 17.14, 45.89], "area": [12, 12], "seed": 575315232 },
+            "uid": "n_t4tybsims9ctmj36"
+          },
+          {
+            "name": "Flowers5",
+            "type": "Flowers3D",
+            "props": { "position": [55.02, 13.26, 39.6], "area": [12, 12], "seed": 73428741 },
+            "uid": "n_fai1c6sitg3n2anp"
+          },
+          {
+            "name": "Flowers6",
+            "type": "Flowers3D",
+            "props": { "position": [-49.05, 16.91, -30.14], "area": [12, 12], "seed": 258165764 },
+            "uid": "n_v70ko63nunhk03tu"
+          },
+          {
+            "name": "Flowers7",
+            "type": "Flowers3D",
+            "props": { "position": [17.86, 16.44, 76.99], "area": [12, 12], "seed": 22178236 },
+            "uid": "n_cp59m1vdm8zp0b0r"
+          },
+          {
+            "name": "Flowers8",
+            "type": "Flowers3D",
+            "props": { "position": [-5.95, 13.7, -35.97], "area": [12, 12], "seed": 359604670 },
+            "uid": "n_isk8bpe8nvlnv30p"
+          },
+          {
+            "name": "Flowers9",
+            "type": "Flowers3D",
+            "props": { "position": [-51.11, 18.29, -4.34], "area": [12, 12], "seed": 723951523 },
+            "uid": "n_jdq3amavetrrshlh"
+          },
+          {
+            "name": "ShoreRocks",
+            "type": "InstancedMesh3D",
+            "props": {
+              "snapToGround": false,
+              "mesh": "gem",
+              "size": [0.6, 0.45, 0.6],
+              "material": { "color": "#7e8590", "roughness": 0.95, "flatShading": true },
+              "transforms": [
+                [65.87, 9.27, -76.93, 166, 0.53],
+                [101.47, 9.37, -83.3, 302, 1.6],
+                [76.91, 9.7, -72.39, 85, 0.6],
+                [44.4, 9.72, -68.56, 9, 0.65],
+                [-12.82, 9.3, -101.57, 53, 0.88],
+                [44.62, 9.54, -74.72, 332, 0.9],
+                [58, 9.32, -73.07, 116, 1.26],
+                [-88.35, 9.35, -111.06, 138, 0.81],
+                [21.68, 10.03, -84.99, 78, 0.99],
+                [-10.68, 9.62, -98.65, 293, 0.69],
+                [1.69, 9.46, -100.2, 31, 0.8],
+                [-14.77, 9.68, -98.01, 125, 0.64],
+                [53.06, 9.23, -79.81, 120, 1],
+                [3.15, 9.57, -98.98, 302, 0.71],
+                [46.79, 9.35, -80.32, 332, 0.51],
+                [-27.05, 9.96, -97.3, 219, 1.41],
+                [41.91, 9.83, -68.51, 29, 0.72],
+                [-5.36, 9.48, -100.07, 119, 1.51],
+                [70.09, 9.96, -61.31, 195, 1.28],
+                [29.06, 9.49, -89.12, 291, 1.02],
+                [72.03, 9.72, -68.56, 17, 0.84],
+                [76.59, 9.5, -76.24, 2, 1.46],
+                [77.61, 10.11, -63.76, 102, 0.97],
+                [88.88, 9.97, -71.71, 144, 1.27],
+                [22.81, 10.1, -82.71, 44, 0.69],
+                [-53.97, 9.68, -106.43, 172, 1.14],
+                [31.22, 9.91, -78.35, 234, 0.82],
+                [77.29, 9.35, -79.67, 37, 1.15],
+                [15.4, 9.5, -96.98, 235, 0.82],
+                [53.77, 10.11, -51.89, 150, 0.74],
+                [82.2, 9.41, -80.35, 241, 0.59],
+                [-83.75, 9.8, -109.91, 197, 0.76],
+                [111.75, 9.57, -18.26, 259, 1.34],
+                [83.12, 9.62, 113.87, 152, 1.19],
+                [-35.65, 9.4, -103.97, 223, 1.44],
+                [11.58, 9.85, -93.83, 88, 0.71],
+                [25.71, 9.2, -96.34, 353, 1.2],
+                [-62.69, 9.26, -108.36, 22, 1.54],
+                [-4.49, 9.44, -100.45, 156, 1.11],
+                [-20.78, 9.26, -102.31, 346, 1.25],
+                [34.63, 9.68, -80.6, 154, 0.99],
+                [-103.24, 9.43, -112.69, 253, 1.1],
+                [3.1, 9.97, -94.51, 198, 1.05],
+                [100.5, 9.94, -72.96, 156, 1.1],
+                [34.58, 10.11, -70.23, 358, 0.84],
+                [112.12, 9.53, -5.23, 346, 1.12],
+                [81.07, 9.39, -80.26, 32, 0.57],
+                [41.15, 10.02, 114.74, 333, 1.12],
+                [7.6, 9.69, -96.94, 14, 0.67],
+                [50.43, 9.69, -62.51, 206, 1.06]
+              ],
+              "castShadow": true,
+              "receiveShadow": true
+            },
+            "uid": "n_b1n31kt2aie6qki8"
+          }
+        ],
+        "uid": "n_q8x8lsbybkthltgj"
+      },
+      {
+        "name": "Lighthouse",
+        "type": "Node3D",
+        "props": { "position": [-21.5, 18, 57.5], "snapToGround": false, "static": true },
+        "children": [
+          {
+            "name": "Tower",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [3, 11, 3] },
+              "position": [0, 5.5, 0]
+            },
+            "children": [
+              {
+                "name": "Shaft",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [1.5, 11, 1.5],
+                  "material": { "color": "#e8e2d4", "roughness": 0.8 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_ek6ltf5l6vku3rg1"
+              },
+              {
+                "name": "Band",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [1.56, 1.6, 1.56],
+                  "position": [0, 1.2, 0],
+                  "material": { "color": "#b8452e", "roughness": 0.8 }
+                },
+                "uid": "n_woovtumccv3d3sr3"
+              }
+            ],
+            "uid": "n_wyv94004gjp2ezmq"
+          },
+          {
+            "name": "Lamp",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.9, 1.4, 0.9],
+              "position": [0, 11.6, 0],
+              "material": { "color": "#fff2c4", "emissive": "#ffd982", "emissiveIntensity": 2.2 }
+            },
+            "uid": "n_0g9ip66wbbjtmvs1"
+          },
+          {
+            "name": "LampLight",
+            "type": "OmniLight3D",
+            "props": {
+              "position": [0, 11.6, 0],
+              "color": "#ffd982",
+              "intensity": 2.2,
+              "range": 40
+            },
+            "uid": "n_hfsvm9993s9wun0g"
+          }
+        ],
+        "uid": "n_e19frysdu1nu5o86"
+      },
+      {
+        "name": "Keeper",
+        "type": "Node3D",
+        "props": { "position": [-16.5, 17.85, 61.5], "snapToGround": false },
+        "script": { "name": "Interactable", "props": { "action": "interact", "range": 3 } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "ModelInstance3D",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.68,
+              "animation": "$anims/idle",
+              "tint": "#d8b46a",
+              "castShadow": true
+            },
+            "uid": "n_xze2gpyfdxp626dm"
+          },
+          {
+            "name": "Marker",
+            "type": "Billboard3D",
+            "props": { "position": [0, 2.2, 0], "mode": "y" },
+            "children": [
+              {
+                "name": "Bang",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.13, 0.46, 0.13],
+                  "material": {
+                    "color": "#ffd166",
+                    "emissive": "#ffd166",
+                    "emissiveIntensity": 1.8
+                  }
+                },
+                "uid": "n_m1jdgd8yzjjwk0h0"
+              }
+            ],
+            "uid": "n_jsyx2r7e1w81to9k"
+          },
+          {
+            "name": "HeadTrack",
+            "type": "BoneLookAt3D",
+            "props": {
+              "target": "../Body",
+              "bone": "Head",
+              "lookAt": "../../Player",
+              "maxAngleDeg": 80
+            },
+            "uid": "n_9vlxaw713h46a070"
+          },
+          {
+            "name": "TalkSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "blip", "volume": 0.5, "pitch": 0.9 },
+            "uid": "n_xb6nx0bcftgo2isf"
+          },
+          {
+            "name": "AcceptSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "coin", "volume": 0.5 },
+            "uid": "n_bl73afa35s0itxg2"
+          }
+        ],
+        "uid": "n_mul5jcl9bm2xb99j"
+      },
+      {
+        "name": "Ward1",
+        "type": "Node3D",
+        "groups": ["ward"],
+        "props": { "position": [-61.5, 17.27, -37.5], "snapToGround": false },
+        "children": [
+          {
+            "name": "Plinth",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [1.6, 1.2, 1.6] },
+              "position": [0, 0.6, 0]
+            },
+            "children": [
+              {
+                "name": "Stone",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.8, 1.2, 0.8],
+                  "material": { "color": "#7d8494", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_flbva4qdcwhas075"
+              }
+            ],
+            "uid": "n_0iqqrt0dvw5wp5vi"
+          },
+          {
+            "name": "Crystal",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.55, 1.1, 0.55],
+              "position": [0, 1.75, 0],
+              "material": {
+                "color": "#243044",
+                "emissive": "#66ddff",
+                "emissiveIntensity": 0,
+                "roughness": 0.2
+              },
+              "castShadow": true
+            },
+            "uid": "n_5ns2gcttq6nft7hw"
+          },
+          {
+            "name": "Glow",
+            "type": "OmniLight3D",
+            "props": { "position": [0, 2, 0], "color": "#7fe3ff", "intensity": 0, "range": 16 },
+            "uid": "n_s5588txd4q4lm0pw"
+          },
+          {
+            "name": "LitFx",
+            "type": "Particles3D",
+            "props": {
+              "position": [0, 2, 0],
+              "preset": "magic",
+              "rate": 0,
+              "burst": 40,
+              "blend": "add",
+              "sizeStart": 80,
+              "sizeEnd": 16,
+              "renderOrder": 100
+            },
+            "uid": "n_nborf1s78i5eygo4"
+          },
+          {
+            "name": "ChimeSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "powerup",
+              "volume": 0.7,
+              "spatial": true,
+              "refDistance": 6,
+              "maxDistance": 60
+            },
+            "uid": "n_2xkbepqqnyu1vtkm"
+          }
+        ],
+        "uid": "n_ogvjm3gido0f6h5m"
+      },
+      {
+        "name": "Ward2",
+        "type": "Node3D",
+        "groups": ["ward"],
+        "props": { "position": [58.5, 10.2, -52.5], "snapToGround": false },
+        "children": [
+          {
+            "name": "Plinth",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [1.6, 1.2, 1.6] },
+              "position": [0, 0.6, 0]
+            },
+            "children": [
+              {
+                "name": "Stone",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.8, 1.2, 0.8],
+                  "material": { "color": "#7d8494", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_af39rdlt54zq32t0"
+              }
+            ],
+            "uid": "n_li9a7c4y34300zm2"
+          },
+          {
+            "name": "Crystal",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.55, 1.1, 0.55],
+              "position": [0, 1.75, 0],
+              "material": {
+                "color": "#243044",
+                "emissive": "#66ddff",
+                "emissiveIntensity": 0,
+                "roughness": 0.2
+              },
+              "castShadow": true
+            },
+            "uid": "n_6gah1oxows01pp26"
+          },
+          {
+            "name": "Glow",
+            "type": "OmniLight3D",
+            "props": { "position": [0, 2, 0], "color": "#7fe3ff", "intensity": 0, "range": 16 },
+            "uid": "n_cmmn25p3i29dfocm"
+          },
+          {
+            "name": "LitFx",
+            "type": "Particles3D",
+            "props": {
+              "position": [0, 2, 0],
+              "preset": "magic",
+              "rate": 0,
+              "burst": 40,
+              "blend": "add",
+              "sizeStart": 80,
+              "sizeEnd": 16,
+              "renderOrder": 100
+            },
+            "uid": "n_gtr5oqegjj0z9w6n"
+          },
+          {
+            "name": "ChimeSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "powerup",
+              "volume": 0.7,
+              "spatial": true,
+              "refDistance": 6,
+              "maxDistance": 60
+            },
+            "uid": "n_3u9ul6mqxme65f3a"
+          }
+        ],
+        "uid": "n_78frppxektihfu21"
+      },
+      {
+        "name": "Ward3",
+        "type": "Node3D",
+        "groups": ["ward"],
+        "props": { "position": [67.5, 13.07, 43.5], "snapToGround": false },
+        "children": [
+          {
+            "name": "Plinth",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [1.6, 1.2, 1.6] },
+              "position": [0, 0.6, 0]
+            },
+            "children": [
+              {
+                "name": "Stone",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.8, 1.2, 0.8],
+                  "material": { "color": "#7d8494", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_ro1moxdkeclz8jzd"
+              }
+            ],
+            "uid": "n_iqga3rt4nj5bvoq1"
+          },
+          {
+            "name": "Crystal",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.55, 1.1, 0.55],
+              "position": [0, 1.75, 0],
+              "material": {
+                "color": "#243044",
+                "emissive": "#66ddff",
+                "emissiveIntensity": 0,
+                "roughness": 0.2
+              },
+              "castShadow": true
+            },
+            "uid": "n_vkmstb5mqxs8794z"
+          },
+          {
+            "name": "Glow",
+            "type": "OmniLight3D",
+            "props": { "position": [0, 2, 0], "color": "#7fe3ff", "intensity": 0, "range": 16 },
+            "uid": "n_idb130at64anh510"
+          },
+          {
+            "name": "LitFx",
+            "type": "Particles3D",
+            "props": {
+              "position": [0, 2, 0],
+              "preset": "magic",
+              "rate": 0,
+              "burst": 40,
+              "blend": "add",
+              "sizeStart": 80,
+              "sizeEnd": 16,
+              "renderOrder": 100
+            },
+            "uid": "n_anhagqcbhak5c1t3"
+          },
+          {
+            "name": "ChimeSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "powerup",
+              "volume": 0.7,
+              "spatial": true,
+              "refDistance": 6,
+              "maxDistance": 60
+            },
+            "uid": "n_cmogiy6p2c5pzthd"
+          }
+        ],
+        "uid": "n_kmlyog7um67dbqzj"
+      },
+      {
+        "name": "Shade1_1",
+        "type": "Node3D",
+        "groups": ["shade", "shade-ward1"],
+        "props": { "position": [-52.5, 17.71, -34.5], "snapToGround": false },
+        "script": { "name": "PathFollow", "props": { "speed": 2.6, "loop": true } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.28, 0.62, 0.28],
+              "material": {
+                "color": "#141428",
+                "emissive": "#3b2d8a",
+                "emissiveIntensity": 0.5,
+                "roughness": 0.6
+              },
+              "castShadow": true
+            },
+            "uid": "n_vnzb94w1t5f6pvhe"
+          },
+          {
+            "name": "Hood",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.3, 0.46, 0.3],
+              "position": [0, 0.58, 0],
+              "material": { "color": "#0e0e1e", "emissive": "#241a5e", "emissiveIntensity": 0.4 }
+            },
+            "uid": "n_xzhx85fjudvdyaad"
+          },
+          {
+            "name": "EyeL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [-0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_meu3617g8soxzvur"
+          },
+          {
+            "name": "EyeR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_um644ymu3f1uhz6t"
+          },
+          {
+            "name": "Wisp",
+            "type": "Trail3D",
+            "props": {
+              "width": 0.3,
+              "color": "#5a48c8",
+              "opacity": 0.5,
+              "seconds": 0.5,
+              "additive": true,
+              "position": [0, 0.2, 0]
+            },
+            "uid": "n_7154w6h1ehghlbtp"
+          },
+          {
+            "name": "Fang",
+            "type": "Area3D",
+            "props": {
+              "position": [0, 0, 0.4],
+              "collider": { "shape": "box", "size": [0.7, 1.2, 0.8] }
+            },
+            "script": {
+              "name": "DamageOnContact",
+              "props": {
+                "amount": 20,
+                "targetGroup": "player",
+                "oncePerTarget": false,
+                "repeatEvery": 1.2
+              }
+            },
+            "uid": "n_36cm25pm1yqfxvdp"
+          },
+          {
+            "name": "HissSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "hurt",
+              "volume": 0.3,
+              "pitch": 0.4,
+              "spatial": true,
+              "refDistance": 4,
+              "maxDistance": 30
+            },
+            "uid": "n_nifzsy7x1ngp25ch"
+          }
+        ],
+        "uid": "n_vtxsvhcb38lu8jxr"
+      },
+      {
+        "name": "Shade1_2",
+        "type": "Node3D",
+        "groups": ["shade", "shade-ward1"],
+        "props": { "position": [-67.5, 18.16, -46.5], "snapToGround": false },
+        "script": { "name": "PathFollow", "props": { "speed": 2.6, "loop": true } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.28, 0.62, 0.28],
+              "material": {
+                "color": "#141428",
+                "emissive": "#3b2d8a",
+                "emissiveIntensity": 0.5,
+                "roughness": 0.6
+              },
+              "castShadow": true
+            },
+            "uid": "n_cq95ddywond4iy54"
+          },
+          {
+            "name": "Hood",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.3, 0.46, 0.3],
+              "position": [0, 0.58, 0],
+              "material": { "color": "#0e0e1e", "emissive": "#241a5e", "emissiveIntensity": 0.4 }
+            },
+            "uid": "n_fgbwqv6rc59v4kgy"
+          },
+          {
+            "name": "EyeL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [-0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_vugm06iaevlbmajp"
+          },
+          {
+            "name": "EyeR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_v90ysdqk81vb9smv"
+          },
+          {
+            "name": "Wisp",
+            "type": "Trail3D",
+            "props": {
+              "width": 0.3,
+              "color": "#5a48c8",
+              "opacity": 0.5,
+              "seconds": 0.5,
+              "additive": true,
+              "position": [0, 0.2, 0]
+            },
+            "uid": "n_31w8e8nqhh91kn0u"
+          },
+          {
+            "name": "Fang",
+            "type": "Area3D",
+            "props": {
+              "position": [0, 0, 0.4],
+              "collider": { "shape": "box", "size": [0.7, 1.2, 0.8] }
+            },
+            "script": {
+              "name": "DamageOnContact",
+              "props": {
+                "amount": 20,
+                "targetGroup": "player",
+                "oncePerTarget": false,
+                "repeatEvery": 1.2
+              }
+            },
+            "uid": "n_6vg1jdq39hynvurc"
+          },
+          {
+            "name": "HissSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "hurt",
+              "volume": 0.3,
+              "pitch": 0.4,
+              "spatial": true,
+              "refDistance": 4,
+              "maxDistance": 30
+            },
+            "uid": "n_qf3m7d6uh1ker1rn"
+          }
+        ],
+        "uid": "n_r5vg5y04gzy6jesl"
+      },
+      {
+        "name": "Shade2_1",
+        "type": "Node3D",
+        "groups": ["shade", "shade-ward2"],
+        "props": { "position": [67.5, 11.46, -49.5], "snapToGround": false },
+        "script": { "name": "PathFollow", "props": { "speed": 2.6, "loop": true } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.28, 0.62, 0.28],
+              "material": {
+                "color": "#141428",
+                "emissive": "#3b2d8a",
+                "emissiveIntensity": 0.5,
+                "roughness": 0.6
+              },
+              "castShadow": true
+            },
+            "uid": "n_r1bhe6a564o4aq6n"
+          },
+          {
+            "name": "Hood",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.3, 0.46, 0.3],
+              "position": [0, 0.58, 0],
+              "material": { "color": "#0e0e1e", "emissive": "#241a5e", "emissiveIntensity": 0.4 }
+            },
+            "uid": "n_at1rtzu6jtf4ev62"
+          },
+          {
+            "name": "EyeL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [-0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_0e7yg9nteypk7f5x"
+          },
+          {
+            "name": "EyeR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_jcf9umufm5yptjv2"
+          },
+          {
+            "name": "Wisp",
+            "type": "Trail3D",
+            "props": {
+              "width": 0.3,
+              "color": "#5a48c8",
+              "opacity": 0.5,
+              "seconds": 0.5,
+              "additive": true,
+              "position": [0, 0.2, 0]
+            },
+            "uid": "n_p8xl05b2ros5ttua"
+          },
+          {
+            "name": "Fang",
+            "type": "Area3D",
+            "props": {
+              "position": [0, 0, 0.4],
+              "collider": { "shape": "box", "size": [0.7, 1.2, 0.8] }
+            },
+            "script": {
+              "name": "DamageOnContact",
+              "props": {
+                "amount": 20,
+                "targetGroup": "player",
+                "oncePerTarget": false,
+                "repeatEvery": 1.2
+              }
+            },
+            "uid": "n_f09g1ssdolxxejia"
+          },
+          {
+            "name": "HissSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "hurt",
+              "volume": 0.3,
+              "pitch": 0.4,
+              "spatial": true,
+              "refDistance": 4,
+              "maxDistance": 30
+            },
+            "uid": "n_gobp1shh4b29mnce"
+          }
+        ],
+        "uid": "n_6wwlu8sbcnvshg3k"
+      },
+      {
+        "name": "Shade2_2",
+        "type": "Node3D",
+        "groups": ["shade", "shade-ward2"],
+        "props": { "position": [52.5, 10.73, -61.5], "snapToGround": false },
+        "script": { "name": "PathFollow", "props": { "speed": 2.6, "loop": true } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.28, 0.62, 0.28],
+              "material": {
+                "color": "#141428",
+                "emissive": "#3b2d8a",
+                "emissiveIntensity": 0.5,
+                "roughness": 0.6
+              },
+              "castShadow": true
+            },
+            "uid": "n_jpl24hrpiwunympj"
+          },
+          {
+            "name": "Hood",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.3, 0.46, 0.3],
+              "position": [0, 0.58, 0],
+              "material": { "color": "#0e0e1e", "emissive": "#241a5e", "emissiveIntensity": 0.4 }
+            },
+            "uid": "n_i6qnttmv8oa6dm4n"
+          },
+          {
+            "name": "EyeL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [-0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_qyixqg1nvccd9aug"
+          },
+          {
+            "name": "EyeR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_dvxxfmov18hl0332"
+          },
+          {
+            "name": "Wisp",
+            "type": "Trail3D",
+            "props": {
+              "width": 0.3,
+              "color": "#5a48c8",
+              "opacity": 0.5,
+              "seconds": 0.5,
+              "additive": true,
+              "position": [0, 0.2, 0]
+            },
+            "uid": "n_jmsovcd46z83x0t3"
+          },
+          {
+            "name": "Fang",
+            "type": "Area3D",
+            "props": {
+              "position": [0, 0, 0.4],
+              "collider": { "shape": "box", "size": [0.7, 1.2, 0.8] }
+            },
+            "script": {
+              "name": "DamageOnContact",
+              "props": {
+                "amount": 20,
+                "targetGroup": "player",
+                "oncePerTarget": false,
+                "repeatEvery": 1.2
+              }
+            },
+            "uid": "n_v57yy55e166ta3wz"
+          },
+          {
+            "name": "HissSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "hurt",
+              "volume": 0.3,
+              "pitch": 0.4,
+              "spatial": true,
+              "refDistance": 4,
+              "maxDistance": 30
+            },
+            "uid": "n_0xbye0rmb6te7z01"
+          }
+        ],
+        "uid": "n_l4nnh74z3m6e6iiu"
+      },
+      {
+        "name": "Shade3_1",
+        "type": "Node3D",
+        "groups": ["shade", "shade-ward3"],
+        "props": { "position": [76.5, 14.09, 46.5], "snapToGround": false },
+        "script": { "name": "PathFollow", "props": { "speed": 2.6, "loop": true } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.28, 0.62, 0.28],
+              "material": {
+                "color": "#141428",
+                "emissive": "#3b2d8a",
+                "emissiveIntensity": 0.5,
+                "roughness": 0.6
+              },
+              "castShadow": true
+            },
+            "uid": "n_dt76xt6qtct02147"
+          },
+          {
+            "name": "Hood",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.3, 0.46, 0.3],
+              "position": [0, 0.58, 0],
+              "material": { "color": "#0e0e1e", "emissive": "#241a5e", "emissiveIntensity": 0.4 }
+            },
+            "uid": "n_cjc3jm3r12xknng8"
+          },
+          {
+            "name": "EyeL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [-0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_8lvhsggaug951mux"
+          },
+          {
+            "name": "EyeR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_2o3htke05mwodt1n"
+          },
+          {
+            "name": "Wisp",
+            "type": "Trail3D",
+            "props": {
+              "width": 0.3,
+              "color": "#5a48c8",
+              "opacity": 0.5,
+              "seconds": 0.5,
+              "additive": true,
+              "position": [0, 0.2, 0]
+            },
+            "uid": "n_z2wkn1ep3bwfyabt"
+          },
+          {
+            "name": "Fang",
+            "type": "Area3D",
+            "props": {
+              "position": [0, 0, 0.4],
+              "collider": { "shape": "box", "size": [0.7, 1.2, 0.8] }
+            },
+            "script": {
+              "name": "DamageOnContact",
+              "props": {
+                "amount": 20,
+                "targetGroup": "player",
+                "oncePerTarget": false,
+                "repeatEvery": 1.2
+              }
+            },
+            "uid": "n_eum2htm836mblcpf"
+          },
+          {
+            "name": "HissSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "hurt",
+              "volume": 0.3,
+              "pitch": 0.4,
+              "spatial": true,
+              "refDistance": 4,
+              "maxDistance": 30
+            },
+            "uid": "n_t6rtdx1rf31asmz6"
+          }
+        ],
+        "uid": "n_h36jra1obrmdpot0"
+      },
+      {
+        "name": "Shade3_2",
+        "type": "Node3D",
+        "groups": ["shade", "shade-ward3"],
+        "props": { "position": [61.5, 13.7, 34.5], "snapToGround": false },
+        "script": { "name": "PathFollow", "props": { "speed": 2.6, "loop": true } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.28, 0.62, 0.28],
+              "material": {
+                "color": "#141428",
+                "emissive": "#3b2d8a",
+                "emissiveIntensity": 0.5,
+                "roughness": 0.6
+              },
+              "castShadow": true
+            },
+            "uid": "n_hvcc0wi92amkhsfi"
+          },
+          {
+            "name": "Hood",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.3, 0.46, 0.3],
+              "position": [0, 0.58, 0],
+              "material": { "color": "#0e0e1e", "emissive": "#241a5e", "emissiveIntensity": 0.4 }
+            },
+            "uid": "n_y218yxfhqioxrens"
+          },
+          {
+            "name": "EyeL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [-0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_1tp8mo7mnv1a5iys"
+          },
+          {
+            "name": "EyeR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.05, 0.05, 0.05],
+              "position": [0.09, 0.6, 0.24],
+              "material": { "color": "#ff4466", "emissive": "#ff4466", "emissiveIntensity": 2.4 }
+            },
+            "uid": "n_pnkxefk8dkpmv5tp"
+          },
+          {
+            "name": "Wisp",
+            "type": "Trail3D",
+            "props": {
+              "width": 0.3,
+              "color": "#5a48c8",
+              "opacity": 0.5,
+              "seconds": 0.5,
+              "additive": true,
+              "position": [0, 0.2, 0]
+            },
+            "uid": "n_ifiveeul9m062ru7"
+          },
+          {
+            "name": "Fang",
+            "type": "Area3D",
+            "props": {
+              "position": [0, 0, 0.4],
+              "collider": { "shape": "box", "size": [0.7, 1.2, 0.8] }
+            },
+            "script": {
+              "name": "DamageOnContact",
+              "props": {
+                "amount": 20,
+                "targetGroup": "player",
+                "oncePerTarget": false,
+                "repeatEvery": 1.2
+              }
+            },
+            "uid": "n_8vrqyycre1jy3qfc"
+          },
+          {
+            "name": "HissSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "hurt",
+              "volume": 0.3,
+              "pitch": 0.4,
+              "spatial": true,
+              "refDistance": 4,
+              "maxDistance": 30
+            },
+            "uid": "n_llegxg0pvq0qfjda"
+          }
+        ],
+        "uid": "n_wl3i254fiub3uwkz"
+      },
+      {
+        "name": "Player",
+        "type": "RigidBody3D",
+        "groups": ["player"],
+        "uid": "n_3cqocoi9v0cvoxdv",
+        "script": { "name": "Health", "props": { "max": 100, "invulnerableFor": 0.8 } },
+        "props": {
+          "position": [-4.5, 18.73, 70.5],
+          "fixedRotation": true,
+          "friction": 0,
+          "collider": { "shape": "capsule", "radius": 0.34, "height": 1 }
+        },
+        "children": [
+          { "name": "Catch", "type": "Respawn", "uid": "n_4xqjog8ub7avkdvp" },
+          {
+            "name": "Controller",
+            "type": "CharacterController3D",
+            "props": {
+              "view": "free",
+              "coyoteSeconds": 0.12,
+              "jumpBufferSeconds": 0.15,
+              "camDistance": 5.2,
+              "eyeHeight": 1.1,
+              "maxSpeed": 4.4,
+              "sprintMultiplier": 1.8,
+              "pitchMin": -0.5,
+              "pitchMax": 1.1,
+              "animations": {
+                "idle": "$anims/idle",
+                "walk": "$anims/walk",
+                "run": "$anims/run",
+                "fastRun": "$anims/runFast",
+                "airborne": "$anims/jump",
+                "swim": "$anims/swim"
+              }
+            },
+            "script": { "name": "SwordStrike" },
+            "uid": "n_wwj03pq43zanstwu"
+          },
+          {
+            "name": "Skin",
+            "type": "ModelInstance3D",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.7,
+              "animation": "$anims/idle",
+              "castShadow": true,
+              "position": [0, -0.85, 0]
+            },
+            "uid": "n_0pm8ea5gu8ncx7mn"
+          },
+          {
+            "name": "SwordMount",
+            "type": "BoneAttachment3D",
+            "props": { "target": "../Skin", "bone": "RightHand" },
+            "children": [
+              {
+                "name": "Blade",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.045, 0.7, 0.045],
+                  "position": [0, 0.42, 0],
+                  "material": { "color": "#d8dde8", "metalness": 0.9, "roughness": 0.25 },
+                  "castShadow": true
+                },
+                "uid": "n_eek8bpumznj7xju6"
+              },
+              {
+                "name": "Guard",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.16, 0.04, 0.06],
+                  "position": [0, 0.09, 0],
+                  "material": { "color": "#8a6d3a", "metalness": 0.7, "roughness": 0.4 }
+                },
+                "uid": "n_bu4qz5iavtzzrnji"
+              },
+              {
+                "name": "SwordTip",
+                "type": "Node3D",
+                "props": { "position": [0, 0.78, 0] },
+                "children": [
+                  {
+                    "name": "SwingTrail",
+                    "type": "Trail3D",
+                    "props": {
+                      "width": 0.26,
+                      "color": "#ffe9b0",
+                      "opacity": 0.9,
+                      "seconds": 0.25,
+                      "additive": true,
+                      "emitting": false,
+                      "minDistance": 0.02
+                    },
+                    "uid": "n_uo34otd2prq3a6er"
+                  }
+                ],
+                "uid": "n_xqd0x4at43mh137i"
+              }
+            ],
+            "uid": "n_b35eoqfebxbsja3e"
+          },
+          {
+            "name": "SwingSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "shoot", "volume": 0.35, "pitch": 0.55 },
+            "uid": "n_l527ckwzu8aqdbur"
+          },
+          {
+            "name": "HitSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "hit", "volume": 0.6 },
+            "uid": "n_njlpsv892q9w319m"
+          }
+        ]
+      },
+      {
+        "name": "Sky",
+        "type": "Node",
+        "script": {
+          "name": "DayNight",
+          "props": {
+            "paused": true,
+            "startHour": 17.25,
+            "nightDarkness": 0.32,
+            "maxSunElevationDeg": 48
+          }
+        },
+        "uid": "n_ewmqe9qbcu5taq30"
+      },
+      {
+        "name": "Boss",
+        "type": "Node3D",
+        "groups": ["boss"],
+        "props": { "visible": false, "snapToGround": false, "position": [-0.5, 16.87, 47.5] },
+        "script": { "name": "PathFollow", "props": { "speed": 2, "loop": false } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [1.1, 2.6, 1.1],
+              "position": [0, 2.4, 0],
+              "material": {
+                "color": "#171130",
+                "emissive": "#41288f",
+                "emissiveIntensity": 0.7,
+                "roughness": 0.55
+              },
+              "castShadow": true
+            },
+            "uid": "n_dx9ylqxepeoki5h3"
+          },
+          {
+            "name": "Crown",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "gem",
+              "size": [1, 1.2, 1],
+              "position": [0, 4.6, 0],
+              "material": {
+                "color": "#0c0920",
+                "emissive": "#6b46c8",
+                "emissiveIntensity": 1.1,
+                "flatShading": true
+              },
+              "castShadow": true
+            },
+            "uid": "n_3rh8opeg17jv7rh5"
+          },
+          {
+            "name": "EyeL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.16, 0.16, 0.16],
+              "position": [-0.34, 4.4, 0.8],
+              "material": { "color": "#ff2f6b", "emissive": "#ff2f6b", "emissiveIntensity": 4 }
+            },
+            "uid": "n_vi426k237cd557c1"
+          },
+          {
+            "name": "EyeR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.16, 0.16, 0.16],
+              "position": [0.34, 4.4, 0.8],
+              "material": { "color": "#ff2f6b", "emissive": "#ff2f6b", "emissiveIntensity": 4 }
+            },
+            "uid": "n_mhtslzu34na0rppx"
+          },
+          {
+            "name": "ArmL",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.4, 2, 0.4],
+              "position": [-1.5, 2.6, 0],
+              "rotation": [0, 0, 18],
+              "material": { "color": "#171130", "emissive": "#41288f", "emissiveIntensity": 0.5 },
+              "castShadow": true
+            },
+            "uid": "n_9fnq6rh2z91s7ekg"
+          },
+          {
+            "name": "ArmR",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.4, 2, 0.4],
+              "position": [1.5, 2.6, 0],
+              "rotation": [0, 0, -18],
+              "material": { "color": "#171130", "emissive": "#41288f", "emissiveIntensity": 0.5 },
+              "castShadow": true
+            },
+            "uid": "n_xxl26cpwjcxnw335"
+          },
+          {
+            "name": "EyeGlow",
+            "type": "OmniLight3D",
+            "props": { "position": [0, 4.2, 0.6], "color": "#b46bff", "intensity": 0, "range": 26 },
+            "uid": "n_4t8vek1pwzjtb8d3"
+          },
+          {
+            "name": "Dread",
+            "type": "Trail3D",
+            "props": {
+              "width": 1.2,
+              "color": "#6b46c8",
+              "opacity": 0.35,
+              "seconds": 0.8,
+              "additive": true,
+              "position": [0, 1.2, 0],
+              "emitting": false
+            },
+            "uid": "n_pm6t328scenz7s8r"
+          },
+          {
+            "name": "Fang",
+            "type": "Area3D",
+            "props": {
+              "position": [0, 1.2, 0.8],
+              "collider": { "shape": "box", "size": [2.4, 3.2, 2.2] }
+            },
+            "script": {
+              "name": "DamageOnContact",
+              "props": {
+                "amount": 35,
+                "targetGroup": "player",
+                "oncePerTarget": false,
+                "repeatEvery": 1.5
+              }
+            },
+            "uid": "n_z4n0p976sp0mwr8m"
+          },
+          {
+            "name": "RoarSfx",
+            "type": "AudioPlayer",
+            "props": {
+              "preset": "explosion",
+              "volume": 0.7,
+              "pitch": 0.35,
+              "spatial": true,
+              "refDistance": 10,
+              "maxDistance": 90
+            },
+            "uid": "n_nfg7w6morb3y7rkp"
+          }
+        ],
+        "uid": "n_d8cl5voz3mjr266t"
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "props": { "current": true, "far": 900, "position": [-16.5, 23.85266860961914, 75.5] },
+        "uid": "n_qrjexhafl5c2a93z"
+      },
+      {
+        "name": "WinSfx",
+        "type": "AudioPlayer",
+        "props": { "preset": "win", "volume": 0.7 },
+        "uid": "n_y8xvse41r9eqzl0v"
+      },
+      {
+        "name": "HUD",
+        "type": "HudLayer",
+        "children": [
+          {
+            "name": "Quest",
+            "type": "UiText",
+            "uid": "n_3txwnq8m201xbwoz",
+            "props": {
+              "text": "Find the lighthouse keeper [E]",
+              "size": 16,
+              "anchor": "topLeft",
+              "shadow": true
+            }
+          },
+          {
+            "name": "HP",
+            "type": "UiBar",
+            "uid": "n_vp09cmk3syxo2lcz",
+            "props": { "anchor": "topRight", "value": 100, "max": 100, "width": 170 }
+          },
+          {
+            "name": "Banner",
+            "type": "UiBanner",
+            "uid": "n_xwkphpoa7ac9w451",
+            "props": { "anchor": "center" }
+          },
+          {
+            "name": "Dialogue",
+            "type": "UiDialogue",
+            "uid": "n_7wosfkulqmue3jpv",
+            "props": { "anchor": "bottom", "charsPerSecond": 45 }
+          },
+          {
+            "name": "Hint",
+            "type": "UiText",
+            "uid": "n_x3funbse7a8nkfnu",
+            "props": {
+              "text": "WASD move · Shift sprint · E interact · click/F strike",
+              "size": 12,
+              "color": "#dddddd",
+              "anchor": "bottomRight",
+              "shadow": true
+            }
+          },
+          {
+            "name": "PauseMenu",
+            "type": "UiPanel",
+            "uid": "n_36ox1wee9cdz2cgj",
+            "props": {
+              "anchor": "center",
+              "layout": "column",
+              "gap": 12,
+              "padding": 22,
+              "visible": false,
+              "background": "rgba(10,14,22,0.92)",
+              "radius": 12
+            },
+            "children": [
+              {
+                "name": "PausedTitle",
+                "type": "UiText",
+                "uid": "n_kdecsevdetjk0q1i",
+                "props": { "text": "PAUSED", "size": 26 }
+              },
+              {
+                "name": "Resume",
+                "type": "UiButton",
+                "uid": "n_vaxmkxrqot30vd7u",
+                "props": { "text": "RESUME", "size": 18 }
+              },
+              {
+                "name": "PauseOptions",
+                "type": "UiButton",
+                "uid": "n_3nt1ztixpsvjtb86",
+                "props": { "text": "OPTIONS", "size": 16 }
+              },
+              {
+                "name": "Save",
+                "type": "UiButton",
+                "uid": "n_enx1clunsomchjx2",
+                "props": { "text": "SAVE", "size": 16 }
+              },
+              {
+                "name": "Continue",
+                "type": "UiButton",
+                "uid": "n_3hpo1n3ho12l7po2",
+                "props": { "text": "CONTINUE", "size": 16 }
+              },
+              {
+                "name": "Restart",
+                "type": "UiButton",
+                "uid": "n_0ytaknljuqmthwpl",
+                "props": { "text": "START OVER", "size": 16 }
+              }
+            ]
+          },
+          {
+            "name": "Options",
+            "type": "UiPanel",
+            "uid": "n_drf0bze03zae5h4l",
+            "props": {
+              "anchor": "center",
+              "layout": "column",
+              "gap": 10,
+              "padding": 22,
+              "visible": false,
+              "background": "rgba(10,14,22,0.92)",
+              "radius": 12
+            },
+            "children": [
+              {
+                "name": "OptionsTitle",
+                "type": "UiText",
+                "uid": "n_wn6vz16vfsnz4guj",
+                "props": { "text": "OPTIONS", "size": 24 }
+              },
+              {
+                "name": "Master",
+                "type": "UiVolumeSlider",
+                "uid": "n_aguq7s3aeapln07y",
+                "props": { "label": "master", "bus": "master", "width": 260 }
+              },
+              {
+                "name": "Sfx",
+                "type": "UiVolumeSlider",
+                "uid": "n_yyaguhkmv9z4u9a8",
+                "props": { "label": "effects", "bus": "sfx", "width": 260 }
+              },
+              {
+                "name": "Mute",
+                "type": "UiMuteToggle",
+                "uid": "n_3yj77bemd2sjm4yi",
+                "props": { "label": "mute everything" }
+              },
+              {
+                "name": "Quality",
+                "type": "UiQualitySelect",
+                "uid": "n_e3ehj0ln9p28ib59",
+                "props": { "label": "quality" }
+              },
+              {
+                "name": "Back",
+                "type": "UiButton",
+                "uid": "n_y95ob0mpwrvvhr78",
+                "props": { "text": "BACK", "size": 16 }
+              }
+            ]
+          }
+        ],
+        "uid": "n_0q1r3a6rijr3hc1w"
+      },
+      {
+        "name": "Pad",
+        "type": "StaticBody3D",
+        "uid": "n_uae445vafun14t1w",
+        "props": {
+          "position": [2, 0, 66],
+          "snapToGround": 0.1,
+          "collider": { "shape": "box", "size": [2, 0.2, 2] },
+          "restitution": 1
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_r5z35fqhlhntir5y",
+            "props": {
+              "mesh": "box",
+              "size": [2, 0.2, 2],
+              "castShadow": true,
+              "material": { "color": "#3b82f6", "roughness": 0.7 }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Ball",
+        "type": "RigidBody3D",
+        "uid": "n_rbwioxy4v827q3a4",
+        "props": { "position": [2, 60, 66], "collider": { "shape": "sphere", "radius": 0.3 } },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_hy0cclrpbgge9wiy",
+            "props": {
+              "mesh": "sphere",
+              "size": [0.3, 0.3, 0.3],
+              "castShadow": true,
+              "material": { "color": "#f4f1de" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Walker",
+        "type": "CharacterBody3D",
+        "uid": "n_mjjx1odvbl668a8p",
+        "props": {
+          "position": [-92, 0, -64],
+          "snapToGround": 0.95,
+          "slopeLimitDeg": 50,
+          "stepHeight": 0.5,
+          "collider": { "shape": "capsule", "radius": 0.4, "height": 1.1 }
+        },
+        "children": [
+          {
+            "name": "AI",
+            "type": "Node3D",
+            "uid": "n_73h5b3fzsep3ksnf",
+            "script": {
+              "name": "Chase",
+              "props": {
+                "target": "/root/Player",
+                "speed": 2.4,
+                "stopRange": 1.5,
+                "loseRange": 25,
+                "moveParent": true
+              }
+            }
+          },
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_lt6ypdouri4cicwd",
+            "props": {
+              "mesh": "capsule",
+              "size": [0.4, 1.1, 0.4],
+              "castShadow": true,
+              "material": { "color": "#6b4d8a", "roughness": 0.7 }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Buoy",
+        "type": "RigidBody3D",
+        "uid": "n_y0kpfi62yas7ai09",
+        "props": {
+          "position": [-150, 9.6, 0],
+          "snapToGround": false,
+          "mass": 20,
+          "collider": { "shape": "box", "size": [1, 1, 1] }
+        },
+        "script": {
+          "name": "Buoyancy",
+          "props": { "water": "/root/Terrain/Sea", "samples": 1, "drag": 0.1, "drift": 0 }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_tz2qooe24d5evtq2",
+            "props": {
+              "mesh": "box",
+              "size": [1, 1, 1],
+              "castShadow": true,
+              "material": { "color": "#f59e0b", "roughness": 0.6 }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Crate",
+        "type": "RigidBody3D",
+        "uid": "n_x0on4nkgt4l83sic",
+        "props": {
+          "position": [-150, 9.6, 8],
+          "snapToGround": false,
+          "mass": 20,
+          "collider": { "shape": "box", "size": [1, 1, 1] }
+        },
+        "script": { "name": "Buoyancy", "props": { "drift": 0 } },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_u0ckada9zfkpv9zz",
+            "props": {
+              "mesh": "box",
+              "size": [1, 1, 1],
+              "castShadow": true,
+              "material": { "color": "#8b5a2b", "roughness": 0.8 }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Flow",
+        "type": "Node",
+        "uid": "n_ibf6agaxzcxjhcmg",
+        "script": { "name": "GameFlow", "props": { "saveSlots": "beacon-isle" } }
+      }
+    ],
+    "uid": "n_nxftk1ep8wbi1bn9"
+  },
+  "connections": [
+    { "signal": "interacted", "from": "Keeper", "to": "/root", "handler": "onTalk" },
+    { "signal": "died", "from": "Player", "to": "/root", "handler": "onPlayerDown" },
+    {
+      "from": "/root/HUD/PauseMenu/Resume",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "resume"
+    },
+    {
+      "from": "/root/HUD/PauseMenu/PauseOptions",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "screen",
+      "args": ["/root/HUD/Options"]
+    },
+    {
+      "from": "/root/HUD/PauseMenu/Restart",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "restart"
+    },
+    {
+      "from": "/root/HUD/Options/Back",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "back"
+    },
+    {
+      "from": "/root/HUD/PauseMenu/Save",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "save"
+    },
+    {
+      "from": "/root/HUD/PauseMenu/Continue",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "continueFrom"
+    }
+  ]
+}
