@@ -1,15 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%236ee7dc%22/><text x=%2250%22 y=%2268%22 font-size=%2255%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22 fill=%22%230b0d14%22>in</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>3D Minecraft</title>
     <style>
+      html,
       body {
         margin: 0;
         padding: 0;
+        height: 100%;
+        overflow: hidden;
         font-family: Arial, sans-serif;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
       }
       .loading-container {
         position: fixed;
@@ -19,7 +27,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background-color: black;
+        background: black;
         color: white;
       }
       .loading-title {
@@ -35,48 +43,149 @@
         border-top-color: white;
         animation: spin 1s ease-in-out infinite;
       }
+      #crosshair {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 24px;
+        height: 24px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 50;
+      }
+      .ch-h,
+      .ch-v {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background: white;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8);
+      }
+      .ch-h {
+        width: 12px;
+        height: 1px;
+        transform: translate(-50%, -50%);
+      }
+      .ch-v {
+        width: 1px;
+        height: 12px;
+        transform: translate(-50%, -50%);
+      }
+      #tilebar {
+        position: fixed;
+        bottom: 0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 50;
+        display: flex;
+        gap: 6px;
+        background: rgba(0, 0, 0, 0.9);
+        border: 1px solid #313a40;
+        border-radius: 8px;
+        padding: 8px 10px;
+      }
+      .tile-chip {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        padding: 0;
+      }
+      .tile-chip.selected {
+        border-color: #ffffff;
+        transform: translateY(-2px) scale(1.15);
+      }
+      .action-buttons {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1001;
+      }
+      .round-btn {
+        border: none;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: bold;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: transform 0.1s;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .round-btn:active {
+        transform: scale(0.9);
+      }
+      .round-btn.attack {
+        width: 80px;
+        height: 80px;
+      }
+      .round-btn.jump {
+        position: absolute;
+        left: -3rem;
+        top: -3rem;
+        width: 56px;
+        height: 56px;
+      }
       @keyframes spin {
         to {
           transform: rotate(360deg);
         }
       }
+      .progress-track {
+        width: 256px;
+        height: 8px;
+        background: #374151;
+        border-radius: 9999px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        width: 0%;
+        height: 100%;
+        background: #3b82f6;
+        transition: width 0.3s;
+      }
+      .progress-text {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+      }
+      #root {
+        display: contents;
+      }
     </style>
-    <script>
-      (function () {
-        function reportGameSize() {
-          const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-
-          const width = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
-
-          window.parent.postMessage(
-            {
-              type: 'GAME_SIZE_RESPONSE',
-              height: height,
-              width: width,
-            },
-            '*',
-          );
-        }
-
-        window.addEventListener('load', reportGameSize);
-
-        window.addEventListener('resize', reportGameSize);
-
-        window.addEventListener('message', function (event) {
-          if (event.data && event.data.type === 'REQUEST_GAME_SIZE') {
-            reportGameSize();
-          }
-        });
-      })();
-    </script>
   </head>
   <body>
-    <div id="root">
-      <div class="loading-container">
-        <h2 class="loading-title">Loading</h2>
-        <div class="spinner"></div>
-      </div>
+    <div class="loading-container" id="loading">
+      <h2 class="loading-title">Loading</h2>
+      <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+      <div class="progress-text" id="progress-text">0%</div>
     </div>
+    <div id="root"></div>
+    <div id="crosshair">
+      <div class="ch-h"></div>
+      <div class="ch-v"></div>
+    </div>
+    <div id="tilebar"></div>
+    <div class="action-buttons">
+      <button type="button" id="btn-attack" class="round-btn attack">ADD CUBE</button>
+      <button type="button" id="btn-jump" class="round-btn jump">JUMP</button>
+    </div>
+    <script>
+      // agent8 embed harness: report the game size to a hosting iframe parent.
+      function postGameSize() {
+        window.parent.postMessage(
+          { type: 'GAME_SIZE_RESPONSE', width: document.body.scrollWidth, height: document.body.scrollHeight },
+          '*',
+        );
+      }
+      window.addEventListener('load', postGameSize);
+      window.addEventListener('resize', postGameSize);
+      window.addEventListener('message', (e) => {
+        if (e.data && e.data.type === 'REQUEST_GAME_SIZE') postGameSize();
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+

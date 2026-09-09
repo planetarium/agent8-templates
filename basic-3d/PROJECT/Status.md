@@ -1,19 +1,15 @@
-# Status — basic-3d
+# Status — basic-3d (Incanto)
 
 ## Implemented
 
-- Vite + React 18 + TypeScript scaffold
-- Tailwind CSS pipeline (`index.css` directives, `tailwind.config.js`, `postcss.config.js`)
-- ESLint configuration
-- Default `App.tsx` counter component
-- `index.html` iframe size reporter (`GAME_SIZE_RESPONSE` via `postMessage`)
-- Empty `assets.json` manifest
+- Physical sky (`atmosphere`, sun at 35° elevation / 140° azimuth), shadows on,
+  low ambient so the sky's light does the work
+- Sun `DirectionalLight3D` casting shadows over a 30 m area
+- Ground: `StaticBody3D` 40×40 with a receiving skin
+- Marker cube at the origin (casts a shadow — the visible proof the stage is lit)
+- Camera framing the origin from [7, 6, 9]
+- React shell, console handle, loading card, agent8 embed handshake
 
-## Installed but not wired
+## Next steps
 
-- `three`, `@react-three/fiber`, `@react-three/drei` — no `Canvas` or scene
-- `@react-three/rapier`, `@dimforge/rapier3d-compat` — no physics world
-- `@react-three/postprocessing` — no effect pipeline
-- `zustand` — no stores
-- `@agent8/gameserver` — no networking / session code
-- `lucide-react` — no icons used
+- Delete `Marker`, add the game.

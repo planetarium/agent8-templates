@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "type": "scene",
+  "name": "Stage",
+  "dimension": "3d",
+  "environment": {
+    "sky": { "type": "atmosphere", "elevationDeg": 35, "azimuthDeg": 140, "turbidity": 2.4 },
+    "shadows": true,
+    "ambient": { "color": "#ffffff", "intensity": 0.18 },
+    "background": "#9bc4e2"
+  },
+  "root": {
+    "name": "Stage",
+    "type": "Node3D",
+    "uid": "n_bavqe6dt96fm0495",
+    "children": [
+      {
+        "name": "Sun",
+        "type": "DirectionalLight3D",
+        "uid": "n_3eb8ejx7fgj27mg8",
+        "props": {
+          "position": [30, 60, 30],
+          "intensity": 1.2,
+          "castShadow": true,
+          "shadowArea": 30
+        }
+      },
+      {
+        "name": "Ground",
+        "type": "StaticBody3D",
+        "uid": "n_qizusruvq3q9q9nk",
+        "props": {
+          "position": [0, -0.05, 0],
+          "collider": { "shape": "box", "size": [40, 0.1, 40] }
+        },
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_zywmi5dlty5823vd",
+            "props": {
+              "mesh": "box",
+              "size": [40, 0.1, 40],
+              "material": { "color": "#6b7f5e", "roughness": 1 },
+              "receiveShadow": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Marker",
+        "type": "MeshInstance3D",
+        "uid": "n_6ybxoxog43b00oxi",
+        "props": {
+          "mesh": "box",
+          "size": [1, 1, 1],
+          "position": [0, 0.5, 0],
+          "castShadow": true,
+          "material": { "color": "#ffd166", "roughness": 0.6 }
+        }
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "uid": "n_q94g62t22m3zp2vx",
+        "props": { "position": [7, 6, 9], "rotation": [-26, 36, 0], "current": true }
+      }
+    ]
+  }
+}
