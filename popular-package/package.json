@@ -16,15 +16,16 @@
     "lucide-react": "0.482.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "three": "0.174.0",
+    "three": "^0.184.0",
     "three-stdlib": "2.35.14",
-    "zustand": "5.0.3"
+    "zustand": "5.0.3",
+    "incanto": "^0.78.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.5",
-    "@types/three": "^0.174.0",
+    "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^6.0.3",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.23.0",

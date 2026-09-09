@@ -1,0 +1,909 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "Vanguard",
+  "environment": {
+    "sky": {
+      "type": "atmosphere",
+      "elevationDeg": 28,
+      "azimuthDeg": 135,
+      "turbidity": 3.2,
+      "rayleigh": 2
+    },
+    "fog": { "near": 40, "far": 180 },
+    "shadows": { "mapSize": 2048 },
+    "exposure": 1.05,
+    "ambient": { "color": "#bcd0f0", "intensity": 0.28 },
+    "iblIntensity": 0.8,
+    "background": "#243047"
+  },
+  "physics": { "gravity": [0, -9.81, 0] },
+  "input": {
+    "move": {
+      "type": "vector2",
+      "keys": {
+        "up": ["KeyW", "ArrowUp"],
+        "down": ["KeyS", "ArrowDown"],
+        "left": ["KeyA", "ArrowLeft"],
+        "right": ["KeyD", "ArrowRight"]
+      }
+    },
+    "jump": { "type": "button", "keys": ["Space"] },
+    "sprint": { "type": "button", "keys": ["ShiftLeft", "ShiftRight"] },
+    "fire": { "type": "button", "keys": ["Mouse0", "KeyF"] },
+    "reload": { "type": "button", "keys": ["KeyR"] },
+    "pause": { "type": "button", "keys": ["Escape"] },
+    "restart": { "type": "button", "keys": ["Enter"] }
+  },
+  "assets": {
+    "characters/base": {
+      "type": "model",
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb"
+    },
+    "anims/idle": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb"
+    },
+    "anims/walk": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb"
+    },
+    "anims/run": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb"
+    },
+    "anims/runFast": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb"
+    },
+    "anims/jump": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb"
+    },
+    "anims/shoot": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/shoot.glb"
+    }
+  },
+  "root": {
+    "name": "Game",
+    "type": "Node",
+    "script": { "name": "ScoreKeeper", "props": { "lives": 3 } },
+    "children": [
+      {
+        "name": "Flow",
+        "type": "Node",
+        "script": { "name": "GameFlow", "props": { "pausePanelPath": "%PauseMenu" } },
+        "uid": "n_ofc39vdgsw837grt"
+      },
+      {
+        "name": "Arena",
+        "type": "Node3D",
+        "children": [
+          {
+            "name": "Floor",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [48, 0.1, 48] },
+              "position": [0, -0.05, 0]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [48, 0.1, 48],
+                  "material": { "color": "#3a4253", "roughness": 1 },
+                  "receiveShadow": true
+                },
+                "uid": "n_fhrx2w1swdg4aouk"
+              }
+            ],
+            "uid": "n_a9g237qshrv6q3zr"
+          },
+          {
+            "name": "Wall1",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [49, 3, 0.5] },
+              "position": [0, 1.5, -24.25]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [49, 3, 0.5],
+                  "material": { "color": "#4a5468", "roughness": 0.9 },
+                  "receiveShadow": true
+                },
+                "uid": "n_7zgr4tm46gypk29z"
+              }
+            ],
+            "uid": "n_dva41ykintj4ckoz"
+          },
+          {
+            "name": "Wall2",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [49, 3, 0.5] },
+              "position": [0, 1.5, 24.25]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [49, 3, 0.5],
+                  "material": { "color": "#4a5468", "roughness": 0.9 },
+                  "receiveShadow": true
+                },
+                "uid": "n_m70mrkagrg1igwdk"
+              }
+            ],
+            "uid": "n_9gan2h8arfads6nj"
+          },
+          {
+            "name": "Wall3",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [0.5, 3, 48] },
+              "position": [-24.25, 1.5, 0]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.5, 3, 48],
+                  "material": { "color": "#4a5468", "roughness": 0.9 },
+                  "receiveShadow": true
+                },
+                "uid": "n_i5eorlm18c6o3x10"
+              }
+            ],
+            "uid": "n_pibc3l5f1peblsvr"
+          },
+          {
+            "name": "Wall4",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [0.5, 3, 48] },
+              "position": [24.25, 1.5, 0]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.5, 3, 48],
+                  "material": { "color": "#4a5468", "roughness": 0.9 },
+                  "receiveShadow": true
+                },
+                "uid": "n_w7s4c7cv69pfnbk7"
+              }
+            ],
+            "uid": "n_4lh2uesc09jprpaf"
+          },
+          {
+            "name": "Cover1",
+            "instance": "cover.scene.json",
+            "overrides": { "position": [-8, 0.6, -8] },
+            "uid": "n_wrzlr0jqbyxh7m11"
+          },
+          {
+            "name": "Cover2",
+            "instance": "cover.scene.json",
+            "overrides": { "position": [8, 0.6, -8] },
+            "uid": "n_6ailumev172o037a"
+          },
+          {
+            "name": "Pillar1",
+            "instance": "pillar.scene.json",
+            "overrides": { "position": [-14, 2, 6] },
+            "uid": "n_xeh6r9631usk2i6w"
+          },
+          {
+            "name": "Pillar2",
+            "instance": "pillar.scene.json",
+            "overrides": { "position": [14, 2, 6] },
+            "uid": "n_7ksm42z50jbh13np"
+          },
+          {
+            "name": "Ramp",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [5, 0.6, 3] },
+              "position": [0, 0.3, -14]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5, 0.6, 3],
+                  "material": { "color": "#5b6678", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_fgwyll0y26mldnum"
+              }
+            ],
+            "uid": "n_3jp7mtbnbx0rhv29"
+          },
+          {
+            "name": "Sun",
+            "type": "DirectionalLight3D",
+            "props": {
+              "position": [38, 70, 28],
+              "intensity": 2,
+              "castShadow": true,
+              "shadowArea": 58,
+              "shadowMapSize": 2048
+            },
+            "uid": "n_23zij3jcjcb72y70"
+          },
+          {
+            "name": "FillLight",
+            "type": "DirectionalLight3D",
+            "props": { "position": [-38, 36, -28], "intensity": 0.4, "color": "#b9d4ff" },
+            "uid": "n_28u31t86eb8xnyjc"
+          },
+          {
+            "name": "Curb",
+            "type": "StaticBody3D",
+            "uid": "n_m7pib5xw39k54m05",
+            "props": {
+              "position": [6, 0.15, -12],
+              "collider": { "shape": "box", "size": [1, 0.3, 3] }
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_rt7knp3ltzhzozar",
+                "props": {
+                  "mesh": "box",
+                  "size": [1, 0.3, 3],
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": { "color": "#8a8f98", "roughness": 0.9 }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Ledge",
+            "type": "StaticBody3D",
+            "uid": "n_yic221rb7bf3dqlp",
+            "props": {
+              "position": [-6, 0.45, -12],
+              "collider": { "shape": "box", "size": [1, 0.9, 3] }
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_h0518v6sh56dkggp",
+                "props": {
+                  "mesh": "box",
+                  "size": [1, 0.9, 3],
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": { "color": "#6b7078", "roughness": 0.9 }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Hill",
+            "type": "StaticBody3D",
+            "uid": "n_d0fkn4oeipz3zeqs",
+            "props": {
+              "position": [10, 1.286, -20],
+              "collider": { "shape": "box", "size": [4, 0.3, 3] },
+              "rotation": [0, 0, 40]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_9ee5kmwfusu9g3qy",
+                "props": {
+                  "mesh": "box",
+                  "size": [4, 0.3, 3],
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": { "color": "#7a8a5a", "roughness": 0.9 }
+                }
+              }
+            ]
+          },
+          {
+            "name": "HillTop",
+            "type": "StaticBody3D",
+            "uid": "n_glh0dpbpa5i8izg3",
+            "props": {
+              "position": [13.032, 1.286, -20],
+              "collider": { "shape": "box", "size": [3, 2.571, 3] }
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_5283g7n7zukt91tz",
+                "props": {
+                  "mesh": "box",
+                  "size": [3, 2.571, 3],
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": { "color": "#7a8a5a", "roughness": 0.9 }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Cliff",
+            "type": "StaticBody3D",
+            "uid": "n_khek9wvhy0l8ks8r",
+            "props": {
+              "position": [18, 1.879, -20],
+              "collider": { "shape": "box", "size": [4, 0.3, 3] },
+              "rotation": [0, 0, 70]
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_1px010aspvz8bjlo",
+                "props": {
+                  "mesh": "box",
+                  "size": [4, 0.3, 3],
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": { "color": "#5a5a66", "roughness": 0.9 }
+                }
+              }
+            ]
+          },
+          {
+            "name": "CliffTop",
+            "type": "StaticBody3D",
+            "uid": "n_z257x74mbjjdrhjg",
+            "props": {
+              "position": [20.184, 1.879, -20],
+              "collider": { "shape": "box", "size": [3, 3.759, 3] }
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_q5lamsioudv2pvos",
+                "props": {
+                  "mesh": "box",
+                  "size": [3, 3.759, 3],
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": { "color": "#5a5a66", "roughness": 0.9 }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Lift",
+            "type": "StaticBody3D",
+            "uid": "n_dof21x23423au6ry",
+            "props": {
+              "position": [-18, 0.3, -20],
+              "collider": { "shape": "box", "size": [3, 0.6, 3] }
+            },
+            "script": {
+              "name": "Patrol",
+              "props": {
+                "points": [[-18, 0.3, -20], [-10, 0.3, -20]],
+                "speed": 2,
+                "mode": "pingpong",
+                "facePath": "Skin",
+                "turnSpeed": 2
+              }
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_7fz2e5w5tg0dww78",
+                "props": {
+                  "mesh": "box",
+                  "size": [3, 0.6, 3],
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": { "color": "#b08a4a", "roughness": 0.8 }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Mortar",
+            "type": "Node3D",
+            "uid": "n_i8b5hrnspxz4ayz8",
+            "props": { "position": [-20, 0.5, 20] },
+            "script": {
+              "name": "Spawner",
+              "props": {
+                "prefab": "Shell",
+                "interval": 1,
+                "max": 4,
+                "at": [0, 1, 0],
+                "autoStart": false
+              }
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_hfpshodulxhpuojh",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.8, 1, 0.8],
+                  "castShadow": true,
+                  "material": { "color": "#4b5563", "roughness": 0.9 }
+                }
+              },
+              {
+                "name": "Shell",
+                "type": "Node3D",
+                "uid": "n_izn5k1gxwrolcoi7",
+                "props": { "visible": false },
+                "script": {
+                  "name": "Projectile",
+                  "props": { "speed": 8, "direction": [0.8, 0.6, 0], "gravity": 9.81 }
+                },
+                "children": [
+                  {
+                    "name": "Skin",
+                    "type": "MeshInstance3D",
+                    "uid": "n_s0naouowv8dl2qtv",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [0.15, 0.15, 0.15],
+                      "material": {
+                        "color": "#f97316",
+                        "emissive": "#f97316",
+                        "emissiveIntensity": 0.8
+                      }
+                    }
+                  },
+                  {
+                    "name": "Life",
+                    "type": "Node3D",
+                    "uid": "n_silxb3jtl0ymj60m",
+                    "script": { "name": "Lifetime", "props": { "seconds": 3, "freeParent": true } }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Mine",
+            "type": "Node3D",
+            "uid": "n_k7e92pmsstpjdwnz",
+            "props": { "position": [20, 0.5, 20] },
+            "script": { "name": "Lifetime", "props": { "seconds": 1.5, "startOnSignal": true } },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_cnf1w18yth1dqgdk",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.35, 0.2, 0.35],
+                  "castShadow": true,
+                  "material": { "color": "#dc2626", "roughness": 0.5 }
+                }
+              },
+              {
+                "name": "Trigger",
+                "type": "Area3D",
+                "uid": "n_oiuomj18rhutetd5",
+                "props": { "collider": { "shape": "sphere", "radius": 1 } }
+              }
+            ]
+          },
+          {
+            "name": "Bait",
+            "type": "Area3D",
+            "uid": "n_aogqugzbj5id2h6o",
+            "groups": ["pickup"],
+            "props": {
+              "position": [21, 0.5, 12],
+              "collider": { "shape": "sphere", "radius": 0.8 }
+            },
+            "script": {
+              "name": "Pickup",
+              "props": { "value": 1, "kind": "bait", "collectorGroup": "enemy" }
+            },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "uid": "n_b406hxmbano9gtyh",
+                "props": {
+                  "mesh": "sphere",
+                  "size": [0.25, 0.25, 0.25],
+                  "castShadow": true,
+                  "material": {
+                    "color": "#22c55e",
+                    "emissive": "#22c55e",
+                    "emissiveIntensity": 0.5
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "uid": "n_9yavlr08c9026im9"
+      },
+      {
+        "name": "Player",
+        "type": "RigidBody3D",
+        "groups": ["player"],
+        "props": {
+          "position": [0, 1.4, 18],
+          "fixedRotation": true,
+          "friction": 0,
+          "collider": { "shape": "capsule", "radius": 0.34, "height": 1 }
+        },
+        "script": { "name": "Health", "props": { "max": 100, "invulnerableFor": 0.6 } },
+        "children": [
+          {
+            "name": "Controller",
+            "type": "CharacterController3D",
+            "props": {
+              "view": "free",
+              "camDistance": 4.2,
+              "eyeHeight": 1.1,
+              "maxSpeed": 4.2,
+              "sprintMultiplier": 1.7,
+              "pitchMin": -0.5,
+              "pitchMax": 1.1,
+              "coyoteSeconds": 0.12,
+              "jumpBufferSeconds": 0.15,
+              "jumpCutMultiplier": 0.45,
+              "maxJumps": 2,
+              "airControl": 0.5,
+              "fallGravity": 3,
+              "stepHeight": 0.4,
+              "jumpVelocity": 5,
+              "cameraCollision": true,
+              "platformCarry": true
+            },
+            "script": { "name": "Shoot" },
+            "uid": "n_ltyrn17s5l9tizgp"
+          },
+          {
+            "name": "Skin",
+            "type": "ModelInstance3D",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.7,
+              "animation": "$anims/idle",
+              "castShadow": true,
+              "position": [0, -0.85, 0]
+            },
+            "uid": "n_sirva2bpp1i01f1u"
+          },
+          {
+            "name": "Muzzle",
+            "type": "Node3D",
+            "props": { "position": [0, 0.4, 0.4] },
+            "children": [
+              {
+                "name": "ShotSfx",
+                "type": "AudioPlayer",
+                "props": {
+                  "preset": "shoot",
+                  "volume": 0.5,
+                  "spatial": true,
+                  "refDistance": 3,
+                  "maxDistance": 50
+                },
+                "uid": "n_r6cpq75vhtxu4q18"
+              },
+              {
+                "name": "KillSfx",
+                "type": "AudioPlayer",
+                "props": {
+                  "preset": "explosion",
+                  "volume": 0.6,
+                  "spatial": true,
+                  "refDistance": 4,
+                  "maxDistance": 60
+                },
+                "uid": "n_fw07t0wpfd7wwtrb"
+              },
+              {
+                "name": "EmptySfx",
+                "type": "AudioPlayer",
+                "props": { "preset": "blip", "volume": 0.4, "pitch": 0.7 },
+                "uid": "n_0vtkipp7h0so4mx2"
+              },
+              {
+                "name": "Flash",
+                "type": "OmniLight3D",
+                "props": { "color": "#ffd27f", "intensity": 0, "range": 7 },
+                "uid": "n_s3033w4bwtacojs1"
+              }
+            ],
+            "uid": "n_jstha9c29p0dlioy"
+          },
+          { "name": "Catch", "type": "Respawn", "uid": "n_ygw9hloc5vihrr6l" }
+        ],
+        "uid": "n_nx7dsn65lts2arru"
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "props": { "position": [0, 2.6, 23], "fov": 70, "current": true, "far": 400 },
+        "uid": "n_fldx3xcpdr27y1a3"
+      },
+      {
+        "name": "HurtSfx",
+        "type": "AudioPlayer",
+        "props": { "preset": "hurt", "volume": 0.6 },
+        "uid": "n_oz5kawq52q4wmece"
+      },
+      {
+        "name": "Spawner",
+        "type": "Node3D",
+        "props": { "position": [0, 0, 0] },
+        "script": {
+          "name": "WaveSpawner",
+          "props": {
+            "waves": [
+              { "prefab": "EnemyTemplate", "count": 4, "interval": 1.1, "delayBefore": 2 },
+              { "prefab": "EnemyTemplate", "count": 6, "interval": 0.9, "delayBefore": 3 },
+              { "prefab": "EnemyTemplate", "count": 8, "interval": 0.7, "delayBefore": 3 }
+            ]
+          }
+        },
+        "children": [
+          {
+            "name": "EnemyTemplate",
+            "type": "CharacterBody3D",
+            "groups": ["enemy"],
+            "props": {
+              "position": [0, 0.95, -20],
+              "visible": false,
+              "collider": { "shape": "capsule", "radius": 0.4, "height": 1.1 },
+              "slopeLimitDeg": 50,
+              "stickToGround": true,
+              "stepHeight": 0.7
+            },
+            "script": { "name": "Health", "props": { "max": 30, "freeOnDeath": true } },
+            "children": [
+              {
+                "name": "Skin",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "capsule",
+                  "size": [0.4, 1.1, 0.4],
+                  "material": {
+                    "color": "#c0392b",
+                    "roughness": 0.7,
+                    "emissive": "#511",
+                    "emissiveIntensity": 0.4
+                  },
+                  "castShadow": true
+                },
+                "uid": "n_cn4tjqgi2tk2t724",
+                "children": [
+                  {
+                    "name": "Eye",
+                    "type": "MeshInstance3D",
+                    "props": {
+                      "mesh": "sphere",
+                      "size": [0.12, 0.12, 0.12],
+                      "position": [0, 0.55, 0.32],
+                      "material": {
+                        "color": "#ffec5c",
+                        "emissive": "#ffd000",
+                        "emissiveIntensity": 2
+                      }
+                    },
+                    "uid": "n_xjsfyhxuxp0wkse1"
+                  }
+                ]
+              },
+              {
+                "name": "AI",
+                "type": "Node3D",
+                "script": {
+                  "name": "Chase",
+                  "props": {
+                    "target": "/root/Player",
+                    "speed": 2.6,
+                    "stopRange": 1.8,
+                    "moveParent": true,
+                    "facePath": "../Skin",
+                    "turnSpeed": 3
+                  }
+                },
+                "uid": "n_9qza6f0diwm3b24n"
+              },
+              {
+                "name": "Hit",
+                "type": "Area3D",
+                "props": { "collider": { "shape": "sphere", "radius": 1.5 } },
+                "script": {
+                  "name": "DamageOnContact",
+                  "props": {
+                    "amount": 12,
+                    "targetGroup": "player",
+                    "oncePerTarget": false,
+                    "repeatEvery": 0.5
+                  }
+                },
+                "uid": "n_ddva4c9vmu703s1w"
+              },
+              {
+                "name": "Growl",
+                "type": "AudioPlayer",
+                "props": {
+                  "preset": "hit",
+                  "volume": 0.5,
+                  "loop": false,
+                  "autoplay": true,
+                  "spatial": true,
+                  "refDistance": 3,
+                  "maxDistance": 35,
+                  "rolloff": "inverse",
+                  "pitch": 0.6
+                },
+                "uid": "n_jznb5aprs78r1qs0"
+              }
+            ],
+            "uid": "n_17sotvbult7pgelw"
+          }
+        ],
+        "uid": "n_1q2910pbbzvfucv2"
+      },
+      {
+        "name": "Grove",
+        "type": "Tree3D",
+        "props": {
+          "type": "conifer",
+          "tier": "simple",
+          "count": 8,
+          "area": [44, 44],
+          "seed": 17,
+          "height": 6
+        },
+        "uid": "n_ttfovkru8078togk"
+      },
+      {
+        "name": "Hud",
+        "type": "Node",
+        "script": { "name": "HudUpdater" },
+        "uid": "n_ihn045f8ag1zraa2"
+      },
+      {
+        "name": "HUD",
+        "type": "HudLayer",
+        "children": [
+          {
+            "name": "PauseMenu",
+            "type": "UiPanel",
+            "props": { "anchor": "center", "layout": "column", "gap": 10, "padding": 18 },
+            "children": [
+              {
+                "name": "PausedTitle",
+                "type": "UiText",
+                "props": { "text": "Paused", "size": 24 },
+                "uid": "n_ffjlx3r053emjjhc"
+              },
+              {
+                "name": "Resume",
+                "type": "UiButton",
+                "uid": "n_ibf6agaxzcxjhcmg",
+                "props": { "text": "RESUME", "size": 18 }
+              },
+              {
+                "name": "PauseOptions",
+                "type": "UiButton",
+                "uid": "n_kdecsevdetjk0q1i",
+                "props": { "text": "OPTIONS", "size": 16 }
+              },
+              {
+                "name": "Restart",
+                "type": "UiButton",
+                "uid": "n_vaxmkxrqot30vd7u",
+                "props": { "text": "START OVER", "size": 16 }
+              }
+            ],
+            "uid": "n_8bcregfz1ajwi03l"
+          },
+          {
+            "name": "Options",
+            "type": "UiPanel",
+            "uid": "n_36ox1wee9cdz2cgj",
+            "props": {
+              "anchor": "center",
+              "layout": "column",
+              "gap": 10,
+              "padding": 22,
+              "visible": false,
+              "background": "rgba(10,14,22,0.92)",
+              "radius": 12
+            },
+            "children": [
+              {
+                "name": "OptionsTitle",
+                "type": "UiText",
+                "uid": "n_3nt1ztixpsvjtb86",
+                "props": { "text": "OPTIONS", "size": 24 }
+              },
+              { "name": "Volume", "type": "UiVolumeSlider", "uid": "n_5p4124fbnjxx8s0c" },
+              { "name": "Mute", "type": "UiMuteToggle", "uid": "n_e1lyn3mvsy3vj2qr" },
+              { "name": "Quality", "type": "UiQualitySelect", "uid": "n_35r1h71i75yft3ex" },
+              { "name": "RenderScale", "type": "UiRenderScaleSelect", "uid": "n_emg840df89fqsriw" },
+              { "name": "FrameCap", "type": "UiFrameCapSelect", "uid": "n_mgqwgghn0bx900ip" },
+              {
+                "name": "Back",
+                "type": "UiButton",
+                "uid": "n_0ytaknljuqmthwpl",
+                "props": { "text": "BACK", "size": 16 }
+              }
+            ]
+          }
+        ],
+        "uid": "n_dimifr19c9et8cr4"
+      }
+    ],
+    "uid": "n_h46qaejxdqadqc1c"
+  },
+  "connections": [
+    { "signal": "died", "from": "Player", "to": "/root", "handler": "loseLife" },
+    { "signal": "lifeLost", "from": "/root", "to": "Player", "handler": "reviveFull" },
+    { "signal": "damaged", "from": "Player", "to": "HurtSfx", "handler": "play" },
+    { "signal": "allCleared", "from": "Spawner", "to": "Hud", "handler": "onAllCleared" },
+    {
+      "signal": "triggerEnter",
+      "from": "Arena/Mine/Trigger",
+      "to": "Arena/Mine",
+      "handler": "startTimer",
+      "filter": { "group": "player" }
+    },
+    {
+      "from": "/root/HUD/PauseMenu/Resume",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "resume"
+    },
+    {
+      "from": "/root/HUD/PauseMenu/PauseOptions",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "screen",
+      "args": ["/root/HUD/Options"]
+    },
+    {
+      "from": "/root/HUD/PauseMenu/Restart",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "restart"
+    },
+    {
+      "from": "/root/HUD/Options/Back",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "back"
+    }
+  ]
+}

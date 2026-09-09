@@ -1,0 +1,34 @@
+{
+  "models": {
+    "characters/base": {
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb",
+      "description": "characters/base (model) \u2014 referenced by the scene as $characters/base"
+    }
+  },
+  "animations": {
+    "anims/idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
+      "description": "anims/idle (animation) \u2014 referenced by the scene as $anims/idle"
+    },
+    "anims/walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+      "description": "anims/walk (animation) \u2014 referenced by the scene as $anims/walk"
+    },
+    "anims/run": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
+      "description": "anims/run (animation) \u2014 referenced by the scene as $anims/run"
+    },
+    "anims/runFast": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb",
+      "description": "anims/runFast (animation) \u2014 referenced by the scene as $anims/runFast"
+    },
+    "anims/jump": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb",
+      "description": "anims/jump (animation) \u2014 referenced by the scene as $anims/jump"
+    },
+    "anims/attack": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb",
+      "description": "anims/attack (animation) \u2014 referenced by the scene as $anims/attack"
+    }
+  }
+}

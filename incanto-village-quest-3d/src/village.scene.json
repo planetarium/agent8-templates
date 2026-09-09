@@ -1,0 +1,3231 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "EmberwoodVillage",
+  "strings": {
+    "en": {
+      "quest.talkElder": "Talk to the Elder [E]",
+      "ui.playAgain": "Play again",
+      "ui.hint": "WASD move · Shift sprint · E talk · click/F strike",
+      "settings.language": "Language"
+    },
+    "ko": {
+      "quest.talkElder": "촌장에게 말을 걸어보세요 [E]",
+      "ui.playAgain": "다시 하기",
+      "settings.language": "언어"
+    }
+  },
+  "environment": {
+    "sky": {
+      "type": "atmosphere",
+      "elevationDeg": 38,
+      "azimuthDeg": 8,
+      "turbidity": 2,
+      "rayleigh": 1.2
+    },
+    "fog": { "near": 55, "far": 190 },
+    "shadows": { "mapSize": 2048, "radius": 1.1 },
+    "exposure": 1,
+    "ambient": { "color": "#e8d5c0", "intensity": 0.52 },
+    "iblIntensity": 0.65,
+    "bloom": { "threshold": 1.35, "strength": 0.4 },
+    "post": { "vignette": 0.22, "saturation": 1.1, "contrast": 1.03 }
+  },
+  "physics": { "gravity": [0, -9.81, 0] },
+  "input": {
+    "move": {
+      "type": "vector2",
+      "keys": {
+        "up": ["KeyW", "ArrowUp"],
+        "down": ["KeyS", "ArrowDown"],
+        "left": ["KeyA", "ArrowLeft"],
+        "right": ["KeyD", "ArrowRight"]
+      }
+    },
+    "jump": { "type": "button", "keys": ["Space"] },
+    "sprint": { "type": "button", "keys": ["ShiftLeft", "ShiftRight"] },
+    "interact": { "type": "button", "keys": ["KeyE"] },
+    "attack": { "type": "button", "keys": ["Mouse0", "KeyF"] },
+    "restart": { "type": "button", "keys": ["KeyR"] },
+    "pause": { "type": "button", "keys": ["Escape"] }
+  },
+  "assets": {
+    "characters/base": {
+      "type": "model",
+      "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb"
+    },
+    "anims/idle": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb"
+    },
+    "anims/walk": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb"
+    },
+    "anims/run": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb"
+    },
+    "anims/runFast": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb"
+    },
+    "anims/jump": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb"
+    },
+    "anims/attack": {
+      "type": "animation",
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/melee-attack.glb"
+    }
+  },
+  "root": {
+    "name": "Game",
+    "type": "Node",
+    "script": { "name": "VillageDirector" },
+    "children": [
+      {
+        "name": "Village",
+        "type": "Node3D",
+        "props": {},
+        "children": [
+          {
+            "name": "Floor",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [64, 0.1, 64] },
+              "position": [0, -0.05, 0]
+            },
+            "children": [
+              {
+                "name": "Grass",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [64, 0.1, 64],
+                  "material": { "color": "#57713f", "roughness": 1 },
+                  "castShadow": false,
+                  "receiveShadow": true
+                },
+                "uid": "n_r3cv6op0yq4swcgj"
+              }
+            ],
+            "uid": "n_e32qy7oc7kssboeg"
+          },
+          {
+            "name": "Path",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [3, 0.12, 40],
+              "material": { "color": "#9b8459", "roughness": 1 },
+              "castShadow": false,
+              "receiveShadow": true,
+              "position": [0, 0.01, -4]
+            },
+            "uid": "n_j32s3fcw59yyfi8w"
+          },
+          {
+            "name": "Plaza",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "cylinder",
+              "size": [5.4, 0.12, 5.4],
+              "material": { "color": "#a68d63", "roughness": 1 },
+              "castShadow": false,
+              "receiveShadow": true,
+              "position": [1.5, 0.015, 6]
+            },
+            "uid": "n_odumw2lm8wi26xep"
+          },
+          {
+            "name": "PathStones",
+            "type": "InstancedMesh3D",
+            "props": {
+              "mesh": "gem",
+              "size": [0.11, 0.07, 0.09],
+              "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+              "transforms": [
+                [-1.81, 0.05, -24.15, -168, 0.8],
+                [1.87, 0.05, -24.3, -107, 1.04],
+                [-1.89, 0.05, -22.05, -346.8, 1.28],
+                [1.86, 0.05, -22.13, -285.8, 0.92],
+                [-1.79, 0.05, -20.9, -165.6, 1.16],
+                [1.79, 0.05, -20.69, -104.6, 0.8],
+                [-1.86, 0.05, -19.48, -344.4, 1.04],
+                [1.89, 0.05, -19.55, -283.4, 1.28],
+                [-1.87, 0.05, -17.3, -163.2, 0.92],
+                [1.81, 0.05, -17.46, -102.2, 1.16],
+                [-1.78, 0.05, -15.94, 18, 0.8],
+                [1.85, 0.05, -15.75, 79, 1.04],
+                [-1.89, 0.05, -14.74, 199.2, 1.28],
+                [1.88, 0.05, -14.72, 260.2, 0.92],
+                [-1.82, 0.05, -12.62, 20.4, 1.16],
+                [1.76, 0.05, -12.83, 81.4, 0.8],
+                [-1.84, 0.05, -10.98, 201.6, 1.04],
+                [1.88, 0.05, -10.86, 262.6, 1.28],
+                [-1.88, 0.05, -9.93, 22.8, 0.92],
+                [1.84, 0.05, -9.81, 83.8, 1.16],
+                [-1.76, 0.05, -7.98, 204, 0.8],
+                [1.82, 0.05, -8.18, 265, 1.04],
+                [-1.88, 0.05, -6.08, 25.2, 1.28],
+                [1.89, 0.05, -6.06, 86.2, 0.92],
+                [-1.85, 0.05, -5.05, 206.4, 1.16],
+                [1.77, 0.05, -4.86, 267.4, 0.8],
+                [-1.81, 0.05, -3.34, 27.6, 1.04],
+                [1.87, 0.05, -3.5, 88.6, 1.28]
+              ],
+              "receiveShadow": true
+            },
+            "uid": "n_4rdwcj89z5anas74"
+          },
+          {
+            "name": "House1",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [6, 3.4, 5] },
+              "position": [-10, 1.7, 2],
+              "rotation": [0, 8, 0]
+            },
+            "children": [
+              {
+                "name": "Walls",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6, 3.4, 5],
+                  "material": { "color": "#d8c9a8", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_80lrw69yw82aqddr"
+              },
+              {
+                "name": "Gable",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6, 1.7, 2.8],
+                  "material": { "color": "#d8c9a8", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.55, 0]
+                },
+                "uid": "n_z04yitloz8p5wxa4"
+              },
+              {
+                "name": "PostWN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.99, 0, -2.49]
+                },
+                "uid": "n_yxl5b8x20jjilo0v"
+              },
+              {
+                "name": "PostWS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.99, 0, 2.49]
+                },
+                "uid": "n_r4y6klngb1qpkow0"
+              },
+              {
+                "name": "PostEN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.99, 0, -2.49]
+                },
+                "uid": "n_ksd7iomhal44jg4a"
+              },
+              {
+                "name": "PostES",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.99, 0, 2.49]
+                },
+                "uid": "n_p0o9u82yb9zq4ybl"
+              },
+              {
+                "name": "BeamN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.06, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.5899999999999999, -2.48]
+                },
+                "uid": "n_8qjfgpnefthwo28v"
+              },
+              {
+                "name": "BeamS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.06, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.5899999999999999, 2.48]
+                },
+                "uid": "n_xizjgqr5euo6735k"
+              },
+              {
+                "name": "RoofN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.9, 0.16, 3.55],
+                  "material": { "color": "#b06a45", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.55, -1.475],
+                  "rotation": [29.95360816780149, 0, 0]
+                },
+                "uid": "n_2wyzfadyb8cabty0"
+              },
+              {
+                "name": "RoofS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.9, 0.16, 3.55],
+                  "material": { "color": "#b06a45", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.55, 1.475],
+                  "rotation": [-29.95360816780149, 0, 0]
+                },
+                "uid": "n_j5f8qyodznubysa9"
+              },
+              {
+                "name": "Ridge",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [7, 0.2, 0.3],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 3.42, 0]
+                },
+                "uid": "n_s0bohbb9v5q6onhe"
+              },
+              {
+                "name": "Chimney",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.55, 2.8, 0.55],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.2, 2.8999999999999995, 0.8999999999999999]
+                },
+                "uid": "n_dq62s7y0lj2hnxzf"
+              },
+              {
+                "name": "Smoke",
+                "type": "Particles3D",
+                "props": {
+                  "position": [2.2, 4.45, 0.8999999999999999],
+                  "rate": 3.5,
+                  "lifetime": [1.6, 2.6],
+                  "speed": [6, 14],
+                  "directionDeg": -90,
+                  "spreadDeg": 16,
+                  "gravity": [4, -6],
+                  "sizeStart": 12,
+                  "sizeEnd": 34,
+                  "colorStart": "#c9c4bc",
+                  "colorEnd": "#9aa0a8",
+                  "alphaStart": 0.3,
+                  "alphaEnd": 0,
+                  "blend": "normal",
+                  "maxParticles": 32
+                },
+                "uid": "n_jji7vr2mowxghug5"
+              },
+              {
+                "name": "DoorFrame",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.16, 2.26, 0.1],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.02, -0.5999999999999999, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_r1oo2xby2tjzogl3"
+              },
+              {
+                "name": "Door",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.92, 2.05, 0.12],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.06, -0.6499999999999999, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_e24mpw32og8ani9z"
+              },
+              {
+                "name": "Step",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.3, 0.16, 0.7],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.36, -1.6199999999999999, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_f3ibxdtk4zuqgdu2"
+              },
+              {
+                "name": "WindowTrim1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.02, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_d5vu4inlfv2iddmb"
+              },
+              {
+                "name": "Window1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.05, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_lkc813r77ula3oo8"
+              },
+              {
+                "name": "WindowTrim2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.02, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_nse3k20qpg4ckb69"
+              },
+              {
+                "name": "Window2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.05, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_8x3i1rwgvo6f7jtf"
+              }
+            ],
+            "uid": "n_irs334un40nr18nb"
+          },
+          {
+            "name": "House2",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [5, 3, 6] },
+              "position": [11, 1.5, -2],
+              "rotation": [0, -6, 0]
+            },
+            "children": [
+              {
+                "name": "Walls",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5, 3, 6],
+                  "material": { "color": "#cfc2a2", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_n0p8kaj1ta1v7q14"
+              },
+              {
+                "name": "Gable",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5, 1.7, 3.36],
+                  "material": { "color": "#cfc2a2", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.35, 0]
+                },
+                "uid": "n_ofi0cqbp7orehil6"
+              },
+              {
+                "name": "PostWN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.49, 0, -2.99]
+                },
+                "uid": "n_9aotc605yvldg5ap"
+              },
+              {
+                "name": "PostWS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.49, 0, 2.99]
+                },
+                "uid": "n_3bvdrlz9jqypj874"
+              },
+              {
+                "name": "PostEN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.49, 0, -2.99]
+                },
+                "uid": "n_nd4semhnm42m3o6j"
+              },
+              {
+                "name": "PostES",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.49, 0, 2.99]
+                },
+                "uid": "n_opw7s6upoqvjspws"
+              },
+              {
+                "name": "BeamN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.06, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.39, -2.98]
+                },
+                "uid": "n_gdn7dmfnvy0cg6qc"
+              },
+              {
+                "name": "BeamS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.06, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.39, 2.98]
+                },
+                "uid": "n_i63web44urlak0ym"
+              },
+              {
+                "name": "RoofN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.9, 0.16, 4],
+                  "material": { "color": "#8a4f38", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.35, -1.725],
+                  "rotation": [26.231939933156625, 0, 0]
+                },
+                "uid": "n_3jo6x7nljhhprzr2"
+              },
+              {
+                "name": "RoofS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.9, 0.16, 4],
+                  "material": { "color": "#8a4f38", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.35, 1.725],
+                  "rotation": [-26.231939933156625, 0, 0]
+                },
+                "uid": "n_giqcgfk7gm9ifk1j"
+              },
+              {
+                "name": "Ridge",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6, 0.2, 0.3],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 3.22, 0]
+                },
+                "uid": "n_87vx1ila0g2905bw"
+              },
+              {
+                "name": "Chimney",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.55, 2.8, 0.55],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [1.7, 2.6999999999999997, 1.08]
+                },
+                "uid": "n_xrj0n7rjs3yxq0pz"
+              },
+              {
+                "name": "Smoke",
+                "type": "Particles3D",
+                "props": {
+                  "position": [1.7, 4.25, 1.08],
+                  "rate": 3.5,
+                  "lifetime": [1.6, 2.6],
+                  "speed": [6, 14],
+                  "directionDeg": -90,
+                  "spreadDeg": 16,
+                  "gravity": [4, -6],
+                  "sizeStart": 12,
+                  "sizeEnd": 34,
+                  "colorStart": "#c9c4bc",
+                  "colorEnd": "#9aa0a8",
+                  "alphaStart": 0.3,
+                  "alphaEnd": 0,
+                  "blend": "normal",
+                  "maxParticles": 32
+                },
+                "uid": "n_mboig8gwgm25d4zc"
+              },
+              {
+                "name": "DoorFrame",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.16, 2.26, 0.1],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.52, -0.39999999999999997, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_tpzs31zmwlmbli86"
+              },
+              {
+                "name": "Door",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.92, 2.05, 0.12],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.56, -0.44999999999999996, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_8fgjahjcbj6du0mm"
+              },
+              {
+                "name": "Step",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.3, 0.16, 0.7],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.86, -1.42, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_18zf3fo354y19ezu"
+              },
+              {
+                "name": "WindowTrim1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.52, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_ert6nbk02qdah15c"
+              },
+              {
+                "name": "Window1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.55, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_yxlfzmlx5tw44mah"
+              },
+              {
+                "name": "WindowTrim2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.52, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_pblzrsr2ho2bsk1a"
+              },
+              {
+                "name": "Window2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.55, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_bael3zr8llz8v02t"
+              }
+            ],
+            "uid": "n_8qmfus6m3mzy5g3n"
+          },
+          {
+            "name": "House3",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [5.4, 3.1, 5] },
+              "position": [-13, 1.55, -13],
+              "rotation": [0, 24, 0]
+            },
+            "children": [
+              {
+                "name": "Walls",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.4, 3.1, 5],
+                  "material": { "color": "#e0d2b4", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_exi5pucl319w4zl5"
+              },
+              {
+                "name": "Gable",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.4, 1.7, 2.8],
+                  "material": { "color": "#e0d2b4", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.4, 0]
+                },
+                "uid": "n_te4dzr5bgdiehmo3"
+              },
+              {
+                "name": "PostWN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.1, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.6900000000000004, 0, -2.49]
+                },
+                "uid": "n_0vigdqlw27vvdin0"
+              },
+              {
+                "name": "PostWS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.1, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.6900000000000004, 0, 2.49]
+                },
+                "uid": "n_c6q4opkd4ce8j0o4"
+              },
+              {
+                "name": "PostEN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.1, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.6900000000000004, 0, -2.49]
+                },
+                "uid": "n_myir8rpzvm3m51yj"
+              },
+              {
+                "name": "PostES",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.1, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.6900000000000004, 0, 2.49]
+                },
+                "uid": "n_902tyt7bikqpwp2o"
+              },
+              {
+                "name": "BeamN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.46, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.44, -2.48]
+                },
+                "uid": "n_2x7yers5vzy4xnxc"
+              },
+              {
+                "name": "BeamS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.46, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.44, 2.48]
+                },
+                "uid": "n_aadqfu8rgqzkqmml"
+              },
+              {
+                "name": "RoofN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.3, 0.16, 3.55],
+                  "material": { "color": "#6a6f7a", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.4, -1.475],
+                  "rotation": [29.95360816780149, 0, 0]
+                },
+                "uid": "n_94v6hfk9dvy828tp"
+              },
+              {
+                "name": "RoofS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.3, 0.16, 3.55],
+                  "material": { "color": "#6a6f7a", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.4, 1.475],
+                  "rotation": [-29.95360816780149, 0, 0]
+                },
+                "uid": "n_8bxj9gicmubv4huc"
+              },
+              {
+                "name": "Ridge",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.4, 0.2, 0.3],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 3.27, 0]
+                },
+                "uid": "n_83eeioj7nswwidp5"
+              },
+              {
+                "name": "Chimney",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.55, 2.8, 0.55],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [1.9000000000000001, 2.75, 0.8999999999999999]
+                },
+                "uid": "n_by6un8l9vl3vmqs4"
+              },
+              {
+                "name": "Smoke",
+                "type": "Particles3D",
+                "props": {
+                  "position": [1.9000000000000001, 4.3, 0.8999999999999999],
+                  "rate": 3.5,
+                  "lifetime": [1.6, 2.6],
+                  "speed": [6, 14],
+                  "directionDeg": -90,
+                  "spreadDeg": 16,
+                  "gravity": [4, -6],
+                  "sizeStart": 12,
+                  "sizeEnd": 34,
+                  "colorStart": "#c9c4bc",
+                  "colorEnd": "#9aa0a8",
+                  "alphaStart": 0.3,
+                  "alphaEnd": 0,
+                  "blend": "normal",
+                  "maxParticles": 32
+                },
+                "uid": "n_s3h6glw9en07oizo"
+              },
+              {
+                "name": "DoorFrame",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.16, 2.26, 0.1],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.72, -0.45, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_2qdpl86qw3138ndb"
+              },
+              {
+                "name": "Door",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.92, 2.05, 0.12],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.7600000000000002, -0.5, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_8xh2l41kvt3bioqs"
+              },
+              {
+                "name": "Step",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.3, 0.16, 0.7],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.06, -1.47, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_jxe8987nn27evkj2"
+              },
+              {
+                "name": "WindowTrim1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.72, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_t089iknxq7ad1w21"
+              },
+              {
+                "name": "Window1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.75, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_i589l5h7ijediha1"
+              },
+              {
+                "name": "WindowTrim2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.72, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_uvc9do8stx8tlnpx"
+              },
+              {
+                "name": "Window2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.75, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_kxr958o8h7uw40v3"
+              }
+            ],
+            "uid": "n_0z9klb2wifsonfzu"
+          },
+          {
+            "name": "House4",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [4.6, 2.9, 5.2] },
+              "position": [13, 1.45, -14],
+              "rotation": [0, -18, 0]
+            },
+            "children": [
+              {
+                "name": "Walls",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [4.6, 2.9, 5.2],
+                  "material": { "color": "#d3c5a5", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_1dctnswwkj9eo2a8"
+              },
+              {
+                "name": "Gable",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [4.6, 1.7, 2.91],
+                  "material": { "color": "#d3c5a5", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.3, 0]
+                },
+                "uid": "n_ihddr60nntovvx23"
+              },
+              {
+                "name": "PostWN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 2.9, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.29, 0, -2.5900000000000003]
+                },
+                "uid": "n_q8uxsujpi2uje0gs"
+              },
+              {
+                "name": "PostWS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 2.9, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.29, 0, 2.5900000000000003]
+                },
+                "uid": "n_jtp2t3tnud9o5446"
+              },
+              {
+                "name": "PostEN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 2.9, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.29, 0, -2.5900000000000003]
+                },
+                "uid": "n_fsvuz2jnbdt6bg8f"
+              },
+              {
+                "name": "PostES",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 2.9, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.29, 0, 2.5900000000000003]
+                },
+                "uid": "n_9bre9ejnuxdoqwj8"
+              },
+              {
+                "name": "BeamN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [4.66, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.3399999999999999, -2.58]
+                },
+                "uid": "n_cj35g3w1i5ildrbc"
+              },
+              {
+                "name": "BeamS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [4.66, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.3399999999999999, 2.58]
+                },
+                "uid": "n_wr3z3ezvjq3kn1ak"
+              },
+              {
+                "name": "RoofN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.5, 0.16, 3.64],
+                  "material": { "color": "#a05a3c", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.3, -1.5250000000000001],
+                  "rotation": [29.13429219722617, 0, 0]
+                },
+                "uid": "n_23vcz0t2uv612oa4"
+              },
+              {
+                "name": "RoofS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.5, 0.16, 3.64],
+                  "material": { "color": "#a05a3c", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.3, 1.5250000000000001],
+                  "rotation": [-29.13429219722617, 0, 0]
+                },
+                "uid": "n_wzzz4msa7bi0ylab"
+              },
+              {
+                "name": "Ridge",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [5.6, 0.2, 0.3],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 3.17, 0]
+                },
+                "uid": "n_soh3pcg1ryxfajaj"
+              },
+              {
+                "name": "Chimney",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.55, 2.8, 0.55],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [1.4999999999999998, 2.6499999999999995, 0.9359999999999999]
+                },
+                "uid": "n_l93hwizl36nmsvx6"
+              },
+              {
+                "name": "Smoke",
+                "type": "Particles3D",
+                "props": {
+                  "position": [1.4999999999999998, 4.2, 0.9359999999999999],
+                  "rate": 3.5,
+                  "lifetime": [1.6, 2.6],
+                  "speed": [6, 14],
+                  "directionDeg": -90,
+                  "spreadDeg": 16,
+                  "gravity": [4, -6],
+                  "sizeStart": 12,
+                  "sizeEnd": 34,
+                  "colorStart": "#c9c4bc",
+                  "colorEnd": "#9aa0a8",
+                  "alphaStart": 0.3,
+                  "alphaEnd": 0,
+                  "blend": "normal",
+                  "maxParticles": 32
+                },
+                "uid": "n_du5yfr5k2q2n2ssh"
+              },
+              {
+                "name": "DoorFrame",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.16, 2.26, 0.1],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.32, -0.3499999999999999, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_dr1w39kjgdqgul9l"
+              },
+              {
+                "name": "Door",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.92, 2.05, 0.12],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.36, -0.3999999999999999, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_sefg8twtgdle6wzy"
+              },
+              {
+                "name": "Step",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.3, 0.16, 0.7],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.6599999999999997, -1.3699999999999999, 0.9],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_ljvt22b7kusy06zr"
+              },
+              {
+                "name": "WindowTrim1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.32, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_3dpbpa9to8cbafze"
+              },
+              {
+                "name": "Window1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.3499999999999996, 0.28, -0.95],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_dwj4ffmuq700hwai"
+              },
+              {
+                "name": "WindowTrim2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.32, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_gzvqf83gjv0ilog5"
+              },
+              {
+                "name": "Window2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2.3499999999999996, 0.28, -2],
+                  "rotation": [0, 90, 0]
+                },
+                "uid": "n_t30qy1d17k96ws99"
+              }
+            ],
+            "uid": "n_h7i87tjpmfsdryle"
+          },
+          {
+            "name": "House5",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [6.2, 3.4, 5.4] },
+              "position": [-3, 1.7, 17],
+              "rotation": [0, 3, 0]
+            },
+            "children": [
+              {
+                "name": "Walls",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.2, 3.4, 5.4],
+                  "material": { "color": "#dccdae", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_1xp67eddxadqnc9s"
+              },
+              {
+                "name": "Gable",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.2, 1.7, 3.02],
+                  "material": { "color": "#dccdae", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.55, 0]
+                },
+                "uid": "n_v8sh7fj1srd2fy91"
+              },
+              {
+                "name": "PostWN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-3.0900000000000003, 0, -2.6900000000000004]
+                },
+                "uid": "n_57h1ksn92kimjgt8"
+              },
+              {
+                "name": "PostWS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-3.0900000000000003, 0, 2.6900000000000004]
+                },
+                "uid": "n_f43zuzr3dj5ty7u0"
+              },
+              {
+                "name": "PostEN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.0900000000000003, 0, -2.6900000000000004]
+                },
+                "uid": "n_uog12lyy75q5pnw0"
+              },
+              {
+                "name": "PostES",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 3.4, 0.24],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [3.0900000000000003, 0, 2.6900000000000004]
+                },
+                "uid": "n_2goa5envc9q5uhco"
+              },
+              {
+                "name": "BeamN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.26, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.5899999999999999, -2.68]
+                },
+                "uid": "n_n2pqhx36sqebz6t5"
+              },
+              {
+                "name": "BeamS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [6.26, 0.22, 0.26],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.5899999999999999, 2.68]
+                },
+                "uid": "n_q16trzsgskikgnv3"
+              },
+              {
+                "name": "RoofN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [7.1, 0.16, 3.73],
+                  "material": { "color": "#7a4534", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.55, -1.5750000000000002],
+                  "rotation": [28.354961785324054, 0, 0]
+                },
+                "uid": "n_vhnbbdycig06yutg"
+              },
+              {
+                "name": "RoofS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [7.1, 0.16, 3.73],
+                  "material": { "color": "#7a4534", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.55, 1.5750000000000002],
+                  "rotation": [-28.354961785324054, 0, 0]
+                },
+                "uid": "n_a8qn68p7l19obt2c"
+              },
+              {
+                "name": "Ridge",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [7.2, 0.2, 0.3],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 3.42, 0]
+                },
+                "uid": "n_yxrusacmx66iwdsu"
+              },
+              {
+                "name": "Chimney",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.55, 2.8, 0.55],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [2.3, 2.8999999999999995, 0.972]
+                },
+                "uid": "n_8hzpogdefx99hdwu"
+              },
+              {
+                "name": "Smoke",
+                "type": "Particles3D",
+                "props": {
+                  "position": [2.3, 4.45, 0.972],
+                  "rate": 3.5,
+                  "lifetime": [1.6, 2.6],
+                  "speed": [6, 14],
+                  "directionDeg": -90,
+                  "spreadDeg": 16,
+                  "gravity": [4, -6],
+                  "sizeStart": 12,
+                  "sizeEnd": 34,
+                  "colorStart": "#c9c4bc",
+                  "colorEnd": "#9aa0a8",
+                  "alphaStart": 0.3,
+                  "alphaEnd": 0,
+                  "blend": "normal",
+                  "maxParticles": 32
+                },
+                "uid": "n_abvcj829dk18vsl1"
+              },
+              {
+                "name": "DoorFrame",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.16, 2.26, 0.1],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.9, -0.5999999999999999, -2.72],
+                  "rotation": [0, 0, 0]
+                },
+                "uid": "n_4y04per4f4xp5ku0"
+              },
+              {
+                "name": "Door",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.92, 2.05, 0.12],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.9, -0.6499999999999999, -2.7600000000000002],
+                  "rotation": [0, 0, 0]
+                },
+                "uid": "n_twncaikykkipkhw8"
+              },
+              {
+                "name": "Step",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [1.3, 0.16, 0.7],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.9, -1.6199999999999999, -3.06],
+                  "rotation": [0, 0, 0]
+                },
+                "uid": "n_0474xztnxeumomh6"
+              },
+              {
+                "name": "WindowTrim1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-0.95, 0.28, -2.72],
+                  "rotation": [0, 0, 0]
+                },
+                "uid": "n_d9uqrz4a71udfzmm"
+              },
+              {
+                "name": "Window1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-0.95, 0.28, -2.75],
+                  "rotation": [0, 0, 0]
+                },
+                "uid": "n_ss8uvfyy2bu334wm"
+              },
+              {
+                "name": "WindowTrim2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.94, 1.04, 0.08],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2, 0.28, -2.72],
+                  "rotation": [0, 0, 0]
+                },
+                "uid": "n_z5rs1308ajx7h4bi"
+              },
+              {
+                "name": "Window2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.74, 0.84, 0.1],
+                  "material": {
+                    "color": "#3a2c1c",
+                    "emissive": "#ffc46e",
+                    "emissiveIntensity": 1.7,
+                    "roughness": 0.4
+                  },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-2, 0.28, -2.75],
+                  "rotation": [0, 0, 0]
+                },
+                "uid": "n_nzdb1qzz2nuaoh4y"
+              }
+            ],
+            "uid": "n_bfbh8me1nf8a1vf4"
+          },
+          {
+            "name": "Well",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [2.2, 1, 2.2] },
+              "position": [5, 0.5, 8]
+            },
+            "children": [
+              {
+                "name": "Ring",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.95, 1, 0.95],
+                  "material": { "color": "#8d939c", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_134lum4nloi9izsj"
+              },
+              {
+                "name": "Rim",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [1.05, 0.14, 1.05],
+                  "material": { "color": "#7a808a", "roughness": 0.95, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 0.55, 0]
+                },
+                "uid": "n_m3sgej70iynqoogz"
+              },
+              {
+                "name": "PostW",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.14, 1.7, 0.14],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-0.95, 0.85, 0]
+                },
+                "uid": "n_bdmizoasue9k9250"
+              },
+              {
+                "name": "PostE",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.14, 1.7, 0.14],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.95, 0.85, 0]
+                },
+                "uid": "n_6808qq10gttj045t"
+              },
+              {
+                "name": "CapN",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [2.5, 0.1, 0.95],
+                  "material": { "color": "#8a4f38", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.85, -0.38],
+                  "rotation": [32, 0, 0]
+                },
+                "uid": "n_zdfefgh1htx9w77t"
+              },
+              {
+                "name": "CapS",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [2.5, 0.1, 0.95],
+                  "material": { "color": "#8a4f38", "roughness": 0.85, "flatShading": true },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.85, 0.38],
+                  "rotation": [-32, 0, 0]
+                },
+                "uid": "n_jdewidqaf4lp12c5"
+              },
+              {
+                "name": "Crossbar",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.06, 2, 0.06],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.45, 0],
+                  "rotation": [0, 0, 90]
+                },
+                "uid": "n_y3r8hvmprj2p67k8"
+              },
+              {
+                "name": "Bucket",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.18, 0.26, 0.18],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.3, 0.95, 0]
+                },
+                "uid": "n_rh4k0fpfedbu8r10"
+              }
+            ],
+            "uid": "n_dhrd5xn1c9dkht6c"
+          },
+          {
+            "name": "GatePostL",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [0.8, 4, 0.8] },
+              "position": [-2.4, 2, -26]
+            },
+            "children": [
+              {
+                "name": "Post",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.8, 4, 0.8],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_naqrtgi1xy40xk8n"
+              },
+              {
+                "name": "Brace",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 1.5, 0.24],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.55, 1.45, 0],
+                  "rotation": [0, 0, -38]
+                },
+                "uid": "n_bo3oeoqmpg38ccmb"
+              }
+            ],
+            "uid": "n_hsvhavz3t4w4ahb4"
+          },
+          {
+            "name": "GatePostR",
+            "type": "StaticBody3D",
+            "props": {
+              "collider": { "shape": "box", "size": [0.8, 4, 0.8] },
+              "position": [2.4, 2, -26]
+            },
+            "children": [
+              {
+                "name": "Post",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.8, 4, 0.8],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true
+                },
+                "uid": "n_t2lv5kc4drqliwer"
+              },
+              {
+                "name": "Brace",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.24, 1.5, 0.24],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-0.55, 1.45, 0],
+                  "rotation": [0, 0, 38]
+                },
+                "uid": "n_qqss7t0qmp7wfiv1"
+              }
+            ],
+            "uid": "n_36q1b9wca9e4hakp"
+          },
+          {
+            "name": "GateBeam",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [6.4, 0.7, 0.9],
+              "material": { "color": "#54402c", "roughness": 0.85 },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [0, 4.1, -26]
+            },
+            "uid": "n_vbbkfbvqhyt1gtl2"
+          },
+          {
+            "name": "GateCap",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [7.2, 0.22, 1.2],
+              "material": { "color": "#8a4f38", "roughness": 0.85, "flatShading": true },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [0, 4.55, -26]
+            },
+            "uid": "n_xg2ggl6yn02ywysi"
+          },
+          {
+            "name": "GateLampL",
+            "type": "Node3D",
+            "props": { "position": [-3.2, 0, -25.2], "rotation": [0, 40, 0] },
+            "children": [
+              {
+                "name": "Post",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.16, 2.3, 0.16],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.15, 0]
+                },
+                "uid": "n_omcdxcp2ht9hofsc"
+              },
+              {
+                "name": "Arm",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.62, 0.12, 0.12],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.26, 2.24, 0]
+                },
+                "uid": "n_gzfzpxfli4t5k687"
+              },
+              {
+                "name": "Cage",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.3, 0.4, 0.3],
+                  "material": { "color": "#3c3228", "roughness": 0.6 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_xwsph081qhfzkbop"
+              },
+              {
+                "name": "Glow",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "gem",
+                  "size": [0.16, 0.22, 0.16],
+                  "material": {
+                    "color": "#8a5a20",
+                    "emissive": "#ffb84f",
+                    "emissiveIntensity": 2.8,
+                    "roughness": 0.3
+                  },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_96wereb0op3mh8zk"
+              }
+            ],
+            "uid": "n_vk65y8cwz6zj11j0"
+          },
+          {
+            "name": "GateLampR",
+            "type": "Node3D",
+            "props": { "position": [3.2, 0, -25.2], "rotation": [0, 140, 0] },
+            "children": [
+              {
+                "name": "Post",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.16, 2.3, 0.16],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.15, 0]
+                },
+                "uid": "n_14jz90l8az3ib8cw"
+              },
+              {
+                "name": "Arm",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.62, 0.12, 0.12],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.26, 2.24, 0]
+                },
+                "uid": "n_jf8y307ythu0vay9"
+              },
+              {
+                "name": "Cage",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.3, 0.4, 0.3],
+                  "material": { "color": "#3c3228", "roughness": 0.6 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_t7f670yirrn0wy0v"
+              },
+              {
+                "name": "Glow",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "gem",
+                  "size": [0.16, 0.22, 0.16],
+                  "material": {
+                    "color": "#8a5a20",
+                    "emissive": "#ffb84f",
+                    "emissiveIntensity": 2.8,
+                    "roughness": 0.3
+                  },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_z704cbi39uuqgevx"
+              }
+            ],
+            "uid": "n_ip01825w1rms4z33"
+          },
+          {
+            "name": "FencePosts",
+            "type": "InstancedMesh3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.14, 1, 0.14],
+              "material": { "color": "#6b533a", "roughness": 0.9 },
+              "transforms": [
+                [-2.6, 0.5, -23, -4, 1],
+                [-2.6, 0.5, -21.3, -4, 1],
+                [-2.6, 0.5, -19.6, -4, 1],
+                [-2.6, 0.5, -17.9, -4, 1],
+                [-2.6, 0.5, -16.2, -4, 1],
+                [-2.6, 0.5, -14.5, -4, 1],
+                [-2.6, 0.5, -12.8, -4, 1],
+                [-2.6, 0.5, -11.1, -4, 1],
+                [-2.6, 0.5, -9.4, -4, 1],
+                [2.6, 0.5, -23, 4, 1],
+                [2.6, 0.5, -21.3, 4, 1],
+                [2.6, 0.5, -19.6, 4, 1],
+                [2.6, 0.5, -17.9, 4, 1],
+                [2.6, 0.5, -16.2, 4, 1],
+                [2.6, 0.5, -14.5, 4, 1],
+                [2.6, 0.5, -12.8, 4, 1],
+                [2.6, 0.5, -11.1, 4, 1],
+                [2.6, 0.5, -9.4, 4, 1]
+              ],
+              "castShadow": true
+            },
+            "uid": "n_1poe43iubbm0yv99"
+          },
+          {
+            "name": "FenceRailW1",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.07, 0.1, 15.4],
+              "material": { "color": "#755c40", "roughness": 0.9 },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [-2.6, 0.42, -15.5]
+            },
+            "uid": "n_gemz73mde6nrtecr"
+          },
+          {
+            "name": "FenceRailW2",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.07, 0.1, 15.4],
+              "material": { "color": "#755c40", "roughness": 0.9 },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [-2.6, 0.78, -15.5]
+            },
+            "uid": "n_sucjkvirz7zr01p1"
+          },
+          {
+            "name": "FenceRailE1",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.07, 0.1, 15.4],
+              "material": { "color": "#755c40", "roughness": 0.9 },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [2.6, 0.42, -15.5]
+            },
+            "uid": "n_jvy32pfdkx7vpcm3"
+          },
+          {
+            "name": "FenceRailE2",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.07, 0.1, 15.4],
+              "material": { "color": "#755c40", "roughness": 0.9 },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [2.6, 0.78, -15.5]
+            },
+            "uid": "n_gts1fqjr49nk1xk1"
+          },
+          {
+            "name": "Lamp1",
+            "type": "Node3D",
+            "props": { "position": [-2.6, 0, 3.4], "rotation": [0, -30, 0] },
+            "children": [
+              {
+                "name": "Post",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.16, 2.3, 0.16],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.15, 0]
+                },
+                "uid": "n_60z6sio4korzrmc0"
+              },
+              {
+                "name": "Arm",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.62, 0.12, 0.12],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.26, 2.24, 0]
+                },
+                "uid": "n_w8nb1wux8dd7ji1l"
+              },
+              {
+                "name": "Cage",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.3, 0.4, 0.3],
+                  "material": { "color": "#3c3228", "roughness": 0.6 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_2dfkllwmg5pdwfko"
+              },
+              {
+                "name": "Glow",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "gem",
+                  "size": [0.16, 0.22, 0.16],
+                  "material": {
+                    "color": "#8a5a20",
+                    "emissive": "#ffb84f",
+                    "emissiveIntensity": 2.8,
+                    "roughness": 0.3
+                  },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_fbu60g57t5fmmg5u"
+              }
+            ],
+            "uid": "n_wukntba9bi89tbk4"
+          },
+          {
+            "name": "Lamp2",
+            "type": "Node3D",
+            "props": { "position": [4.2, 0, 12.6], "rotation": [0, 150, 0] },
+            "children": [
+              {
+                "name": "Post",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.16, 2.3, 0.16],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.15, 0]
+                },
+                "uid": "n_xfzhb3wo7f6uo19i"
+              },
+              {
+                "name": "Arm",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.62, 0.12, 0.12],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.26, 2.24, 0]
+                },
+                "uid": "n_27nhwl2o7x8zbhow"
+              },
+              {
+                "name": "Cage",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.3, 0.4, 0.3],
+                  "material": { "color": "#3c3228", "roughness": 0.6 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_1xmj4jp4gv3rqi7r"
+              },
+              {
+                "name": "Glow",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "gem",
+                  "size": [0.16, 0.22, 0.16],
+                  "material": {
+                    "color": "#8a5a20",
+                    "emissive": "#ffb84f",
+                    "emissiveIntensity": 2.8,
+                    "roughness": 0.3
+                  },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_4nz3awreioq6qxn9"
+              }
+            ],
+            "uid": "n_nxd0q2pc820hybe9"
+          },
+          {
+            "name": "Lamp3",
+            "type": "Node3D",
+            "props": { "position": [-3.4, 0, -7.5], "rotation": [0, -90, 0] },
+            "children": [
+              {
+                "name": "Post",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.16, 2.3, 0.16],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 1.15, 0]
+                },
+                "uid": "n_ttdzphmt0cb2q5jk"
+              },
+              {
+                "name": "Arm",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.62, 0.12, 0.12],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.26, 2.24, 0]
+                },
+                "uid": "n_ksyyd1awkoy2mczd"
+              },
+              {
+                "name": "Cage",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.3, 0.4, 0.3],
+                  "material": { "color": "#3c3228", "roughness": 0.6 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_de3t77v5mttu38v2"
+              },
+              {
+                "name": "Glow",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "gem",
+                  "size": [0.16, 0.22, 0.16],
+                  "material": {
+                    "color": "#8a5a20",
+                    "emissive": "#ffb84f",
+                    "emissiveIntensity": 2.8,
+                    "roughness": 0.3
+                  },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0.5, 2, 0]
+                },
+                "uid": "n_07zf0uj9kggox81v"
+              }
+            ],
+            "uid": "n_pya2axyb72qrvkh8"
+          },
+          {
+            "name": "Stall",
+            "type": "Node3D",
+            "props": { "position": [-4.6, 0, 8.6], "rotation": [0, 18, 0] },
+            "children": [
+              {
+                "name": "Counter",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [2.6, 0.9, 1.1],
+                  "material": { "color": "#6b533a", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 0.45, 0]
+                },
+                "uid": "n_evjtd5dsuz2uclmw"
+              },
+              {
+                "name": "Top",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [2.7, 0.08, 1.2],
+                  "material": { "color": "#8a6a44", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 0.93, 0]
+                },
+                "uid": "n_bo330f31s7itjzyp"
+              },
+              {
+                "name": "PoleW",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.1, 2.2, 0.1],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [-1.2, 1.1, -0.45]
+                },
+                "uid": "n_02bznh5uopp1q8xo"
+              },
+              {
+                "name": "PoleE",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.1, 2.2, 0.1],
+                  "material": { "color": "#54402c", "roughness": 0.85 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [1.2, 1.1, -0.45]
+                },
+                "uid": "n_02f1d1rmr906hj51"
+              },
+              {
+                "name": "Canopy",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [2.9, 0.06, 1.9],
+                  "material": { "color": "#a33d34", "roughness": 0.8 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 2.18, 0.25],
+                  "rotation": [-12, 0, 0]
+                },
+                "uid": "n_leds0gjk0i7k36yn"
+              },
+              {
+                "name": "CanopyStripe",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [2.92, 0.06, 0.5],
+                  "material": { "color": "#e8ddc4", "roughness": 0.8 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0, 2.181, 0.25],
+                  "rotation": [-12, 0, 0]
+                },
+                "uid": "n_9mvitow1g20u3jr1"
+              },
+              {
+                "name": "Goods1",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "sphere",
+                  "size": [0.16, 0.16, 0.16],
+                  "material": { "color": "#c8542e", "roughness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [-0.5, 1.06, 0.1]
+                },
+                "uid": "n_1ndxj1pbfphror0r"
+              },
+              {
+                "name": "Goods2",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "sphere",
+                  "size": [0.14, 0.14, 0.14],
+                  "material": { "color": "#d9a032", "roughness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [-0.16, 1.04, -0.2]
+                },
+                "uid": "n_7gqnn43dff3sl1jy"
+              },
+              {
+                "name": "Goods3",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "sphere",
+                  "size": [0.15, 0.15, 0.15],
+                  "material": { "color": "#7ba03a", "roughness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0.2, 1.05, 0.14]
+                },
+                "uid": "n_4a7020e5bcs5zs75"
+              }
+            ],
+            "uid": "n_mx8bnne0r5w2ud81"
+          },
+          {
+            "name": "Barrel1",
+            "type": "Node3D",
+            "props": { "position": [-7.2, 0, 4.2] },
+            "children": [
+              {
+                "name": "Body",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.34, 0.78, 0.34],
+                  "material": { "color": "#7a5c3c", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 0.39, 0]
+                },
+                "uid": "n_xkc5sk83oymj5mjv"
+              },
+              {
+                "name": "HoopTop",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.36, 0.06, 0.36],
+                  "material": { "color": "#3a332c", "roughness": 0.5, "metalness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0, 0.62, 0]
+                },
+                "uid": "n_gphxx4t41w10l2kh"
+              },
+              {
+                "name": "HoopBottom",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.36, 0.06, 0.36],
+                  "material": { "color": "#3a332c", "roughness": 0.5, "metalness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0, 0.18, 0]
+                },
+                "uid": "n_ykjzvrgm40ai9afe"
+              }
+            ],
+            "uid": "n_xgtfwhdafak8tg75"
+          },
+          {
+            "name": "Barrel2",
+            "type": "Node3D",
+            "props": { "position": [-6.6, 0, 4.9] },
+            "children": [
+              {
+                "name": "Body",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.34, 0.78, 0.34],
+                  "material": { "color": "#7a5c3c", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 0.39, 0]
+                },
+                "uid": "n_eg3mlab84p1elyld"
+              },
+              {
+                "name": "HoopTop",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.36, 0.06, 0.36],
+                  "material": { "color": "#3a332c", "roughness": 0.5, "metalness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0, 0.62, 0]
+                },
+                "uid": "n_c31tev4y9dafptrk"
+              },
+              {
+                "name": "HoopBottom",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.36, 0.06, 0.36],
+                  "material": { "color": "#3a332c", "roughness": 0.5, "metalness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0, 0.18, 0]
+                },
+                "uid": "n_tkwl8ot1yd5hesty"
+              }
+            ],
+            "uid": "n_gn3jpjadhecuxkik"
+          },
+          {
+            "name": "Barrel3",
+            "type": "Node3D",
+            "props": { "position": [8.9, 0, -4.6] },
+            "children": [
+              {
+                "name": "Body",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.34, 0.78, 0.34],
+                  "material": { "color": "#7a5c3c", "roughness": 0.9 },
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "position": [0, 0.39, 0]
+                },
+                "uid": "n_yfuzscfdeq0rpxrj"
+              },
+              {
+                "name": "HoopTop",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.36, 0.06, 0.36],
+                  "material": { "color": "#3a332c", "roughness": 0.5, "metalness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0, 0.62, 0]
+                },
+                "uid": "n_9izwlogjr7h1lc3w"
+              },
+              {
+                "name": "HoopBottom",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "cylinder",
+                  "size": [0.36, 0.06, 0.36],
+                  "material": { "color": "#3a332c", "roughness": 0.5, "metalness": 0.6 },
+                  "castShadow": false,
+                  "receiveShadow": true,
+                  "position": [0, 0.18, 0]
+                },
+                "uid": "n_3w82txbq39e0g4qw"
+              }
+            ],
+            "uid": "n_1t6diuva2568oa2w"
+          },
+          {
+            "name": "Crate1",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.62, 0.62, 0.62],
+              "material": { "color": "#9c7c50", "roughness": 0.9, "flatShading": true },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [8.2, 0.31, -5.4],
+              "rotation": [0, 14, 0]
+            },
+            "uid": "n_xtvj9dwhsl60htkn"
+          },
+          {
+            "name": "Crate2",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.5, 0.5, 0.5],
+              "material": { "color": "#9c7c50", "roughness": 0.9, "flatShading": true },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [8.5, 0.25, -4.5],
+              "rotation": [0, -8, 0]
+            },
+            "uid": "n_135y0ygzx6pirsqa"
+          },
+          {
+            "name": "Crate3",
+            "type": "MeshInstance3D",
+            "props": {
+              "mesh": "box",
+              "size": [0.55, 0.55, 0.55],
+              "material": { "color": "#9c7c50", "roughness": 0.9, "flatShading": true },
+              "castShadow": true,
+              "receiveShadow": true,
+              "position": [-7, 0.275, 5.8],
+              "rotation": [0, 32, 0]
+            },
+            "uid": "n_n0jggoxpomvh52oi"
+          },
+          {
+            "name": "MeadowW",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [-17, 0, -2],
+              "area": [26, 34],
+              "density": 9,
+              "height": 0.22,
+              "coverage": 0.78,
+              "seed": 101
+            },
+            "uid": "n_03wvwcmdhd8inr1m"
+          },
+          {
+            "name": "MeadowE",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [18, 0, -1],
+              "area": [24, 34],
+              "density": 9,
+              "height": 0.22,
+              "coverage": 0.78,
+              "seed": 202
+            },
+            "uid": "n_1lmih1r29dmyof9l"
+          },
+          {
+            "name": "MeadowN",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [2, 0, 21],
+              "area": [42, 16],
+              "density": 9,
+              "height": 0.22,
+              "coverage": 0.78,
+              "seed": 303
+            },
+            "uid": "n_vyrm0s4tenya0zta"
+          },
+          {
+            "name": "MeadowGate",
+            "type": "Foliage3D",
+            "props": {
+              "kind": "grass",
+              "style": "mesh",
+              "position": [0, 0, -21.5],
+              "area": [30, 12],
+              "density": 9,
+              "height": 0.22,
+              "coverage": 0.78,
+              "seed": 404
+            },
+            "uid": "n_5t119q3j5e2bynha"
+          },
+          {
+            "name": "FlowersWell",
+            "type": "Flowers3D",
+            "props": {
+              "position": [6.8, 0, 9.6],
+              "area": [2.6, 2.2],
+              "density": "lush",
+              "seed": 7,
+              "palette": ["#e4572e", "#f3a712", "#ffffff"]
+            },
+            "uid": "n_4n4koji68yozc9i1"
+          },
+          {
+            "name": "FlowersH1",
+            "type": "Flowers3D",
+            "props": {
+              "position": [-9.4, 0, 5.6],
+              "area": [3.4, 1.4],
+              "density": "lush",
+              "seed": 17,
+              "palette": ["#a26bd4", "#ffffff", "#f3a712"]
+            },
+            "uid": "n_ah0g80w1g45qpnwo"
+          },
+          {
+            "name": "FlowersH2",
+            "type": "Flowers3D",
+            "props": {
+              "position": [8.2, 0, -0.4],
+              "area": [3, 1.3],
+              "density": "lush",
+              "seed": 27,
+              "palette": ["#e4572e", "#ffffff"]
+            },
+            "uid": "n_0d6hcl4y8kuvz0wo"
+          },
+          {
+            "name": "FlowersGate",
+            "type": "Flowers3D",
+            "props": {
+              "position": [-4.4, 0, -24.4],
+              "area": [2.4, 1.6],
+              "density": "lush",
+              "seed": 37,
+              "palette": ["#f3a712", "#a26bd4"]
+            },
+            "uid": "n_g5jnu98a0b3yk21m"
+          },
+          {
+            "name": "Oak1",
+            "type": "Tree3D",
+            "props": {
+              "position": [-16, 0, -10],
+              "type": "broadleaf",
+              "seed": 11,
+              "scale": [1.2, 1.2, 1.2]
+            },
+            "uid": "n_ei0jkrvs2e92akyn"
+          },
+          {
+            "name": "Oak2",
+            "type": "Tree3D",
+            "props": { "position": [17, 0, 6], "type": "broadleaf", "seed": 23 },
+            "uid": "n_lecolhfjtkwlv55l"
+          },
+          {
+            "name": "Oak3",
+            "type": "Tree3D",
+            "props": { "position": [-14, 0, 14], "type": "broadleaf", "seed": 31 },
+            "uid": "n_j8qd48uzhrdbsecz"
+          },
+          {
+            "name": "Oak4",
+            "type": "Tree3D",
+            "props": {
+              "position": [14, 0, -14],
+              "type": "broadleaf",
+              "seed": 47,
+              "scale": [1.35, 1.35, 1.35]
+            },
+            "uid": "n_sznmxsp2t55yjnqd"
+          },
+          {
+            "name": "TreelineW",
+            "type": "Tree3D",
+            "props": {
+              "position": [-27, 0, -4],
+              "type": "conifer",
+              "count": 7,
+              "area": [8, 40],
+              "seed": 61
+            },
+            "uid": "n_a5ivoatws9am5b4w"
+          },
+          {
+            "name": "TreelineE",
+            "type": "Tree3D",
+            "props": {
+              "position": [27, 0, -2],
+              "type": "conifer",
+              "count": 7,
+              "area": [8, 40],
+              "seed": 71
+            },
+            "uid": "n_bhra5hoej28m61to"
+          },
+          {
+            "name": "TreelineN",
+            "type": "Tree3D",
+            "props": {
+              "position": [4, 0, 27],
+              "type": "broadleaf",
+              "count": 6,
+              "area": [40, 7],
+              "seed": 81
+            },
+            "uid": "n_2n13pngpbsr1mc2e"
+          },
+          {
+            "name": "TreelineGate",
+            "type": "Tree3D",
+            "props": {
+              "position": [-14, 0, -27],
+              "type": "conifer",
+              "count": 4,
+              "area": [22, 6],
+              "seed": 91
+            },
+            "uid": "n_gtjxpw0ha79jvple"
+          },
+          {
+            "name": "TreelineGateE",
+            "type": "Tree3D",
+            "props": {
+              "position": [14, 0, -27],
+              "type": "conifer",
+              "count": 4,
+              "area": [20, 6],
+              "seed": 95
+            },
+            "uid": "n_vukczk7kerwzylpv"
+          },
+          {
+            "name": "Bush1",
+            "type": "Tree3D",
+            "props": { "position": [-7.4, 0, 0.4], "type": "bush", "seed": 5 },
+            "uid": "n_genvo4pbe9apbzp8"
+          },
+          {
+            "name": "Bush2",
+            "type": "Tree3D",
+            "props": { "position": [9.2, 0, 1.8], "type": "bush", "seed": 15 },
+            "uid": "n_ndzit0eupe2nlm03"
+          },
+          {
+            "name": "Bush3",
+            "type": "Tree3D",
+            "props": { "position": [1.6, 0, -24.2], "type": "bush", "seed": 25 },
+            "uid": "n_ecsn1ibmvh9hy88y"
+          },
+          {
+            "name": "Sun",
+            "type": "DirectionalLight3D",
+            "props": {
+              "position": [7, 30, 22],
+              "intensity": 2.4,
+              "color": "#ffe2b8",
+              "castShadow": true,
+              "shadowArea": 56
+            },
+            "uid": "n_17xee1cojv5nzz43"
+          },
+          {
+            "name": "SquareGlow",
+            "type": "OmniLight3D",
+            "props": {
+              "position": [1.5, 2.6, 6],
+              "color": "#ffc98a",
+              "intensity": 14,
+              "range": 16
+            },
+            "uid": "n_vgcuoraq354tf8wq"
+          }
+        ],
+        "uid": "n_gs2ndd7i0avy0x4p"
+      },
+      {
+        "name": "Elder",
+        "type": "Node3D",
+        "props": { "position": [3, 0, -2] },
+        "script": { "name": "Interactable", "props": { "action": "interact", "range": 2.8 } },
+        "children": [
+          {
+            "name": "Body",
+            "type": "ModelInstance3D",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.65,
+              "animation": "$anims/idle",
+              "tint": "#c8a878",
+              "castShadow": true,
+              "rotation": [0, 0, 0]
+            },
+            "uid": "n_aqacnmwehdckpbxp"
+          },
+          {
+            "name": "Marker",
+            "type": "Billboard3D",
+            "props": { "position": [0, 2.15, 0], "mode": "y" },
+            "children": [
+              {
+                "name": "Bang",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.14, 0.5, 0.14],
+                  "material": {
+                    "color": "#ffd166",
+                    "emissive": "#ffd166",
+                    "emissiveIntensity": 1.6
+                  }
+                },
+                "uid": "n_0aul6i30b58a7fnc"
+              }
+            ],
+            "uid": "n_ceawk8oh27hszptp"
+          },
+          {
+            "name": "TalkSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "blip", "volume": 0.5, "pitch": 0.9 },
+            "uid": "n_sa391ifrhkd9cjda"
+          },
+          {
+            "name": "AcceptSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "coin", "volume": 0.5 },
+            "uid": "n_b5266u4vhhqpp9bf"
+          }
+        ],
+        "uid": "n_d5ztstoy2cc94xqw"
+      },
+      {
+        "name": "GroveGate",
+        "type": "Area3D",
+        "props": {
+          "position": [0, 1.5, -26.5],
+          "collider": { "shape": "box", "size": [4, 3, 1.6] }
+        },
+        "uid": "n_j43n1rs7e7kx9gsk"
+      },
+      {
+        "name": "Player",
+        "type": "RigidBody3D",
+        "groups": ["player"],
+        "props": {
+          "position": [0, 1.4, 10],
+          "fixedRotation": true,
+          "friction": 0,
+          "collider": { "shape": "capsule", "radius": 0.34, "height": 1 }
+        },
+        "children": [
+          {
+            "name": "Controller",
+            "type": "CharacterController3D",
+            "props": {
+              "view": "free",
+              "camDistance": 4.6,
+              "eyeHeight": 1.1,
+              "maxSpeed": 4,
+              "sprintMultiplier": 1.8,
+              "pitchMin": -0.5,
+              "pitchMax": 1.1,
+              "animations": {
+                "idle": "$anims/idle",
+                "walk": "$anims/walk",
+                "run": "$anims/run",
+                "fastRun": "$anims/runFast",
+                "airborne": "$anims/jump"
+              },
+              "coyoteSeconds": 0.12,
+              "jumpBufferSeconds": 0.15
+            },
+            "script": { "name": "SwordStrike" },
+            "uid": "n_4nm8dbrf8lwe34mn"
+          },
+          {
+            "name": "Skin",
+            "type": "ModelInstance3D",
+            "props": {
+              "model": "$characters/base",
+              "targetHeight": 1.7,
+              "animation": "$anims/idle",
+              "castShadow": true,
+              "position": [0, -0.85, 0]
+            },
+            "uid": "n_wn68f3q2bmlsyysc"
+          },
+          {
+            "name": "SwordMount",
+            "type": "BoneAttachment3D",
+            "props": { "target": "../Skin", "bone": "RightHand" },
+            "children": [
+              {
+                "name": "Blade",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.045, 0.7, 0.045],
+                  "position": [0, 0.42, 0],
+                  "material": { "color": "#d8dde8", "metalness": 0.9, "roughness": 0.25 },
+                  "castShadow": true
+                },
+                "uid": "n_f9fyehw1zk4jmpsi"
+              },
+              {
+                "name": "Guard",
+                "type": "MeshInstance3D",
+                "props": {
+                  "mesh": "box",
+                  "size": [0.16, 0.04, 0.06],
+                  "position": [0, 0.09, 0],
+                  "material": { "color": "#8a6d3a", "metalness": 0.7, "roughness": 0.4 }
+                },
+                "uid": "n_8o1wnzz5gzifx78x"
+              },
+              {
+                "name": "SwordTip",
+                "type": "Node3D",
+                "props": { "position": [0, 0.78, 0] },
+                "children": [
+                  {
+                    "name": "SwingTrail",
+                    "type": "Trail3D",
+                    "props": {
+                      "width": 0.26,
+                      "color": "#cfe8ff",
+                      "opacity": 0.9,
+                      "seconds": 0.25,
+                      "additive": true,
+                      "emitting": false,
+                      "minDistance": 0.02
+                    },
+                    "uid": "n_74necfd6un9ez6po"
+                  }
+                ],
+                "uid": "n_50vbtdh36ly90cvy"
+              }
+            ],
+            "uid": "n_p70g06708p5e8kjg"
+          },
+          {
+            "name": "SwingSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "shoot", "volume": 0.35, "pitch": 0.55 },
+            "uid": "n_6154ve7fb8b7pf9b"
+          },
+          {
+            "name": "HitSfx",
+            "type": "AudioPlayer",
+            "props": { "preset": "hit", "volume": 0.6 },
+            "uid": "n_a3deec4u9ji6a6pj"
+          },
+          { "name": "Catch", "type": "Respawn", "uid": "n_lsao0no5c23u2umd" }
+        ],
+        "uid": "n_tv4bgevj0e6hhnqg"
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "props": { "current": true, "position": [0, 4, 16] },
+        "uid": "n_1x145b9so1pnp8nj"
+      },
+      {
+        "name": "HUD",
+        "type": "HudLayer",
+        "children": [
+          {
+            "name": "Quest",
+            "type": "UiText",
+            "uid": "n_ouw4yqcp59yn0xwp",
+            "props": {
+              "text": "@t:quest.talkElder",
+              "size": 16,
+              "anchor": "topLeft",
+              "shadow": true
+            }
+          },
+          {
+            "name": "Banner",
+            "type": "UiBanner",
+            "uid": "n_rqkjlucsenuwggtc",
+            "props": { "anchor": "center" }
+          },
+          {
+            "name": "Dialogue",
+            "type": "UiDialogue",
+            "uid": "n_ui4xf7paa0mgjzmh",
+            "props": { "anchor": "bottom", "charsPerSecond": 45 }
+          },
+          {
+            "name": "RestartBtn",
+            "type": "UiButton",
+            "uid": "n_5eupths7miw4jilp",
+            "props": { "text": "@t:ui.playAgain", "anchor": "bottom", "visible": false }
+          },
+          {
+            "name": "Hint",
+            "type": "UiText",
+            "uid": "n_aoy8da41ca8tq4mr",
+            "props": {
+              "text": "@t:ui.hint",
+              "size": 12,
+              "color": "#cccccc",
+              "anchor": "bottomRight",
+              "shadow": true
+            }
+          },
+          {
+            "name": "Language",
+            "type": "UiLanguageSelect",
+            "uid": "n_4m6tsfl0og3ekii3",
+            "props": { "label": "@t:settings.language", "anchor": "topRight" }
+          },
+          {
+            "name": "PauseMenu",
+            "type": "UiPanel",
+            "uid": "n_2qwqjqh4quth7e2n",
+            "props": {
+              "anchor": "center",
+              "layout": "column",
+              "gap": 12,
+              "padding": 22,
+              "visible": false,
+              "background": "rgba(10,14,22,0.92)",
+              "radius": 12
+            },
+            "children": [
+              {
+                "name": "PausedTitle",
+                "type": "UiText",
+                "uid": "n_txt30ax88omwicjs",
+                "props": { "text": "PAUSED", "size": 26 }
+              },
+              {
+                "name": "Resume",
+                "type": "UiButton",
+                "uid": "n_jo0ovhcin79mtfel",
+                "props": { "text": "RESUME", "size": 18 }
+              },
+              {
+                "name": "PauseOptions",
+                "type": "UiButton",
+                "uid": "n_gu9f3scxx3ey6zoc",
+                "props": { "text": "OPTIONS", "size": 16 }
+              },
+              {
+                "name": "Restart",
+                "type": "UiButton",
+                "uid": "n_v1jdh9w3njlqtc4u",
+                "props": { "text": "START OVER", "size": 16 }
+              }
+            ]
+          },
+          {
+            "name": "Options",
+            "type": "UiPanel",
+            "uid": "n_kq3hlan3nrz5keog",
+            "props": {
+              "anchor": "center",
+              "layout": "column",
+              "gap": 10,
+              "padding": 22,
+              "visible": false,
+              "background": "rgba(10,14,22,0.92)",
+              "radius": 12
+            },
+            "children": [
+              {
+                "name": "OptionsTitle",
+                "type": "UiText",
+                "uid": "n_i0a6qykgauqump71",
+                "props": { "text": "OPTIONS", "size": 24 }
+              },
+              {
+                "name": "Master",
+                "type": "UiVolumeSlider",
+                "uid": "n_n5h7cfsjsych63ix",
+                "props": { "label": "master", "bus": "master", "width": 260 }
+              },
+              {
+                "name": "Sfx",
+                "type": "UiVolumeSlider",
+                "uid": "n_a37vbt17sodktb1h",
+                "props": { "label": "effects", "bus": "sfx", "width": 260 }
+              },
+              {
+                "name": "Mute",
+                "type": "UiMuteToggle",
+                "uid": "n_wxmwd9gbf16mia7v",
+                "props": { "label": "mute everything" }
+              },
+              {
+                "name": "Quality",
+                "type": "UiQualitySelect",
+                "uid": "n_g9f4iazzwcqxlykd",
+                "props": { "label": "quality" }
+              },
+              {
+                "name": "Back",
+                "type": "UiButton",
+                "uid": "n_6vkdb2onbyjrwakr",
+                "props": { "text": "BACK", "size": 16 }
+              }
+            ]
+          }
+        ],
+        "uid": "n_6u92lb0drej635s9"
+      },
+      {
+        "name": "Flow",
+        "type": "Node",
+        "uid": "n_y2pc0uwbjnsx2ppe",
+        "script": { "name": "GameFlow" }
+      }
+    ],
+    "uid": "n_2a2pghqmq92ko29c"
+  },
+  "connections": [
+    { "signal": "interacted", "from": "Elder", "to": "/root", "handler": "onTalk" },
+    { "signal": "triggerEnter", "from": "GroveGate", "to": "/root", "handler": "onGateEnter" },
+    { "signal": "pressed", "from": "HUD/RestartBtn", "to": "/root", "handler": "onRestart" },
+    {
+      "from": "/root/HUD/PauseMenu/Resume",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "resume"
+    },
+    {
+      "from": "/root/HUD/PauseMenu/PauseOptions",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "screen",
+      "args": ["/root/HUD/Options"]
+    },
+    {
+      "from": "/root/HUD/PauseMenu/Restart",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "restart"
+    },
+    {
+      "from": "/root/HUD/Options/Back",
+      "signal": "pressed",
+      "to": "/root/Flow",
+      "handler": "back"
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "Minecraft",
+  "environment": { "background": "#87ceeb", "ambient": { "color": "#ffffff", "intensity": 1.2 } },
+  "physics": { "gravity": [0, -9.81, 0] },
+  "input": {
+    "move": {
+      "type": "vector2",
+      "keys": {
+        "up": ["KeyW", "ArrowUp"],
+        "down": ["KeyS", "ArrowDown"],
+        "left": ["KeyA", "ArrowLeft"],
+        "right": ["KeyD", "ArrowRight"]
+      }
+    },
+    "jump": { "type": "button", "keys": ["Space"] },
+    "sprint": { "type": "button", "keys": ["ShiftLeft", "ShiftRight"] },
+    "addCube": { "type": "button", "keys": ["KeyF", "Mouse0"] }
+  },
+  "root": {
+    "name": "Minecraft",
+    "type": "Node3D",
+    "uid": "n_fu6152tz430aqkvc",
+    "children": [
+      {
+        "name": "Voxels",
+        "type": "VoxelGrid3D",
+        "uid": "n_f1z52sofzpzwbagn",
+        "props": {
+          "voxels": [
+            [0, 0, -8, 2],
+            [0, 1, -8, 2],
+            [0, 2, -8, 2],
+            [0, 3, -8, 2],
+            [0, 4, -8, 2],
+            [0, 5, -8, 2],
+            [0, 6, -8, 2],
+            [0, 7, -8, 2],
+            [0, 8, -8, 2],
+            [0, 9, -8, 2],
+            [0, 10, -8, 2],
+            [0, 11, -8, 2],
+            [0, 12, -8, 2],
+            [0, 13, -8, 2],
+            [0, 14, -8, 2],
+            [0, 15, -8, 2],
+            [0, 16, -8, 2],
+            [0, 17, -8, 2],
+            [0, 18, -8, 1]
+          ]
+        }
+      },
+      {
+        "name": "Terrain",
+        "type": "Node3D",
+        "uid": "n_gofod3i25yw357mb",
+        "script": { "name": "Terrain" }
+      },
+      {
+        "name": "Water",
+        "type": "Node3D",
+        "uid": "n_zy6qwrpoe5o2466n",
+        "children": [
+          {
+            "name": "Skin",
+            "type": "MeshInstance3D",
+            "uid": "n_8q6llr2lf7ex1zps",
+            "props": {
+              "mesh": "box",
+              "size": [1000, 0.02, 1000],
+              "position": [0, 10, 0],
+              "material": { "color": "#0077be", "roughness": 0.4 }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Player",
+        "type": "RigidBody3D",
+        "uid": "n_9hvdu9zee0ds74xb",
+        "props": {
+          "position": [0, 20, 0],
+          "fixedRotation": true,
+          "friction": 0,
+          "collider": { "shape": "capsule", "radius": 0.32, "height": 0.96 }
+        },
+        "script": { "name": "Builder" },
+        "children": [
+          {
+            "name": "Controller",
+            "type": "CharacterController3D",
+            "uid": "n_spovf7315uzrtmc8",
+            "props": {
+              "view": "firstPerson",
+              "camDistance": 0.01,
+              "skinPath": "",
+              "coyoteSeconds": 0.12,
+              "jumpBufferSeconds": 0.15
+            }
+          },
+          { "name": "Catch", "type": "Respawn", "uid": "n_duzn526oqgxp1hfu" }
+        ]
+      },
+      {
+        "name": "Preview",
+        "type": "MeshInstance3D",
+        "uid": "n_wtqf9vkqu3sbedu4",
+        "props": {
+          "mesh": "box",
+          "size": [1.03, 1.03, 1.03],
+          "material": { "color": "#ffffff", "roughness": 1 },
+          "visible": false
+        }
+      },
+      {
+        "name": "Sun",
+        "type": "DirectionalLight3D",
+        "uid": "n_c0cp0ezgjaw0o5o6",
+        "props": {
+          "position": [30, 100, 30],
+          "intensity": 0.8,
+          "castShadow": true,
+          "shadowMapSize": 4096
+        },
+        "script": { "name": "FollowLight" }
+      },
+      {
+        "name": "FillLight",
+        "type": "DirectionalLight3D",
+        "uid": "n_kin2o5fxg7ky9wu4",
+        "props": { "position": [-30, 50, -30], "intensity": 0.8, "color": "#b9d4ff" }
+      },
+      {
+        "name": "UnderLight",
+        "type": "DirectionalLight3D",
+        "uid": "n_g8eucf08t08z8ti4",
+        "props": { "position": [0, -10, 0], "intensity": 0.3, "color": "#fff9e8" }
+      },
+      {
+        "name": "Camera",
+        "type": "Camera3D",
+        "uid": "n_4dgika6ebk7y1rh9",
+        "props": { "position": [0, 18, 6], "fov": 75, "current": true }
+      }
+    ]
+  }
+}

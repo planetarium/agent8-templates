@@ -1,0 +1,31 @@
+{
+  "name": "incanto-village-quest-3d",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "check": "incanto-check src --behaviors src/behaviors.ts",
+    "verify": "bun verify.ts"
+  },
+  "dependencies": {
+    "@agent8/gameserver": "^1.10.2",
+    "@dimforge/rapier2d-compat": "0.19.3",
+    "@dimforge/rapier3d-compat": "0.19.3",
+    "@pixiv/three-vrm": "^3.5.3",
+    "incanto": "^0.78.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.184.1",
+    "@vitejs/plugin-react": "^6.0.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  }
+}
