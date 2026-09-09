@@ -1,0 +1,26 @@
+{
+  "format": 1,
+  "type": "scene",
+  "dimension": "3d",
+  "name": "Cover",
+  "root": {
+    "name": "Cover",
+    "type": "StaticBody3D",
+    "props": { "collider": { "shape": "box", "size": [2, 1.2, 2] } },
+    "children": [
+      {
+        "name": "Skin",
+        "type": "MeshInstance3D",
+        "props": {
+          "mesh": "box",
+          "size": [2, 1.2, 2],
+          "material": { "color": "#5b6678", "roughness": 0.85, "metalness": 0.1 },
+          "castShadow": true,
+          "receiveShadow": true
+        },
+        "uid": "n_wgm7e7zg55s8ugcn"
+      }
+    ],
+    "uid": "n_z4ycq2ses8kh87zd"
+  }
+}
