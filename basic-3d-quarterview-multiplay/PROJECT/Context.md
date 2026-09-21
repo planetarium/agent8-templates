@@ -20,7 +20,7 @@ _Exact versions are in `package.json`._
 
 - Local player must be built on `RigidBodyPlayer`; remote players must be built on `NetworkObject` — do not swap these.
 - Physics stay paused until `gameStore.isMapPhysicsReady` is `true`. `MapPhysicsReadyChecker` releases it via a downward raycast — new map geometry must be reachable by it. `QuarterViewController` is mounted only after the gate opens.
-- Server communication is centralized: `networkSyncStore.setServer(server)` is called once in `App.tsx`; do not call `remoteFunction` without going through the existing flow (`updateMyState`, `joinRoom`, `leaveRoom`, `toggleReady`, `setCharacter`, `handlePing`, `revive`, `applyDamage`).
+- Server communication is centralized: `networkSyncStore.setServer(server)` is called once in `App.tsx`; do not call `remoteFunction` without going through the existing flow (`updateMyState`, `createRoom`, `setNickname`, `toggleReady`, `setCharacter`, `handlePing`, `revive`, `applyDamage`); room entry/exit is the SDK's `joinRoom` / `leaveRoom` from `useGameServer()`.
 - Local `Player` state sync is throttled (100 ms) and dirty-checked against position (0.01 m) / rotation (0.01 rad) thresholds — preserve these to avoid flooding the server.
 - `RemotePlayer` transforms arrive through `ref.syncState(...)`; never bypass `NetworkContainer` and render `RemotePlayer` directly.
 - Character model and animation URLs are loaded via the `src/assets.json` manifest; selected character key is stored in `UserState.character`.

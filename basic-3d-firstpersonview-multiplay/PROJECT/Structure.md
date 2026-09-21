@@ -2,7 +2,7 @@
 
 ## `src/main.tsx`, `src/App.tsx`
 
-Entry point and root component. `App` owns the session state machine: it reads `useGameServer`, wires the server into `networkSyncStore`, subscribes to room state (`gameStarted`) and my-state (`isReady`, `character`), and conditionally renders `NicknameSetup` → `RoomManager` → `LobbyRoom` → `GameScene`. Room actions (`joinRoom`, `leaveRoom`) are called via `server.remoteFunction`.
+Entry point and root component. `App` owns the session state machine: it reads `useGameServer`, wires the server into `networkSyncStore`, subscribes (once `rsConnected`) to room state (`gameStarted`) and my-state (`isReady`, `character`), and conditionally renders `NicknameSetup` → `RoomManager` → `LobbyRoom` → `GameScene`. Room entry/exit uses `joinRoom` / `leaveRoom` from `useGameServer()`, which also owns `currentRoomId` and `rsConnected`; `setNickname` and `createRoom` are the remote functions called around the join.
 
 ## `src/App.css`, `src/index.css`
 

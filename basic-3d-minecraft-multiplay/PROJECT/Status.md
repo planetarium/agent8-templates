@@ -2,8 +2,8 @@
 
 ## Implemented
 
-- Connection flow: connecting spinner → nickname → room create/join → lobby (character + ready) → in-game scene, all driven by `@agent8/gameserver` hooks.
-- Multiplayer server bridge: `joinRoom`, `leaveRoom`, `toggleReady`, `setCharacter`, `updatePlayerTransform`, `addCube`, `initializeCubes`, `sendEffectEvent`, `handlePing` (in `server.js`).
+- Connection flow: connecting spinner → nickname → room create/join → joining-room spinner (`rsConnected`) → lobby (character + ready) → in-game scene, all driven by `@agent8/gameserver` hooks.
+- Multiplayer server bridge: `createRoom`, `setNickname`, `toggleReady`, `setCharacter`, `updatePlayerTransform`, `addCube`, `initializeCubes`, `sendEffectEvent`, `handlePing`, plus the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` lifecycle hooks (in `server.js`). Room entry/exit is the SDK's `joinRoom` / `leaveRoom`.
 - Remote-player sync: per-account `RemotePlayer` refs, transform/state replication via `subscribeRoomAllUserStates`, billboarded nickname labels.
 - First-person controller (`FirstPersonViewController`) with humanoid animation set (idle, walk, run, jump, punch, hit, die) and a magic cast on `KeyE`.
 - Local-player network sync throttled at 100 ms with position/rotation dirty checks.

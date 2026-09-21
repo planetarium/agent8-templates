@@ -2,7 +2,7 @@
 
 ## `src/main.tsx`, `src/App.tsx`
 
-Entry point and root flow controller. `App` uses `useGameServer` from `@agent8/gameserver`, wires `networkSyncStore.setServer`, and switches between `NicknameSetup`, `RoomManager`, `LobbyRoom`, and `GameScene` based on connection / nickname / room / `roomStarted` / `isReady` state. Exposes `joinRoom`, `leaveRoom` remote-function calls and subscribes to `subscribeRoomState` + `subscribeRoomMyState`.
+Entry point and root flow controller. `App` uses `useGameServer` from `@agent8/gameserver`, wires `networkSyncStore.setServer`, and switches between `NicknameSetup`, `RoomManager`, `LobbyRoom`, and `GameScene` based on connection / nickname / room / `rsConnected` / `roomStarted` / `isReady` state. Takes `joinRoom`, `leaveRoom`, `currentRoomId` and `rsConnected` from `useGameServer()`, calls `setNickname` + `createRoom` before joining, and subscribes to `subscribeRoomState` + `subscribeRoomMyState` once `rsConnected` is true.
 
 ## `src/App.css`, `src/index.css`
 
