@@ -19,7 +19,7 @@ _Exact versions are in `package.json`._
 
 ## Critical Memory
 
-- App flow is gated by `connected` → `nickname` → `currentRoomId` → `roomState.gameStarted && roomMyState.isReady`. `GameScene` only mounts after the ready flag flips; `LobbyRoom` handles character pick + ready toggle.
+- App flow is gated by `connected` → `nickname` → `currentRoomId` → `rsConnected` → `roomState.gameStarted && roomMyState.isReady`. `rsConnected` is the separate Room Server connection that `joinRoom` establishes; `$room` state, the room hooks and `onRoomMessage` do not work without it, so room UI and room subscriptions gate on it rather than on `connected`. `GameScene` only mounts after the ready flag flips; `LobbyRoom` handles character pick + ready toggle.
 - Local player transform sync goes through `Player.tsx` → `server.remoteFunction('updatePlayerTransform', ...)`, throttled at 100ms with dirty-check thresholds (`POSITION_CHANGE_THRESHOLD` 0.01, `ROTATION_CHANGE_THRESHOLD` 0.01). Do not bypass the throttle.
 - Remote players are owned by `NetworkContainer`: it keeps a `RemotePlayerHandle` ref per account and calls `syncState(state, position, rotation)` on each `subscribeRoomAllUserStates` tick. Only users with `isReady && transform` are rendered.
 - Effects flow both ways: locally add via `useEffectStore.addEffect`, then `server.remoteFunction('sendEffectEvent', ...)`; incoming `onRoomMessage('effect-event', ...)` calls `addEffect` after filtering self-sender.

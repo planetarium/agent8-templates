@@ -68,4 +68,4 @@ Asset manifest — character GLBs, mixamorig animations, and the `minecraft` spr
 
 ## `server.js`
 
-Verse room server: `joinRoom`, `leaveRoom`, `toggleReady`, `setCharacter`, `updatePlayerTransform`, `addCube`, `initializeCubes`, `sendEffectEvent`, `handlePing`.
+Verse room server: `createRoom`, `setNickname`, `toggleReady`, `setCharacter`, `updatePlayerTransform`, `addCube`, `initializeCubes`, `sendEffectEvent`, `handlePing`, plus the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` lifecycle hooks.

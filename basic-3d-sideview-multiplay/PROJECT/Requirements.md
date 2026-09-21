@@ -2,8 +2,8 @@
 
 ## Coding Patterns
 
-- Keep the flow states in `App.tsx` (`nickname` / `currentRoomId` / `roomStarted` / `isReady`); screen components stay presentational and take callbacks.
-- Never write user/room state directly from the client — go through `server.remoteFunction` (`joinRoom`, `leaveRoom`, `setCharacter`, `toggleReady`, `updatePlayerTransform`, `sendEffectEvent`, `applyDamage`).
+- Keep the flow states in `App.tsx` (`nickname` / `roomStarted` / `isReady`); `currentRoomId` and `rsConnected` come from `useGameServer()`, not local state. Screen components stay presentational and take callbacks.
+- Never write user/room state directly from the client — go through `server.remoteFunction` (`createRoom`, `setNickname`, `setCharacter`, `toggleReady`, `updatePlayerTransform`, `sendEffectEvent`, `applyDamage`). Room entry/exit is the SDK's `joinRoom` / `leaveRoom` from `useGameServer()`.
 - Local player transform sync lives in `Player.tsx` only; reuse its throttle + dirty-check thresholds (`NETWORK_CONSTANTS.SYNC`) rather than spawning new sync paths.
 - Remote players are driven via `RemotePlayerHandle.syncState` from `NetworkContainer`; do not mount `RemotePlayer` directly elsewhere.
 - Effects are spawned through `useEffectStore.addEffect` then broadcast via `sendEffectEvent`; incoming `effect-event` messages call `addEffect` again — filter self-sender to avoid duplicates.
