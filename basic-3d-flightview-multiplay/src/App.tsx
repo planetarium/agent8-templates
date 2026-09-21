@@ -17,7 +17,6 @@ function App() {
   const [error, setError] = useState<string | null>(null); // Error message state
 
   useEffect(() => {
-    console.log('server', server.account);
     if (server && connected) {
       networkSyncStore.getState().setServer(server);
     }
@@ -30,7 +29,8 @@ function App() {
     if (!server || !rsConnected || !currentRoomId) return;
 
     const unsubscribe = server.subscribeRoomState(currentRoomId, (roomState) => {
-      setRoomStarted(roomState.gameStarted);
+      // Absent until toggleReady() first writes it — onRoomCreate no longer seeds it.
+      setRoomStarted(roomState.gameStarted ?? false);
     });
 
     return () => {
@@ -78,12 +78,14 @@ function App() {
     setError(null);
 
     try {
-      // Persist the nickname first: the server's onRoomJoin hook reads it back from
-      // global user state to seed this user's room state.
-      await server.remoteFunction('setNickname', [nickname]);
-
-      // An explicit id joins that room; without one the server hands out a fresh id.
-      const targetRoomId = roomId ?? (await server.remoteFunction('createRoom', []));
+      // Both must land before joinRoom — onRoomJoin reads the nickname back out of
+      // global user state — but they do not depend on each other, so they go in
+      // parallel. An explicit id joins that room; without one the server hands out
+      // a fresh id.
+      const [, targetRoomId] = await Promise.all([
+        server.remoteFunction('setNickname', [nickname]),
+        roomId ?? server.remoteFunction('createRoom', []),
+      ]);
 
       // joinRoom() is the SDK's, not a remote function: it routes the client to the
       // room's Room Server and connects, which is what makes $room state, the room
@@ -139,12 +141,19 @@ function App() {
           <div className="text-center">
             <div className="w-10 h-10 border-3 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
             <p>Joining room...</p>
+            {error && <p className="mt-2 text-red-600">{error}</p>}
+            {/* The SDK keeps retrying on its own, but a player who is stuck here
+                (or who simply changed their mind) needs a way out. */}
+            <button
+              onClick={handleLeaveRoom}
+              className="mt-4 px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       );
     }
-
-    console.log('roomStarted', roomStarted, isReady);
 
     // Show game scene if the game has started and the user is ready
     // Note: Character selection check might be needed here or handled within GameScene/LobbyRoom
@@ -152,10 +161,11 @@ function App() {
       return <GameScene roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} />;
     }
 
-    // Otherwise, show the lobby room
-    if (currentRoomId && !isReady) {
-      return <LobbyRoom roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} server={server} />;
-    }
+    // Otherwise, show the lobby room. Unconditional on purpose: roomStarted and
+    // isReady arrive on two independent subscriptions, so between the two
+    // callbacks of a single toggleReady the guarded form matched no branch at all
+    // and renderContent() returned undefined — a blank screen.
+    return <LobbyRoom roomId={currentRoomId} onLeaveRoom={handleLeaveRoom} server={server} />;
   };
 
   return (

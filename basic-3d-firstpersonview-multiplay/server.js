@@ -2,15 +2,14 @@ class Server {
   // Returns an id for a brand-new room. The room does not exist yet — the runtime
   // creates it when the first client joins with the SDK's joinRoom(). The server
   // never joins rooms in 2.0: $global.joinRoom() has been removed.
+  //
+  // No collision scan: getAllRoomIds() lists only ACTIVE rooms, so it cannot see
+  // the one id that matters — one just handed out and not yet joined. Two players
+  // creating a room at the same moment would both read the same snapshot anyway.
+  // A 32-bit random id makes a real collision vanishingly unlikely; a scan would
+  // cost a full room enumeration per click and still not close that window.
   async createRoom() {
-    const existingRoomIds = new Set(await $global.getAllRoomIds());
-
-    let roomId = 'Room' + Math.random().toString(16).substring(2, 10);
-    while (existingRoomIds.has(roomId)) {
-      roomId = 'Room' + Math.random().toString(16).substring(2, 10);
-    }
-
-    return roomId;
+    return 'Room' + Math.random().toString(16).substring(2, 10);
   }
 
   // Stores the nickname on the caller's global user state. onRoomJoin reads it back
@@ -26,15 +25,16 @@ class Server {
     return trimmed;
   }
 
-  // Runs once, when the first user joins and the room is created. Only fields that
-  // onRoomJoin never writes may be seeded here: room hooks are not serialized, so a
-  // second user's onRoomJoin can land before this hook runs and a blind overwrite
-  // would erase them.
+  // Runs once, when the first user joins and the room is created. Seed ONLY fields
+  // that no other code path writes: room hooks and remote functions are not
+  // serialized against each other, so this blind updateRoomState can land after a
+  // racing writer and would silently undo it. gameStarted is written by
+  // toggleReady() and is therefore NOT seeded here — an absent value reads as
+  // "not started" on the client, which is the same thing.
   async onRoomCreate(roomId) {
     await $room.updateRoomState({
       initialized: true,
       createdAt: Date.now(),
-      gameStarted: false,
     });
   }
 
@@ -61,18 +61,28 @@ class Server {
       },
     });
 
-    // Broadcast a system message that a new user has joined
-    await $room.broadcastToRoom('system-message', {
-      type: 'join',
-      account,
-      nickname,
-      timestamp: Date.now(),
-    });
+    // Courtesy broadcast only. It is deliberately not awaited into the hook's
+    // result: throwing here fails the JOIN, the runtime rolls the user back out
+    // of $users, and the SDK retries silently until its deadline — re-running
+    // clearUserState on every attempt with nothing surfaced to the player.
+    try {
+      await $room.broadcastToRoom('system-message', {
+        type: 'join',
+        account,
+        nickname,
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      console.warn(`join broadcast failed for ${account}: ${error.message}`);
+    }
   }
 
-  // Runs on every exit, and is the only hook that does. A closed tab fires it at
-  // once; an explicit leaveRoom() or a dropped connection fires it after the
-  // runtime's 30s grace period, during which the user is still in $users.
+  // Runs on every exit, and is the only hook that does. An intentional exit —
+  // leaveRoom(), switching rooms, a closed tab — fires it at once. Only an
+  // involuntary drop waits out the runtime's 30s grace period, during which the
+  // user stays in $users so a brief network blip can reconnect into the same
+  // room. (Requires @agent8/gameserver >= 2.0.1; 2.0.0 sent no close code, so
+  // even a deliberate leave took the grace path.)
   async onRoomLeave(roomId, account) {
     const userState = await $room.getUserState(account);
 
