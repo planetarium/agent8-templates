@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
-    "@agent8/gameserver": "^2.0.0",
+    "@agent8/gameserver": "^2.0.1",
     "vibe-starter-3d": "^0.8.22",
     "vibe-starter-3d-environment": "^3.0.9",
     "@react-three/drei": "9.122.0",
