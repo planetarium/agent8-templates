@@ -2,7 +2,7 @@
 
 ## `src/main.tsx`, `src/App.tsx`
 
-Entry point and root component. `App` owns the top-level flow state (`connected`, `nickname`, `currentRoomId`, `roomStarted`, `isReady`) and switches between `NicknameSetup`, `RoomManager`, `LobbyRoom`, and `GameScene`. It subscribes to `subscribeRoomState` / `subscribeRoomMyState` and wires the `GameServer` instance into `networkSyncStore`.
+Entry point and root component. `App` owns the top-level flow state (`nickname`, `roomStarted`, `isReady`) and reads `connected`, `currentRoomId` and `rsConnected` from `useGameServer()`, switching between `NicknameSetup`, `RoomManager`, a joining-room spinner, `LobbyRoom`, and `GameScene`. It subscribes to `subscribeRoomState` / `subscribeRoomMyState` once `rsConnected` is true, and wires the `GameServer` instance into `networkSyncStore`.
 
 ## `src/App.css`, `src/index.css`
 
@@ -14,7 +14,7 @@ Asset manifest — character model URLs (multiple selectable characters) and ani
 
 ## `src/server.js`
 
-Agent8 gameserver methods: `joinRoom`, `leaveRoom`, `setCharacter`, `toggleReady`, `updateMyState`, `handlePing` (RTT), `applyDamage`, `sendMessage`, `sendEffectEvent`, plus `$roomTick`.
+Agent8 gameserver methods: `createRoom`, `setNickname`, `setCharacter`, `toggleReady`, `updateMyState`, `handlePing` (RTT), `applyDamage`, `sendMessage`, `sendEffectEvent`, plus the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` lifecycle hooks and `$roomTick`.
 
 ## `src/constants/`
 
