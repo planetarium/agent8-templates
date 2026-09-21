@@ -2,7 +2,7 @@
 
 ## Implemented
 
-- End-to-end session flow: connect → nickname → room create/join → lobby ready → game scene (`App.tsx` + `NicknameSetup` + `RoomManager` + `LobbyRoom` + `GameScene`)
+- End-to-end session flow: connect → nickname → room create/join → joining room (until `rsConnected`) → lobby ready → game scene (`App.tsx` + `NicknameSetup` + `RoomManager` + `LobbyRoom` + `GameScene`)
 - Flight control via `FlightViewController` (WASD yaw/throttle, arrow keys pitch/roll) with propeller-speed-reactive visuals
 - Multiplayer transform sync: throttled `updateMyState` outbound, `subscribeRoomAllUserStates` inbound, imperative `RemotePlayer.syncState`
 - Remote player rendering through `NetworkObject` + nickname `Billboard` + cuboid hit collider
