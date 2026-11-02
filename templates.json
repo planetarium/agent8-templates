@@ -24,6 +24,14 @@
     "tags": ["vite", "react", "typescript", "phaser", "2d", "boardgame"]
   },
   {
+    "name": "2d-phaser-basic-pixelfx",
+    "label": "2D Phaser Basic Template with Pixel Art VFX",
+    "description": "Basic 2D Phaser template with a built-in library of 244 ready-to-use pixel art effects (fire, explosions, magic, healing, hits and slashes, weather, pickups, UI pops and more) and a helper to play them in any scene. Ideal for 2D games that need polished visual effects.",
+    "githubRepo": "planetarium/agent8-templates",
+    "path": "2d-phaser-basic-pixelfx",
+    "tags": ["vite", "react", "typescript", "phaser", "2d", "pixel art VFX", "effects", "pixelfx"]
+  },
+  {
     "name": "basic-3d",
     "label": "Incanto 3D Empty Stage Template",
     "description": "Incanto engine 3D empty stage (Three.js underneath, the whole game is scene JSON): a solid ground under a physical sky, a shadow-casting sun, a marker cube and a camera framing the origin — no character. Pick this for a 3D game that is not a character game: puzzle, board game, tower defense, idle, tycoon, simulation, sandbox. The project uses the incanto-* skills — read incanto-your-first-game before the first edit. 3D only; not for 2D games.",
