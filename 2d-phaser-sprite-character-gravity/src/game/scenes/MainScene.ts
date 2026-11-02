@@ -54,8 +54,8 @@ export class MainScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
   }
 
-  update() {
-    // 플레이어 업데이트
-    this.player.update(this.cursors);
+  update(_time: number, delta: number) {
+    // 플레이어 업데이트 (점프 유예·가속은 delta로 잰다)
+    this.player.update(this.cursors, delta);
   }
 }

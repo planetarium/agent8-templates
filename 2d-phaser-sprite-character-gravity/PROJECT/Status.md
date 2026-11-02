@@ -7,7 +7,9 @@
 - Critical scale/tween compatibility patch in `Game.ts` (`setDisplaySize`, `setScale`, `TweenManager.add`)
 - `MainScene` with sky-blue background, static ground rectangle, world bounds, physics debug graphic
 - `SpriteCharacter` (extends `Phaser.Physics.Arcade.Sprite`) with idle / left / right / jump / attack animations driven from the `2dbasic` sheet
-- Arrow-key movement, ground-checked jump, Space-key attack with transient hitbox and 300ms auto-destroy + 500ms safety timeout
+- Arrow-key movement with acceleration/deceleration (separate ground and air rates, about 0.1s to full speed or to a stop on the ground), measured with `delta`
+- Jump on a fresh Up press with 0.12s coyote time and a 0.1s input buffer; holding Up jumps once
+- Space-key attack with transient hitbox and 300ms auto-destroy + 500ms safety timeout
 - Player ↔ ground collider, world-bounds collision, and `setBounce(0.2)`
 - Sprite sheet loaded from `src/assets.json` with `frameWidth`/`frameHeight` metadata
 
