@@ -14,63 +14,65 @@ export interface VfxSheet {
   frames: number;
   /** Full-screen overlay (weather): covers the camera instead of standing at x, y. */
   screenSpace: boolean;
+  /** GPU memory of the loaded sheet, in bytes. */
+  gpuBytes: number;
   /** Impact frames: t seconds after start, freeze seconds long. */
   hits: { t: number; freeze: number }[];
 }
 
 export type ExplosionsVfx = 'small-explosion' | 'cartoon-pow' | 'plasma-explosion';
 export const EXPLOSIONS: Record<ExplosionsVfx, VfxSheet> = {
-  'small-explosion': { path: 'explosions/small-explosion', frameWidth: 300, frameHeight: 240, pivot: [150, 196], loop: false, fps: 30, frames: 163, screenSpace: false, hits: [] },
-  'cartoon-pow': { path: 'explosions/cartoon-pow', frameWidth: 184, frameHeight: 144, pivot: [92, 72], loop: false, fps: 30, frames: 33, screenSpace: false, hits: [] },
-  'plasma-explosion': { path: 'explosions/plasma-explosion', frameWidth: 224, frameHeight: 200, pivot: [112, 100], loop: false, fps: 30, frames: 52, screenSpace: false, hits: [] },
+  'small-explosion': { path: 'explosions/small-explosion', frameWidth: 300, frameHeight: 240, pivot: [150, 196], loop: false, fps: 30, frames: 163, screenSpace: false, gpuBytes: 48384000, hits: [] },
+  'cartoon-pow': { path: 'explosions/cartoon-pow', frameWidth: 184, frameHeight: 144, pivot: [92, 72], loop: false, fps: 30, frames: 33, screenSpace: false, gpuBytes: 3815424, hits: [] },
+  'plasma-explosion': { path: 'explosions/plasma-explosion', frameWidth: 224, frameHeight: 200, pivot: [112, 100], loop: false, fps: 30, frames: 52, screenSpace: false, gpuBytes: 10035200, hits: [] },
 };
 
 export type FireVfx = 'fireball' | 'torch' | 'campfire' | 'fireball-ice';
 export const FIRE: Record<FireVfx, VfxSheet> = {
-  'fireball': { path: 'fire/fireball', frameWidth: 136, frameHeight: 56, pivot: [112, 28], loop: true, fps: 30, frames: 36, screenSpace: false, hits: [] },
-  'torch': { path: 'fire/torch', frameWidth: 72, frameHeight: 120, pivot: [36, 94], loop: true, fps: 30, frames: 60, screenSpace: false, hits: [] },
-  'campfire': { path: 'fire/campfire', frameWidth: 128, frameHeight: 128, pivot: [64, 112], loop: true, fps: 30, frames: 90, screenSpace: false, hits: [] },
-  'fireball-ice': { path: 'fire/fireball-ice', frameWidth: 136, frameHeight: 56, pivot: [112, 28], loop: true, fps: 30, frames: 36, screenSpace: false, hits: [] },
+  'fireball': { path: 'fire/fireball', frameWidth: 136, frameHeight: 56, pivot: [112, 28], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 1096704, hits: [] },
+  'torch': { path: 'fire/torch', frameWidth: 72, frameHeight: 120, pivot: [36, 94], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 2073600, hits: [] },
+  'campfire': { path: 'fire/campfire', frameWidth: 128, frameHeight: 128, pivot: [64, 112], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 5898240, hits: [] },
+  'fireball-ice': { path: 'fire/fireball-ice', frameWidth: 136, frameHeight: 56, pivot: [112, 28], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 1096704, hits: [] },
 };
 
 export type HolyVfx = 'heal';
 export const HOLY: Record<HolyVfx, VfxSheet> = {
-  'heal': { path: 'holy/heal', frameWidth: 80, frameHeight: 104, pivot: [40, 92], loop: false, fps: 30, frames: 58, screenSpace: false, hits: [] },
+  'heal': { path: 'holy/heal', frameWidth: 80, frameHeight: 104, pivot: [40, 92], loop: false, fps: 30, frames: 58, screenSpace: false, gpuBytes: 2096640, hits: [] },
 };
 
 export type ImpactsVfx = 'hit-spark' | 'crit-hit' | 'bullet-impact' | 'shield-block';
 export const IMPACTS: Record<ImpactsVfx, VfxSheet> = {
-  'hit-spark': { path: 'impacts/hit-spark', frameWidth: 136, frameHeight: 80, pivot: [44, 64], loop: false, fps: 30, frames: 16, screenSpace: false, hits: [] },
-  'crit-hit': { path: 'impacts/crit-hit', frameWidth: 216, frameHeight: 136, pivot: [84, 106], loop: false, fps: 30, frames: 28, screenSpace: false, hits: [] },
-  'bullet-impact': { path: 'impacts/bullet-impact', frameWidth: 152, frameHeight: 100, pivot: [116, 84], loop: false, fps: 30, frames: 43, screenSpace: false, hits: [] },
-  'shield-block': { path: 'impacts/shield-block', frameWidth: 148, frameHeight: 104, pivot: [40, 88], loop: false, fps: 30, frames: 34, screenSpace: false, hits: [{ t: 0.005, freeze: 0.09 }] },
+  'hit-spark': { path: 'impacts/hit-spark', frameWidth: 136, frameHeight: 80, pivot: [44, 64], loop: false, fps: 30, frames: 16, screenSpace: false, gpuBytes: 696320, hits: [] },
+  'crit-hit': { path: 'impacts/crit-hit', frameWidth: 216, frameHeight: 136, pivot: [84, 106], loop: false, fps: 30, frames: 28, screenSpace: false, gpuBytes: 3525120, hits: [] },
+  'bullet-impact': { path: 'impacts/bullet-impact', frameWidth: 152, frameHeight: 100, pivot: [116, 84], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 2918400, hits: [] },
+  'shield-block': { path: 'impacts/shield-block', frameWidth: 148, frameHeight: 104, pivot: [40, 88], loop: false, fps: 30, frames: 34, screenSpace: false, gpuBytes: 2154880, hits: [{ t: 0.005, freeze: 0.09 }] },
 };
 
 export type PickupsVfx = 'coin-spin' | 'collect-burst' | 'gem-spin' | 'heart-pickup';
 export const PICKUPS: Record<PickupsVfx, VfxSheet> = {
-  'coin-spin': { path: 'pickups/coin-spin', frameWidth: 56, frameHeight: 56, pivot: [28, 48], loop: true, fps: 30, frames: 48, screenSpace: false, hits: [] },
-  'collect-burst': { path: 'pickups/collect-burst', frameWidth: 112, frameHeight: 108, pivot: [56, 94], loop: false, fps: 30, frames: 42, screenSpace: false, hits: [] },
-  'gem-spin': { path: 'pickups/gem-spin', frameWidth: 64, frameHeight: 64, pivot: [32, 56], loop: true, fps: 30, frames: 72, screenSpace: false, hits: [] },
-  'heart-pickup': { path: 'pickups/heart-pickup', frameWidth: 56, frameHeight: 60, pivot: [28, 52], loop: true, fps: 30, frames: 36, screenSpace: false, hits: [] },
+  'coin-spin': { path: 'pickups/coin-spin', frameWidth: 56, frameHeight: 56, pivot: [28, 48], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 614656, hits: [] },
+  'collect-burst': { path: 'pickups/collect-burst', frameWidth: 112, frameHeight: 108, pivot: [56, 94], loop: false, fps: 30, frames: 42, screenSpace: false, gpuBytes: 2032128, hits: [] },
+  'gem-spin': { path: 'pickups/gem-spin', frameWidth: 64, frameHeight: 64, pivot: [32, 56], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 1179648, hits: [] },
+  'heart-pickup': { path: 'pickups/heart-pickup', frameWidth: 56, frameHeight: 60, pivot: [28, 52], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 564480, hits: [] },
 };
 
 export type StatusVfx = 'stunned' | 'poisoned';
 export const STATUS: Record<StatusVfx, VfxSheet> = {
-  'stunned': { path: 'status/stunned', frameWidth: 60, frameHeight: 64, pivot: [30, 56], loop: true, fps: 30, frames: 60, screenSpace: false, hits: [] },
-  'poisoned': { path: 'status/poisoned', frameWidth: 72, frameHeight: 64, pivot: [36, 54], loop: true, fps: 30, frames: 48, screenSpace: false, hits: [] },
+  'stunned': { path: 'status/stunned', frameWidth: 60, frameHeight: 64, pivot: [30, 56], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 983040, hits: [] },
+  'poisoned': { path: 'status/poisoned', frameWidth: 72, frameHeight: 64, pivot: [36, 54], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 903168, hits: [] },
 };
 
 export type UiVfx = 'damage-number' | 'level-up' | 'coin-collect' | 'exclamation';
 export const UI: Record<UiVfx, VfxSheet> = {
-  'damage-number': { path: 'ui/damage-number', frameWidth: 76, frameHeight: 68, pivot: [30, 52], loop: false, fps: 30, frames: 33, screenSpace: false, hits: [] },
-  'level-up': { path: 'ui/level-up', frameWidth: 176, frameHeight: 138, pivot: [88, 114], loop: false, fps: 30, frames: 97, screenSpace: false, hits: [{ t: 0.28, freeze: 0.05 }] },
-  'coin-collect': { path: 'ui/coin-collect', frameWidth: 176, frameHeight: 116, pivot: [60, 102], loop: false, fps: 30, frames: 75, screenSpace: false, hits: [] },
-  'exclamation': { path: 'ui/exclamation', frameWidth: 84, frameHeight: 104, pivot: [42, 92], loop: false, fps: 30, frames: 43, screenSpace: false, hits: [] },
+  'damage-number': { path: 'ui/damage-number', frameWidth: 76, frameHeight: 68, pivot: [30, 52], loop: false, fps: 30, frames: 33, screenSpace: false, gpuBytes: 744192, hits: [] },
+  'level-up': { path: 'ui/level-up', frameWidth: 176, frameHeight: 138, pivot: [88, 114], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 9618048, hits: [{ t: 0.28, freeze: 0.05 }] },
+  'coin-collect': { path: 'ui/coin-collect', frameWidth: 176, frameHeight: 116, pivot: [60, 102], loop: false, fps: 30, frames: 75, screenSpace: false, gpuBytes: 6533120, hits: [] },
+  'exclamation': { path: 'ui/exclamation', frameWidth: 84, frameHeight: 104, pivot: [42, 92], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 1677312, hits: [] },
 };
 
 export type WeatherVfx = 'rain';
 export const WEATHER: Record<WeatherVfx, VfxSheet> = {
-  'rain': { path: 'weather/rain', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 64, screenSpace: true, hits: [] },
+  'rain': { path: 'weather/rain', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 64, screenSpace: true, gpuBytes: 15206400, hits: [] },
 };
 
 export type VfxName = ExplosionsVfx | FireVfx | HolyVfx | ImpactsVfx | PickupsVfx | StatusVfx | UiVfx | WeatherVfx;

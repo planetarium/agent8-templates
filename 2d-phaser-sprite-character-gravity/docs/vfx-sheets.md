@@ -39,74 +39,78 @@ library: origin at the sheet's pivot, right fps, loop or one-shot, crisp pixels,
 4. Glow is baked into alpha, so effects read best over darker backgrounds; over very light ones they look faint.
 5. Sheets with impact frames (`hits` in `sheets.ts`) can hit-stop: `{ hitStop: true }` pauses the effect on them,
    `{ hitStop: (ms) => … }` also lets you freeze your game for that long.
+6. Full-screen effects (weather, transitions, nuke-style blasts) use a lot of mobile GPU memory (GPU MB below): at most
+   one per scene, load it when needed (`play()` loads a sheet that was not preloaded), and it is freed when the scene ends.
 
 Options: `scale`, `depth` (default 1000), `flip` (directional effects face right; flip when facing left),
 `follow` (an object; `x, y` become offsets from it, and the effect goes when the object is destroyed), `repeat`
-(override loop/one-shot), `hitStop`. Full-screen sheets (`rain`) ignore x, y and cover the camera at any zoom.
+(override loop/one-shot), `hitStop`, `keep`. Full-screen sheets (`rain`) ignore x, y and cover the camera at any zoom.
+Sheets are freed when the scene that loaded them shuts down; pass `{ keep: true }` to `preload`/`play` to keep them.
+In development a console warning appears when the loaded sheets pass 64 MB of GPU memory.
 
 ## Sheets by category (23)
 
-Size is one frame in px; pivot is the anchor point inside it.
+Size is one frame in px; pivot is the anchor point inside it; GPU MB is the memory the loaded sheet takes.
 
 ### explosions
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `small-explosion` | A ground blast (explosion, fire, smoke, debris, impact) | 300x240 | 163, one-shot | 150, 196 |
-| `cartoon-pow` | A comic-book hit (cartoon, comic, pow, hit, impact, text) | 184x144 | 33, one-shot | 92, 72 |
-| `plasma-explosion` | A blue-violet energy blast with no smoke (explosion, plasma, energy, electric, magic, sci-fi) | 224x200 | 52, one-shot | 112, 100 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `small-explosion` | A ground blast (explosion, fire, smoke, debris, impact) | 300x240 | 163, one-shot | 150, 196 | 46.1 |
+| `cartoon-pow` | A comic-book hit (cartoon, comic, pow, hit, impact, text) | 184x144 | 33, one-shot | 92, 72 | 3.6 |
+| `plasma-explosion` | A blue-violet energy blast with no smoke (explosion, plasma, energy, electric, magic, sci-fi) | 224x200 | 52, one-shot | 112, 100 | 9.6 |
 
 ### fire
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `fireball` | A fireball flying right (fire, fireball, projectile, magic, directional) | 136x56 | 36, loop | 112, 28 |
-| `torch` | A wall torch on an iron bracket (fire, torch, prop, light, wall, dungeon) | 72x120 | 60, loop | 36, 94 |
-| `campfire` | Crossed logs on a bed of coals and a lively fire (fire, campfire, prop, light, smoke, ambient) | 128x128 | 90, loop | 64, 112 |
-| `fireball-ice` | The fireball recoloured with a cold blue ice ramp (fire, fireball, projectile, magic, directional) | 136x56 | 36, loop | 112, 28 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `fireball` | A fireball flying right (fire, fireball, projectile, magic, directional) | 136x56 | 36, loop | 112, 28 | 1.0 |
+| `torch` | A wall torch on an iron bracket (fire, torch, prop, light, wall, dungeon) | 72x120 | 60, loop | 36, 94 | 2.0 |
+| `campfire` | Crossed logs on a bed of coals and a lively fire (fire, campfire, prop, light, smoke, ambient) | 128x128 | 90, loop | 64, 112 | 5.6 |
+| `fireball-ice` | The fireball recoloured with a cold blue ice ramp (fire, fireball, projectile, magic, directional) | 136x56 | 36, loop | 112, 28 | 1.0 |
 
 ### holy
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `heal` | Petals of light bloom under the feet, a hoop of light rises up the body restoring its… (holy, heal, restore, buff, petals, hearts, character) | 80x104 | 58, one-shot | 40, 92 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `heal` | Petals of light bloom under the feet, a hoop of light rises up the body restoring its… (holy, heal, restore, buff, petals, hearts, character) | 80x104 | 58, one-shot | 40, 92 | 2.0 |
 
 ### impacts
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `hit-spark` | The everyday hit (impact, hit, spark, combat, directional) | 136x80 | 16, one-shot | 44, 64 |
-| `crit-hit` | A critical hit (impact, hit, crit, critical, combat, directional) | 216x136 | 28, one-shot | 84, 106 |
-| `bullet-impact` | A bullet hits a wall on the right (impact, bullet, gun, wall, sparks, debris, directional) | 152x100 | 43, one-shot | 116, 84 |
-| `shield-block` | A blow is caught on a half-dome of energy in front of the character (impact, block, shield, barrier, energy, ripple, actor) | 148x104 | 34, one-shot | 40, 88 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `hit-spark` | The everyday hit (impact, hit, spark, combat, directional) | 136x80 | 16, one-shot | 44, 64 | 0.7 |
+| `crit-hit` | A critical hit (impact, hit, crit, critical, combat, directional) | 216x136 | 28, one-shot | 84, 106 | 3.4 |
+| `bullet-impact` | A bullet hits a wall on the right (impact, bullet, gun, wall, sparks, debris, directional) | 152x100 | 43, one-shot | 116, 84 | 2.8 |
+| `shield-block` | A blow is caught on a half-dome of energy in front of the character (impact, block, shield, barrier, energy, ripple, actor) | 148x104 | 34, one-shot | 40, 88 | 2.1 |
 
 ### pickups
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `coin-spin` | A thick gold coin turning on its edge (pickup, coin, gold, money) | 56x56 | 48, loop | 28, 48 |
-| `collect-burst` | The moment of pickup (pickup, collect, burst, sparkle, reward) | 112x108 | 42, one-shot | 56, 94 |
-| `gem-spin` | A brilliant-cut ruby turning on its axis (pickup, gem, jewel, treasure, ruby) | 64x64 | 72, loop | 32, 56 |
-| `heart-pickup` | A plump glossy heart hovering over its shadow beats lub-dub (pickup, heart, health, life) | 56x60 | 36, loop | 28, 52 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `coin-spin` | A thick gold coin turning on its edge (pickup, coin, gold, money) | 56x56 | 48, loop | 28, 48 | 0.6 |
+| `collect-burst` | The moment of pickup (pickup, collect, burst, sparkle, reward) | 112x108 | 42, one-shot | 56, 94 | 1.9 |
+| `gem-spin` | A brilliant-cut ruby turning on its axis (pickup, gem, jewel, treasure, ruby) | 64x64 | 72, loop | 32, 56 | 1.1 |
+| `heart-pickup` | A plump glossy heart hovering over its shadow beats lub-dub (pickup, heart, health, life) | 56x60 | 36, loop | 28, 52 | 0.5 |
 
 ### status
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `stunned` | Seeing stars (status, stun, dizzy, daze, stars, birds, debuff) | 60x64 | 60, loop | 30, 56 |
-| `poisoned` | Sick to the bone (status, poison, toxic, dot, debuff, sick) | 72x64 | 48, loop | 36, 54 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `stunned` | Seeing stars (status, stun, dizzy, daze, stars, birds, debuff) | 60x64 | 60, loop | 30, 56 | 0.9 |
+| `poisoned` | Sick to the bone (status, poison, toxic, dot, debuff, sick) | 72x64 | 48, loop | 36, 54 | 0.9 |
 
 ### ui
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `damage-number` | A red -27 punches out of a hit spark, white for a frame, arcs up, lands with a squash and… (ui, damage, number, combat, text, hit) | 76x68 | 33, one-shot | 30, 52 |
-| `level-up` | Gold gathers at the feet and bursts up as a pillar of light round the hero; rings climb… (ui, level, reward, text, light) | 176x138 | 97, one-shot | 88, 114 |
-| `coin-collect` | A coin bursts into a fountain of spinning coins that hang, then zip one by one into a HUD… (ui, coins, pickup, reward, hud, counter) | 176x116 | 75, one-shot | 60, 102 |
-| `exclamation` | A bold ! springs up off the hero's head, stretching as it shoots up and squashing as it… (ui, alert, surprise, emote, character) | 84x104 | 43, one-shot | 42, 92 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `damage-number` | A red -27 punches out of a hit spark, white for a frame, arcs up, lands with a squash and… (ui, damage, number, combat, text, hit) | 76x68 | 33, one-shot | 30, 52 | 0.7 |
+| `level-up` | Gold gathers at the feet and bursts up as a pillar of light round the hero; rings climb… (ui, level, reward, text, light) | 176x138 | 97, one-shot | 88, 114 | 9.2 |
+| `coin-collect` | A coin bursts into a fountain of spinning coins that hang, then zip one by one into a HUD… (ui, coins, pickup, reward, hud, counter) | 176x116 | 75, one-shot | 60, 102 | 6.2 |
+| `exclamation` | A bold ! springs up off the hero's head, stretching as it shoots up and squashing as it… (ui, alert, surprise, emote, character) | 84x104 | 43, one-shot | 42, 92 | 1.6 |
 
 ### weather
 
-| Name | What | Size | Frames | Pivot |
-|---|---|---|---|---|
-| `rain` | Slanted rain at four depths (weather, rain, storm, water, ambient) | 320x180 | 64, loop, full-screen | 160, 170 |
+| Name | What | Size | Frames | Pivot | GPU MB |
+|---|---|---|---|---|---|
+| `rain` | Slanted rain at four depths (weather, rain, storm, water, ambient) | 320x180 | 64, loop, full-screen | 160, 170 | 14.5 |
