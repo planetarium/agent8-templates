@@ -17,6 +17,23 @@ const check = (name: string, ok: boolean, detail = '') => out.checks.push({ name
 const ALL = Object.keys(SHEETS) as VfxName[];
 const LOCAL = ALL.filter((n) => !SHEETS[n].screenSpace);
 
+class NextScene extends Phaser.Scene {
+  create() {
+    const has = (n: string) => this.textures.exists(`vfx:${n}`);
+    check('release: hit-spark and rain freed with the scene', !has('hit-spark') && !has('rain'));
+    check('release: their animations freed too', !this.anims.exists('vfx:hit-spark') && !this.anims.exists('vfx:rain'));
+    check('release: keep: true sheet stays', has('coin-spin'));
+    // Loading a freed sheet again works.
+    const s = PixelVfx.play(this, 'hit-spark', 300, 300);
+    let started = false;
+    s.on(Phaser.Animations.Events.ANIMATION_START, () => (started = true));
+    this.time.delayedCall(1500, () => {
+      check('release: freed sheet loads again later', started && has('hit-spark'));
+      out.done = true;
+    });
+  }
+}
+
 export class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
@@ -25,13 +42,101 @@ export class MainScene extends Phaser.Scene {
   preload() {
     if (q.get('base')) PixelVfx.baseUrl = q.get('base')!;
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (f: Phaser.Loader.File) => out.loadErrors.push(`${f.key} ${f.url}`));
-    PixelVfx.preload(this, mode === 'all' ? ALL : ['rain']);
+    if (mode === 'all' || mode === 'pivot') PixelVfx.preload(this, ALL);
+    if (mode === 'rain') PixelVfx.preload(this, ['rain']);
+    if (mode === 'release') {
+      PixelVfx.preload(this, ['hit-spark', 'rain']);
+      PixelVfx.preload(this, ['coin-spin'], { keep: true });
+    }
   }
 
   create() {
     this.cameras.main.setBackgroundColor('#1b1f2a');
     if (mode === 'rain') return this.rain();
+    if (mode === 'pivot') return this.pivot();
+    if (mode === 'release') return this.release();
+    if (mode === 'lazy') return this.lazy();
     this.all();
+  }
+
+  // Every sheet paused on its middle frame at a fixed point; the page reports each cell's pixels so two runs (full vs
+  // trimmed sheets) can be compared pixel for pixel, plus where the drawn pixels sit relative to the pivot point.
+  private pivot() {
+    const cam = this.cameras.main;
+    const flip = q.get('flip') === '1';
+    const cols = 6, cellW = 320, cellH = 260;
+    cam.setZoom(1).setScroll(0, 0);
+    const cells = LOCAL.map((name, i) => {
+      const x = (i % cols) * cellW + cellW / 2, y = Math.floor(i / cols) * cellH + 200;
+      const sprite = PixelVfx.play(this, name, x, y, { flip });
+      const anim = sprite.anims.currentAnim!;
+      sprite.anims.pause(anim.frames[Math.floor(anim.frames.length / 2)]);
+      return { name, x, y, cx: (i % cols) * cellW, cy: Math.floor(i / cols) * cellH };
+    });
+    this.time.delayedCall(300, () => {
+      this.game.renderer.snapshot((image) => {
+        const img = image as HTMLImageElement;
+        const c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        const ctx = c.getContext('2d', { willReadFrequently: true })!;
+        ctx.drawImage(img, 0, 0);
+        const bg = [0x1b, 0x1f, 0x2a];
+        (out as any).cells = cells.map(({ name, x, y, cx, cy }) => {
+          const d = ctx.getImageData(cx, cy, cellW, cellH).data;
+          let hash = 0, x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+          for (let p = 0; p < d.length; p += 4) {
+            hash = (Math.imul(hash, 31) + d[p] * 65536 + d[p + 1] * 256 + d[p + 2]) | 0;
+            if (Math.abs(d[p] - bg[0]) + Math.abs(d[p + 1] - bg[1]) + Math.abs(d[p + 2] - bg[2]) < 6) continue;
+            const px = (p / 4) % cellW, py = Math.floor(p / 4 / cellW);
+            if (px < x0) x0 = px; if (py < y0) y0 = py; if (px > x1) x1 = px; if (py > y1) y1 = py;
+          }
+          // Drawn-pixel box relative to the pivot point (x, y).
+          return { name, hash, box: x1 < 0 ? null : [x0 + cx - x, y0 + cy - y, x1 + cx - x, y1 + cy - y] };
+        });
+        (out as any).shotReady = true;
+        out.done = true;
+      });
+    });
+  }
+
+  // Sheets are freed when the scene that loaded them shuts down, unless kept; a later scene can load them again.
+  private release() {
+    PixelVfx.play(this, 'hit-spark', 200, 200);
+    PixelVfx.play(this, 'rain');
+    const has = (n: string) => this.textures.exists(`vfx:${n}`);
+    check('release: loaded before shutdown', has('hit-spark') && has('rain') && has('coin-spin'));
+    this.scene.add('Next', NextScene, false);
+    this.time.delayedCall(200, () => {
+      (out as any).shotReady = true;
+      this.scene.start('Next');
+    });
+  }
+
+  // play() on sheets that were never preloaded: they load at runtime and start when they arrive.
+  private lazy() {
+    const started: string[] = [];
+    const track = (s: Phaser.GameObjects.Sprite, label: string) => s.on(Phaser.Animations.Events.ANIMATION_START, () => started.push(label));
+    const rain = PixelVfx.play(this, 'rain');
+    track(rain, 'rain');
+    const a = PixelVfx.play(this, 'hit-spark', 300, 300, { scale: 2 });
+    const b = PixelVfx.play(this, 'hit-spark', 600, 300);
+    track(a, 'hit-spark a'); track(b, 'hit-spark b');
+    let aDone = false, bDone = false;
+    a.once(Phaser.GameObjects.Events.DESTROY, () => (aDone = true));
+    b.once(Phaser.GameObjects.Events.DESTROY, () => (bDone = true));
+    const gone = PixelVfx.play(this, 'heal', 400, 400);
+    gone.destroy(); // destroyed before its sheet arrives: must not start or throw
+    check('lazy: hidden until loaded', !rain.visible && !a.visible && this.load.isLoading());
+    this.time.delayedCall(400, () => (out as any).shotReady = true);
+    this.time.delayedCall(2500, () => {
+      const cam = this.cameras.main;
+      check('lazy: rain loaded, visible and playing', rain.active && rain.visible && rain.texture.key === 'vfx:rain' && rain.anims.isPlaying);
+      check('lazy: rain covers the screen', rain.displayWidth * cam.zoom >= cam.width && rain.displayHeight * cam.zoom >= cam.height, `${rain.displayWidth}x${rain.displayHeight}`);
+      check('lazy: both hit-sparks started (one load) and destroyed themselves', started.includes('hit-spark a') && started.includes('hit-spark b') && aDone && bDone, started.join(','));
+      check('lazy: hit-spark scale 2 and pivot origin', a.scaleX === 2 || aDone);
+      check('lazy: sprite destroyed before load did not start', !started.includes('heal'));
+      out.done = true;
+    });
   }
 
   private all() {
