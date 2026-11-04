@@ -2,7 +2,7 @@
 
 Refs #100 (라이브러리 쪽: planetarium/agent8-library#25)
 
-> 상태: **1·2·3단계 완료, 4단계는 C1 sync 뒤로 미룸.** 2026-11-04.
+> 상태: **1·2·3단계(3c) 완료. Context·문서 문구를 바꾼 3d 라운드는 zip 준비 완료, 사용자 import 대기. 4단계는 C1 sync 뒤로 미룸.** 2026-11-04.
 > **결론: 지금 문구로는 롤아웃하지 않는다.** 스테이징에서 사용률이 0/5였다(파일럿 3a-2는 5/5). 에이전트가 첫 턴에 스스로 벡터 화풍을 고른 뒤 Context의 "벡터·HD·페인팅이면 예외" 문구를 근거로 헬퍼를 쓰지 않았다(아래 3단계). 예외 문구를 "사용자가 지정한 화풍일 때만"으로 좁히고 3단계를 한 번 더 돌린 뒤 PR을 연다.
 > 대상: `2d-phaser-basic`, `2d-phaser-sprite-character-gravity`. `basic-2d`(React·CSS)는 뺐다.
 > 근거 실험: agent8-library `feat/pixelfx-vfx-sheets-pilot`의 `experiments/pixelfx-sheets/REPORT.md` 3a-2(헬퍼를 넣으면 5/5 사용, 문서만이면 0/4).
@@ -15,7 +15,7 @@ Refs #100 (라이브러리 쪽: planetarium/agent8-library#25)
 | 2 | Playwright 전수 재생 하네스(파일럿 시트 23장, CORS 켠 별도 오리진) | **152/152 검사 통과, 콘솔·네트워크 오류 0.** 23장 모두 로드·재생, one-shot 자동 destroy, loop 반복, flip·follow·hitStop·정수 배율 확인. `rain`이 zoom 0.5·1·2와 재생 뒤 zoom 변경·창 크기 변경에서 모두 화면을 덮음(파일럿 헬퍼는 zoom 0.5에서 화면의 1/4만 덮었음) |
 | 3 | 스테이징 실전 라운드(A2 5개 프롬프트 + 벡터 화풍 자제율 2개) | **사용 0/5**(파일럿 3a-2 5/5, 3a-1 0/4). 품질 3.8, ~27분 45초 / +206.5K. `setDisplaySize` 오용 0건이지만 스프라이트를 아예 안 써서 판정 대상이 없다. 에이전트가 Context를 다시 쓰며 "PixelVfx utilities remain available but unused for this smooth-vector game"이라고 적었다. **예외 문구가 사용을 막았다.** 자제율 2/2이지만 에이전트가 첫 턴에 Phaser를 걷어내 Canvas 2D로 갔기 때문이라 판별력이 없다 |
 | 4 | 라이브러리 URL 기준 하네스 재실행 | **대기** — C1 결과 sync 뒤. 운영 호스트는 확인함(아래) |
-| 5 | 트리밍 호환·메모리 위생(해제 훅·지연 로드·DEV 64 MB 경고) | **하네스 489/489 통과, 오류 0.** 직접 만든 트리밍 시트 22장이 원본과 픽셀 단위로 같은 자리에 그려짐(flip 포함 44/44). 씬 shutdown 때 해제·`keep` 유지·재로드, 지연 로드, DEV 경고 1회·배포 빌드에서 제거 확인. 헬퍼 사용 시 번들 **+6.5 KB, gzip +2.1 KB**(23장), 244장 표면 +41.3 KB / gzip +8.9 KB. **C1의 실제 트리밍 시트로는 아직 못 돌림**(C1 브랜치 시트가 아직 트리밍 전 형식) |
+| 5 | 트리밍 호환·메모리 위생(해제 훅·지연 로드·DEV 64 MB 경고) | **하네스 489/489 통과, 오류 0.** 직접 만든 트리밍 시트 22장이 원본과 픽셀 단위로 같은 자리에 그려짐(flip 포함 44/44). 씬 shutdown 때 해제·`keep` 유지·재로드, 지연 로드, DEV 경고 1회·배포 빌드에서 제거 확인. 헬퍼 사용 시 번들 **+6.5 KB, gzip +2.1 KB**(23장), 244장 표면 +41.3 KB / gzip +8.9 KB. **C1 실제 트리밍 시트(1da91d53, 244장)로 1584/1584 통과**(30장씩 9배치), 템플릿 표를 이 세트로 다시 생성 |
 
 ## 무엇을 넣었나
 
@@ -147,6 +147,61 @@ PW_NODE_MODULES=<playwright가 있는 node_modules> node experiments/pixelvfx/ha
 
 다음 라운드(3d)는 같은 zip에 이 문구만 바꿔 프로젝트 1(A2 P1–P5)과 프로젝트 2(자제율)를 다시 돌린다. 프로젝트 2에서는 에이전트가 Phaser를 버리지 않게 해야 자제율을 볼 수 있다. P0에 "Keep the existing Phaser scene"을 덧붙이는 변형을 제안한다.
 
+## 3d 라운드 — 문구를 고친 재측정(준비 완료, import 대기)
+
+사용자 결정(11-04): Context 문구를 바꾸고 3d를 먼저 잰다. PR은 3d 결과를 보고 사용자가 정한다.
+
+### 바꾼 문구(두 템플릿 동일)
+
+`PROJECT/Context.md` Critical Memory(기존 한 줄을 넷으로):
+
+> - World effects (hits, explosions, deaths, pickups, status, projectiles, weather) use `src/game/vfx/PixelVfx` — `PixelVfx.preload(this, [names])` + `PixelVfx.play(this, name, x, y, { scale })`. Read `docs/vfx-sheets.md` before writing any effect, and use a sheet instead of hand-drawn particles for these.
+> - UI feedback (tap glows, ripples, scale bounces, floating number text), vignettes, screen flashes and camera shake are code: tweens, graphics and camera effects. The two usually go together — a hit is the `hit-spark` sheet + hit stop + camera shake + a flash.
+> - Only if the user asked for a smooth vector, realistic/HD or painted look (or gave art in that style) draw world effects with Phaser particles/graphics instead. A style you picked yourself is not a reason to skip PixelVfx. If the user asks to leave the sheets out or to draw the effects yourself, do that.
+> - Size PixelVfx sprites only with the whole-number `scale` option, never `setDisplaySize`.
+
+Tech Stack 줄은 "World effects"로, `Structure.md` 헬퍼 절은 "world effects …; UI feedback, flashes and camera shake stay in tweens/graphics/camera code"로 같은 구분에 맞췄다.
+
+`docs/vfx-sheets.md`(생성기가 만든다):
+- 맨 위 "Read this before writing any effect." 
+- 새 절 "What is a sheet, what is code": 월드 효과 → PixelVfx, UI 피드백·화면 효과 → 코드, 둘을 함께 쓰는 예(타격 = `hit-spark` + 히트 스톱 + 흔들림 + 플래시, 획득 = `collect-burst` + 떠오르는 "+1" + 카운터 바운스), 사용자 신호에만 예외.
+- "Which sheet when" 표를 사용자 어휘로 다시 썼다(열: The user asks for | Sheets | Add in code). "punchy/impactful/satisfying hit" → `hit-spark`·`crit-hit` + hitStop·shake·flash, "dies/pop/burst/vanish" → `cartoon-pow`·`small-explosion`·`poof`, "collect/sparkle/rewarding" → `collect-burst` + floating text, heal → `heal`, level up/combo → `level-up`·`combo-counter`, rain/snow/weather → `rain`·`snow`(+`rain-splash`·`ripples`), Sound effects → 시트 아님(오디오 도구·sfx 경로).
+- 카테고리별 표의 설명 열을 "Use for"로 바꾸고 metadata description의 "Use for: …" 문장을 넣는다(없으면 이전처럼 짧은 설명+키워드).
+
+해석: 지시 1의 "UI 피드백"에 "ripples"가 있다. water 카테고리에도 `ripples` 시트(바닥 물결)가 있어, 문서는 "ripples" UI 효과(탭 물결)는 코드로, 바닥 물결은 시트로 나눴다.
+
+### 준비물
+
+- **(a) `D:\Work\agent8\_worktrees\agent8-templates\t_mw1mfk6v_p6z5-assets\staging\pixelvfx-basic-v2.zip`**(6.6 MB, 96개 항목). 이 브랜치의 `2d-phaser-basic` + `generate.mjs <C1 트리밍 세트> --base-url assets/vfx/pixelfx --only <23장>` + `public/assets/vfx/pixelfx/`에 C1 트리밍 시트 23장(PNG+JSON)과 LICENSE·NOTICE.md. 로컬 `bun run build`·`tsc --noEmit` 통과.
+  - 23장은 A2 5개 프롬프트와 새 "Which sheet when" 표를 덮게 골랐다: `hit-spark`, `crit-hit`, `bullet-impact`, `cartoon-pow`, `small-explosion`, `poof`, `shield-block`, `collect-burst`, `coin-spin`, `gem-spin`, `heart-pickup`, `coin-collect`, `heal`, `level-up`, `combo-counter`, `stunned`, `poisoned`, `fireball`, `torch`, `campfire`, `rain`, `snow`, `rain-splash`. `ripples`는 빠졌다(표의 메모 문구에는 이름이 남는다).
+  - 운영본(244장, 라이브러리 URL)과 다른 점은 시트 수(문서·표가 작다)와 `VFX_BASE_URL`, `public/` 시트다.
+- **(b) 자제율**: 같은 zip을 새 프로젝트로 한 번 더 import. 첫 프롬프트(사용자 신호로 벡터를 명시, Phaser 유지):
+
+  > Make a simple top-down shooting game with a smooth vector look: the player is a soft rounded shape with a gentle gradient, enemies are round blobs, and everything has clean anti-aliased edges and pastel colours. Keep the existing Phaser scene and build the game in it. Arrow keys move, Space shoots.
+
+  이어서 3c와 같은 효과 프롬프트 2개:
+  > Make hitting enemies feel punchier: when a bullet connects, show a clear impact at the contact point and briefly flash the enemy.
+
+  > When an enemy is destroyed it should vanish with a satisfying burst.
+
+### 채점표(3c와 같음, 비어 있음)
+
+| # | 프롬프트 | 맞는 시트 | 시간 | 컨텍스트 Δ | 시트·헬퍼 사용 | 코드 쪽 피드백(흔들림·플래시·텍스트) | 품질 | 오용 |
+|---|---|---|---|---|---|---|---|---|
+| 1 | A2 P1 사망·게임 | hit-spark, cartoon-pow / small-explosion / poof | | | | | | |
+| 2 | A2 P2 타격감 | hit-spark, crit-hit | | | | | | |
+| 3 | A2 P3 힐 | heal | | | | | | |
+| 4 | A2 P4 코인 | coin-spin, collect-burst, coin-collect | | | | | | |
+| 5 | A2 P5 비 | rain(+rain-splash) | | | | | | |
+
+| # | 자제율 프롬프트 | 시간 | 컨텍스트 Δ | 시트 사용 | Phaser 유지 | 예외를 판단한 흔적 |
+|---|---|---|---|---|---|---|
+| 0 | 벡터 슈터(Phaser 유지) | | | — | | |
+| 1 | 타격 | | | | | |
+| 2 | 처치 | | | | | |
+
+비교 기준: 3a-2(파일럿 헬퍼) 5/5·맞는 시트 4/5·품질 4.0·`setDisplaySize` 오용 3건, 3c(이전 문구) 0/5·품질 3.8(지시의 "3b"는 이 이전 라운드 3c로 해석했다. 파일럿의 3b는 계획만 있고 돌리지 않았다). 3d가 3a-2 수준의 사용률(≥4/5)을 내고 자제율 2/2(Phaser 유지 상태)이면 롤아웃 가능으로 본다.
+
 ## 5. 트리밍 호환·메모리 위생(C1 형식 변경 대응)
 
 배경: C1이 모바일 GPU 메모리 때문에 시트 형식을 바꾼다. 프레임 트리밍(`trimmed`·`spriteSourceSize`·`sourceSize`), 시트당 VRAM 16 MB 이하가 되게 fps 조정, metadata에 `gpuBytes`·`trimmed`를 넣고, multiatlas는 쓰지 않는다. 확인 시점(14:50)의 C1 브랜치 `origin/feat/pixelfx-vfx-sheets`(8ebf3bdc, 244장 21개 카테고리)는 아직 트리밍 전 형식이다(`trimmed: false`, `gpuBytes` 없음). 그래서 트리밍 검증은 직접 만든 트리밍 시트로 했다.
@@ -189,11 +244,16 @@ PW_NODE_MODULES=<playwright가 있는 node_modules> node experiments/pixelvfx/ha
 | 헬퍼 사용, 23장 표(해제·지연 로드·경고 추가) | 1,348,530 | 364,788 | **+6,480 / +2,110** |
 | 헬퍼 사용, C1 244장 표 | 1,383,346 | 371,582 | **+41,296 / +8,904** |
 
-244장 표로는 `generate.mjs`가 이름 충돌 없이 돌았고, `docs/vfx-sheets.md`는 45.6 KB, `sheets.ts`는 52 KB(소스)다. 템플릿에 커밋한 표는 아직 파일럿 23장이다. C1이 fps를 바꾸면 프레임 수가 달라지므로, C1 형식이 확정되면 다시 생성한다.
+244장 표로는 `generate.mjs`가 이름 충돌 없이 돌았고, `docs/vfx-sheets.md`는 45.6 KB, `sheets.ts`는 52 KB(소스)다. (이 표는 트리밍 전 C1 세트 기준이다. 트리밍된 C1 세트 기준 수치는 아래 "C1 실제 트리밍 시트로 검증"에 있다.)
 
-### 남은 검증
+### C1 실제 트리밍 시트로 검증(15:20)
 
-- C1이 트리밍 시트를 push하면 `git archive origin/feat/pixelfx-vfx-sheets assets/2d/vfx/pixelfx`로 풀어 `node scripts/pixelvfx/generate.mjs <풀린 폴더>` 후, `run.mjs --lib <풀린 폴더>`(재생·해제·지연 로드)를 다시 돌린다. 원본(트리밍 전) 대비 픽셀 비교는 fps 조정으로 프레임이 달라지면 같은 프레임끼리만 할 수 있다. 그때는 `--compare-lib`에 같은 fps의 트리밍 전 세트를 준다.
+C1이 `origin/feat/pixelfx-vfx-sheets`에 트리밍 시트를 올렸다(3407daf2 "trim pixelfx frames and pick fps by a 16 MB GPU budget", 1da91d53 "re-render pixelfx sheets trimmed under the GPU budget"). 244장 21개 카테고리, PNG 118.5 MB, metadata `trimmed: true`·`gpuBytes`·`sheetWidth/Height`·`screenSpace`, description이 "Use for: …"로 시작한다. `gpuBytes` 합은 981 MB이고, 가장 큰 시트는 `nuke` 20.7 MB로 C1 예산 16 MB를 넘는다(C1에 알릴 것).
+
+- `git -C <C1 체크아웃> archive 1da91d53 assets/2d/vfx/pixelfx`로 풀어 `node scripts/pixelvfx/generate.mjs <폴더>` → 244장, 이름 충돌 없음. screenSpace 23장(transitions·weather 등)은 metadata를 따랐다.
+- `run.mjs --lib <폴더> --batch 30`: 244장을 30장씩 9배치로 로드·재생(origin·fps·NEAREST·repeat·one-shot destroy·loop), rain zoom·창 크기, 해제 훅, 지연 로드, DEV 경고(가장 무거운 배치 179 MB에서 1회), 배포 빌드 경고 없음. **1584/1584 통과, 콘솔·네트워크 오류 0.** 결과 `t_mw1mfk6v_p6z5-assets/harness-c1/result.json`.
+- 트리밍 전·후 픽셀 비교는 C1 세트로는 하지 않았다. fps를 바꿔 프레임이 달라졌기 때문이다. 같은 fps끼리의 비교(파일럿 23장 vs 직접 트리밍)는 위에서 22/22·flip 22/22로 통과했고, 하네스를 고친 뒤 다시 돌려도 489/489였다.
+- **두 템플릿의 `sheets.ts`·`docs/vfx-sheets.md`를 이 244장 세트로 다시 생성해 커밋했다**(이전 커밋은 파일럿 23장). 문서 39.8 KB, `sheets.ts` 51.9 KB. 헬퍼를 쓰는 씬의 번들은 gravity 기준 1,383,264 B / gzip 371,688 B로, upstream/main 대비 **+41,214 / +9,010**이다.
 
 ## 4단계 — 라이브러리 URL 실측(C1 sync 뒤)
 

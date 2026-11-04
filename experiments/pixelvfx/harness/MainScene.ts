@@ -14,7 +14,8 @@ const out = { done: false, mode, zoom, loadErrors: [] as string[], checks: [] as
 (window as any).__vfx = out;
 const check = (name: string, ok: boolean, detail = '') => out.checks.push({ name, ok, detail });
 
-const ALL = Object.keys(SHEETS) as VfxName[];
+// ?from=&count= plays a slice, so a big set (244 sheets) is checked in batches instead of all in GPU memory at once.
+const ALL = (Object.keys(SHEETS) as VfxName[]).slice(Number(q.get('from') ?? 0), q.get('count') ? Number(q.get('from') ?? 0) + Number(q.get('count')) : undefined);
 const LOCAL = ALL.filter((n) => !SHEETS[n].screenSpace);
 
 class NextScene extends Phaser.Scene {
@@ -42,7 +43,9 @@ export class MainScene extends Phaser.Scene {
   preload() {
     if (q.get('base')) PixelVfx.baseUrl = q.get('base')!;
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (f: Phaser.Loader.File) => out.loadErrors.push(`${f.key} ${f.url}`));
-    if (mode === 'all' || mode === 'pivot') PixelVfx.preload(this, ALL);
+    if (mode === 'pivot') PixelVfx.preload(this, ALL);
+    // The option checks below use these four whatever the slice.
+    if (mode === 'all') PixelVfx.preload(this, [...new Set<VfxName>([...ALL, 'fireball', 'torch', 'coin-spin', 'shield-block'])]);
     if (mode === 'rain') PixelVfx.preload(this, ['rain']);
     if (mode === 'release') {
       PixelVfx.preload(this, ['hit-spark', 'rain']);
@@ -208,7 +211,9 @@ export class MainScene extends Phaser.Scene {
     check('unloaded name throws a clear error', /not loaded|unknown/.test(threw), threw.slice(0, 80));
 
     this.time.delayedCall(450, () => (out as any).shotReady = true);
-    this.time.delayedCall(7600, () => (out.done = true));
+    // Done after the longest sheet's check.
+    const last = Math.max(2600, ...LOCAL.map((n) => (SHEETS[n].frames / SHEETS[n].fps) * 1300));
+    this.time.delayedCall(last + 600, () => (out.done = true));
   }
 
   private rain() {

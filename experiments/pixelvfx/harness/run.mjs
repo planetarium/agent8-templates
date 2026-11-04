@@ -100,7 +100,13 @@ const open = async (query, viewport, shot, after, { port = APP_PORT, base = base
 };
 const extra = (name, ok, detail = "") => result.runs.push({ query: "harness", checks: [{ name, ok, detail }], errors: [], failed: [], loadErrors: [], coverage: [] });
 
-await open("mode=all", { width: 1600, height: 900 }, "all-sheets");
+// --batch N plays the set N sheets at a time (a 244-sheet set does not fit GPU memory at once).
+const table = readFileSync(join(app, "src", "game", "vfx", "sheets.ts"), "utf8");
+const gpu = [...table.matchAll(/^  '([^']+)': \{.*gpuBytes: (\d+)/gm)].map((m) => ({ name: m[1], bytes: Number(m[2]) }));
+const batch = Number(arg("--batch") ?? gpu.length);
+const slices = [];
+for (let from = 0; from < gpu.length; from += batch) slices.push({ from, count: batch, bytes: gpu.slice(from, from + batch).reduce((a, s) => a + s.bytes, 0) });
+for (const s of slices) await open(`mode=all&from=${s.from}&count=${s.count}`, { width: 1600, height: 900 }, slices.length > 1 ? `all-sheets-${s.from}` : "all-sheets");
 for (const z of [0.5, 1, 2]) await open(`mode=rain&zoom=${z}`, { width: 1280, height: 720 }, `rain-zoom-${z}`);
 // Zoom and canvas size changing after play: the overlay re-fits.
 await open("mode=rain&zoom=1", { width: 1280, height: 720 }, "rain-zoom-1-then-0.5-resized", async (page) => {
@@ -119,8 +125,10 @@ await open("mode=lazy", { width: 1280, height: 720 }, "lazy");
 
 // Development build: loading every sheet passes 64 MB and warns once; the production run above did not warn.
 const prodWarnings = result.runs.flatMap((r) => r.warnings);
-const dev = await open("mode=all", { width: 1600, height: 900 }, "all-sheets-dev", null, { port: DEV_PORT });
-extra("dev build warns once over 64 MB", dev.warnings.length === 1, dev.warnings[0] ?? "no warning");
+// The heaviest slice (+ the four option-check sheets the scene also loads) should pass 64 MB.
+const heavy = slices.reduce((a, b) => (b.bytes > a.bytes ? b : a));
+const dev = await open(`mode=all&from=${heavy.from}&count=${heavy.count}`, { width: 1600, height: 900 }, "all-sheets-dev", null, { port: DEV_PORT });
+extra("dev build warns once over 64 MB", dev.warnings.length === (heavy.bytes > 64 * 1048576 ? 1 : 0) && heavy.bytes > 64 * 1048576, `${(heavy.bytes / 1048576).toFixed(0)} MB slice: ${dev.warnings[0] ?? "no warning"}`);
 extra("production build never warns and has no warning text", prodWarnings.length === 0 && !bundle.devWarningInProduction, `${prodWarnings.length} warnings`);
 
 // Same pixels at the same place from the full and the compared (trimmed) sheets.
