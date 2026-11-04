@@ -6,6 +6,8 @@
   "scripts": {
     "docs:help": "node scripts/copy-docs.js --help",
     "docs:copy": "node scripts/copy-docs.js --target=basic-3d",
-    "docs:remove": "node scripts/remove-docs.js --target=basic-3d"
+    "docs:remove": "node scripts/remove-docs.js --target=basic-3d",
+    "3d:sync": "node scripts/sync-3d-shared.js",
+    "3d:check": "node scripts/sync-3d-shared.js --check"
   }
 }
