@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
 import { player } from '../game/state';
-import { BOXES, PLATFORM, RAMPS, rampVertices, type Ramp as RampData } from '../game/world';
+import { BOXES, FIELDS, RAMPS, rampVertices, type HeightField, type Ramp as RampData } from '../game/world';
 
 /** Sun that follows the player so the shadow camera can stay small. */
 function Lights() {
@@ -66,17 +66,35 @@ function Ramp({ ramp }: { ramp: RampData }) {
   );
 }
 
-/** The moving platform's mesh, centered on its parent. Player.tsx moves it with the platform AABB. */
-export function PlatformMesh() {
+/** Grid spacing (m) of a height field's mesh. */
+const FIELD_STEP = 0.5;
+
+/** A height field drawn as a plane displaced by heightAt (the player collides with heightAt itself). */
+function Field({ field }: { field: HeightField }) {
+  const geometry = useMemo(() => {
+    const w = field.maxX - field.minX;
+    const d = field.maxZ - field.minZ;
+    const nx = Math.max(1, Math.ceil(w / FIELD_STEP));
+    const nz = Math.max(1, Math.ceil(d / FIELD_STEP));
+    const g = new THREE.PlaneGeometry(w, d, nx, nz);
+    g.rotateX(-Math.PI / 2);
+    const pos = g.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i) + (field.minX + field.maxX) / 2;
+      const z = pos.getZ(i) + (field.minZ + field.maxZ) / 2;
+      pos.setXYZ(i, x, field.heightAt(x, z), z);
+    }
+    g.computeVertexNormals();
+    return g;
+  }, [field]);
   return (
-    <mesh castShadow receiveShadow>
-      <boxGeometry args={PLATFORM.size} />
-      <meshStandardMaterial color={PLATFORM.color} />
+    <mesh geometry={geometry} castShadow receiveShadow>
+      <meshStandardMaterial color={field.color ?? '#7fb069'} />
     </mesh>
   );
 }
 
-/** Lights, sky, and the static boxes and ramps from game/world.ts. */
+/** Lights, sky, and the static boxes, ramps and height fields from game/world.ts (any of them may be empty). */
 export function Level() {
   return (
     <>
@@ -91,6 +109,9 @@ export function Level() {
       ))}
       {RAMPS.map((r, i) => (
         <Ramp key={i} ramp={r} />
+      ))}
+      {FIELDS.map((f, i) => (
+        <Field key={i} field={f} />
       ))}
     </>
   );

@@ -6,31 +6,15 @@ import { anim } from '../game/anim';
 import { input, moveAxis, nowSeconds, wantsRun } from '../game/input';
 import { stepPlayer } from '../game/player';
 import { player } from '../game/state';
-import { BOXES, PLATFORM, RAMPS, boxAabb, updatePlatformAabb, type Aabb } from '../game/world';
+import { BOXES, FIELDS, RAMPS, boxAabb, type Aabb } from '../game/world';
 import { Character } from './Character';
-import { PlatformMesh } from './Level';
 
 const SUBSTEP = 1 / 120;
 const axis = { x: 0, y: 0 };
 const move = { x: 0, z: 0 };
 
-/** The moving platform as a kinematic box, moved before every player substep. */
-const platform: Aabb = { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0 };
-updatePlatformAabb(platform, 0);
-const COLLIDERS: Aabb[] = [...BOXES.map(boxAabb), platform];
-
-/** Moves with the platform AABB the player collides with. */
-function MovingPlatform() {
-  const ref = useRef<THREE.Group>(null);
-  useFrame(() => {
-    ref.current?.position.set((platform.minX + platform.maxX) / 2, (platform.minY + platform.maxY) / 2, PLATFORM.z);
-  });
-  return (
-    <group ref={ref}>
-      <PlatformMesh />
-    </group>
-  );
-}
+/** Static boxes. Moving boxes (platforms) go here too and are moved before each substep — see PROJECT/Structure.md. */
+const COLLIDERS: Aabb[] = BOXES.map(boxAabb);
 
 function animState() {
   const speed = Math.hypot(player.vel.x, player.vel.z);
@@ -44,7 +28,6 @@ function animState() {
 export function Player() {
   const group = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
-  const clock = useRef(0);
 
   useFrame((_, delta) => {
     moveAxis(axis);
@@ -59,9 +42,7 @@ export function Player() {
     const steps = Math.max(1, Math.ceil(dt / SUBSTEP));
     const now = nowSeconds();
     for (let i = 0; i < steps; i++) {
-      clock.current += dt / steps;
-      updatePlatformAabb(platform, clock.current);
-      stepPlayer(player, move, input, now - dt + ((i + 1) * dt) / steps, dt / steps, COLLIDERS, true, RAMPS);
+      stepPlayer(player, move, input, now - dt + ((i + 1) * dt) / steps, dt / steps, COLLIDERS, true, RAMPS, FIELDS);
     }
 
     anim.state = animState();
@@ -77,13 +58,10 @@ export function Player() {
   });
 
   return (
-    <>
-      <group ref={group}>
-        <group ref={body}>
-          <Character />
-        </group>
+    <group ref={group}>
+      <group ref={body}>
+        <Character />
       </group>
-      <MovingPlatform />
-    </>
+    </group>
   );
 }

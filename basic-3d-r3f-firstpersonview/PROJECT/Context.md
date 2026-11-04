@@ -3,10 +3,12 @@
 ## Project Overview
 
 Thin React Three Fiber game skeleton, first-person view. The camera sits at
-the player's eyes (1.5 m); the player walks, runs and jumps on a level with
-0.3 m stairs, a ledge, a ramp and a moving platform. Desktop: click to lock
-the mouse, mouse to look, WASD to move. Touch: joystick + JUMP, drag the
-scene to look. The local player is not drawn; a crosshair marks the center.
+the player's eyes (1.5 m); the player walks, runs and jumps on an empty
+stage (floor, sky, fog, sun). Desktop: click to lock the mouse, mouse to
+look, WASD to move. Touch: joystick + JUMP, drag the scene to look. The
+local player is not drawn; a crosshair marks the center. The game's map is
+built in `src/game/world.ts`: obstacles in `BOXES` / `RAMPS`, terrain as a
+`HeightField` in `FIELDS`, moving platforms as AABBs that record `moved`.
 
 ## Tech Stack
 
@@ -19,9 +21,9 @@ _Exact versions are in `package.json`._
 
 ## Critical Memory
 
-- Player movement is a kinematic step (`src/game/player.ts`) against AABBs
-  and ramps from `src/game/world.ts`, not rapier. Grounded = landed on, or
-  stepped up onto, a box top or a ramp this step.
+- Player movement is a kinematic step (`src/game/player.ts`) against AABBs,
+  ramps and height fields from `src/game/world.ts`, not rapier. Grounded = landed on, or
+  stepped up onto, a box top, a ramp or a height field this step.
 - Movement follows the look yaw (`rig.yaw`, 0 = looking along −z).
 - Jump feel: coyote 0.12 s, buffer 0.1 s from the press, consumed on jump.
 - Per-frame state is mutable (`src/game/state.ts`), never React state.

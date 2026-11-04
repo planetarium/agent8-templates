@@ -1,8 +1,9 @@
 # basic-3d-r3f-quarterview
 
 React Three Fiber quarterview skeleton: the verse8 base character walks,
-runs and jumps over stairs, a ledge, a ramp and a moving platform, seen from
-a fixed 45° camera with a narrow FOV (isometric feel) that follows without
+runs and jumps on an empty stage (floor, sky, fog, sun; build the map in
+`src/game/world.ts`, examples in `PROJECT/Structure.md`), seen from a fixed
+45° camera with a narrow FOV (isometric feel) that follows without
 rotating. Movement is along the world axes. The player is the template's own
 kinematic controller (`src/game/player.ts`, tested with `bun test`); rapier
 is only loaded for dynamic bodies.
@@ -23,7 +24,7 @@ bun run build && bun run preview
 
 | chunk | size |
 | --- | --- |
-| `index-*.js` (first load) | 1,236.84 kB |
+| `index-*.js` (first load) | 1,236.57 kB |
 | `PhysicsDemo-*.js` (rapier + inlined wasm) | 2,257.66 kB, fetched only when `LazyPhysics` mounts |
 
 ## Controls

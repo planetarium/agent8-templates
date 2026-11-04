@@ -1,8 +1,9 @@
 # basic-3d-r3f-freeview
 
 React Three Fiber freeview skeleton: the verse8 base character walks, runs
-and jumps over stairs, a ledge, a ramp and a moving platform, followed by a
-3rd-person orbit camera. The player is the template's own kinematic
+and jumps on an empty stage (floor, sky, fog, sun), followed by a
+3rd-person orbit camera. Build the map in `src/game/world.ts` (boxes, ramps,
+height-field terrain; examples in `PROJECT/Structure.md`). The player is the template's own kinematic
 controller (`src/game/player.ts`, tested with `bun test`); rapier is only
 loaded for dynamic bodies.
 
@@ -22,7 +23,7 @@ bun run build && bun run preview
 
 | chunk | size |
 | --- | --- |
-| `index-*.js` (first load) | 1,237.60 kB |
+| `index-*.js` (first load) | 1,237.34 kB |
 | `PhysicsDemo-*.js` (rapier + inlined wasm) | 2,257.66 kB, fetched only when `LazyPhysics` mounts |
 
 ## Controls

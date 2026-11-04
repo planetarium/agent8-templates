@@ -1,34 +1,16 @@
-import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 import { PLAYER } from '../config';
 import { input, moveAxis, nowSeconds, wantsRun } from '../game/input';
 import { stepPlayer } from '../game/player';
 import { player, rig } from '../game/state';
-import { BOXES, PLATFORM, RAMPS, boxAabb, updatePlatformAabb, type Aabb } from '../game/world';
-import { PlatformMesh } from './Level';
+import { BOXES, FIELDS, RAMPS, boxAabb, type Aabb } from '../game/world';
 
 const SUBSTEP = 1 / 120;
 const axis = { x: 0, y: 0 };
 const move = { x: 0, z: 0 };
 
-/** The moving platform as a kinematic box, moved before every player substep. */
-const platform: Aabb = { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0 };
-updatePlatformAabb(platform, 0);
-const COLLIDERS: Aabb[] = [...BOXES.map(boxAabb), platform];
-
-/** Moves with the platform AABB the player collides with. */
-function MovingPlatform() {
-  const ref = useRef<THREE.Group>(null);
-  useFrame(() => {
-    ref.current?.position.set((platform.minX + platform.maxX) / 2, (platform.minY + platform.maxY) / 2, PLATFORM.z);
-  });
-  return (
-    <group ref={ref}>
-      <PlatformMesh />
-    </group>
-  );
-}
+/** Static boxes. Moving boxes (platforms) go here too and are moved before each substep — see PROJECT/Structure.md. */
+const COLLIDERS: Aabb[] = BOXES.map(boxAabb);
 
 /**
  * Kinematic controller (game/player.ts). The local player has no visible body:
@@ -36,8 +18,6 @@ function MovingPlatform() {
  * characters (NPCs, remote players).
  */
 export function Player() {
-  const clock = useRef(0);
-
   useFrame((_, delta) => {
     moveAxis(axis);
     // view-relative: forward = where the camera looks (yaw only); walk unless running
@@ -53,12 +33,10 @@ export function Player() {
     const steps = Math.max(1, Math.ceil(dt / SUBSTEP));
     const now = nowSeconds();
     for (let i = 0; i < steps; i++) {
-      clock.current += dt / steps;
-      updatePlatformAabb(platform, clock.current);
-      stepPlayer(player, move, input, now - dt + ((i + 1) * dt) / steps, dt / steps, COLLIDERS, false, RAMPS);
+      stepPlayer(player, move, input, now - dt + ((i + 1) * dt) / steps, dt / steps, COLLIDERS, false, RAMPS, FIELDS);
     }
     // Before CameraRig (priority -1), so the eyes are at this frame's position.
   }, -2);
 
-  return <MovingPlatform />;
+  return null;
 }

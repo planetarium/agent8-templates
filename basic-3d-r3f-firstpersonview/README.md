@@ -1,7 +1,8 @@
 # basic-3d-r3f-firstpersonview
 
 React Three Fiber first-person skeleton: the camera is the player's eyes; it
-walks, runs and jumps over stairs, a ledge, a ramp and a moving platform.
+walks, runs and jumps on an empty stage (floor, sky, fog, sun; build the map
+in `src/game/world.ts`, examples in `PROJECT/Structure.md`).
 Pointer-lock mouse look (drag fallback), no visible player body. The player
 is the template's own kinematic controller (`src/game/player.ts`, tested
 with `bun test`); rapier is only loaded for dynamic bodies.
@@ -22,7 +23,7 @@ bun run build && bun run preview
 
 | chunk | size |
 | --- | --- |
-| `index-*.js` (first load) | 1,160.05 kB |
+| `index-*.js` (first load) | 1,159.81 kB |
 | `PhysicsDemo-*.js` (rapier + inlined wasm) | 2,258.80 kB, fetched only when `LazyPhysics` mounts |
 
 ## Controls

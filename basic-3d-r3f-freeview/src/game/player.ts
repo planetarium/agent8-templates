@@ -1,5 +1,6 @@
 // Kinematic player: velocity integration + axis-by-axis AABB collision,
-// step-up onto low ledges, ramps by height function, and riding moving boxes.
+// step-up onto low ledges, ramps and terrain height fields (with a slope
+// limit), and riding moving boxes.
 // Pure (no React, no three) so it can be unit-tested — see player.test.ts.
 //
 // Jump feel:
@@ -8,10 +9,10 @@
 //   was pressed, so pressing just before landing jumps on touchdown
 // - a jump consumes both, so one press = one jump
 // "Grounded" only ever comes from collision: the player moved down into a
-// box top, stepped up onto one, or stands on a ramp this step.
+// box top, stepped up onto one, or stands on a ramp or height field this step.
 
 import { PLAYER } from '../config';
-import { rampHeight, type Aabb, type Ramp } from './world';
+import { fieldHeight, rampHeight, type Aabb, type HeightField, type Ramp } from './world';
 
 export type PlayerState = {
   pos: { x: number; y: number; z: number }; // feet center
@@ -99,6 +100,41 @@ function resolveRamps(p: PlayerState, ramps: Ramp[], wasGrounded: boolean, fromX
   }
 }
 
+/** Stand on a surface height h if falling onto it (or walking down it while grounded). */
+function snapTo(p: PlayerState, h: number, wasGrounded: boolean) {
+  if (p.vel.y <= 0 && p.pos.y <= h + (wasGrounded ? RAMP_SNAP : 0)) {
+    p.pos.y = h;
+    p.vel.y = 0;
+    p.grounded = true;
+    p.ground = null;
+  }
+}
+
+/**
+ * Height fields: like ramps, plus a slope limit. Walking up a slope steeper
+ * than PLAYER.maxSlope, or into a face more than stepHeight above the feet,
+ * undoes this step's horizontal move.
+ */
+function resolveFields(p: PlayerState, fields: HeightField[], wasGrounded: boolean, fromX: number, fromZ: number) {
+  const maxRise = Math.tan(PLAYER.maxSlope);
+  for (const f of fields) {
+    let h = fieldHeight(f, p.pos.x, p.pos.z);
+    if (h === null) continue;
+    const run = Math.hypot(p.pos.x - fromX, p.pos.z - fromZ);
+    const from = fieldHeight(f, fromX, fromZ);
+    const tooSteep = wasGrounded && from !== null && run > 1e-9 && (h - from) / run > maxRise;
+    if (tooSteep || p.pos.y < h - PLAYER.stepHeight) {
+      p.pos.x = fromX;
+      p.pos.z = fromZ;
+      p.vel.x = 0;
+      p.vel.z = 0;
+      h = fieldHeight(f, fromX, fromZ);
+      if (h === null) continue;
+    }
+    snapTo(p, h, wasGrounded);
+  }
+}
+
 /**
  * Advance one step.
  * @param move desired horizontal velocity as a fraction of PLAYER.runSpeed, in WORLD space (length ≤ 1)
@@ -107,6 +143,7 @@ function resolveRamps(p: PlayerState, ramps: Ramp[], wasGrounded: boolean, fromX
  * @param colliders boxes; moving ones carry `moved` and must already be at this step's position
  * @param lockZ keep the player on the z = 0 plane (side-scrolling views, and the tests)
  * @param ramps wedge surfaces, see world.ts
+ * @param fields terrain height fields, see world.ts
  */
 export function stepPlayer(
   p: PlayerState,
@@ -117,6 +154,7 @@ export function stepPlayer(
   colliders: Aabb[],
   lockZ = false,
   ramps: Ramp[] = [],
+  fields: HeightField[] = [],
 ) {
   // Ride the box we stood on last step.
   const carrier = p.grounded ? p.ground?.moved : undefined;
@@ -162,6 +200,7 @@ export function stepPlayer(
   moveAxis(p, 'z', p.vel.z * dt, colliders);
   if (lockZ) p.pos.z = 0;
   resolveRamps(p, ramps, wasGrounded, fromX, fromZ);
+  resolveFields(p, fields, wasGrounded, fromX, fromZ);
   if (p.grounded) p.groundedAt = now;
 
   if (p.pos.y < PLAYER.killY) {

@@ -1,8 +1,11 @@
-// Level geometry: axis-aligned boxes, one ramp and one moving platform. The
-// renderer (Level.tsx) draws it and the player (player.ts) collides with it,
-// so adding a box here adds a visible, standable surface.
-// The course runs along the z = 0 line, so every piece is reachable in any
-// view (a side-scroller keeps the player on z = 0); scenery sits behind it.
+// Level geometry. The renderer (Level.tsx) draws it and the player
+// (player.ts) collides with it, so adding an entry here adds a visible,
+// standable surface. The stage starts empty — just the floor:
+// - obstacles, stairs, ledges: boxes in BOXES
+// - slopes: wedges in RAMPS
+// - terrain: height fields in FIELDS (heightAt(x, z) over a rectangle)
+// - moving platforms: an Aabb that records `moved` (see updatePlatformAabb)
+// PROJECT/Structure.md has a short example of each.
 
 export type Box = {
   /** Center [x, y, z] and full size [w, h, d]. */
@@ -14,28 +17,12 @@ export type Box = {
 export const BOXES: Box[] = [
   // Floor: top face at y = 0.
   { pos: [0, -0.5, 0], size: [80, 1, 80], color: '#7fb069' },
-  // Stairs: three 0.3 m steps, walkable without jumping (rise < stepHeight).
-  { pos: [2.5, 0.15, 0], size: [1, 0.3, 3], color: '#d9c5a0' },
-  { pos: [3.5, 0.3, 0], size: [1, 0.6, 3], color: '#c9b48c' },
-  { pos: [4.5, 0.45, 0], size: [1, 0.9, 3], color: '#b9a378' },
-  { pos: [6, 0.45, 0], size: [2, 0.9, 3], color: '#e6aa68' },
-  // A 0.6 m ledge (jump), then the moving platform carries the player to the far block.
-  { pos: [8.5, 0.75, 0], size: [3, 1.5, 3], color: '#ca3c25' },
-  { pos: [20, 0.75, 0], size: [2, 1.5, 3], color: '#4f6d7a' },
-  // Landing at the top of the ramp (jump onto it from the spawn side).
-  { pos: [-4, 0.75, 0], size: [2, 1.5, 3], color: '#4f6d7a' },
-  // Scenery behind the z = 0 line.
-  { pos: [-6, 1, -7], size: [3, 2, 3], color: '#4f6d7a' },
-  { pos: [6, 0.5, -9], size: [4, 1, 2], color: '#ca3c25' },
 ];
 
 /** A wedge standing on the floor, rising linearly along +x from y = 0 at minX to `height` at maxX. */
 export type Ramp = { minX: number; maxX: number; minZ: number; maxZ: number; height: number; color: string };
 
-export const RAMPS: Ramp[] = [
-  // 1.5 m over 6 m ≈ 14°, up to the landing box.
-  { minX: -11, maxX: -5, minZ: -1.5, maxZ: 1.5, height: 1.5, color: '#e6aa68' },
-];
+export const RAMPS: Ramp[] = [];
 
 /** Ramp surface height at (x, z), or null outside its footprint. */
 export function rampHeight(r: Ramp, x: number, z: number): number | null {
@@ -49,24 +36,28 @@ export function rampVertices(r: Ramp): number[] {
   return [x0, 0, z0, x0, 0, z1, x1, 0, z0, x1, 0, z1, x1, h, z0, x1, h, z1];
 }
 
-/** Platform sliding back and forth along x at a constant speed, between the two blocks. */
-export const PLATFORM = {
-  size: [3, 0.3, 3] as [number, number, number],
-  /** Height of the top face (level with both blocks). */
-  top: 1.5,
-  z: 0,
-  /** Center x travels between these. */
-  minX: 11.5,
-  maxX: 17.5,
-  speed: 2,
-  color: '#8e7dbe',
+/**
+ * Terrain: a surface height for every (x, z) inside the rectangle. The player
+ * stands on it like on a ramp; slopes steeper than PLAYER.maxSlope are walls.
+ * `heightAt` must be cheap (it runs several times per substep) and continuous
+ * wherever the player should walk.
+ */
+export type HeightField = {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+  heightAt: (x: number, z: number) => number;
+  /** Mesh color in Level.tsx. */
+  color?: string;
 };
 
-/** Platform center x at time t (s): ping-pong between minX and maxX. */
-export function platformX(t: number): number {
-  const span = PLATFORM.maxX - PLATFORM.minX;
-  const s = (((t * PLATFORM.speed) % (2 * span)) + 2 * span) % (2 * span);
-  return s < span ? PLATFORM.minX + s : PLATFORM.maxX - (s - span);
+export const FIELDS: HeightField[] = [];
+
+/** Height-field surface at (x, z), or null outside its rectangle. */
+export function fieldHeight(f: HeightField, x: number, z: number): number | null {
+  if (x < f.minX || x > f.maxX || z < f.minZ || z > f.maxZ) return null;
+  return f.heightAt(x, z);
 }
 
 export type Aabb = {
@@ -84,12 +75,31 @@ export function boxAabb({ pos: [x, y, z], size: [w, h, d] }: Pick<Box, 'pos' | '
   return { minX: x - w / 2, minY: y - h / 2, minZ: z - d / 2, maxX: x + w / 2, maxY: y + h / 2, maxZ: z + d / 2 };
 }
 
+/** A box sliding back and forth along x at a constant speed. */
+export type Platform = {
+  size: [number, number, number];
+  /** Height of the top face. */
+  top: number;
+  z: number;
+  /** Center x travels between these. */
+  minX: number;
+  maxX: number;
+  speed: number;
+};
+
+/** Platform center x at time t (s): ping-pong between minX and maxX. */
+export function platformX(p: Platform, t: number): number {
+  const span = p.maxX - p.minX;
+  const s = (((t * p.speed) % (2 * span)) + 2 * span) % (2 * span);
+  return s < span ? p.minX + s : p.maxX - (s - span);
+}
+
 /** Moves a platform AABB to time t and records how far it moved since the last update. */
-export function updatePlatformAabb(b: Aabb, t: number) {
-  const x = platformX(t);
-  const [w, h, d] = PLATFORM.size;
+export function updatePlatformAabb(b: Aabb, p: Platform, t: number) {
+  const x = platformX(p, t);
+  const [w, h, d] = p.size;
   const was = (b.minX + b.maxX) / 2;
   const first = b.moved === undefined;
-  Object.assign(b, boxAabb({ pos: [x, PLATFORM.top - h / 2, PLATFORM.z], size: [w, h, d] }));
+  Object.assign(b, boxAabb({ pos: [x, p.top - h / 2, p.z], size: [w, h, d] }));
   b.moved = { x: first ? 0 : x - was, y: 0, z: 0 };
 }

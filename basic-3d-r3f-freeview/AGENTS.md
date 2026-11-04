@@ -1,9 +1,12 @@
 # AGENTS.md — basic-3d-r3f-freeview
 
 A thin React Three Fiber game skeleton, freeview: one verse8 character that
-walks, runs and jumps on a level with stairs, a ramp and a moving platform, a
+walks, runs and jumps on an empty stage (floor, sky, fog, sun), a
 3rd-person orbit camera behind it, keyboard + mouse and touch input. The
 player is the template's own kinematic controller (`src/game/player.ts`).
+Obstacles go in `src/game/world.ts` `BOXES` / `RAMPS`, terrain is a
+`HeightField` in `FIELDS`, a moving platform is an AABB that records `moved`
+— `PROJECT/Structure.md` "Building the stage" has an example of each.
 Read this, then `PROJECT/Structure.md`, before changing code.
 
 ## Rules
@@ -15,10 +18,12 @@ Read this, then `PROJECT/Structure.md`, before changing code.
   rules there and test them with `bun test` (`player.test.ts`).
 - Jump feel is tuned in `PLAYER` (`config.ts`): coyote time 0.12 s, input
   buffer 0.1 s from the press, both consumed by a jump. Grounded comes from
-  collision only. Step-up height is `PLAYER.stepHeight`. Keep those tests
-  green if you change the step.
+  collision only. Step-up height is `PLAYER.stepHeight` (0.35 m), steepest
+  walkable height-field slope `PLAYER.maxSlope` (60°). Keep those tests
+  green if you change them.
 - Level geometry comes from `src/game/world.ts` (`BOXES`, `RAMPS`,
-  `PLATFORM`); the same data is drawn and collided.
+  `FIELDS`); the same data is drawn (`Level.tsx`) and collided
+  (`stepPlayer`). Build the game's own map there — the stage ships empty.
 - Movement is camera-relative: W walks away from the camera (`rig.yaw`).
 - Touch controls render on touch devices before the first touch. Every new
   action needs a keyboard binding AND an on-screen button.
@@ -39,6 +44,6 @@ Read this, then `PROJECT/Structure.md`, before changing code.
 bun install
 bun run dev        # local dev server
 bun run typecheck  # tsc --noEmit
-bun test           # controller tests (jump feel, step-up, ramp, platform)
+bun test           # controller tests (jump feel, step-up, ramp, platform, height field)
 bun run build      # production build to dist/
 ```

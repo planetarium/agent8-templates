@@ -1,8 +1,10 @@
 # basic-3d-r3f-sideview
 
 React Three Fiber sideview skeleton (a side-scroller in 3D): the verse8 base
-character runs left / right and jumps along the z = 0 plane over stairs, a
-ledge, a ramp and a moving platform; a fixed side camera tracks it. The
+character runs left / right and jumps along the z = 0 plane on an empty
+stage (floor, sky, fog, sun); a fixed side camera tracks it. Build the map in
+`src/game/world.ts` (boxes, ramps, height-field terrain; examples in
+`PROJECT/Structure.md`). The
 player is the template's own kinematic controller (`src/game/player.ts`,
 `lockZ`, tested with `bun test`); rapier is only loaded for dynamic bodies.
 
@@ -22,7 +24,7 @@ bun run build && bun run preview
 
 | chunk | size |
 | --- | --- |
-| `index-*.js` (first load) | 1,236.54 kB |
+| `index-*.js` (first load) | 1,236.27 kB |
 | `PhysicsDemo-*.js` (rapier + inlined wasm) | 2,257.66 kB, fetched only when `LazyPhysics` mounts |
 
 ## Controls

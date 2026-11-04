@@ -14,8 +14,10 @@ export const PLAYER = {
   jumpVelocity: 9,
   gravity: 26,
   maxFall: 30,
-  /** Highest ledge the player walks up without jumping (stairs are 0.3). */
+  /** Highest ledge the player walks up without jumping (0.3 m stair steps are walkable). */
   stepHeight: 0.35,
+  /** Steepest height-field slope the player walks up (radians); steeper is a wall. */
+  maxSlope: (60 * Math.PI) / 180,
   /** Seconds after leaving the ground during which a jump still counts. */
   coyoteTime: 0.12,
   /** Seconds a jump press is remembered (from the moment it was pressed) before landing. */
@@ -29,8 +31,8 @@ export const CAMERA = {
   fp: {
     /** Eye height above the feet. */
     eyeHeight: 1.5,
-    /** Start yaw: looking along +x (toward the stairs), turned a little toward −z. */
-    yaw: -Math.PI / 2 + 0.35,
+    /** Start yaw: 0 looks along −z. */
+    yaw: 0,
     minPitch: -1.45,
     maxPitch: 1.45,
     /** Radians per pixel. */

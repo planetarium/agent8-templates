@@ -3,10 +3,12 @@
 ## Project Overview
 
 Thin React Three Fiber game skeleton, quarterview. The verse8 base character
-walks, runs and jumps on a level with 0.3 m stairs, a ledge, a ramp and a
-moving platform; a fixed camera looks down at 45° from the +z side with a
-narrow FOV (isometric feel) and follows the player without rotating.
-Keyboard on desktop, joystick + JUMP button on touch devices.
+walks, runs and jumps on an empty stage (floor, sky, fog, sun); a fixed
+camera looks down at 45° from the +z side with a narrow FOV (isometric feel)
+and follows the player without rotating. Keyboard on desktop, joystick +
+JUMP button on touch devices. The game's map is built in
+`src/game/world.ts`: obstacles in `BOXES` / `RAMPS`, terrain as a
+`HeightField` in `FIELDS`, moving platforms as AABBs that record `moved`.
 
 ## Tech Stack
 
@@ -19,9 +21,9 @@ _Exact versions are in `package.json`._
 
 ## Critical Memory
 
-- Player movement is a kinematic step (`src/game/player.ts`) against AABBs
-  and ramps from `src/game/world.ts`, not rapier. Grounded = landed on, or
-  stepped up onto, a box top or a ramp this step.
+- Player movement is a kinematic step (`src/game/player.ts`) against AABBs,
+  ramps and height fields from `src/game/world.ts`, not rapier. Grounded = landed on, or
+  stepped up onto, a box top, a ramp or a height field this step.
 - Movement is world-relative (up = −z, right = +x); the camera never rotates.
 - Jump feel: coyote 0.12 s, buffer 0.1 s from the press, consumed on jump.
 - Per-frame state is mutable (`src/game/state.ts`), never React state.

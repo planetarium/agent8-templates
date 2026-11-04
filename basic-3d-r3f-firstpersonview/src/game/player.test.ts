@@ -2,9 +2,23 @@
 import { describe, expect, test } from 'bun:test';
 import { PLAYER } from '../config';
 import { createPlayer, stepPlayer, type PlayerState } from './player';
-import { BOXES, PLATFORM, RAMPS, boxAabb, updatePlatformAabb, type Aabb, type Ramp } from './world';
+import { boxAabb, updatePlatformAabb, type Aabb, type Box, type HeightField, type Platform, type Ramp } from './world';
 
 const DT = 1 / 120;
+
+// Test course (the stage itself starts empty): stairs and a 0.6 ledge along
+// z = 0, a ramp, a moving platform.
+const COURSE_BOXES: Box[] = [
+  { pos: [0, -0.5, 0], size: [80, 1, 80], color: '' },
+  { pos: [2.5, 0.15, 0], size: [1, 0.3, 3], color: '' },
+  { pos: [3.5, 0.3, 0], size: [1, 0.6, 3], color: '' },
+  { pos: [4.5, 0.45, 0], size: [1, 0.9, 3], color: '' },
+  { pos: [6, 0.45, 0], size: [2, 0.9, 3], color: '' },
+  { pos: [8.5, 0.75, 0], size: [3, 1.5, 3], color: '' },
+];
+// 1.5 m over 6 m ≈ 14°.
+const COURSE_RAMP: Ramp = { minX: -11, maxX: -5, minZ: -1.5, maxZ: 1.5, height: 1.5, color: '' };
+const COURSE_PLATFORM: Platform = { size: [3, 0.3, 3], top: 1.5, z: 0, minX: 11.5, maxX: 17.5, speed: 2 };
 // A ledge whose right edge is at x = 0, top at y = 0.
 const LEDGE: Aabb[] = [{ minX: -50, minY: -1, minZ: -5, maxX: 0, maxY: 0, maxZ: 5 }];
 const still = { x: 0, z: 0 };
@@ -141,15 +155,15 @@ describe('step-up', () => {
   });
 });
 
-describe('the level in world.ts', () => {
+describe('the test course', () => {
   test('from the spawn, walking +x on z = 0 climbs the stairs to the 0.9 landing without jumping', () => {
     const p = createPlayer();
-    const boxes = BOXES.map(boxAabb);
+    const boxes = COURSE_BOXES.map(boxAabb);
     const jump = { jumpPressedAt: -Infinity };
     let t = 0;
     for (let i = 0; i < 1200 && p.pos.x < 6; i++) {
       t += DT;
-      stepPlayer(p, { x: PLAYER.walkSpeed / PLAYER.runSpeed, z: 0 }, jump, t, DT, boxes, true, RAMPS);
+      stepPlayer(p, { x: PLAYER.walkSpeed / PLAYER.runSpeed, z: 0 }, jump, t, DT, boxes, true, [COURSE_RAMP]);
     }
     expect(p.pos.x).toBeGreaterThanOrEqual(6);
     expect(p.pos.y).toBeCloseTo(0.9, 5);
@@ -158,7 +172,7 @@ describe('the level in world.ts', () => {
 });
 
 describe('ramp', () => {
-  const ramp = RAMPS[0];
+  const ramp = COURSE_RAMP;
   const mid = (ramp.minZ + ramp.maxZ) / 2;
 
   test('walking up follows the surface and stays grounded', () => {
@@ -193,9 +207,10 @@ describe('ramp', () => {
 
 describe('moving platform', () => {
   test('a player standing on it is carried along, both directions', () => {
+    const PLATFORM = COURSE_PLATFORM;
     const plat: Aabb = { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0 };
     const center = () => (plat.minX + plat.maxX) / 2;
-    updatePlatformAabb(plat, 0);
+    updatePlatformAabb(plat, PLATFORM, 0);
     const p = createPlayer();
     Object.assign(p.pos, { x: center(), y: PLATFORM.top + 0.2, z: PLATFORM.z });
     const jump = { jumpPressedAt: -Infinity };
@@ -204,7 +219,7 @@ describe('moving platform', () => {
     // one full back-and-forth cycle plus the drop
     const end = (2 * (PLATFORM.maxX - PLATFORM.minX)) / PLATFORM.speed + 0.5;
     for (let t = DT; t < end; t += DT) {
-      updatePlatformAabb(plat, t);
+      updatePlatformAabb(plat, PLATFORM, t);
       stepPlayer(p, still, jump, t, DT, [plat], false, []);
       if (!p.grounded) continue;
       offset ??= p.pos.x - center();
@@ -213,5 +228,51 @@ describe('moving platform', () => {
     expect(p.grounded).toBe(true);
     expect(p.pos.y).toBeCloseTo(PLATFORM.top, 5);
     expect(drift).toBeLessThan(0.01);
+  });
+});
+
+describe('height field', () => {
+  /** Steps with a constant move on the floor box + `fields` until `until` (or 10 s). */
+  function onField(p: PlayerState, move: { x: number; z: number }, fields: HeightField[], until: () => boolean) {
+    const jump = { jumpPressedAt: -Infinity };
+    let t = 0;
+    for (let i = 0; i < 1200 && !until(); i++) {
+      t += DT;
+      stepPlayer(p, move, jump, t, DT, [FLOOR], false, [], fields);
+    }
+  }
+  const area = { minX: 0, maxX: 10, minZ: -5, maxZ: 5 };
+
+  test('flat: lands on the surface and walks on it grounded', () => {
+    const plateau: HeightField = { ...area, heightAt: () => 1 };
+    const p = onFloor();
+    Object.assign(p.pos, { x: 3, y: 3 });
+    onField(p, still, [plateau], () => p.grounded);
+    expect(p.pos.y).toBeCloseTo(1, 5);
+    onField(p, { x: 1, z: 0 }, [plateau], () => p.pos.x > 6);
+    expect(p.pos.y).toBeCloseTo(1, 5);
+    expect(p.grounded).toBe(true);
+  });
+
+  test('a 20° hill is walked up from the floor, feet on the surface', () => {
+    const k = Math.tan((20 * Math.PI) / 180);
+    const hill: HeightField = { ...area, heightAt: (x) => x * k };
+    const p = onFloor();
+    Object.assign(p.pos, { x: -1 });
+    onField(p, { x: 1, z: 0 }, [hill], () => p.pos.x >= 5);
+    expect(p.pos.y).toBeCloseTo(p.pos.x * k, 5);
+    expect(p.grounded).toBe(true);
+    expect(p.jumps).toBe(0);
+  });
+
+  test('a 75° cliff (steeper than maxSlope) is a wall', () => {
+    const k = Math.tan((75 * Math.PI) / 180);
+    const cliff: HeightField = { ...area, heightAt: (x) => Math.max(0, x - 2) * k };
+    const p = onFloor();
+    Object.assign(p.pos, { x: 0.5 });
+    onField(p, { x: 1, z: 0 }, [cliff], () => false);
+    expect(p.pos.x).toBeLessThan(2.06);
+    expect(p.pos.y).toBeLessThan(0.25);
+    expect(p.grounded).toBe(true);
   });
 });
