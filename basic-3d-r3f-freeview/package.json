@@ -17,6 +17,7 @@
     "@react-three/rapier": "^2.2.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "simplex-noise": "^4.0.3",
     "three": "^0.187.0"
   },
   "devDependencies": {
