@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Generates the PixelVfx helper for the Phaser templates from the agent8-library pixelfx metadata.
 //
-//   node scripts/pixelvfx/generate.mjs <agent8-library-dir> [--base-url <url>] [--out <template-dir> ...]
+//   node scripts/pixelvfx/generate.mjs <agent8-library-dir> [--base-url <url>] [--out <template-dir> ...] [--only a,b,c]
 //
 // Reads <agent8-library-dir>/assets/2d/vfx/pixelfx/<category>/metadata.json (+ each sheet's JSON for impact timing) and
 // writes into every template:
@@ -23,23 +23,23 @@ const DEFAULT_OUT = ["2d-phaser-basic", "2d-phaser-sprite-character-gravity"];
 // this is the fallback for metadata that does not carry it.
 const SCREEN_SPACE = new Set(["weather"]);
 
-// "Which sheet when": game moments in prompt words -> sheet names. Names missing from the library are dropped.
+// "Which sheet when", in the words users write: request -> sheets + what to add in code. Names missing from the library
+// are dropped (a row with no sheet left is dropped too, unless it is a code-only row with an empty list).
 const WHEN = [
-  ["Enemy dies / something blows up", ["small-explosion", "cartoon-pow"], "`plasma-explosion` for energy or sci-fi"],
-  ["Melee or sword hit", ["hit-spark"], "`crit-hit` for a critical or finishing blow"],
-  ["Bullet hits a wall or object", ["bullet-impact"], ""],
-  ["Attack blocked", ["shield-block"], ""],
-  ["Item picked up (the moment of pickup)", ["collect-burst"], ""],
-  ["Collectible lying in the world", ["coin-spin", "gem-spin", "heart-pickup"], "loops; destroy on pickup"],
+  ["“punchy”, “impactful”, “satisfying hit”, a sword or punch lands", ["hit-spark", "crit-hit"], "`hitStop`, camera shake, a white flash on the target"],
+  ["A bullet or arrow hits", ["bullet-impact"], "camera shake"],
+  ["Enemy dies, “pop”, “burst”, “vanish”", ["cartoon-pow", "small-explosion", "poof"], "`plasma-explosion` for energy/sci-fi; camera shake"],
+  ["Block, parry", ["shield-block"], ""],
+  ["Pick up, “collect”, “sparkle”, “rewarding”", ["collect-burst"], "floating “+1” text and a HUD counter bounce"],
+  ["Coin, gem or heart lying in the world", ["coin-spin", "gem-spin", "heart-pickup"], "loops; destroy on pickup"],
   ["Coin flies into a HUD counter", ["coin-collect"], ""],
-  ["Heal / restore HP", ["heal"], "`follow` the character"],
-  ["Level up / reward", ["level-up"], ""],
-  ["Damage number pops up", ["damage-number"], ""],
-  ["Alert / surprise over a head", ["exclamation"], ""],
-  ["Stunned / poisoned status", ["stunned", "poisoned"], "loops; `follow` the character"],
-  ["Projectile in flight", ["fireball", "fireball-ice"], "loops; `flip` when moving left"],
-  ["Torch / campfire prop", ["torch", "campfire"], "loops"],
-  ["Rain over the whole screen", ["rain"], "full-screen, no x, y"],
+  ["Heal, “restore”, “magical” buff", ["heal"], "`follow` the character; HP bar tween"],
+  ["Level up, combo", ["level-up", "combo-counter"], "screen flash"],
+  ["Stunned, poisoned", ["stunned", "poisoned"], "loops; `follow` the character"],
+  ["Fireball, projectile in flight", ["fireball"], "loops; `flip` when moving left"],
+  ["Torch, campfire", ["torch", "campfire"], "loops"],
+  ["Rain, snow, “weather”", ["rain", "snow", "rain-splash", "ripples"], "rain/snow are full-screen (no x, y); `rain-splash`/`ripples` on the ground"],
+  ["Sound effects", [], "not a sheet: use the project's audio tools and sfx path"],
 ];
 
 const args = process.argv.slice(2);
@@ -57,6 +57,8 @@ const SRC = join(resolve(lib), "assets", "2d", "vfx", "pixelfx");
 if (!existsSync(SRC)) throw new Error(`no pixelfx sheets at ${SRC}`);
 const baseUrl = (opt("--base-url")[0] ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
 const outs = (opt("--out").length ? opt("--out") : DEFAULT_OUT).map((d) => resolve(ROOT, d));
+// --only a,b,c keeps just those sheets (e.g. a staging zip that ships a few sheets in public/).
+const only = opt("--only").length ? new Set(opt("--only").join(",").split(",").map((n) => n.trim()).filter(Boolean)) : null;
 
 const categories = readdirSync(SRC, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
 const byName = new Map();
@@ -68,6 +70,7 @@ for (const cat of categories) {
   for (const [file, e] of Object.entries(meta)) {
     if (!file.endsWith(".png")) continue;
     const name = file.slice(0, -4);
+    if (only && !only.has(name)) continue;
     if (byName.has(name)) throw new Error(`duplicate effect name '${name}' in ${byName.get(name).cat} and ${cat}`);
     const m = e.metadata;
     const json = JSON.parse(readFileSync(join(SRC, cat, m.frameData ?? `${name}.json`), "utf8"));
@@ -83,15 +86,17 @@ for (const cat of categories) {
   }
 }
 if (!sheets.length) throw new Error(`no sheets in ${SRC}`);
+if (only) for (const n of only) if (!byName.has(n)) throw new Error(`--only: no sheet named '${n}'`);
 
-// "Title - pixel art VFX sprite sheet (cat). What it shows: details. Keywords: a, b. One-shot animation, ..."
+// "[Use for: when to use it. ]Title - pixel art VFX sprite sheet (cat). What it shows: details. Keywords: a, b. ..."
 function summary(description, cat) {
+  const useFor = description.match(/^Use for: (.*?\.)\s/)?.[1];
   const body = description.split(`(${cat}). `)[1] ?? description;
   const what = body.split(" Keywords:")[0];
   let short = what.split(/[:.](\s|$)/)[0];
   if (short.length > 90) short = short.slice(0, 90).replace(/\s+\S*$/, "") + "…";
   const keywords = (body.match(/Keywords: ([^.]*)\./)?.[1] ?? "").split(",").map((k) => k.trim()).filter(Boolean);
-  return { short, keywords };
+  return { short, keywords, useFor };
 }
 
 const ident = (cat) => cat.toUpperCase().replace(/[^A-Z0-9]+/g, "_");
@@ -138,12 +143,14 @@ export type VfxName = ${[...new Set(sheets.map((s) => typeName(s.cat)))].join(" 
 export const SHEETS: Record<VfxName, VfxSheet> = { ${[...new Set(sheets.map((s) => `...${ident(s.cat)}`))].join(", ")} };
 `;
 
-const when = WHEN.map(([moment, names, note]) => [moment, names.filter((n) => byName.has(n)), note]).filter(([, names]) => names.length);
+const when = WHEN.map(([moment, names, note]) => [moment, names.filter((n) => byName.has(n)), note, !names.length]).filter(([, names, , codeOnly]) => names.length || codeOnly);
 const missing = WHEN.flatMap(([, names]) => names).filter((n) => !byName.has(n));
 if (missing.length) console.warn(`which-sheet-when: not in the library, dropped: ${missing.join(", ")}`);
 
 const loopWord = (s) => (s.screenSpace ? "loop, full-screen" : s.m.loop ? "loop" : "one-shot");
 const docs = `# Pixel art VFX (PixelVfx)
+
+Read this before writing any effect.
 
 \`\`\`ts
 import { PixelVfx } from '../vfx/PixelVfx';                       // in src/game/scenes/*.ts
@@ -155,11 +162,21 @@ PixelVfx.play(this, 'hit-spark', enemy.x, enemy.y, { scale: 2 });  // anywhere a
 library: origin at the sheet's pivot, right fps, loop or one-shot, crisp pixels, cleanup. \`play()\` returns the sprite:
 **one-shots destroy themselves**, **loops** run until you call \`sprite.destroy()\` (keep the returned sprite).
 
+## What is a sheet, what is code
+
+- **World effects → PixelVfx**: hits, explosions, deaths, pickups, heals and buffs, status, projectiles, weather.
+- **UI feedback and screen effects → code** (tweens, graphics, camera effects): tap glows, ripples, scale bounces,
+  floating number text, vignettes, screen flashes, camera shake. Do not force a sheet onto UI.
+- They usually go together: a hit = \`hit-spark\` sheet + hit stop + camera shake + flash; a pickup = \`collect-burst\`
+  sheet + floating "+1" text + counter bounce. Do not hand-draw the world part either.
+- Skip the sheets only if the **user** asked for a smooth vector, realistic/HD or painted look (or gave art in that
+  style), or asked you to draw the effects yourself / leave them out. A style you picked yourself is not a reason.
+
 ## Which sheet when
 
-| Moment | Sheet | Note |
+| The user asks for | Sheets | Add in code |
 |---|---|---|
-${when.map(([moment, names, note]) => `| ${moment} | ${names.map((n) => `\`${n}\``).join(", ")} | ${note} |`).join("\n")}
+${when.map(([moment, names, note, codeOnly]) => `| ${moment} | ${codeOnly ? "—" : names.map((n) => `\`${n}\``).join(", ")} | ${note} |`).join("\n")}
 
 ## Rules
 
@@ -187,11 +204,11 @@ ${categories
   .map((cat) => `
 ### ${cat}
 
-| Name | What | Size | Frames | Pivot | GPU MB |
+| Name | Use for | Size | Frames | Pivot | GPU MB |
 |---|---|---|---|---|---|
 ${sheets
   .filter((s) => s.cat === cat)
-  .map((s) => `| \`${s.name}\` | ${s.short}${s.keywords.length ? ` (${s.keywords.join(", ")})` : ""} | ${s.m.frameWidth}x${s.m.frameHeight} | ${s.m.frames}, ${loopWord(s)} | ${s.m.pivot.join(", ")} | ${(s.gpuBytes / 1048576).toFixed(1)} |`)
+  .map((s) => `| \`${s.name}\` | ${s.useFor ?? `${s.short}${s.keywords.length ? ` (${s.keywords.join(", ")})` : ""}`} | ${s.m.frameWidth}x${s.m.frameHeight} | ${s.m.frames}, ${loopWord(s)} | ${s.m.pivot.join(", ")} | ${(s.gpuBytes / 1048576).toFixed(1)} |`)
   .join("\n")}`)
   .join("\n")}
 `;

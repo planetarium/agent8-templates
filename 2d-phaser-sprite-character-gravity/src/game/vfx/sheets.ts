@@ -20,60 +20,333 @@ export interface VfxSheet {
   hits: { t: number; freeze: number }[];
 }
 
-export type ExplosionsVfx = 'small-explosion' | 'cartoon-pow' | 'plasma-explosion';
+export type ArcaneVfx = 'arcane-beam' | 'arcane-missiles' | 'arcane-orb' | 'blink-in' | 'blink-out' | 'magic-circle-cast' | 'mana-burst' | 'portal' | 'rune-circle' | 'spell-charge' | 'star-fall' | 'time-stop';
+export const ARCANE: Record<ArcaneVfx, VfxSheet> = {
+  'arcane-beam': { path: 'arcane/arcane-beam', frameWidth: 264, frameHeight: 100, pivot: [26, 84], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 2839740, hits: [{ t: 0.1, freeze: 0 }, { t: 0.7, freeze: 0 }] },
+  'arcane-missiles': { path: 'arcane/arcane-missiles', frameWidth: 240, frameHeight: 116, pivot: [26, 88], loop: false, fps: 30, frames: 54, screenSpace: false, gpuBytes: 2856576, hits: [{ t: 0.77, freeze: 0.02 }, { t: 0.85, freeze: 0.02 }, { t: 0.95, freeze: 0.02 }, { t: 1.08, freeze: 0.02 }, { t: 1.2, freeze: 0.07 }] },
+  'arcane-orb': { path: 'arcane/arcane-orb', frameWidth: 136, frameHeight: 112, pivot: [68, 104], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 3308472, hits: [] },
+  'blink-in': { path: 'arcane/blink-in', frameWidth: 136, frameHeight: 96, pivot: [68, 80], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 691328, hits: [{ t: 0.48, freeze: 0.03 }] },
+  'blink-out': { path: 'arcane/blink-out', frameWidth: 136, frameHeight: 96, pivot: [68, 80], loop: false, fps: 30, frames: 49, screenSpace: false, gpuBytes: 1063048, hits: [] },
+  'magic-circle-cast': { path: 'arcane/magic-circle-cast', frameWidth: 200, frameHeight: 220, pivot: [100, 192], loop: false, fps: 30, frames: 118, screenSpace: false, gpuBytes: 7608328, hits: [] },
+  'mana-burst': { path: 'arcane/mana-burst', frameWidth: 208, frameHeight: 150, pivot: [104, 124], loop: false, fps: 30, frames: 55, screenSpace: false, gpuBytes: 2870360, hits: [] },
+  'portal': { path: 'arcane/portal', frameWidth: 152, frameHeight: 116, pivot: [76, 106], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 4924800, hits: [] },
+  'rune-circle': { path: 'arcane/rune-circle', frameWidth: 136, frameHeight: 100, pivot: [68, 80], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 5163600, hits: [] },
+  'spell-charge': { path: 'arcane/spell-charge', frameWidth: 120, frameHeight: 86, pivot: [44, 80], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 1363924, hits: [] },
+  'star-fall': { path: 'arcane/star-fall', frameWidth: 232, frameHeight: 172, pivot: [124, 150], loop: false, fps: 30, frames: 76, screenSpace: false, gpuBytes: 5487264, hits: [] },
+  'time-stop': { path: 'arcane/time-stop', frameWidth: 196, frameHeight: 136, pivot: [98, 118], loop: false, fps: 30, frames: 109, screenSpace: false, gpuBytes: 4997076, hits: [] },
+};
+
+export type CrittersVfx = 'bat' | 'bird' | 'butterfly' | 'eyeball' | 'fish-school' | 'flying-skull' | 'frog' | 'ghost' | 'jellyfish' | 'slime' | 'snake' | 'wisp';
+export const CRITTERS: Record<CrittersVfx, VfxSheet> = {
+  'bat': { path: 'critters/bat', frameWidth: 112, frameHeight: 80, pivot: [56, 40], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 1232000, hits: [] },
+  'bird': { path: 'critters/bird', frameWidth: 112, frameHeight: 80, pivot: [56, 40], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 320256, hits: [] },
+  'butterfly': { path: 'critters/butterfly', frameWidth: 128, frameHeight: 88, pivot: [64, 44], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 2188544, hits: [] },
+  'eyeball': { path: 'critters/eyeball', frameWidth: 96, frameHeight: 108, pivot: [48, 100], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 3065496, hits: [] },
+  'fish-school': { path: 'critters/fish-school', frameWidth: 136, frameHeight: 80, pivot: [68, 40], loop: true, fps: 30, frames: 144, screenSpace: false, gpuBytes: 5571072, hits: [] },
+  'flying-skull': { path: 'critters/flying-skull', frameWidth: 96, frameHeight: 132, pivot: [48, 120], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 3462208, hits: [] },
+  'frog': { path: 'critters/frog', frameWidth: 112, frameHeight: 88, pivot: [56, 80], loop: true, fps: 30, frames: 78, screenSpace: false, gpuBytes: 545936, hits: [] },
+  'ghost': { path: 'critters/ghost', frameWidth: 96, frameHeight: 100, pivot: [48, 90], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 2215032, hits: [] },
+  'jellyfish': { path: 'critters/jellyfish', frameWidth: 96, frameHeight: 120, pivot: [48, 38], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 3026496, hits: [] },
+  'slime': { path: 'critters/slime', frameWidth: 112, frameHeight: 88, pivot: [56, 72], loop: true, fps: 30, frames: 54, screenSpace: false, gpuBytes: 1857024, hits: [] },
+  'snake': { path: 'critters/snake', frameWidth: 136, frameHeight: 56, pivot: [68, 48], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 412620, hits: [] },
+  'wisp': { path: 'critters/wisp', frameWidth: 128, frameHeight: 104, pivot: [64, 96], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 2880616, hits: [] },
+};
+
+export type ExplosionsVfx = 'barrel-explosion' | 'big-explosion' | 'cartoon-pow' | 'dirt-explosion' | 'firework-burst' | 'firework-rocket' | 'grenade' | 'implosion' | 'nuke' | 'plasma-explosion' | 'small-explosion' | 'smoke-bomb';
 export const EXPLOSIONS: Record<ExplosionsVfx, VfxSheet> = {
-  'small-explosion': { path: 'explosions/small-explosion', frameWidth: 300, frameHeight: 240, pivot: [150, 196], loop: false, fps: 30, frames: 163, screenSpace: false, gpuBytes: 48384000, hits: [] },
-  'cartoon-pow': { path: 'explosions/cartoon-pow', frameWidth: 184, frameHeight: 144, pivot: [92, 72], loop: false, fps: 30, frames: 33, screenSpace: false, gpuBytes: 3815424, hits: [] },
-  'plasma-explosion': { path: 'explosions/plasma-explosion', frameWidth: 224, frameHeight: 200, pivot: [112, 100], loop: false, fps: 30, frames: 52, screenSpace: false, gpuBytes: 10035200, hits: [] },
+  'barrel-explosion': { path: 'explosions/barrel-explosion', frameWidth: 300, frameHeight: 240, pivot: [150, 204], loop: false, fps: 15, frames: 79, screenSpace: false, gpuBytes: 8484784, hits: [] },
+  'big-explosion': { path: 'explosions/big-explosion', frameWidth: 360, frameHeight: 300, pivot: [180, 262], loop: false, fps: 10, frames: 73, screenSpace: false, gpuBytes: 14409800, hits: [] },
+  'cartoon-pow': { path: 'explosions/cartoon-pow', frameWidth: 184, frameHeight: 144, pivot: [92, 72], loop: false, fps: 30, frames: 33, screenSpace: false, gpuBytes: 1619280, hits: [] },
+  'dirt-explosion': { path: 'explosions/dirt-explosion', frameWidth: 260, frameHeight: 240, pivot: [130, 206], loop: false, fps: 30, frames: 109, screenSpace: false, gpuBytes: 11356576, hits: [] },
+  'firework-burst': { path: 'explosions/firework-burst', frameWidth: 240, frameHeight: 248, pivot: [120, 100], loop: false, fps: 30, frames: 109, screenSpace: false, gpuBytes: 9653280, hits: [] },
+  'firework-rocket': { path: 'explosions/firework-rocket', frameWidth: 300, frameHeight: 300, pivot: [150, 288], loop: false, fps: 30, frames: 115, screenSpace: false, gpuBytes: 12097440, hits: [] },
+  'grenade': { path: 'explosions/grenade', frameWidth: 300, frameHeight: 200, pivot: [160, 170], loop: false, fps: 30, frames: 127, screenSpace: false, gpuBytes: 5579000, hits: [] },
+  'implosion': { path: 'explosions/implosion', frameWidth: 208, frameHeight: 184, pivot: [104, 92], loop: false, fps: 30, frames: 51, screenSpace: false, gpuBytes: 3565076, hits: [] },
+  'nuke': { path: 'explosions/nuke', frameWidth: 400, frameHeight: 320, pivot: [200, 284], loop: false, fps: 10, frames: 91, screenSpace: false, gpuBytes: 21753360, hits: [] },
+  'plasma-explosion': { path: 'explosions/plasma-explosion', frameWidth: 224, frameHeight: 200, pivot: [112, 100], loop: false, fps: 30, frames: 52, screenSpace: false, gpuBytes: 3305120, hits: [] },
+  'small-explosion': { path: 'explosions/small-explosion', frameWidth: 300, frameHeight: 240, pivot: [150, 196], loop: false, fps: 30, frames: 163, screenSpace: false, gpuBytes: 9759312, hits: [] },
+  'smoke-bomb': { path: 'explosions/smoke-bomb', frameWidth: 260, frameHeight: 176, pivot: [130, 156], loop: false, fps: 30, frames: 151, screenSpace: false, gpuBytes: 5937272, hits: [] },
 };
 
-export type FireVfx = 'fireball' | 'torch' | 'campfire' | 'fireball-ice';
+export type FireVfx = 'brazier' | 'campfire' | 'candle' | 'fire-breath' | 'fire-ring' | 'fire-tornado' | 'fireball' | 'flame-pillar' | 'flamethrower' | 'meteor' | 'spirit-flame' | 'torch';
 export const FIRE: Record<FireVfx, VfxSheet> = {
-  'fireball': { path: 'fire/fireball', frameWidth: 136, frameHeight: 56, pivot: [112, 28], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 1096704, hits: [] },
-  'torch': { path: 'fire/torch', frameWidth: 72, frameHeight: 120, pivot: [36, 94], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 2073600, hits: [] },
-  'campfire': { path: 'fire/campfire', frameWidth: 128, frameHeight: 128, pivot: [64, 112], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 5898240, hits: [] },
-  'fireball-ice': { path: 'fire/fireball-ice', frameWidth: 136, frameHeight: 56, pivot: [112, 28], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 1096704, hits: [] },
+  'brazier': { path: 'fire/brazier', frameWidth: 112, frameHeight: 148, pivot: [56, 136], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 4994880, hits: [] },
+  'campfire': { path: 'fire/campfire', frameWidth: 128, frameHeight: 128, pivot: [64, 112], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 3957376, hits: [] },
+  'candle': { path: 'fire/candle', frameWidth: 56, frameHeight: 76, pivot: [28, 64], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 1512576, hits: [] },
+  'fire-breath': { path: 'fire/fire-breath', frameWidth: 160, frameHeight: 116, pivot: [12, 72], loop: true, fps: 30, frames: 45, screenSpace: false, gpuBytes: 3150160, hits: [] },
+  'fire-ring': { path: 'fire/fire-ring', frameWidth: 224, frameHeight: 128, pivot: [112, 92], loop: false, fps: 30, frames: 118, screenSpace: false, gpuBytes: 7668460, hits: [{ t: 0.32, freeze: 0.1 }, { t: 0.6, freeze: 0 }, { t: 3.5, freeze: 0 }] },
+  'fire-tornado': { path: 'fire/fire-tornado', frameWidth: 120, frameHeight: 152, pivot: [60, 136], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 3853056, hits: [] },
+  'fireball': { path: 'fire/fireball', frameWidth: 136, frameHeight: 56, pivot: [112, 28], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 903960, hits: [] },
+  'flame-pillar': { path: 'fire/flame-pillar', frameWidth: 184, frameHeight: 256, pivot: [92, 232], loop: false, fps: 30, frames: 151, screenSpace: false, gpuBytes: 11604828, hits: [] },
+  'flamethrower': { path: 'fire/flamethrower', frameWidth: 184, frameHeight: 104, pivot: [30, 60], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 3224104, hits: [] },
+  'meteor': { path: 'fire/meteor', frameWidth: 272, frameHeight: 232, pivot: [150, 208], loop: false, fps: 30, frames: 151, screenSpace: false, gpuBytes: 16366600, hits: [] },
+  'spirit-flame': { path: 'fire/spirit-flame', frameWidth: 80, frameHeight: 124, pivot: [40, 94], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 2720016, hits: [] },
+  'torch': { path: 'fire/torch', frameWidth: 72, frameHeight: 120, pivot: [36, 94], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 1834000, hits: [] },
 };
 
-export type HolyVfx = 'heal';
+export type HolyVfx = 'blessing' | 'divine-shield' | 'feather-burst' | 'halo' | 'heal-aoe' | 'heal' | 'holy-pillar' | 'resurrection' | 'smite' | 'sunburst';
 export const HOLY: Record<HolyVfx, VfxSheet> = {
-  'heal': { path: 'holy/heal', frameWidth: 80, frameHeight: 104, pivot: [40, 92], loop: false, fps: 30, frames: 58, screenSpace: false, gpuBytes: 2096640, hits: [] },
+  'blessing': { path: 'holy/blessing', frameWidth: 80, frameHeight: 128, pivot: [40, 108], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 2358720, hits: [] },
+  'divine-shield': { path: 'holy/divine-shield', frameWidth: 88, frameHeight: 84, pivot: [44, 68], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 1465184, hits: [] },
+  'feather-burst': { path: 'holy/feather-burst', frameWidth: 160, frameHeight: 160, pivot: [80, 60], loop: false, fps: 30, frames: 91, screenSpace: false, gpuBytes: 4270592, hits: [] },
+  'halo': { path: 'holy/halo', frameWidth: 56, frameHeight: 80, pivot: [28, 70], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 350696, hits: [] },
+  'heal-aoe': { path: 'holy/heal-aoe', frameWidth: 256, frameHeight: 136, pivot: [128, 104], loop: false, fps: 30, frames: 88, screenSpace: false, gpuBytes: 4590300, hits: [] },
+  'heal': { path: 'holy/heal', frameWidth: 80, frameHeight: 104, pivot: [40, 92], loop: false, fps: 30, frames: 58, screenSpace: false, gpuBytes: 730048, hits: [] },
+  'holy-pillar': { path: 'holy/holy-pillar', frameWidth: 192, frameHeight: 232, pivot: [96, 204], loop: false, fps: 30, frames: 106, screenSpace: false, gpuBytes: 10715232, hits: [] },
+  'resurrection': { path: 'holy/resurrection', frameWidth: 192, frameHeight: 160, pivot: [96, 140], loop: false, fps: 30, frames: 145, screenSpace: false, gpuBytes: 8973900, hits: [] },
+  'smite': { path: 'holy/smite', frameWidth: 224, frameHeight: 176, pivot: [112, 148], loop: false, fps: 30, frames: 85, screenSpace: false, gpuBytes: 3275164, hits: [] },
+  'sunburst': { path: 'holy/sunburst', frameWidth: 128, frameHeight: 128, pivot: [64, 64], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 5771040, hits: [] },
 };
 
-export type ImpactsVfx = 'hit-spark' | 'crit-hit' | 'bullet-impact' | 'shield-block';
+export type IceVfx = 'blizzard-vortex' | 'freeze' | 'frost-breath' | 'frost-nova' | 'ice-crystal' | 'ice-lance' | 'ice-shatter' | 'ice-spikes' | 'icicle-fall' | 'snowflake-burst';
+export const ICE: Record<IceVfx, VfxSheet> = {
+  'blizzard-vortex': { path: 'ice/blizzard-vortex', frameWidth: 128, frameHeight: 116, pivot: [64, 102], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 2181688, hits: [] },
+  'freeze': { path: 'ice/freeze', frameWidth: 176, frameHeight: 128, pivot: [88, 108], loop: false, fps: 30, frames: 121, screenSpace: false, gpuBytes: 3329920, hits: [{ t: 0.62, freeze: 0.03 }, { t: 2.52, freeze: 0.05 }] },
+  'frost-breath': { path: 'ice/frost-breath', frameWidth: 184, frameHeight: 104, pivot: [12, 50], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 1832832, hits: [] },
+  'frost-nova': { path: 'ice/frost-nova', frameWidth: 288, frameHeight: 192, pivot: [144, 150], loop: false, fps: 30, frames: 103, screenSpace: false, gpuBytes: 7250960, hits: [{ t: 0.42, freeze: 0.1 }, { t: 0.66, freeze: 0 }, { t: 2.9, freeze: 0 }] },
+  'ice-crystal': { path: 'ice/ice-crystal', frameWidth: 96, frameHeight: 100, pivot: [48, 92], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 1474128, hits: [] },
+  'ice-lance': { path: 'ice/ice-lance', frameWidth: 176, frameHeight: 64, pivot: [146, 32], loop: true, fps: 30, frames: 24, screenSpace: false, gpuBytes: 674400, hits: [] },
+  'ice-shatter': { path: 'ice/ice-shatter', frameWidth: 224, frameHeight: 112, pivot: [68, 90], loop: false, fps: 30, frames: 85, screenSpace: false, gpuBytes: 2261640, hits: [] },
+  'ice-spikes': { path: 'ice/ice-spikes', frameWidth: 264, frameHeight: 112, pivot: [24, 96], loop: false, fps: 30, frames: 91, screenSpace: false, gpuBytes: 5964608, hits: [] },
+  'icicle-fall': { path: 'ice/icicle-fall', frameWidth: 152, frameHeight: 120, pivot: [76, 100], loop: false, fps: 30, frames: 79, screenSpace: false, gpuBytes: 2363160, hits: [] },
+  'snowflake-burst': { path: 'ice/snowflake-burst', frameWidth: 140, frameHeight: 120, pivot: [70, 106], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 2549428, hits: [] },
+};
+
+export type ImpactsVfx = 'blunt-hit' | 'bullet-impact' | 'crit-hit' | 'ground-slam' | 'heavy-landing' | 'hit-flash' | 'hit-spark' | 'impact-frame' | 'parry' | 'ricochet' | 'shield-block';
 export const IMPACTS: Record<ImpactsVfx, VfxSheet> = {
-  'hit-spark': { path: 'impacts/hit-spark', frameWidth: 136, frameHeight: 80, pivot: [44, 64], loop: false, fps: 30, frames: 16, screenSpace: false, gpuBytes: 696320, hits: [] },
-  'crit-hit': { path: 'impacts/crit-hit', frameWidth: 216, frameHeight: 136, pivot: [84, 106], loop: false, fps: 30, frames: 28, screenSpace: false, gpuBytes: 3525120, hits: [] },
-  'bullet-impact': { path: 'impacts/bullet-impact', frameWidth: 152, frameHeight: 100, pivot: [116, 84], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 2918400, hits: [] },
-  'shield-block': { path: 'impacts/shield-block', frameWidth: 148, frameHeight: 104, pivot: [40, 88], loop: false, fps: 30, frames: 34, screenSpace: false, gpuBytes: 2154880, hits: [{ t: 0.005, freeze: 0.09 }] },
+  'blunt-hit': { path: 'impacts/blunt-hit', frameWidth: 128, frameHeight: 88, pivot: [64, 72], loop: false, fps: 30, frames: 28, screenSpace: false, gpuBytes: 503152, hits: [] },
+  'bullet-impact': { path: 'impacts/bullet-impact', frameWidth: 152, frameHeight: 100, pivot: [116, 84], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 335368, hits: [] },
+  'crit-hit': { path: 'impacts/crit-hit', frameWidth: 216, frameHeight: 136, pivot: [84, 106], loop: false, fps: 30, frames: 28, screenSpace: false, gpuBytes: 1180728, hits: [] },
+  'ground-slam': { path: 'impacts/ground-slam', frameWidth: 288, frameHeight: 208, pivot: [144, 164], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 10171980, hits: [] },
+  'heavy-landing': { path: 'impacts/heavy-landing', frameWidth: 176, frameHeight: 80, pivot: [88, 60], loop: false, fps: 30, frames: 49, screenSpace: false, gpuBytes: 523800, hits: [{ t: 0.005, freeze: 0.13 }] },
+  'hit-flash': { path: 'impacts/hit-flash', frameWidth: 80, frameHeight: 64, pivot: [40, 54], loop: false, fps: 30, frames: 16, screenSpace: false, gpuBytes: 90592, hits: [{ t: 0, freeze: 0.07 }] },
+  'hit-spark': { path: 'impacts/hit-spark', frameWidth: 136, frameHeight: 80, pivot: [44, 64], loop: false, fps: 30, frames: 16, screenSpace: false, gpuBytes: 179728, hits: [] },
+  'impact-frame': { path: 'impacts/impact-frame', frameWidth: 320, frameHeight: 180, pivot: [160, 90], loop: false, fps: 30, frames: 10, screenSpace: true, gpuBytes: 1846080, hits: [] },
+  'parry': { path: 'impacts/parry', frameWidth: 200, frameHeight: 112, pivot: [100, 96], loop: false, fps: 30, frames: 31, screenSpace: false, gpuBytes: 900592, hits: [] },
+  'ricochet': { path: 'impacts/ricochet', frameWidth: 232, frameHeight: 84, pivot: [64, 60], loop: false, fps: 30, frames: 34, screenSpace: false, gpuBytes: 368328, hits: [] },
+  'shield-block': { path: 'impacts/shield-block', frameWidth: 148, frameHeight: 104, pivot: [40, 88], loop: false, fps: 30, frames: 34, screenSpace: false, gpuBytes: 623232, hits: [{ t: 0.005, freeze: 0.09 }] },
 };
 
-export type PickupsVfx = 'coin-spin' | 'collect-burst' | 'gem-spin' | 'heart-pickup';
+export type LightningVfx = 'ball-lightning' | 'chain-lightning' | 'charge-up' | 'electrified' | 'lightning-strike' | 'plasma-ball' | 'spark-arc' | 'storm-cloud' | 'tesla-coil' | 'thunderclap' | 'zap-hit';
+export const LIGHTNING: Record<LightningVfx, VfxSheet> = {
+  'ball-lightning': { path: 'lightning/ball-lightning', frameWidth: 136, frameHeight: 104, pivot: [68, 92], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 2546964, hits: [] },
+  'chain-lightning': { path: 'lightning/chain-lightning', frameWidth: 248, frameHeight: 104, pivot: [40, 82], loop: false, fps: 30, frames: 55, screenSpace: false, gpuBytes: 1862640, hits: [{ t: 0.05, freeze: 0.03 }, { t: 0.14, freeze: 0.03 }, { t: 0.23, freeze: 0.07 }, { t: 1.35, freeze: 0 }] },
+  'charge-up': { path: 'lightning/charge-up', frameWidth: 272, frameHeight: 184, pivot: [124, 148], loop: false, fps: 30, frames: 82, screenSpace: false, gpuBytes: 3518016, hits: [{ t: 1.6, freeze: 0.14 }] },
+  'electrified': { path: 'lightning/electrified', frameWidth: 108, frameHeight: 92, pivot: [54, 76], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 766224, hits: [] },
+  'lightning-strike': { path: 'lightning/lightning-strike', frameWidth: 240, frameHeight: 264, pivot: [120, 228], loop: false, fps: 30, frames: 91, screenSpace: false, gpuBytes: 9950252, hits: [] },
+  'plasma-ball': { path: 'lightning/plasma-ball', frameWidth: 112, frameHeight: 104, pivot: [56, 96], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 3031168, hits: [] },
+  'spark-arc': { path: 'lightning/spark-arc', frameWidth: 124, frameHeight: 120, pivot: [62, 108], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 1994080, hits: [] },
+  'storm-cloud': { path: 'lightning/storm-cloud', frameWidth: 168, frameHeight: 176, pivot: [84, 164], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 8843168, hits: [] },
+  'tesla-coil': { path: 'lightning/tesla-coil', frameWidth: 224, frameHeight: 136, pivot: [112, 120], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 4499264, hits: [] },
+  'thunderclap': { path: 'lightning/thunderclap', frameWidth: 288, frameHeight: 156, pivot: [144, 124], loop: false, fps: 30, frames: 58, screenSpace: false, gpuBytes: 3504592, hits: [{ t: 0.12, freeze: 0.13 }, { t: 0.42, freeze: 0 }, { t: 1.2, freeze: 0 }] },
+  'zap-hit': { path: 'lightning/zap-hit', frameWidth: 144, frameHeight: 112, pivot: [76, 56], loop: false, fps: 30, frames: 28, screenSpace: false, gpuBytes: 561204, hits: [] },
+};
+
+export type MeleeVfx = 'claw-swipe' | 'dagger-flurry' | 'double-slash' | 'hammer-smash' | 'heavy-cleave' | 'scythe-reap' | 'spear-sweep' | 'spin-slash' | 'sword-slash' | 'thrust' | 'uppercut' | 'whip-crack';
+export const MELEE: Record<MeleeVfx, VfxSheet> = {
+  'claw-swipe': { path: 'melee/claw-swipe', frameWidth: 128, frameHeight: 96, pivot: [36, 84], loop: false, fps: 30, frames: 28, screenSpace: false, gpuBytes: 182476, hits: [{ t: 0.04, freeze: 0.03 }, { t: 0.08, freeze: 0.03 }, { t: 0.12, freeze: 0.08 }] },
+  'dagger-flurry': { path: 'melee/dagger-flurry', frameWidth: 148, frameHeight: 104, pivot: [36, 86], loop: false, fps: 30, frames: 30, screenSpace: false, gpuBytes: 530816, hits: [{ t: 0.05, freeze: 0.015 }, { t: 0.105, freeze: 0.015 }, { t: 0.16, freeze: 0.015 }, { t: 0.215, freeze: 0.015 }, { t: 0.27, freeze: 0.015 }, { t: 0.325, freeze: 0.015 }, { t: 0.42, freeze: 0.12 }] },
+  'double-slash': { path: 'melee/double-slash', frameWidth: 164, frameHeight: 108, pivot: [44, 92], loop: false, fps: 30, frames: 25, screenSpace: false, gpuBytes: 497448, hits: [{ t: 0.06, freeze: 0.05 }, { t: 0.16, freeze: 0.14 }] },
+  'hammer-smash': { path: 'melee/hammer-smash', frameWidth: 208, frameHeight: 112, pivot: [80, 92], loop: false, fps: 30, frames: 61, screenSpace: false, gpuBytes: 1842800, hits: [{ t: 0.15, freeze: 0.2 }] },
+  'heavy-cleave': { path: 'melee/heavy-cleave', frameWidth: 208, frameHeight: 116, pivot: [68, 96], loop: false, fps: 30, frames: 58, screenSpace: false, gpuBytes: 2201368, hits: [{ t: 0.335, freeze: 0.2 }] },
+  'scythe-reap': { path: 'melee/scythe-reap', frameWidth: 184, frameHeight: 116, pivot: [84, 98], loop: false, fps: 30, frames: 64, screenSpace: false, gpuBytes: 1148400, hits: [{ t: 0.14, freeze: 0.12 }] },
+  'spear-sweep': { path: 'melee/spear-sweep', frameWidth: 216, frameHeight: 84, pivot: [104, 70], loop: false, fps: 30, frames: 46, screenSpace: false, gpuBytes: 819340, hits: [{ t: 0.1, freeze: 0.12 }] },
+  'spin-slash': { path: 'melee/spin-slash', frameWidth: 208, frameHeight: 104, pivot: [104, 84], loop: false, fps: 30, frames: 25, screenSpace: false, gpuBytes: 840720, hits: [{ t: 0.17, freeze: 0.12 }] },
+  'sword-slash': { path: 'melee/sword-slash', frameWidth: 136, frameHeight: 104, pivot: [44, 92], loop: false, fps: 30, frames: 24, screenSpace: false, gpuBytes: 554484, hits: [{ t: 0.06, freeze: 0.14 }] },
+  'thrust': { path: 'melee/thrust', frameWidth: 196, frameHeight: 76, pivot: [34, 62], loop: false, fps: 30, frames: 24, screenSpace: false, gpuBytes: 273372, hits: [{ t: 0.07, freeze: 0.12 }] },
+  'uppercut': { path: 'melee/uppercut', frameWidth: 132, frameHeight: 128, pivot: [48, 110], loop: false, fps: 30, frames: 27, screenSpace: false, gpuBytes: 520648, hits: [{ t: 0.076, freeze: 0.13 }] },
+  'whip-crack': { path: 'melee/whip-crack', frameWidth: 192, frameHeight: 80, pivot: [30, 68], loop: false, fps: 30, frames: 27, screenSpace: false, gpuBytes: 321904, hits: [{ t: 0.21, freeze: 0.1 }] },
+};
+
+export type MovesVfx = 'arrow-shot' | 'dash-strike' | 'earth-stomp' | 'fireball-throw' | 'ground-pound' | 'holy-smite' | 'ice-lance-throw' | 'lightning-call' | 'meteor-call' | 'pistol-shots' | 'rocket-launcher' | 'sword-combo';
+export const MOVES: Record<MovesVfx, VfxSheet> = {
+  'arrow-shot': { path: 'moves/arrow-shot', frameWidth: 300, frameHeight: 74, pivot: [38, 66], loop: false, fps: 30, frames: 58, screenSpace: false, gpuBytes: 187044, hits: [{ t: 0.8, freeze: 0.07 }] },
+  'dash-strike': { path: 'moves/dash-strike', frameWidth: 372, frameHeight: 156, pivot: [66, 136], loop: false, fps: 30, frames: 70, screenSpace: false, gpuBytes: 1292064, hits: [{ t: 0.22, freeze: 0.17 }] },
+  'earth-stomp': { path: 'moves/earth-stomp', frameWidth: 290, frameHeight: 142, pivot: [50, 128], loop: false, fps: 30, frames: 105, screenSpace: false, gpuBytes: 5893360, hits: [{ t: 0.06, freeze: 0.1 }, { t: 0.49, freeze: 0.14 }] },
+  'fireball-throw': { path: 'moves/fireball-throw', frameWidth: 356, frameHeight: 244, pivot: [64, 198], loop: false, fps: 30, frames: 205, screenSpace: false, gpuBytes: 11489224, hits: [{ t: 1.41, freeze: 0.18 }, { t: 6.21, freeze: 0 }] },
+  'ground-pound': { path: 'moves/ground-pound', frameWidth: 304, frameHeight: 204, pivot: [152, 168], loop: false, fps: 30, frames: 116, screenSpace: false, gpuBytes: 9914784, hits: [{ t: 0.62, freeze: 0.2 }, { t: 0.76, freeze: 0.04 }, { t: 1.06, freeze: 0 }] },
+  'holy-smite': { path: 'moves/holy-smite', frameWidth: 252, frameHeight: 182, pivot: [42, 151], loop: false, fps: 30, frames: 85, screenSpace: false, gpuBytes: 3371088, hits: [{ t: 0.47, freeze: 0.14 }, { t: 2.3, freeze: 0 }] },
+  'ice-lance-throw': { path: 'moves/ice-lance-throw', frameWidth: 310, frameHeight: 136, pivot: [86, 134], loop: false, fps: 30, frames: 131, screenSpace: false, gpuBytes: 3375792, hits: [{ t: 1.1400000000000001, freeze: 0.13 }, { t: 2.75, freeze: 0 }] },
+  'lightning-call': { path: 'moves/lightning-call', frameWidth: 290, frameHeight: 266, pivot: [42, 231], loop: false, fps: 30, frames: 91, screenSpace: false, gpuBytes: 9687392, hits: [{ t: 0.76, freeze: 0.14 }, { t: 1.04, freeze: 0.03 }, { t: 1.26, freeze: 0.03 }, { t: 2.5, freeze: 0 }] },
+  'meteor-call': { path: 'moves/meteor-call', frameWidth: 380, frameHeight: 240, pivot: [92, 212], loop: false, fps: 15, frames: 97, screenSpace: false, gpuBytes: 12268336, hits: [{ t: 1.52, freeze: 0.06 }, { t: 2.05, freeze: 0.22 }, { t: 5.949999999999999, freeze: 0 }] },
+  'pistol-shots': { path: 'moves/pistol-shots', frameWidth: 378, frameHeight: 76, pivot: [111, 72], loop: false, fps: 30, frames: 79, screenSpace: false, gpuBytes: 2564804, hits: [{ t: 0.26, freeze: 0.04 }, { t: 0.54, freeze: 0.04 }, { t: 0.82, freeze: 0.08 }] },
+  'rocket-launcher': { path: 'moves/rocket-launcher', frameWidth: 480, frameHeight: 244, pivot: [178, 198], loop: false, fps: 15, frames: 99, screenSpace: false, gpuBytes: 8853664, hits: [{ t: 0.6, freeze: 0.06 }, { t: 1.1600000000000001, freeze: 0.2 }, { t: 5.96, freeze: 0 }] },
+  'sword-combo': { path: 'moves/sword-combo', frameWidth: 264, frameHeight: 150, pivot: [72, 130], loop: false, fps: 30, frames: 90, screenSpace: false, gpuBytes: 3301128, hits: [{ t: 0.06, freeze: 0.14 }, { t: 0.56, freeze: 0.05 }, { t: 0.66, freeze: 0.14 }, { t: 1.375, freeze: 0.2 }] },
+};
+
+export type NatureVfx = 'acid-splash' | 'boulder' | 'earth-spike' | 'healing-bloom' | 'leaf-storm' | 'poison-cloud' | 'quake' | 'root-snare' | 'spore-burst' | 'thorns' | 'tornado' | 'toxic-puddle' | 'vine-whip';
+export const NATURE: Record<NatureVfx, VfxSheet> = {
+  'acid-splash': { path: 'nature/acid-splash', frameWidth: 184, frameHeight: 116, pivot: [92, 100], loop: false, fps: 30, frames: 85, screenSpace: false, gpuBytes: 1954336, hits: [] },
+  'boulder': { path: 'nature/boulder', frameWidth: 264, frameHeight: 120, pivot: [40, 104], loop: false, fps: 30, frames: 70, screenSpace: false, gpuBytes: 2677268, hits: [] },
+  'earth-spike': { path: 'nature/earth-spike', frameWidth: 272, frameHeight: 150, pivot: [136, 132], loop: false, fps: 30, frames: 103, screenSpace: false, gpuBytes: 5624784, hits: [] },
+  'healing-bloom': { path: 'nature/healing-bloom', frameWidth: 124, frameHeight: 120, pivot: [62, 108], loop: false, fps: 30, frames: 100, screenSpace: false, gpuBytes: 2113984, hits: [] },
+  'leaf-storm': { path: 'nature/leaf-storm', frameWidth: 112, frameHeight: 104, pivot: [56, 92], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 1993168, hits: [] },
+  'poison-cloud': { path: 'nature/poison-cloud', frameWidth: 256, frameHeight: 100, pivot: [128, 86], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 8811264, hits: [] },
+  'quake': { path: 'nature/quake', frameWidth: 288, frameHeight: 104, pivot: [144, 88], loop: false, fps: 30, frames: 94, screenSpace: false, gpuBytes: 4448132, hits: [] },
+  'root-snare': { path: 'nature/root-snare', frameWidth: 128, frameHeight: 96, pivot: [64, 78], loop: false, fps: 30, frames: 82, screenSpace: false, gpuBytes: 979448, hits: [{ t: 0.62, freeze: 0.05 }, { t: 1.75, freeze: 0.04 }] },
+  'spore-burst': { path: 'nature/spore-burst', frameWidth: 212, frameHeight: 132, pivot: [106, 118], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 2707308, hits: [] },
+  'thorns': { path: 'nature/thorns', frameWidth: 232, frameHeight: 92, pivot: [48, 78], loop: false, fps: 30, frames: 73, screenSpace: false, gpuBytes: 2387344, hits: [] },
+  'tornado': { path: 'nature/tornado', frameWidth: 196, frameHeight: 168, pivot: [98, 152], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 3496608, hits: [] },
+  'toxic-puddle': { path: 'nature/toxic-puddle', frameWidth: 176, frameHeight: 100, pivot: [88, 86], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 2965880, hits: [] },
+  'vine-whip': { path: 'nature/vine-whip', frameWidth: 216, frameHeight: 128, pivot: [60, 114], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 855628, hits: [] },
+};
+
+export type PickupsVfx = 'chest-open' | 'coin-spin' | 'collect-burst' | 'crystal-shard' | 'gem-spin' | 'heart-pickup' | 'key-glint' | 'loot-beam' | 'potion' | 'power-star' | 'xp-orb';
 export const PICKUPS: Record<PickupsVfx, VfxSheet> = {
-  'coin-spin': { path: 'pickups/coin-spin', frameWidth: 56, frameHeight: 56, pivot: [28, 48], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 614656, hits: [] },
-  'collect-burst': { path: 'pickups/collect-burst', frameWidth: 112, frameHeight: 108, pivot: [56, 94], loop: false, fps: 30, frames: 42, screenSpace: false, gpuBytes: 2032128, hits: [] },
-  'gem-spin': { path: 'pickups/gem-spin', frameWidth: 64, frameHeight: 64, pivot: [32, 56], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 1179648, hits: [] },
-  'heart-pickup': { path: 'pickups/heart-pickup', frameWidth: 56, frameHeight: 60, pivot: [28, 52], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 564480, hits: [] },
+  'chest-open': { path: 'pickups/chest-open', frameWidth: 176, frameHeight: 112, pivot: [88, 96], loop: false, fps: 30, frames: 139, screenSpace: false, gpuBytes: 3767904, hits: [] },
+  'coin-spin': { path: 'pickups/coin-spin', frameWidth: 56, frameHeight: 56, pivot: [28, 48], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 263968, hits: [] },
+  'collect-burst': { path: 'pickups/collect-burst', frameWidth: 112, frameHeight: 108, pivot: [56, 94], loop: false, fps: 30, frames: 42, screenSpace: false, gpuBytes: 636272, hits: [] },
+  'crystal-shard': { path: 'pickups/crystal-shard', frameWidth: 64, frameHeight: 76, pivot: [32, 68], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 1033728, hits: [] },
+  'gem-spin': { path: 'pickups/gem-spin', frameWidth: 64, frameHeight: 64, pivot: [32, 56], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 544320, hits: [] },
+  'heart-pickup': { path: 'pickups/heart-pickup', frameWidth: 56, frameHeight: 60, pivot: [28, 52], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 242880, hits: [] },
+  'key-glint': { path: 'pickups/key-glint', frameWidth: 72, frameHeight: 60, pivot: [36, 54], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 434340, hits: [] },
+  'loot-beam': { path: 'pickups/loot-beam', frameWidth: 96, frameHeight: 176, pivot: [48, 162], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 2944072, hits: [] },
+  'potion': { path: 'pickups/potion', frameWidth: 56, frameHeight: 72, pivot: [28, 64], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 708576, hits: [] },
+  'power-star': { path: 'pickups/power-star', frameWidth: 88, frameHeight: 84, pivot: [44, 76], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 865856, hits: [] },
+  'xp-orb': { path: 'pickups/xp-orb', frameWidth: 72, frameHeight: 56, pivot: [36, 48], loop: true, fps: 30, frames: 54, screenSpace: false, gpuBytes: 319600, hits: [] },
 };
 
-export type StatusVfx = 'stunned' | 'poisoned';
+export type ProjectilesVfx = 'arrow' | 'bullet-tracer' | 'cannonball' | 'energy-disc' | 'flare' | 'homing-missile' | 'laser-bolt' | 'magic-missile' | 'muzzle-pistol' | 'muzzle-shotgun' | 'muzzle-smg' | 'plasma-shot' | 'rocket';
+export const PROJECTILES: Record<ProjectilesVfx, VfxSheet> = {
+  'arrow': { path: 'projectiles/arrow', frameWidth: 112, frameHeight: 32, pivot: [92, 16], loop: true, fps: 30, frames: 18, screenSpace: false, gpuBytes: 63360, hits: [] },
+  'bullet-tracer': { path: 'projectiles/bullet-tracer', frameWidth: 200, frameHeight: 40, pivot: [184, 18], loop: true, fps: 30, frames: 18, screenSpace: false, gpuBytes: 395604, hits: [] },
+  'cannonball': { path: 'projectiles/cannonball', frameWidth: 208, frameHeight: 116, pivot: [48, 102], loop: false, fps: 30, frames: 115, screenSpace: false, gpuBytes: 3268300, hits: [] },
+  'energy-disc': { path: 'projectiles/energy-disc', frameWidth: 120, frameHeight: 52, pivot: [92, 26], loop: true, fps: 30, frames: 15, screenSpace: false, gpuBytes: 229248, hits: [] },
+  'flare': { path: 'projectiles/flare', frameWidth: 152, frameHeight: 232, pivot: [76, 226], loop: false, fps: 30, frames: 151, screenSpace: false, gpuBytes: 7915600, hits: [] },
+  'homing-missile': { path: 'projectiles/homing-missile', frameWidth: 248, frameHeight: 140, pivot: [160, 120], loop: false, fps: 30, frames: 115, screenSpace: false, gpuBytes: 5458032, hits: [] },
+  'laser-bolt': { path: 'projectiles/laser-bolt', frameWidth: 128, frameHeight: 32, pivot: [108, 16], loop: true, fps: 30, frames: 15, screenSpace: false, gpuBytes: 162352, hits: [] },
+  'magic-missile': { path: 'projectiles/magic-missile', frameWidth: 208, frameHeight: 112, pivot: [24, 104], loop: false, fps: 30, frames: 58, screenSpace: false, gpuBytes: 704544, hits: [] },
+  'muzzle-pistol': { path: 'projectiles/muzzle-pistol', frameWidth: 96, frameHeight: 72, pivot: [44, 66], loop: false, fps: 30, frames: 55, screenSpace: false, gpuBytes: 561976, hits: [] },
+  'muzzle-shotgun': { path: 'projectiles/muzzle-shotgun', frameWidth: 160, frameHeight: 88, pivot: [44, 82], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 2023120, hits: [] },
+  'muzzle-smg': { path: 'projectiles/muzzle-smg', frameWidth: 112, frameHeight: 72, pivot: [56, 66], loop: true, fps: 30, frames: 30, screenSpace: false, gpuBytes: 442188, hits: [] },
+  'plasma-shot': { path: 'projectiles/plasma-shot', frameWidth: 144, frameHeight: 60, pivot: [108, 30], loop: true, fps: 30, frames: 24, screenSpace: false, gpuBytes: 540960, hits: [] },
+  'rocket': { path: 'projectiles/rocket', frameWidth: 288, frameHeight: 76, pivot: [252, 42], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 2634400, hits: [] },
+};
+
+export type ScifiVfx = 'emp-blast' | 'energy-core' | 'force-field' | 'glitch' | 'hologram' | 'jetpack' | 'laser-grid' | 'scanner' | 'teleporter-pad' | 'tractor-beam' | 'warp-in' | 'warp-out';
+export const SCIFI: Record<ScifiVfx, VfxSheet> = {
+  'emp-blast': { path: 'scifi/emp-blast', frameWidth: 152, frameHeight: 116, pivot: [76, 84], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 2530596, hits: [] },
+  'energy-core': { path: 'scifi/energy-core', frameWidth: 112, frameHeight: 100, pivot: [56, 88], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 2170560, hits: [] },
+  'force-field': { path: 'scifi/force-field', frameWidth: 184, frameHeight: 104, pivot: [76, 84], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 3215056, hits: [{ t: 0.42, freeze: 0.07 }, { t: 1.5, freeze: 0.03 }] },
+  'glitch': { path: 'scifi/glitch', frameWidth: 88, frameHeight: 64, pivot: [44, 54], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 465920, hits: [] },
+  'hologram': { path: 'scifi/hologram', frameWidth: 112, frameHeight: 104, pivot: [56, 92], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 2754280, hits: [] },
+  'jetpack': { path: 'scifi/jetpack', frameWidth: 96, frameHeight: 116, pivot: [48, 30], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 1382912, hits: [] },
+  'laser-grid': { path: 'scifi/laser-grid', frameWidth: 128, frameHeight: 84, pivot: [64, 76], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 2903040, hits: [] },
+  'scanner': { path: 'scifi/scanner', frameWidth: 112, frameHeight: 78, pivot: [42, 58], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 1476224, hits: [] },
+  'teleporter-pad': { path: 'scifi/teleporter-pad', frameWidth: 96, frameHeight: 104, pivot: [48, 92], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 1897344, hits: [] },
+  'tractor-beam': { path: 'scifi/tractor-beam', frameWidth: 120, frameHeight: 132, pivot: [60, 114], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 3556800, hits: [] },
+  'warp-in': { path: 'scifi/warp-in', frameWidth: 192, frameHeight: 168, pivot: [96, 128], loop: false, fps: 30, frames: 91, screenSpace: false, gpuBytes: 6138180, hits: [] },
+  'warp-out': { path: 'scifi/warp-out', frameWidth: 128, frameHeight: 168, pivot: [64, 128], loop: false, fps: 30, frames: 79, screenSpace: false, gpuBytes: 2298312, hits: [] },
+};
+
+export type ShadowVfx = 'black-hole' | 'curse' | 'dark-explosion' | 'eclipse' | 'grasping-hands' | 'hex-sigil' | 'life-steal' | 'necro-skulls' | 'shadow-flames' | 'shadow-tendrils' | 'soul-drain' | 'void-orb';
+export const SHADOW: Record<ShadowVfx, VfxSheet> = {
+  'black-hole': { path: 'shadow/black-hole', frameWidth: 184, frameHeight: 132, pivot: [92, 124], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 9289800, hits: [] },
+  'curse': { path: 'shadow/curse', frameWidth: 112, frameHeight: 124, pivot: [56, 108], loop: false, fps: 30, frames: 103, screenSpace: false, gpuBytes: 1960200, hits: [{ t: 0.55, freeze: 0.09 }] },
+  'dark-explosion': { path: 'shadow/dark-explosion', frameWidth: 280, frameHeight: 248, pivot: [140, 206], loop: false, fps: 30, frames: 115, screenSpace: false, gpuBytes: 16206856, hits: [] },
+  'eclipse': { path: 'shadow/eclipse', frameWidth: 160, frameHeight: 144, pivot: [80, 72], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 8956728, hits: [] },
+  'grasping-hands': { path: 'shadow/grasping-hands', frameWidth: 200, frameHeight: 116, pivot: [100, 100], loop: false, fps: 30, frames: 94, screenSpace: false, gpuBytes: 4756752, hits: [] },
+  'hex-sigil': { path: 'shadow/hex-sigil', frameWidth: 168, frameHeight: 128, pivot: [84, 112], loop: false, fps: 30, frames: 127, screenSpace: false, gpuBytes: 4010160, hits: [] },
+  'life-steal': { path: 'shadow/life-steal', frameWidth: 184, frameHeight: 100, pivot: [36, 92], loop: false, fps: 30, frames: 67, screenSpace: false, gpuBytes: 1180416, hits: [{ t: 0.01, freeze: 0.07 }, { t: 1.6, freeze: 0 }] },
+  'necro-skulls': { path: 'shadow/necro-skulls', frameWidth: 136, frameHeight: 116, pivot: [68, 108], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 3288300, hits: [] },
+  'shadow-flames': { path: 'shadow/shadow-flames', frameWidth: 104, frameHeight: 112, pivot: [52, 102], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 2444176, hits: [] },
+  'shadow-tendrils': { path: 'shadow/shadow-tendrils', frameWidth: 208, frameHeight: 130, pivot: [104, 106], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 5746944, hits: [] },
+  'soul-drain': { path: 'shadow/soul-drain', frameWidth: 208, frameHeight: 120, pivot: [40, 110], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 5159868, hits: [] },
+  'void-orb': { path: 'shadow/void-orb', frameWidth: 168, frameHeight: 160, pivot: [84, 150], loop: true, fps: 30, frames: 96, screenSpace: false, gpuBytes: 5740944, hits: [] },
+};
+
+export type SpawnVfx = 'coin-drop' | 'disintegrate' | 'dissolve-burn' | 'egg-hatch' | 'poof' | 'respawn-beam' | 'shatter-death' | 'soul-rise' | 'spawn-portal' | 'summon-rise';
+export const SPAWN: Record<SpawnVfx, VfxSheet> = {
+  'coin-drop': { path: 'spawn/coin-drop', frameWidth: 160, frameHeight: 88, pivot: [80, 78], loop: false, fps: 30, frames: 91, screenSpace: false, gpuBytes: 1072916, hits: [] },
+  'disintegrate': { path: 'spawn/disintegrate', frameWidth: 176, frameHeight: 100, pivot: [48, 86], loop: false, fps: 30, frames: 103, screenSpace: false, gpuBytes: 1853280, hits: [] },
+  'dissolve-burn': { path: 'spawn/dissolve-burn', frameWidth: 96, frameHeight: 112, pivot: [48, 100], loop: false, fps: 30, frames: 109, screenSpace: false, gpuBytes: 2103072, hits: [] },
+  'egg-hatch': { path: 'spawn/egg-hatch', frameWidth: 120, frameHeight: 96, pivot: [60, 84], loop: false, fps: 30, frames: 94, screenSpace: false, gpuBytes: 720288, hits: [] },
+  'poof': { path: 'spawn/poof', frameWidth: 112, frameHeight: 92, pivot: [56, 80], loop: false, fps: 30, frames: 49, screenSpace: false, gpuBytes: 592896, hits: [] },
+  'respawn-beam': { path: 'spawn/respawn-beam', frameWidth: 128, frameHeight: 150, pivot: [64, 136], loop: false, fps: 30, frames: 76, screenSpace: false, gpuBytes: 2640468, hits: [] },
+  'shatter-death': { path: 'spawn/shatter-death', frameWidth: 172, frameHeight: 96, pivot: [84, 84], loop: false, fps: 30, frames: 100, screenSpace: false, gpuBytes: 1841400, hits: [{ t: 0.5, freeze: 0.02 }, { t: 1.4, freeze: 0.09 }] },
+  'soul-rise': { path: 'spawn/soul-rise', frameWidth: 96, frameHeight: 140, pivot: [48, 126], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 1760808, hits: [] },
+  'spawn-portal': { path: 'spawn/spawn-portal', frameWidth: 208, frameHeight: 150, pivot: [104, 122], loop: false, fps: 30, frames: 115, screenSpace: false, gpuBytes: 5260560, hits: [] },
+  'summon-rise': { path: 'spawn/summon-rise', frameWidth: 176, frameHeight: 116, pivot: [88, 94], loop: false, fps: 30, frames: 139, screenSpace: false, gpuBytes: 5943808, hits: [] },
+};
+
+export type StatusVfx = 'bleeding' | 'burning' | 'charmed' | 'confused' | 'cursed' | 'frozen' | 'haste' | 'petrified' | 'poisoned' | 'rage' | 'sleep' | 'slowed' | 'stunned';
 export const STATUS: Record<StatusVfx, VfxSheet> = {
-  'stunned': { path: 'status/stunned', frameWidth: 60, frameHeight: 64, pivot: [30, 56], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 983040, hits: [] },
-  'poisoned': { path: 'status/poisoned', frameWidth: 72, frameHeight: 64, pivot: [36, 54], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 903168, hits: [] },
+  'bleeding': { path: 'status/bleeding', frameWidth: 60, frameHeight: 56, pivot: [30, 46], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 144092, hits: [] },
+  'burning': { path: 'status/burning', frameWidth: 72, frameHeight: 80, pivot: [36, 70], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 392400, hits: [] },
+  'charmed': { path: 'status/charmed', frameWidth: 60, frameHeight: 76, pivot: [30, 68], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 735840, hits: [] },
+  'confused': { path: 'status/confused', frameWidth: 60, frameHeight: 78, pivot: [30, 70], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 436224, hits: [] },
+  'cursed': { path: 'status/cursed', frameWidth: 64, frameHeight: 84, pivot: [32, 76], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 995376, hits: [] },
+  'frozen': { path: 'status/frozen', frameWidth: 72, frameHeight: 64, pivot: [36, 54], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 716412, hits: [] },
+  'haste': { path: 'status/haste', frameWidth: 100, frameHeight: 56, pivot: [64, 48], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 542592, hits: [] },
+  'petrified': { path: 'status/petrified', frameWidth: 120, frameHeight: 74, pivot: [60, 64], loop: false, fps: 30, frames: 115, screenSpace: false, gpuBytes: 946204, hits: [{ t: 2.2, freeze: 0.08 }] },
+  'poisoned': { path: 'status/poisoned', frameWidth: 72, frameHeight: 64, pivot: [36, 54], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 406080, hits: [] },
+  'rage': { path: 'status/rage', frameWidth: 80, frameHeight: 80, pivot: [40, 70], loop: true, fps: 30, frames: 36, screenSpace: false, gpuBytes: 450288, hits: [] },
+  'sleep': { path: 'status/sleep', frameWidth: 60, frameHeight: 82, pivot: [26, 74], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 842184, hits: [] },
+  'slowed': { path: 'status/slowed', frameWidth: 64, frameHeight: 76, pivot: [32, 68], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 865980, hits: [] },
+  'stunned': { path: 'status/stunned', frameWidth: 60, frameHeight: 64, pivot: [30, 56], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 434280, hits: [] },
 };
 
-export type UiVfx = 'damage-number' | 'level-up' | 'coin-collect' | 'exclamation';
+export type TransitionsVfx = 'blinds' | 'burn-away' | 'crt-off' | 'diamond-wipe' | 'glitch-wipe' | 'iris' | 'pixel-dissolve' | 'shatter-wipe' | 'slash-wipe' | 'star-iris';
+export const TRANSITIONS: Record<TransitionsVfx, VfxSheet> = {
+  'blinds': { path: 'transitions/blinds', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 61, screenSpace: true, gpuBytes: 13447680, hits: [] },
+  'burn-away': { path: 'transitions/burn-away', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 15, frames: 46, screenSpace: true, gpuBytes: 10371600, hits: [] },
+  'crt-off': { path: 'transitions/crt-off', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 61, screenSpace: true, gpuBytes: 12928000, hits: [] },
+  'diamond-wipe': { path: 'transitions/diamond-wipe', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 61, screenSpace: true, gpuBytes: 9766800, hits: [] },
+  'glitch-wipe': { path: 'transitions/glitch-wipe', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 55, screenSpace: true, gpuBytes: 8997120, hits: [] },
+  'iris': { path: 'transitions/iris', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 67, screenSpace: true, gpuBytes: 11197440, hits: [] },
+  'pixel-dissolve': { path: 'transitions/pixel-dissolve', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 67, screenSpace: true, gpuBytes: 13747200, hits: [] },
+  'shatter-wipe': { path: 'transitions/shatter-wipe', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 85, screenSpace: true, gpuBytes: 15892480, hits: [] },
+  'slash-wipe': { path: 'transitions/slash-wipe', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 52, screenSpace: true, gpuBytes: 9426240, hits: [] },
+  'star-iris': { path: 'transitions/star-iris', frameWidth: 320, frameHeight: 180, pivot: [0, 0], loop: false, fps: 30, frames: 67, screenSpace: true, gpuBytes: 11212800, hits: [] },
+};
+
+export type UiVfx = 'achievement' | 'coin-collect' | 'combo-counter' | 'confetti' | 'countdown' | 'crit-number' | 'damage-number' | 'exclamation' | 'health-bar-hit' | 'heart-lost' | 'level-up' | 'quest-complete';
 export const UI: Record<UiVfx, VfxSheet> = {
-  'damage-number': { path: 'ui/damage-number', frameWidth: 76, frameHeight: 68, pivot: [30, 52], loop: false, fps: 30, frames: 33, screenSpace: false, gpuBytes: 744192, hits: [] },
-  'level-up': { path: 'ui/level-up', frameWidth: 176, frameHeight: 138, pivot: [88, 114], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 9618048, hits: [{ t: 0.28, freeze: 0.05 }] },
-  'coin-collect': { path: 'ui/coin-collect', frameWidth: 176, frameHeight: 116, pivot: [60, 102], loop: false, fps: 30, frames: 75, screenSpace: false, gpuBytes: 6533120, hits: [] },
-  'exclamation': { path: 'ui/exclamation', frameWidth: 84, frameHeight: 104, pivot: [42, 92], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 1677312, hits: [] },
+  'achievement': { path: 'ui/achievement', frameWidth: 220, frameHeight: 72, pivot: [110, 36], loop: false, fps: 30, frames: 73, screenSpace: false, gpuBytes: 1487400, hits: [] },
+  'coin-collect': { path: 'ui/coin-collect', frameWidth: 176, frameHeight: 116, pivot: [60, 102], loop: false, fps: 30, frames: 75, screenSpace: false, gpuBytes: 2200880, hits: [] },
+  'combo-counter': { path: 'ui/combo-counter', frameWidth: 208, frameHeight: 100, pivot: [104, 50], loop: false, fps: 30, frames: 45, screenSpace: false, gpuBytes: 2543112, hits: [] },
+  'confetti': { path: 'ui/confetti', frameWidth: 200, frameHeight: 140, pivot: [100, 126], loop: false, fps: 30, frames: 103, screenSpace: false, gpuBytes: 3274020, hits: [] },
+  'countdown': { path: 'ui/countdown', frameWidth: 152, frameHeight: 136, pivot: [76, 68], loop: false, fps: 30, frames: 94, screenSpace: false, gpuBytes: 3697176, hits: [] },
+  'crit-number': { path: 'ui/crit-number', frameWidth: 152, frameHeight: 120, pivot: [76, 60], loop: false, fps: 30, frames: 46, screenSpace: false, gpuBytes: 1668600, hits: [] },
+  'damage-number': { path: 'ui/damage-number', frameWidth: 76, frameHeight: 68, pivot: [30, 52], loop: false, fps: 30, frames: 33, screenSpace: false, gpuBytes: 198768, hits: [] },
+  'exclamation': { path: 'ui/exclamation', frameWidth: 84, frameHeight: 104, pivot: [42, 92], loop: false, fps: 30, frames: 43, screenSpace: false, gpuBytes: 276768, hits: [] },
+  'health-bar-hit': { path: 'ui/health-bar-hit', frameWidth: 160, frameHeight: 64, pivot: [80, 30], loop: false, fps: 30, frames: 61, screenSpace: false, gpuBytes: 1594240, hits: [] },
+  'heart-lost': { path: 'ui/heart-lost', frameWidth: 96, frameHeight: 88, pivot: [48, 34], loop: false, fps: 30, frames: 46, screenSpace: false, gpuBytes: 539840, hits: [] },
+  'level-up': { path: 'ui/level-up', frameWidth: 176, frameHeight: 138, pivot: [88, 114], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 4928180, hits: [{ t: 0.28, freeze: 0.05 }] },
+  'quest-complete': { path: 'ui/quest-complete', frameWidth: 204, frameHeight: 92, pivot: [102, 46], loop: false, fps: 30, frames: 79, screenSpace: false, gpuBytes: 3848460, hits: [] },
 };
 
-export type WeatherVfx = 'rain';
+export type WaterVfx = 'bubbles' | 'drip' | 'fountain' | 'geyser' | 'rain-splash' | 'ripples' | 'splash' | 'water-jet' | 'water-orb' | 'waterfall' | 'wave-crash' | 'whirlpool';
+export const WATER: Record<WaterVfx, VfxSheet> = {
+  'bubbles': { path: 'water/bubbles', frameWidth: 104, frameHeight: 112, pivot: [52, 104], loop: true, fps: 30, frames: 120, screenSpace: false, gpuBytes: 4632984, hits: [] },
+  'drip': { path: 'water/drip', frameWidth: 72, frameHeight: 88, pivot: [36, 78], loop: true, fps: 30, frames: 48, screenSpace: false, gpuBytes: 734400, hits: [] },
+  'fountain': { path: 'water/fountain', frameWidth: 120, frameHeight: 104, pivot: [60, 96], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 1785600, hits: [] },
+  'geyser': { path: 'water/geyser', frameWidth: 184, frameHeight: 168, pivot: [92, 146], loop: false, fps: 30, frames: 151, screenSpace: false, gpuBytes: 6870704, hits: [] },
+  'rain-splash': { path: 'water/rain-splash', frameWidth: 176, frameHeight: 80, pivot: [88, 50], loop: true, fps: 30, frames: 72, screenSpace: false, gpuBytes: 3083520, hits: [] },
+  'ripples': { path: 'water/ripples', frameWidth: 136, frameHeight: 52, pivot: [68, 30], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 1481760, hits: [] },
+  'splash': { path: 'water/splash', frameWidth: 176, frameHeight: 100, pivot: [88, 78], loop: false, fps: 30, frames: 76, screenSpace: false, gpuBytes: 1596160, hits: [] },
+  'water-jet': { path: 'water/water-jet', frameWidth: 188, frameHeight: 80, pivot: [14, 32], loop: true, fps: 30, frames: 30, screenSpace: false, gpuBytes: 1168224, hits: [] },
+  'water-orb': { path: 'water/water-orb', frameWidth: 100, frameHeight: 108, pivot: [50, 100], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 3626496, hits: [] },
+  'waterfall': { path: 'water/waterfall', frameWidth: 144, frameHeight: 136, pivot: [72, 118], loop: true, fps: 30, frames: 60, screenSpace: false, gpuBytes: 3753792, hits: [] },
+  'wave-crash': { path: 'water/wave-crash', frameWidth: 224, frameHeight: 104, pivot: [112, 86], loop: false, fps: 30, frames: 97, screenSpace: false, gpuBytes: 3802920, hits: [] },
+  'whirlpool': { path: 'water/whirlpool', frameWidth: 128, frameHeight: 84, pivot: [64, 42], loop: true, fps: 30, frames: 90, screenSpace: false, gpuBytes: 3398400, hits: [] },
+};
+
+export type WeatherVfx = 'aurora' | 'blizzard' | 'cherry-blossoms' | 'clouds' | 'falling-leaves' | 'fireflies' | 'fog' | 'god-rays' | 'rain' | 'shooting-stars' | 'snow' | 'storm';
 export const WEATHER: Record<WeatherVfx, VfxSheet> = {
-  'rain': { path: 'weather/rain', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 64, screenSpace: true, gpuBytes: 15206400, hits: [] },
+  'aurora': { path: 'weather/aurora', frameWidth: 320, frameHeight: 180, pivot: [160, 180], loop: true, fps: 6, frames: 72, screenSpace: true, gpuBytes: 16107520, hits: [] },
+  'blizzard': { path: 'weather/blizzard', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 10, frames: 80, screenSpace: true, gpuBytes: 18432000, hits: [] },
+  'cherry-blossoms': { path: 'weather/cherry-blossoms', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16128000, hits: [] },
+  'clouds': { path: 'weather/clouds', frameWidth: 320, frameHeight: 180, pivot: [160, 180], loop: true, fps: 7, frames: 84, screenSpace: true, gpuBytes: 16002560, hits: [] },
+  'falling-leaves': { path: 'weather/falling-leaves', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16128000, hits: [] },
+  'fireflies': { path: 'weather/fireflies', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 6, frames: 72, screenSpace: true, gpuBytes: 16588800, hits: [] },
+  'fog': { path: 'weather/fog', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 96, screenSpace: true, gpuBytes: 10531840, hits: [] },
+  'god-rays': { path: 'weather/god-rays', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16128000, hits: [] },
+  'rain': { path: 'weather/rain', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 64, screenSpace: true, gpuBytes: 14745600, hits: [] },
+  'shooting-stars': { path: 'weather/shooting-stars', frameWidth: 320, frameHeight: 180, pivot: [160, 180], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16108800, hits: [] },
+  'snow': { path: 'weather/snow', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 6, frames: 72, screenSpace: true, gpuBytes: 16588800, hits: [] },
+  'storm': { path: 'weather/storm', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16128000, hits: [] },
 };
 
-export type VfxName = ExplosionsVfx | FireVfx | HolyVfx | ImpactsVfx | PickupsVfx | StatusVfx | UiVfx | WeatherVfx;
-export const SHEETS: Record<VfxName, VfxSheet> = { ...EXPLOSIONS, ...FIRE, ...HOLY, ...IMPACTS, ...PICKUPS, ...STATUS, ...UI, ...WEATHER };
+export type VfxName = ArcaneVfx | CrittersVfx | ExplosionsVfx | FireVfx | HolyVfx | IceVfx | ImpactsVfx | LightningVfx | MeleeVfx | MovesVfx | NatureVfx | PickupsVfx | ProjectilesVfx | ScifiVfx | ShadowVfx | SpawnVfx | StatusVfx | TransitionsVfx | UiVfx | WaterVfx | WeatherVfx;
+export const SHEETS: Record<VfxName, VfxSheet> = { ...ARCANE, ...CRITTERS, ...EXPLOSIONS, ...FIRE, ...HOLY, ...ICE, ...IMPACTS, ...LIGHTNING, ...MELEE, ...MOVES, ...NATURE, ...PICKUPS, ...PROJECTILES, ...SCIFI, ...SHADOW, ...SPAWN, ...STATUS, ...TRANSITIONS, ...UI, ...WATER, ...WEATHER };
