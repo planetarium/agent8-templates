@@ -1,0 +1,194 @@
+#!/usr/bin/env node
+// Generates the PixelVfx helper for the Phaser templates from the agent8-library pixelfx metadata.
+//
+//   node scripts/pixelvfx/generate.mjs <agent8-library-dir> [--base-url <url>] [--out <template-dir> ...]
+//
+// Reads <agent8-library-dir>/assets/2d/vfx/pixelfx/<category>/metadata.json (+ each sheet's JSON for impact timing) and
+// writes into every template:
+//   src/game/vfx/PixelVfx.ts  copied from scripts/pixelvfx/PixelVfx.ts
+//   src/game/vfx/sheets.ts    VFX_BASE_URL, VfxName, one table per category
+//   docs/vfx-sheets.md        usage, which sheet when, rules, sheets by category
+// --base-url defaults to the library URL; pass another one to point a local copy at a local server or at public/.
+
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(HERE, "..", "..");
+const DEFAULT_BASE_URL = "https://agent8-games.verse8.io/assets/2d/vfx/pixelfx";
+const DEFAULT_OUT = ["2d-phaser-basic", "2d-phaser-sprite-character-gravity"];
+
+// Full-screen effects are drawn as a whole 320x180 scene rather than around an anchor point.
+const SCREEN_SPACE = new Set(["weather"]);
+
+// "Which sheet when": game moments in prompt words -> sheet names. Names missing from the library are dropped.
+const WHEN = [
+  ["Enemy dies / something blows up", ["small-explosion", "cartoon-pow"], "`plasma-explosion` for energy or sci-fi"],
+  ["Melee or sword hit", ["hit-spark"], "`crit-hit` for a critical or finishing blow"],
+  ["Bullet hits a wall or object", ["bullet-impact"], ""],
+  ["Attack blocked", ["shield-block"], ""],
+  ["Item picked up (the moment of pickup)", ["collect-burst"], ""],
+  ["Collectible lying in the world", ["coin-spin", "gem-spin", "heart-pickup"], "loops; destroy on pickup"],
+  ["Coin flies into a HUD counter", ["coin-collect"], ""],
+  ["Heal / restore HP", ["heal"], "`follow` the character"],
+  ["Level up / reward", ["level-up"], ""],
+  ["Damage number pops up", ["damage-number"], ""],
+  ["Alert / surprise over a head", ["exclamation"], ""],
+  ["Stunned / poisoned status", ["stunned", "poisoned"], "loops; `follow` the character"],
+  ["Projectile in flight", ["fireball", "fireball-ice"], "loops; `flip` when moving left"],
+  ["Torch / campfire prop", ["torch", "campfire"], "loops"],
+  ["Rain over the whole screen", ["rain"], "full-screen, no x, y"],
+];
+
+const args = process.argv.slice(2);
+const opt = (flag) => {
+  const values = [];
+  for (let i = 0; i < args.length; i++) if (args[i] === flag && args[i + 1]) values.push(args[++i]);
+  return values;
+};
+const lib = args.find((a, i) => !a.startsWith("--") && !args[i - 1]?.startsWith("--"));
+if (!lib) {
+  console.error("usage: node scripts/pixelvfx/generate.mjs <agent8-library-dir> [--base-url <url>] [--out <template-dir> ...]");
+  process.exit(1);
+}
+const SRC = join(resolve(lib), "assets", "2d", "vfx", "pixelfx");
+if (!existsSync(SRC)) throw new Error(`no pixelfx sheets at ${SRC}`);
+const baseUrl = (opt("--base-url")[0] ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
+const outs = (opt("--out").length ? opt("--out") : DEFAULT_OUT).map((d) => resolve(ROOT, d));
+
+const categories = readdirSync(SRC, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+const byName = new Map();
+const sheets = [];
+for (const cat of categories) {
+  const metaFile = join(SRC, cat, "metadata.json");
+  if (!existsSync(metaFile)) continue;
+  const meta = JSON.parse(readFileSync(metaFile, "utf8"));
+  for (const [file, e] of Object.entries(meta)) {
+    if (!file.endsWith(".png")) continue;
+    const name = file.slice(0, -4);
+    if (byName.has(name)) throw new Error(`duplicate effect name '${name}' in ${byName.get(name).cat} and ${cat}`);
+    const m = e.metadata;
+    const json = JSON.parse(readFileSync(join(SRC, cat, m.frameData ?? `${name}.json`), "utf8"));
+    const hits = (json.meta?.pixelfx?.act?.hits ?? []).map((h) => ({ t: h.t, freeze: h.freeze }));
+    const s = { cat, name, m, hits, screenSpace: SCREEN_SPACE.has(cat), ...summary(e.description, cat) };
+    byName.set(name, s);
+    sheets.push(s);
+  }
+}
+if (!sheets.length) throw new Error(`no sheets in ${SRC}`);
+
+// "Title - pixel art VFX sprite sheet (cat). What it shows: details. Keywords: a, b. One-shot animation, ..."
+function summary(description, cat) {
+  const body = description.split(`(${cat}). `)[1] ?? description;
+  const what = body.split(" Keywords:")[0];
+  let short = what.split(/[:.](\s|$)/)[0];
+  if (short.length > 90) short = short.slice(0, 90).replace(/\s+\S*$/, "") + "…";
+  const keywords = (body.match(/Keywords: ([^.]*)\./)?.[1] ?? "").split(",").map((k) => k.trim()).filter(Boolean);
+  return { short, keywords };
+}
+
+const ident = (cat) => cat.toUpperCase().replace(/[^A-Z0-9]+/g, "_");
+const typeName = (cat) => cat.replace(/(^|[^a-zA-Z0-9]+)([a-zA-Z0-9])/g, (_, __, c) => c.toUpperCase()) + "Vfx";
+const row = (s) =>
+  `  '${s.name}': { path: '${s.cat}/${s.name}', frameWidth: ${s.m.frameWidth}, frameHeight: ${s.m.frameHeight}, ` +
+  `pivot: [${s.m.pivot.join(", ")}], loop: ${s.m.loop}, fps: ${s.m.fps}, frames: ${s.m.frames}, ` +
+  `screenSpace: ${s.screenSpace}, hits: [${s.hits.map((h) => `{ t: ${h.t}, freeze: ${h.freeze} }`).join(", ")}] },`;
+
+const sheetsTs = `// Generated by scripts/pixelvfx/generate.mjs from the agent8-library pixelfx metadata. Do not edit by hand.
+
+export const VFX_BASE_URL = '${baseUrl}';
+
+export interface VfxSheet {
+  /** <category>/<name>, under VFX_BASE_URL. */
+  path: string;
+  frameWidth: number;
+  frameHeight: number;
+  /** Ground/anchor point inside a frame, in px. */
+  pivot: [number, number];
+  loop: boolean;
+  fps: number;
+  frames: number;
+  /** Full-screen overlay (weather): covers the camera instead of standing at x, y. */
+  screenSpace: boolean;
+  /** Impact frames: t seconds after start, freeze seconds long. */
+  hits: { t: number; freeze: number }[];
+}
+${categories
+  .filter((cat) => sheets.some((s) => s.cat === cat))
+  .map((cat) => {
+    const list = sheets.filter((s) => s.cat === cat);
+    return `
+export type ${typeName(cat)} = ${list.map((s) => `'${s.name}'`).join(" | ")};
+export const ${ident(cat)}: Record<${typeName(cat)}, VfxSheet> = {
+${list.map(row).join("\n")}
+};`;
+  })
+  .join("\n")}
+
+export type VfxName = ${[...new Set(sheets.map((s) => typeName(s.cat)))].join(" | ")};
+export const SHEETS: Record<VfxName, VfxSheet> = { ${[...new Set(sheets.map((s) => `...${ident(s.cat)}`))].join(", ")} };
+`;
+
+const when = WHEN.map(([moment, names, note]) => [moment, names.filter((n) => byName.has(n)), note]).filter(([, names]) => names.length);
+const missing = WHEN.flatMap(([, names]) => names).filter((n) => !byName.has(n));
+if (missing.length) console.warn(`which-sheet-when: not in the library, dropped: ${missing.join(", ")}`);
+
+const loopWord = (s) => (s.screenSpace ? "loop, full-screen" : s.m.loop ? "loop" : "one-shot");
+const docs = `# Pixel art VFX (PixelVfx)
+
+\`\`\`ts
+import { PixelVfx } from '../vfx/PixelVfx';                       // in src/game/scenes/*.ts
+PixelVfx.preload(this, ['hit-spark', 'small-explosion']);          // in preload(): only the effects this scene plays
+PixelVfx.play(this, 'hit-spark', enemy.x, enemy.y, { scale: 2 });  // anywhere after: plays standing at x, y
+\`\`\`
+
+\`src/game/vfx/PixelVfx.ts\` plays ${sheets.length} pre-rendered pixel art effect sheets (pixelfx, MIT) from the Agent8 asset
+library: origin at the sheet's pivot, right fps, loop or one-shot, crisp pixels, cleanup. \`play()\` returns the sprite:
+**one-shots destroy themselves**, **loops** run until you call \`sprite.destroy()\` (keep the returned sprite).
+
+## Which sheet when
+
+| Moment | Sheet | Note |
+|---|---|---|
+${when.map(([moment, names, note]) => `| ${moment} | ${names.map((n) => `\`${n}\``).join(", ")} | ${note} |`).join("\n")}
+
+## Rules
+
+1. Size an effect only with the \`scale\` option. It is a whole number (1, 2, 3); the pixels stay crisp.
+2. Never call \`setDisplaySize\` / \`displayWidth\` / \`displayHeight\` on a PixelVfx sprite. The template's setDisplaySize
+   rule does not apply to effects; resizing to a pixel size blurs them and breaks the pivot.
+3. \`x, y\` is where the effect stands: the feet of a character, the bottom of a blast, the contact point of a hit.
+4. Glow is baked into alpha, so effects read best over darker backgrounds; over very light ones they look faint.
+5. Sheets with impact frames (\`hits\` in \`sheets.ts\`) can hit-stop: \`{ hitStop: true }\` pauses the effect on them,
+   \`{ hitStop: (ms) => … }\` also lets you freeze your game for that long.
+
+Options: \`scale\`, \`depth\` (default 1000), \`flip\` (directional effects face right; flip when facing left),
+\`follow\` (an object; \`x, y\` become offsets from it, and the effect goes when the object is destroyed), \`repeat\`
+(override loop/one-shot), \`hitStop\`. Full-screen sheets (\`rain\`) ignore x, y and cover the camera at any zoom.
+
+## Sheets by category (${sheets.length})
+
+Size is one frame in px; pivot is the anchor point inside it.
+${categories
+  .filter((cat) => sheets.some((s) => s.cat === cat))
+  .map((cat) => `
+### ${cat}
+
+| Name | What | Size | Frames | Pivot |
+|---|---|---|---|---|
+${sheets
+  .filter((s) => s.cat === cat)
+  .map((s) => `| \`${s.name}\` | ${s.short}${s.keywords.length ? ` (${s.keywords.join(", ")})` : ""} | ${s.m.frameWidth}x${s.m.frameHeight} | ${s.m.frames}, ${loopWord(s)} | ${s.m.pivot.join(", ")} |`)
+  .join("\n")}`)
+  .join("\n")}
+`;
+
+for (const out of outs) {
+  mkdirSync(join(out, "src", "game", "vfx"), { recursive: true });
+  mkdirSync(join(out, "docs"), { recursive: true });
+  copyFileSync(join(HERE, "PixelVfx.ts"), join(out, "src", "game", "vfx", "PixelVfx.ts"));
+  writeFileSync(join(out, "src", "game", "vfx", "sheets.ts"), sheetsTs);
+  writeFileSync(join(out, "docs", "vfx-sheets.md"), docs);
+}
+console.log(`${sheets.length} sheets in ${categories.length} categories, base ${baseUrl} -> ${outs.join(", ")}`);

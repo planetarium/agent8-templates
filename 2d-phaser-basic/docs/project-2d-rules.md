@@ -9,6 +9,7 @@ YOU MUST follow these rules EXACTLY:
 6. 💎 MAKE IT PROFESSIONAL: Polish every feature to production quality
 7. ✅ BACKTICKS FOR STRINGS: Always use backticks (`) for multi-line strings
 8. 📐 SET DISPLAY SIZE: When adding images/sprites, ALWAYS use setDisplaySize() to control dimensions
+   (VFX exception: PixelVfx sprites from src/game/vfx take only a whole-number `scale` option — NEVER setDisplaySize them. See docs/vfx-sheets.md)
 
 🚨 CRITICAL RULE - NEVER BREAK THIS:
 When tweening size changes, you MUST use displayWidth/displayHeight!!!
@@ -43,4 +44,7 @@ const sprite = this.add.image(x, y, 'texture');
 ✅ Correct Example (REQUIRED - ALWAYS WRITE):
 const sprite = this.add.image(x, y, 'texture');
 sprite.setDisplaySize(200, 150);  // ✅ MANDATORY! Always control dimensions
+
+✅ VFX exception (PixelVfx sprites only):
+PixelVfx.play(this, 'hit-spark', x, y, { scale: 2 });  // ✅ size with whole-number scale; ❌ never setDisplaySize a PixelVfx sprite
 </userRequest>

@@ -6,6 +6,7 @@
   "scripts": {
     "docs:help": "node scripts/copy-docs.js --help",
     "docs:copy": "node scripts/copy-docs.js --target=basic-3d",
-    "docs:remove": "node scripts/remove-docs.js --target=basic-3d"
+    "docs:remove": "node scripts/remove-docs.js --target=basic-3d",
+    "pixelvfx": "node scripts/pixelvfx/generate.mjs"
   }
 }
