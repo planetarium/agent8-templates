@@ -2,8 +2,9 @@
 
 Refs #100 (라이브러리 쪽: planetarium/agent8-library#25)
 
-> 상태: **1·2·3단계(3c) 완료. Context·문서 문구를 바꾼 3d 라운드는 zip 준비 완료, 사용자 import 대기. 4단계는 C1 sync 뒤로 미룸.** 2026-11-04.
-> **결론: 지금 문구로는 롤아웃하지 않는다.** 스테이징에서 사용률이 0/5였다(파일럿 3a-2는 5/5). 에이전트가 첫 턴에 스스로 벡터 화풍을 고른 뒤 Context의 "벡터·HD·페인팅이면 예외" 문구를 근거로 헬퍼를 쓰지 않았다(아래 3단계). 예외 문구를 "사용자가 지정한 화풍일 때만"으로 좁히고 3단계를 한 번 더 돌린 뒤 PR을 연다.
+> 상태: **1·2·3단계(3c)·3d 완료. 3d에서 롤아웃 기준 충족(사용 5/5, 자제 2/2 Phaser 유지). 4단계(운영 URL)는 C1 sync 뒤.** 2026-11-04.
+> **3d 결론: 고친 문구로는 롤아웃 가능.** 남은 조건은 C1 sync(운영 URL)와 4단계 재실측이다(아래 "3d 결론").
+> (3c 시점 결론, 3d로 대체됨) **결론: 지금 문구로는 롤아웃하지 않는다.** 스테이징에서 사용률이 0/5였다(파일럿 3a-2는 5/5). 에이전트가 첫 턴에 스스로 벡터 화풍을 고른 뒤 Context의 "벡터·HD·페인팅이면 예외" 문구를 근거로 헬퍼를 쓰지 않았다(아래 3단계). 예외 문구를 "사용자가 지정한 화풍일 때만"으로 좁히고 3단계를 한 번 더 돌린 뒤 PR을 연다.
 > 대상: `2d-phaser-basic`, `2d-phaser-sprite-character-gravity`. `basic-2d`(React·CSS)는 뺐다.
 > 근거 실험: agent8-library `feat/pixelfx-vfx-sheets-pilot`의 `experiments/pixelfx-sheets/REPORT.md` 3a-2(헬퍼를 넣으면 5/5 사용, 문서만이면 0/4).
 
@@ -14,6 +15,7 @@ Refs #100 (라이브러리 쪽: planetarium/agent8-library#25)
 | 1 | 두 템플릿 `bun install`·`bun run build`·`tsc -p tsconfig.app.json --noEmit` | **둘 다 통과, tsc 오류 0.** 헬퍼를 import하지 않으면 번들 증가 **0 B**(tree-shake). 헬퍼를 쓰면 **+5.1 KB, gzip +1.6 KB**(23장 기준) |
 | 2 | Playwright 전수 재생 하네스(파일럿 시트 23장, CORS 켠 별도 오리진) | **152/152 검사 통과, 콘솔·네트워크 오류 0.** 23장 모두 로드·재생, one-shot 자동 destroy, loop 반복, flip·follow·hitStop·정수 배율 확인. `rain`이 zoom 0.5·1·2와 재생 뒤 zoom 변경·창 크기 변경에서 모두 화면을 덮음(파일럿 헬퍼는 zoom 0.5에서 화면의 1/4만 덮었음) |
 | 3 | 스테이징 실전 라운드(A2 5개 프롬프트 + 벡터 화풍 자제율 2개) | **사용 0/5**(파일럿 3a-2 5/5, 3a-1 0/4). 품질 3.8, ~27분 45초 / +206.5K. `setDisplaySize` 오용 0건이지만 스프라이트를 아예 안 써서 판정 대상이 없다. 에이전트가 Context를 다시 쓰며 "PixelVfx utilities remain available but unused for this smooth-vector game"이라고 적었다. **예외 문구가 사용을 막았다.** 자제율 2/2이지만 에이전트가 첫 턴에 Phaser를 걷어내 Canvas 2D로 갔기 때문이라 판별력이 없다 |
+| 3d | 문구를 고친 재측정(같은 5개 프롬프트 + 사용자가 벡터를 명시한 자제율 2개) | **사용 5/5, 맞는 시트 5/5, `setDisplaySize` 오용 0건, 자제율 2/2(Phaser 유지)**, 품질 4.0, ~31분 / +189.8K. 롤아웃 기준 충족 |
 | 4 | 라이브러리 URL 기준 하네스 재실행 | **대기** — C1 결과 sync 뒤. 운영 호스트는 확인함(아래) |
 | 5 | 트리밍 호환·메모리 위생(해제 훅·지연 로드·DEV 64 MB 경고) | **하네스 489/489 통과, 오류 0.** 직접 만든 트리밍 시트 22장이 원본과 픽셀 단위로 같은 자리에 그려짐(flip 포함 44/44). 씬 shutdown 때 해제·`keep` 유지·재로드, 지연 로드, DEV 경고 1회·배포 빌드에서 제거 확인. 헬퍼 사용 시 번들 **+6.5 KB, gzip +2.1 KB**(23장), 244장 표면 +41.3 KB / gzip +8.9 KB. **C1 실제 트리밍 시트(1da91d53, 244장)로 1584/1584 통과**(30장씩 9배치), 템플릿 표를 이 세트로 다시 생성 |
 
@@ -184,21 +186,55 @@ Tech Stack 줄은 "World effects"로, `Structure.md` 헬퍼 절은 "world effect
 
   > When an enemy is destroyed it should vanish with a satisfying burst.
 
-### 채점표(3c와 같음, 비어 있음)
+### 3d 결과(2026-11-04 15:21–16:21)
 
-| # | 프롬프트 | 맞는 시트 | 시간 | 컨텍스트 Δ | 시트·헬퍼 사용 | 코드 쪽 피드백(흔들림·플래시·텍스트) | 품질 | 오용 |
-|---|---|---|---|---|---|---|---|---|
-| 1 | A2 P1 사망·게임 | hit-spark, cartoon-pow / small-explosion / poof | | | | | | |
-| 2 | A2 P2 타격감 | hit-spark, crit-hit | | | | | | |
-| 3 | A2 P3 힐 | heal | | | | | | |
-| 4 | A2 P4 코인 | coin-spin, collect-burst, coin-collect | | | | | | |
-| 5 | A2 P5 비 | rain(+rain-splash) | | | | | | |
+사용자가 같은 zip을 두 번 import했다(`seungbae/pixelvfx-basic-v2-1`, `seungbae/pixelvfx-basic-v2-2`). Agent8 Auto, 시작 컨텍스트 0. 측정 방법은 3c와 같다(시간 오차 ±25초). 세션은 만료되지 않았다. 다만 작업 보드가 두 번 재시작돼, 측정 도중 폴링이 한 번씩 끊겼다가 같은 탭에서 이어 갔다. P2–P4의 컨텍스트는 실행 중 Agent 탭이 "-%"로만 보여 개별 값을 못 읽었고, P1 뒤와 P5 뒤 값만 있다.
 
-| # | 자제율 프롬프트 | 시간 | 컨텍스트 Δ | 시트 사용 | Phaser 유지 | 예외를 판단한 흔적 |
+#### 3d-A. 사용률(프로젝트 1)
+
+| # | 맞는 시트 | 시간 | 컨텍스트 | 시트·헬퍼 사용 | 코드 쪽 피드백 | 품질 | 오용 |
+|---|---|---|---|---|---|---|---|
+| 1 | hit-spark, cartoon-pow / small-explosion / poof | ~17m (15:21:33→~15:38:30) | 0→84.1K | **예** — 첫 Read 묶음에서 `docs/vfx-sheets.md`·`PixelVfx.ts`·`sheets.ts`·`public`을 읽음. 타격 `hit-spark`(flip), 처치 `poof` + `collect-burst` | 히트 스톱, `cameras.main.shake`, 슬라임 `setTintFill` 흰 플래시, 넉백, 떠오르는 "+1" 텍스트 tween | 4 — 달밤 숲, **캐릭터도 픽셀 아트로 그려 시트와 화풍을 맞춤**, 칼 궤적, 히트·처치 버스트 | `setDisplaySize` 0. `effectScale`은 `step: 1` 정수 슬라이더. 경미: `poof`에 `setTint`(색 바꿈), 처치에 픽업용 `collect-burst`를 겹침(3a-2와 같은 습관) |
+| 2 | hit-spark, crit-hit | ~2m15s (15:41:50→~15:44:00) | (P2–P5 합 +105.7K) | **예** — 접촉점(`contactX/Y`)으로 옮기고 `crit-hit`으로 바꿈 | 같은 흔들림·플래시 유지, "Slime flash duration" 슬라이더 | 4 — 접촉점에 큰 스타버스트, 흰 플래시 | 없음(`impactScale` `step: 1`) |
+| 3 | heal | ~6m (15:44:45→~15:51:00) | | **예** — `heal`, `follow: this.player`, 재시전 시 이전 효과 destroy | HP 바 tween, "+30" 텍스트, Heal 버튼 | 4 — 캐릭터를 따라가는 힐 시트, HP 바 | 경미: `heal`에 `setTint(healing.color)` |
+| 4 | coin-spin, collect-burst, coin-collect | ~4m15s (15:52:05→~15:56:20) | | **예 — 3종 모두** `coin-spin`(바닥 loop, `scale: 1`, 물리 바디), `collect-burst`(획득), `coin-collect`(HUD로 날아가는 코인) | "+1" 텍스트, 카운터 팝 | 4 — 처치 시 코인 드롭, 획득 버스트, 카운터 | 없음(3a-2의 `setDisplaySize(32,32)` 오용이 사라짐) |
+| 5 | rain | ~1m30s (15:56:55→~15:58:20) | →189.8K | **예** — `PixelVfx.play(this, 'rain')` 한 줄 + `setAlpha`, 20초 타이머, 재시작 시 초기화 | — | 4 — 20초 뒤 화면 전체 비, 바닥 물보라 | 없음(3a-2의 zoom 우회·`setDisplaySize` cover가 사라짐. Context에 "handles camera scrolling, zoom"이라고 적음) |
+
+합계: **사용 5/5, 맞는 시트 5/5**(P1 처치는 `poof`로 맞음, `collect-burst`를 덧붙인 것만 경미), 품질 4.0, 약 31분 / +189.8K. `setDisplaySize` 오용 **0건**(3a-2는 3건). 헬퍼 파일은 고치지 않았다(`PixelVfx.ts` diff 0). 경미한 오용은 `setTint`로 색을 바꾼 2건과 처치에 `collect-burst`를 겹친 1건이다. 에이전트는 이번에도 PROJECT 문서를 다시 썼지만, PixelVfx 줄은 그대로 두고 비 항목만 더했다.
+
+#### 3d-B. 자제율(프로젝트 2, 사용자가 벡터를 명시하고 Phaser 유지를 요청)
+
+| # | 프롬프트 | 시간 | 컨텍스트 | 시트 사용 | Phaser 유지 | 예외를 판단한 흔적 |
 |---|---|---|---|---|---|---|
-| 0 | 벡터 슈터(Phaser 유지) | | | — | | |
-| 1 | 타격 | | | | | |
-| 2 | 처치 | | | | | |
+| 0 | 벡터 슈터(Phaser 유지) | ~15m (16:01:15→~16:16:30) | 0→64.8K | — | **예** — "The existing scene is a minimal scaffold, so I'm keeping it…". `MainScene` 382줄, 그라디언트 텍스처는 `vectorArt.ts` | Context 템플릿 줄을 그대로 둠 |
+| 1 | 타격 | ~2m (16:16:32→~16:18:30) | →69.5K (+4.7K) | **자제** — graphics로 확장 링·스파크 + 적 플래시(`showImpact`) | 예 | **응답에 "keeping the effects soft and vector-styled"** |
+| 2 | 처치 | ~1m (16:19:45→~16:20:40) | →77.4K (+7.9K) | **자제** — 색을 맞춘 파스텔 파편과 확장 링(`showDestructionBurst`, 개수·퍼짐·크기 슬라이더) | 예 | "pastel burst" |
+
+**자제율 2/2, Phaser 유지.** 사용자가 화풍을 말했을 때만 예외가 걸렸고, 에이전트는 그 이유를 응답에 적었다. (P1 응답 도중 포털에 `Cannot read properties of null (reading 'scrollHeight')` 배너가 한 번 떴다. 3a에서도 본 포털 쪽 오류로, 앱과는 무관해 닫았다.)
+
+스크린샷(리포 밖 `t_mw1mfk6v_p6z5-assets/`):
+- `v2-p1-p5.png`(프로젝트 1 최종 빌드, t=2–25s): 픽셀 기사와 슬라임, t=2s `crit-hit`·코인 HUD 팝, t=3.5s 힐 시트, t=7s 힐, t≥22s 화면 전체 비. 미리보기 컨테이너가 끝난 뒤 502가 되어, 받아 둔 소스를 로컬 빌드해(플랫폼 `debug-panel.js` 주입, CSS는 템플릿 것) 찍었다.
+- `v2-q-vector.png`(프로젝트 2 최종, t=2–5s): 파스텔 아레나, 그라디언트 공 모양 적, t=3s 처치 지점의 파스텔 링과 파편.
+
+#### 3a-2·3c·3d 비교
+
+| 라운드 | 문구 | 사용 | 맞는 시트 | `setDisplaySize` 오용 | 자제율 | 품질 | 시간·컨텍스트(P1–P5) |
+|---|---|---|---|---|---|---|---|
+| 3a-2 파일럿 | "use … before hand-rolling particles"(예외 없음) | 5/5 | 4/5 | 3건 | 측정 안 함 | 4.0 | ~27m15s / +191.7K |
+| 3c | "기본 사용 + 분명한 벡터·HD·페인팅이면 예외" | **0/5** | — | 판정 불가 | 2/2(Phaser 버림) | 3.8 | ~27m45s / +206.5K |
+| **3d** | 월드/UI 구분 + 예외는 사용자 신호만 + 문서를 사용자 어휘로 | **5/5** | **5/5** | **0건** | **2/2(Phaser 유지)** | 4.0 | ~31m / +189.8K |
+
+### 3d 결론 — 롤아웃 기준 충족
+
+- 기준(사용률 ≥4/5, Phaser를 유지한 상태에서 자제율 2/2)을 **모두 충족했다**(n=1).
+- 3c에서 사용을 막았던 원인(에이전트가 스스로 고른 벡터 화풍을 예외로 삼음)은 문구로 해결됐다. 에이전트는 오히려 캐릭터를 픽셀 아트로 그려 시트에 맞췄다.
+- "Which sheet when"을 사용자 어휘로 바꾼 효과로 보이는 개선: 처치에 `poof`(3a-2는 `collect-burst`만), 타격 강화에 `crit-hit`(3a-2는 안 씀), 코인 3종 모두(3a-2는 2종).
+- 월드/UI 구분은 의도대로 동작했다. 시트(월드)와 함께 흔들림·플래시·히트 스톱·떠오르는 텍스트·HP 바(코드)를 같이 썼고, UI에 시트를 억지로 쓴 곳은 없다.
+- `setDisplaySize` 오용이 3건에서 0건이 됐다. 규칙 8 예외, 정수 `scale` 안내, zoom을 고친 `rain`이 함께 작용한 것으로 본다.
+- 남은 경미한 오용: `setTint`로 시트 색을 바꾸는 것(2건)과 처치에 `collect-burst`를 겹치는 것(1건). 다음에 문구를 손볼 때 문서 규칙에 "Do not tint sheets to recolor them; pick another sheet"와 Which sheet when의 처치 행에 "not `collect-burst` (that is for pickups)"를 더하는 것을 제안한다. 이번에는 문구를 바꾸지 않았다(측정한 문구를 그대로 둠).
+- 비용: 3a-2와 비슷하다(~31분 / +189.8K, 문서·헬퍼를 읽는 비용이 프롬프트마다 든다).
+
+**롤아웃 전에 남은 조건**: (1) C1 결과를 사용자가 sync 해 운영 URL `https://agent8-games.verse8.io/assets/2d/vfx/pixelfx/...`가 살아야 한다(지금은 404). (2) sync 뒤 4단계(운영 URL로 하네스 재실행)를 돌린다. (3) 이 zip은 시트 23장이고 운영 템플릿은 244장 문서(39.8 KB)다. 문서가 커져도 사용률이 유지되는지는 sync 뒤 운영 URL 판 zip으로 한 번 더 보는 것을 권한다(선택).
 
 비교 기준: 3a-2(파일럿 헬퍼) 5/5·맞는 시트 4/5·품질 4.0·`setDisplaySize` 오용 3건, 3c(이전 문구) 0/5·품질 3.8(지시의 "3b"는 이 이전 라운드 3c로 해석했다. 파일럿의 3b는 계획만 있고 돌리지 않았다). 3d가 3a-2 수준의 사용률(≥4/5)을 내고 자제율 2/2(Phaser 유지 상태)이면 롤아웃 가능으로 본다.
 
