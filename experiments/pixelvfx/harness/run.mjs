@@ -1,0 +1,114 @@
+#!/usr/bin/env node
+// PixelVfx playback harness: builds a throwaway copy of 2d-phaser-basic whose MainScene is ./MainScene.ts, serves it and the
+// sheets from two origins (sheets with CORS, like the library host), and drives it with Playwright.
+//
+//   node experiments/pixelvfx/harness/run.mjs --work <scratch-dir> (--lib <agent8-library-dir> | --base-url <sheets url>)
+//
+// --lib serves <lib>/assets/2d/vfx/pixelfx locally; --base-url plays straight from a host (e.g. the library URL after sync).
+// Playwright is resolved from PW_NODE_MODULES (a node_modules dir that has playwright) or the normal module path.
+// Writes <work>/result.json and screenshots <work>/*.png.
+
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync, readdirSync } from "node:fs";
+import { createServer } from "node:http";
+import { createRequire } from "node:module";
+import { execSync } from "node:child_process";
+import { dirname, extname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { gzipSync } from "node:zlib";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(HERE, "..", "..", "..");
+const args = process.argv.slice(2);
+const arg = (f) => (args.includes(f) ? args[args.indexOf(f) + 1] : undefined);
+const work = resolve(arg("--work") ?? "");
+const lib = arg("--lib") && resolve(arg("--lib"));
+if (!arg("--work") || (!lib && !arg("--base-url"))) {
+  console.error("usage: run.mjs --work <dir> (--lib <agent8-library-dir> | --base-url <url>)");
+  process.exit(1);
+}
+const require = createRequire(process.env.PW_NODE_MODULES ? join(process.env.PW_NODE_MODULES, "x.js") : import.meta.url);
+const { chromium } = require("playwright");
+
+const APP_PORT = 4310, SHEET_PORT = 4311;
+const baseUrl = arg("--base-url") ?? `http://127.0.0.1:${SHEET_PORT}/pixelfx`;
+
+// 1. Throwaway app: the template + harness scene + sheets.ts pointing at baseUrl.
+const app = join(work, "app");
+mkdirSync(work, { recursive: true });
+rmSync(app, { recursive: true, force: true });
+cpSync(join(ROOT, "2d-phaser-basic"), app, { recursive: true, filter: (p) => !/[\\/](dist|node_modules)([\\/]|$)/.test(p) });
+execSync("bun install", { cwd: app, stdio: "inherit" });
+const sheetsLib = lib ?? arg("--sheets-lib");
+if (sheetsLib) execSync(`node "${join(ROOT, "scripts", "pixelvfx", "generate.mjs")}" "${sheetsLib}" --base-url "${baseUrl}" --out "${app}"`, { stdio: "inherit" });
+else {
+  // No library checkout: keep the template's generated table, only repoint the base URL.
+  const f = join(app, "src", "game", "vfx", "sheets.ts");
+  writeFileSync(f, readFileSync(f, "utf8").replace(/export const VFX_BASE_URL = '[^']*';/, `export const VFX_BASE_URL = '${baseUrl}';`));
+}
+cpSync(join(HERE, "MainScene.ts"), join(app, "src", "game", "scenes", "MainScene.ts"));
+execSync("bun run build", { cwd: app, stdio: "inherit" });
+const js = readdirSync(join(app, "dist", "assets")).filter((f) => f.endsWith(".js")).map((f) => readFileSync(join(app, "dist", "assets", f)));
+const bundle = { jsBytes: js.reduce((a, b) => a + b.length, 0), jsGzip: js.reduce((a, b) => a + gzipSync(b).length, 0) };
+
+// 2. Two static servers: the app, and the sheets with Access-Control-Allow-Origin (like the library host).
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".json": "application/json", ".svg": "image/svg+xml" };
+const serve = (port, rootDir, prefix = "", cors = false) =>
+  new Promise((ok) => {
+    const s = createServer((req, res) => {
+      const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
+      let file = join(rootDir, path.startsWith(prefix) ? path.slice(prefix.length) : path);
+      if (existsSync(file) && statSync(file).isDirectory()) file = join(file, "index.html");
+      if (cors) res.setHeader("Access-Control-Allow-Origin", "*");
+      if (!existsSync(file)) return res.writeHead(404).end();
+      res.writeHead(200, { "Content-Type": TYPES[extname(file)] ?? "application/octet-stream" }).end(readFileSync(file));
+    }).listen(port, "127.0.0.1", () => ok(s));
+  });
+const servers = [await serve(APP_PORT, join(app, "dist"))];
+if (lib) servers.push(await serve(SHEET_PORT, join(lib, "assets", "2d", "vfx", "pixelfx"), "/pixelfx", true));
+
+// 3. Drive it.
+const browser = await chromium.launch();
+const result = { baseUrl, bundle, runs: [] };
+const open = async (query, viewport, shot, after) => {
+  const page = await browser.newPage({ viewport });
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  const failed = [];
+  page.on("requestfailed", (r) => failed.push(r.url()));
+  page.on("response", (r) => r.status() >= 400 && failed.push(`${r.status()} ${r.url()}`));
+  await page.goto(`http://127.0.0.1:${APP_PORT}/?base=${encodeURIComponent(baseUrl)}&${query}`);
+  await page.waitForFunction(() => window.__vfx?.shotReady, null, { timeout: 120000 });
+  await page.screenshot({ path: join(work, `${shot}.png`) });
+  if (after) await after(page);
+  await page.waitForFunction(() => window.__vfx?.done, null, { timeout: 120000 });
+  const r = await page.evaluate(() => window.__vfx);
+  result.runs.push({ query, viewport, ...r, errors, failed });
+  await page.close();
+};
+
+await open("mode=all", { width: 1600, height: 900 }, "all-sheets");
+for (const z of [0.5, 1, 2]) await open(`mode=rain&zoom=${z}`, { width: 1280, height: 720 }, `rain-zoom-${z}`);
+// Zoom and canvas size changing after play: the overlay re-fits.
+await open("mode=rain&zoom=1", { width: 1280, height: 720 }, "rain-zoom-1-then-0.5-resized", async (page) => {
+  await page.evaluate(() => window.__vfxSetZoom(0.5));
+  await page.waitForTimeout(150);
+  await page.evaluate(() => window.__vfxMeasure("zoom 1 -> 0.5 after play"));
+  await page.setViewportSize({ width: 900, height: 1000 });
+  await page.waitForTimeout(400);
+  await page.evaluate(() => window.__vfxMeasure("resized to 900x1000"));
+  await page.screenshot({ path: join(work, "rain-zoom-1-then-0.5-resized.png") });
+});
+
+await browser.close();
+servers.forEach((s) => s.close());
+writeFileSync(join(work, "result.json"), JSON.stringify(result, null, 2));
+
+const checks = result.runs.flatMap((r) => r.checks);
+const bad = checks.filter((c) => !c.ok);
+const errs = result.runs.flatMap((r) => [...r.errors, ...r.failed, ...r.loadErrors]);
+console.log(`bundle ${bundle.jsBytes} B (gzip ${bundle.jsGzip} B); checks ${checks.length - bad.length}/${checks.length} ok; errors ${errs.length}`);
+for (const c of bad) console.log(`FAIL ${c.name}: ${c.detail}`);
+for (const e of errs) console.log(`ERROR ${e}`);
+for (const r of result.runs) for (const c of r.coverage) console.log(JSON.stringify(c));
+process.exit(bad.length || errs.length ? 1 : 0);
