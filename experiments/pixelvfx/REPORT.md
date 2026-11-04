@@ -1,6 +1,7 @@
 # PixelVfx 헬퍼 기본 포함 — PR 전 실측
 
-> 상태: **1·2단계 완료, 3단계는 사용자 import를 기다리는 중, 4단계는 C1 sync 뒤로 미룸.** 2026-11-04.
+> 상태: **1·2·3단계 완료, 4단계는 C1 sync 뒤로 미룸.** 2026-11-04.
+> **결론: 지금 문구로는 롤아웃하지 않는다.** 스테이징에서 사용률이 0/5였다(파일럿 3a-2는 5/5). 에이전트가 첫 턴에 스스로 벡터 화풍을 고른 뒤 Context의 "벡터·HD·페인팅이면 예외" 문구를 근거로 헬퍼를 쓰지 않았다(아래 3단계). 예외 문구를 "사용자가 지정한 화풍일 때만"으로 좁히고 3단계를 한 번 더 돌린 뒤 PR을 연다.
 > 대상: `2d-phaser-basic`, `2d-phaser-sprite-character-gravity`. `basic-2d`(React·CSS)는 뺐다.
 > 근거 실험: agent8-library `feat/pixelfx-vfx-sheets-pilot`의 `experiments/pixelfx-sheets/REPORT.md` 3a-2(헬퍼를 넣으면 5/5 사용, 문서만이면 0/4).
 
@@ -10,7 +11,7 @@
 |---|---|---|
 | 1 | 두 템플릿 `bun install`·`bun run build`·`tsc -p tsconfig.app.json --noEmit` | **둘 다 통과, tsc 오류 0.** 헬퍼를 import하지 않으면 번들 증가 **0 B**(tree-shake). 헬퍼를 쓰면 **+5.1 KB, gzip +1.6 KB**(23장 기준) |
 | 2 | Playwright 전수 재생 하네스(파일럿 시트 23장, CORS 켠 별도 오리진) | **152/152 검사 통과, 콘솔·네트워크 오류 0.** 23장 모두 로드·재생, one-shot 자동 destroy, loop 반복, flip·follow·hitStop·정수 배율 확인. `rain`이 zoom 0.5·1·2와 재생 뒤 zoom 변경·창 크기 변경에서 모두 화면을 덮음(파일럿 헬퍼는 zoom 0.5에서 화면의 1/4만 덮었음) |
-| 3 | 스테이징 실전 라운드(A2 5개 프롬프트 + 벡터 화풍 자제율 2개) | **대기** — zip 준비 완료, 사용자 import 필요(아래 3단계) |
+| 3 | 스테이징 실전 라운드(A2 5개 프롬프트 + 벡터 화풍 자제율 2개) | **사용 0/5**(파일럿 3a-2 5/5, 3a-1 0/4). 품질 3.8, ~27분 45초 / +206.5K. `setDisplaySize` 오용 0건이지만 스프라이트를 아예 안 써서 판정 대상이 없다. 에이전트가 Context를 다시 쓰며 "PixelVfx utilities remain available but unused for this smooth-vector game"이라고 적었다. **예외 문구가 사용을 막았다.** 자제율 2/2이지만 에이전트가 첫 턴에 Phaser를 걷어내 Canvas 2D로 갔기 때문이라 판별력이 없다 |
 | 4 | 라이브러리 URL 기준 하네스 재실행 | **대기** — C1 결과 sync 뒤. 운영 호스트는 확인함(아래) |
 
 ## 무엇을 넣었나
@@ -82,36 +83,66 @@ PW_NODE_MODULES=<playwright가 있는 node_modules> node experiments/pixelvfx/ha
 
 스크린샷(리포 밖 `t_mw1mfk6v_p6z5-assets/harness-local/`): `all-sheets.png`(22장 격자, 빨간 점이 x, y — 각 효과의 발밑·접촉점이 점에 맞는다), `rain-zoom-0.5.png`·`rain-zoom-1.png`·`rain-zoom-2.png`(뒤의 월드 격자는 zoom에 따라 촘촘해지고 비는 화면 전체), `rain-zoom-1-then-0.5-resized.png`.
 
-## 3단계 — 스테이징 실전 라운드(대기)
+## 3단계 — 스테이징 실전 라운드(3c, 2026-11-04 13:51–14:40)
 
 준비물(리포 밖): `D:\Work\agent8\_worktrees\agent8-templates\t_mw1mfk6v_p6z5-assets\staging\pixelvfx-basic.zip` (5.9 MB, 94개 항목).
 
 - 이 브랜치의 `2d-phaser-basic` + 생성기를 `--base-url assets/vfx/pixelfx`로 돌린 `sheets.ts` + `public/assets/vfx/pixelfx/`에 파일럿 시트 23장(PNG+JSON)과 `LICENSE`·`NOTICE.md`. 라이브러리 URL이 아직 없어 시트를 동봉했다. 운영본과 다른 점은 `VFX_BASE_URL` 한 줄과 `public/` 시트뿐이다.
 - 로컬에서 이 사본의 `bun run build`·`tsc --noEmit` 통과를 확인한 뒤 묶었다(`node_modules`·`dist` 없음).
 
-절차(3a-2와 같음): 스테이징 포털(`create.staging.vibe.verse8.io`) → Import Project Zip, 모델 Agent8 Auto, 시작 컨텍스트 0. 프롬프트는 A2와 같은 영어 문장을 순서대로 보낸다. 시간은 Run 클릭부터 "Response Generated"가 처음 보인 폴링까지, 컨텍스트는 Agent 탭 `xK / 1M`의 증가, 코드는 미리보기 dev 서버의 `?raw`로 받아 `PixelVfx`·`setDisplaySize`·`vfx:`를 grep한다. 품질은 1–5점(채점자 1명).
+절차(3a-2와 같음): 사용자가 같은 zip을 두 번 import(`seungbae/pixelvfx-basic-1`, `seungbae/pixelvfx-basic-2`), 모델 Agent8 Auto, 시작 컨텍스트 0. 프롬프트는 A2와 같은 영어 문장을 순서대로 보냈다. 시간은 Run 클릭부터 "Response Generated"가 처음 보인 폴링까지(폴링 30–40초, 오차 ±25초), 컨텍스트는 Agent 탭 `xK / 1M`, 코드는 미리보기 dev 서버에서 `/src/main.tsx`부터 상대 import를 따라 `?raw`로 받아(`t_mw1mfk6v_p6z5-assets/pull-src.mjs`) `PixelVfx`·`vfx`·`setDisplaySize`를 grep했다. 품질은 1–5점(채점자 1명). 세션은 만료되지 않았다(P3 중 "Connection restored" 한 번).
 
-### 3-A. 사용률·품질·오용(프로젝트 1)
+### 3-A. 사용률·품질·오용(프로젝트 1 `pixelvfx-basic-1`)
 
-| # | 프롬프트 | 맞는 시트 | 시간 | 컨텍스트 Δ | 사용 | 품질 | 오용(setDisplaySize 등) |
+| # | 프롬프트 | 맞는 시트 | 시간 | 컨텍스트 Δ | 시트·헬퍼 사용 | 품질 | 오용 |
 |---|---|---|---|---|---|---|---|
-| 1 | Make a simple side-view action game: a player character that moves with the arrow keys and jumps, and slimes that wander on the ground. Pressing Space swings a sword; when a slime is hit it should feel impactful and when it dies it should vanish with a satisfying burst. | small-explosion / cartoon-pow, hit-spark | | | | | |
-| 2 | Make hitting enemies feel punchier: when the sword connects, show a clear impact at the contact point and briefly flash the slime. | hit-spark, crit-hit | | | | | |
-| 3 | Add a healing skill on the H key: it restores 30 HP to the player, shows a health bar, and plays a magical restoring effect around the character. | heal | | | | | |
-| 4 | Spawn coins that the player can collect; picking one up should give an eye-catching sparkle so it feels rewarding, and update a coin counter. | coin-spin, collect-burst, coin-collect | | | | | |
-| 5 | Add rain weather that starts after 20 seconds of play and covers the whole screen. | rain | | | | | |
+| 1 | 사망·게임(A2 P1) | small-explosion / cartoon-pow, hit-spark | ~11m40s (13:51:01→~14:02:40) | +72.2K (0→72.2K) | **아니오** — Context.md·Structure.md는 읽었지만 `docs/vfx-sheets.md`·`PixelVfx.ts`는 읽지 않음. "warm, illustrated forest"로 화풍을 정하고 캐릭터·배경·효과를 모두 `Phaser.GameObjects.Graphics`로 그림(`actorArt` 139줄, `simulation`에 자체 파티클). 처치는 물방울 버스트 | 4 — 평면 벡터 숲·기사·슬라임, 칼 궤적, "WHACK!", 넉백·히트스톱·물방울 | 해당 없음(시트 미사용). Game.ts CRITICAL 블록 그대로 |
+| 2 | 타격감(A2 P2) | hit-spark, crit-hit | ~2m45s (14:05:15→~14:08:00) | +18.0K (→90.2K) | **아니오** — 흰·금색 스타버스트+스파크를 직접 그림(`actorArt` 139→168) | 4 — 접촉점 스타버스트, 슬라임 백색 플래시, "SQUISH!" | 해당 없음 |
+| 3 | 힐(A2 P3) | heal | ~5m (14:08:33→~14:13:30) | +38.3K (→128.5K) | **아니오** — 민트 오라·상승 반짝이를 직접 그림. **`PROJECT/Context.md`를 다시 쓰며 템플릿의 PixelVfx 두 줄을 지우고 "The scaffold's PixelVfx utilities remain available but unused for this smooth-vector game."을 넣음** | 4 — H 키·Restore 버튼, 100 HP 바, 오라·"+30" | 해당 없음 |
+| 4 | 코인(A2 P4) | coin-spin, collect-burst, coin-collect | ~5m20s (14:14:28→~14:19:50) | +52.4K (→180.9K) | **아니오** — 떠다니며 도는 코인, 금·백색 반짝이 버스트, 카운터 팝을 직접 그림 | 4 — 코인 회전·획득 버스트·"+1"·카운터 팝 | 해당 없음 |
+| 5 | 비(A2 P5) | rain | ~3m (14:20:05→~14:23:00) | +25.6K (→206.5K) | **아니오** — 새 `weatherArt.ts`(44줄)로 사선 빗줄기·흐린 틴트·바닥 물보라를 그림 | 3 — 20초 뒤 화면 전체에 비와 흐린 틴트가 깔리지만 빗줄기가 가늘고 옅다 | 해당 없음 |
 
-비교 기준(n=1): 3a-2 헬퍼 5/5 사용·맞는 시트 4/5·품질 4.0·~27분 15초/+191.7K, `setDisplaySize` 오용 3건(P3 힐 매 프레임, P4 코인 0.57배, P5 비 cover). 이번 라운드의 가설: (a) "Which sheet when" 표로 P1 사망이 폭발 시트로 바뀐다, (b) 규칙 8 예외·Context 문구로 `setDisplaySize`가 줄어든다, (c) zoom을 고친 `rain`은 에이전트가 다시 맞추지 않는다.
+합계(P1–P5): 약 27분 45초 / +206.5K, 품질 평균 3.8, **사용 0/5**. 스프라이트를 쓰지 않았으므로 `setDisplaySize` 오용도 0건이다. 줄었다기보다 **판정할 대상이 없다.**
 
-### 3-B. 자제율(프로젝트 2, 같은 zip을 새로 import)
-
-| # | 프롬프트 | 기대 | 시트 사용 | 메모 |
+| 라운드 | 노출 | 시트 사용 | 품질 | 시간·컨텍스트(P1–P5) |
 |---|---|---|---|---|
-| 0 | Make a simple top-down shooting game in a smooth vector style: the player is a soft rounded shape with a gentle gradient, enemies are round blobs, and everything has clean anti-aliased edges and pastel colours. Arrow keys move, Space shoots. | 화풍 확정 | — | |
-| 1 | Make hitting enemies feel punchier: when a bullet connects, show a clear impact at the contact point and briefly flash the enemy. | 시트 자제(particles/graphics) | | |
-| 2 | When an enemy is destroyed it should vanish with a satisfying burst. | 시트 자제 | | |
+| A2 대조군 | 없음 | — | 3.6 | ~21.5m / +151.7K |
+| A2 패키지 | pixelfx 코드 + `PixelFxLayer` + 문서 + Context 두 줄 | 사용 | 4.2 | ~30m / +197.7K |
+| 3a-1 문서만 | 시트 + 문서 + Context 두 줄 | 0/4 | 4, 4(P1–P2) | ~14m / +96.3K(P1–P3) |
+| 3a-2 헬퍼(파일럿) | 3a-1 + `PixelVfx.ts` + Context "use … before hand-rolling particles" | **5/5**, 맞는 시트 4/5, `setDisplaySize` 오용 3건 | 4.0 | ~27m15s / +191.7K |
+| **3c 이 브랜치** | 헬퍼(고친 판) + 생성 문서 + Context "기본 사용 + 벡터·HD·페인팅이면 예외" + 규칙 8 VFX 예외 | **0/5** | 3.8 | ~27m45s / +206.5K |
 
-자제율 = 1·2에서 PixelVfx를 쓰지 않고 Phaser particles/graphics로 그린 비율.
+스크린샷(리포 밖 `t_mw1mfk6v_p6z5-assets/`, Playwright로 실제 키 입력: Space 260ms마다·좌우 걷기):
+- `p1-death-burst.png`(P1 뒤, t=2.0–6.5s): 숲·기사·슬라임, 칼 궤적, t=5.0s "WHACK!"과 백색 슬라임.
+- `p2-hit-impact.png`(P2 뒤, t=2.5–5.5s): t=3.5s 접촉점 백색 플래시·"WHACK!", t=4.5s "SQUISH!"와 물방울·반짝이, 처치 카운트 01.
+- `p3-p4-heal-coins.png`(P4 뒤, t=3–9s): HP 바·Restore 버튼, 길 위 코인, t=3s 코인 획득 "+1" 반짝이, 카운터 01→04.
+- `p5-rain.png`(P5 뒤, t=4/22/25/28s): t≥22s 사선 빗줄기와 흐린 틴트. 미리보기 컨테이너가 이 시점에 502로 내려가서, 앞서 받은 P5 소스를 로컬에서 빌드(플랫폼 `debug-panel.js` 주입)해 찍었다. CSS 두 파일은 받지 못해 템플릿 것으로 대신해서 HUD 배치가 실제와 다르다(게임 캔버스는 같다).
+
+### 3-B. 자제율(프로젝트 2 `pixelvfx-basic-2`)
+
+| # | 프롬프트 | 시간 | 컨텍스트 Δ | 시트 사용 | 메모 |
+|---|---|---|---|---|---|
+| 0 | Make a simple top-down shooting game in a smooth vector style: the player is a soft rounded shape with a gentle gradient, enemies are round blobs, and everything has clean anti-aliased edges and pastel colours. Arrow keys move, Space shoots. | ~8m15s (14:25:06→~14:33:20) | +53.9K | — | "Mellow" 파스텔 슈터. **Phaser를 쓰지 않고** React 안 고해상도 Canvas 2D(`SoftGame` 297줄, `render` 150줄)로 새로 짰다. Context.md에 "it does not mount the original Phaser scaffold"라고 적고 템플릿 PixelVfx 두 줄은 남겼다 |
+| 1 | Make hitting enemies feel punchier: when a bullet connects, show a clear impact at the contact point and briefly flash the enemy. | ~2m20s (14:33:51→~14:36:10) | +22.8K (→76.7K) | **자제** | 접촉점 임팩트 버스트·백색 플래시를 Canvas 2D로(`render` 150→185) |
+| 2 | When an enemy is destroyed it should vanish with a satisfying burst. | ~2m45s (14:36:35→~14:39:20) | +20.7K (→97.4K) | **자제** | 파스텔 팝 링·둥근 파편(`render` 185→225) |
+
+스크린샷 `q2-vector-shooter.png`(두 효과 프롬프트 뒤, t=2–5s): 밝은 파스텔 아레나, 라벤더 플레이어, t=2s 파괴 지점의 옅은 파편 링. 밝은 배경 위 파스텔 효과라 대비가 약하다.
+
+자제율 2/2. 다만 에이전트가 첫 턴에 Phaser를 걷어냈으므로 Phaser 전용 헬퍼는 처음부터 쓸 수 없었다. Context 예외 문구를 읽고 판단한 흔적(문서·응답에 PixelVfx·pixel 언급)은 프로젝트 2에는 없다. 판단 흔적은 오히려 프로젝트 1의 Context 재작성에 있다.
+
+### 3단계 결론
+
+- **사용을 막은 것은 예외 문구다.** 3a-2와 이번 라운드의 노출 차이는 Context 문구(파일럿 "use a pixelfx sheet through PixelVfx … before hand-rolling particles" → 이번 "기본 사용 + 분명한 벡터·HD·페인팅이면 particles/graphics"), 문서 형식, 규칙 8 예외다. 에이전트는 두 라운드 모두 첫 턴에 스스로 매끈한 벡터 화풍을 골랐다(3a-1도 같았다). 이번에는 그 선택을 예외의 근거로 삼았고, 그 판단을 Context에 직접 적었다. 그래서 P2–P5는 문서를 다시 볼 이유가 없었다(P1에서 `docs/vfx-sheets.md`를 한 번도 읽지 않음).
+- 사용자가 화풍을 말하지 않은 A2 프롬프트에서도 에이전트가 고른 화풍이 "분명한 벡터"가 된다. 현재 문구는 사실상 기본을 끄는 스위치로 동작한다.
+- 품질·시간·컨텍스트는 3a-2·A2 패키지와 비슷하다(3.8 / ~27m45s / +206.5K). 헬퍼를 넣어도 비용은 늘지 않았지만 얻은 것도 없다.
+- 헬퍼 결함 수정(zoom), `setDisplaySize` 예외 효과는 시트를 쓰지 않아 실전에서 검증하지 못했다(2단계 하네스로만 확인).
+- 교란 요인: n=1. 스테이징 에이전트 동작이 파일럿(11-03)과 달라 보인다(이번에는 `tests/game-check.ts`·`localization-proofread` 스킬·`tuning.ts` 디버그 패널을 매번 만들거나 썼다). 그래도 프로젝트 1의 Context 재작성 문장은 예외 문구가 직접 원인이라는 강한 증거다.
+
+**롤아웃: 지금 문구로는 보류한다.** 헬퍼·생성기·문서는 그대로 두고 Context 문구만 고쳐 3단계를 한 번 더 돌린다. 제안 문구(두 템플릿 `PROJECT/Context.md` Critical Memory):
+
+> Effects (hits, explosions, pickups, status, weather) use `src/game/vfx/PixelVfx` — `PixelVfx.preload(this, [names])` + `PixelVfx.play(this, name, x, y, { scale })`. Read `docs/vfx-sheets.md` before writing any effect, and use a sheet instead of hand-drawn particles. Only if the **user** asked for a smooth vector, HD or painted look (or gave art in that style), draw effects with Phaser particles/graphics instead; a style you picked yourself is not a reason to skip PixelVfx. Size PixelVfx sprites only with the whole-number `scale` option, never `setDisplaySize`.
+
+다음 라운드(3d)는 같은 zip에 이 문구만 바꿔 프로젝트 1(A2 P1–P5)과 프로젝트 2(자제율)를 다시 돌린다. 프로젝트 2에서는 에이전트가 Phaser를 버리지 않게 해야 자제율을 볼 수 있다. P0에 "Keep the existing Phaser scene"을 덧붙이는 변형을 제안한다.
 
 ## 4단계 — 라이브러리 URL 실측(C1 sync 뒤)
 
@@ -122,6 +153,8 @@ C1이 229장 이상을 `assets/2d/vfx/pixelfx/`에 올리고 사용자가 sync �
 3. 229장 기준 번들 증가분과 `docs/vfx-sheets.md` 크기를 다시 잰다.
 
 ## 남은 리스크
+
+- 3단계(3c) 결과 사용률 0/5. Context 문구를 고친 3d 라운드 전에는 PR을 열지 않는다(3단계 결론).
 
 - 운영 URL이 C1 sync 전에는 없다. 이 브랜치는 sync 뒤에 머지해야 한다.
 - 229장에서 이름이 카테고리를 넘어 겹치면 생성기가 멈춘다. 겹치면 이름 규칙을 정해야 한다.
