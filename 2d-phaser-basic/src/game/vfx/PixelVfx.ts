@@ -22,20 +22,32 @@ export interface VfxOptions extends VfxLoadOptions {
   flip?: boolean;
   /** Stick to this object every frame; x, y become offsets from it. The effect is removed when the object is destroyed. */
   follow?: { x: number; y: number; active?: boolean };
-  /** Override the sheet's loop (-1) / one-shot (0). */
+  /** Override the sheet's loop (-1) / one-shot (0) / play n+1 times (n); finite plays destroy themselves at the end. */
   repeat?: number;
-  /** Pause the effect on its impact frames (sheets with hits). A function is also called with the freeze in ms. */
+  /** Pause the effect on its impact frames (sheets with hits only). A function is also called with the freeze in ms. */
   hitStop?: boolean | ((freezeMs: number) => void);
 }
 
 const keyOf = (name: VfxName) => `vfx:${name}`;
 const MEMORY_WARN_BYTES = 64 * 1024 * 1024;
+const LOAD_TIMEOUT_MS = 30000;
+const RETRY_AFTER_MS = 30000;
+// Only timeout is set; the loader keeps each file's own responseType.
+const XHR = { timeout: LOAD_TIMEOUT_MS } as Phaser.Types.Loader.XHRSettingsObject;
 
-// Which scenes asked for which sheet; a sheet is freed when the last scene holding it shuts down.
+// Which scenes asked for which sheet; a sheet is freed when the last scene holding it shuts down or is destroyed.
 const holders = new Map<VfxName, Set<Phaser.Scene>>();
 const kept = new Set<VfxName>();
 const hooked = new WeakSet<Phaser.Scene>();
+// When a sheet last failed to load; play() does not ask again for RETRY_AFTER_MS.
+const failedAt = new Map<VfxName, number>();
+const noHitsWarned = new Set<VfxName>();
 let warned = false;
+
+function free(scene: Phaser.Scene, name: VfxName) {
+  if (scene.anims.exists(keyOf(name))) scene.anims.remove(keyOf(name));
+  if (scene.textures.exists(keyOf(name))) scene.textures.remove(keyOf(name));
+}
 
 function hold(scene: Phaser.Scene, name: VfxName, keep?: boolean) {
   if (keep) kept.add(name);
@@ -44,15 +56,19 @@ function hold(scene: Phaser.Scene, name: VfxName, keep?: boolean) {
   set.add(scene);
   if (hooked.has(scene)) return;
   hooked.add(scene);
-  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+  const release = () => {
+    if (!hooked.has(scene)) return;
     hooked.delete(scene);
+    scene.events.off(Phaser.Scenes.Events.SHUTDOWN, release);
+    scene.events.off(Phaser.Scenes.Events.DESTROY, release);
     for (const [n, s] of holders) {
-      if (!s.delete(scene) || s.size || kept.has(n)) continue;
+      if (!s.delete(scene) || s.size) continue;
       holders.delete(n);
-      if (scene.anims.exists(keyOf(n))) scene.anims.remove(keyOf(n));
-      if (scene.textures.exists(keyOf(n))) scene.textures.remove(keyOf(n));
+      if (!kept.has(n)) free(scene, n);
     }
-  });
+  };
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, release);
+  scene.events.once(Phaser.Scenes.Events.DESTROY, release);
 }
 
 function checkMemory(scene: Phaser.Scene) {
@@ -64,13 +80,36 @@ function checkMemory(scene: Phaser.Scene) {
   console.warn(`PixelVfx: ${loaded.length} VFX sheets use ${(bytes / 1048576).toFixed(0)} MB of GPU memory (over 64 MB, heavy on mobile). Preload only what the scene plays.`);
 }
 
+const warnLoad = (name: VfxName) => console.warn(`PixelVfx: could not load '${name}' from ${PixelVfx.baseUrl}.`);
+
 function queue(scene: Phaser.Scene, name: VfxName) {
   const s = SHEETS[name];
   if (!s) throw new Error(`PixelVfx: unknown effect '${name}'. The names are listed in docs/vfx-sheets.md.`);
   const key = keyOf(name);
   if (scene.textures.exists(key)) return false;
   const url = `${PixelVfx.baseUrl}/${s.path}`;
-  scene.load.atlas(key, `${url}.png`, `${url}.json`);
+  scene.load.atlas(key, `${url}.png`, `${url}.json`, XHR, XHR);
+  // Remember failures (preload or play) so play() does not keep asking a host that just failed.
+  const done = () => {
+    scene.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, onError);
+    scene.load.off(`${Phaser.Loader.Events.FILE_KEY_COMPLETE}atlasjson-${key}`, onDone);
+  };
+  const onError = (file: Phaser.Loader.File) => {
+    if (file.key !== key && file.multiFile?.key !== key) return;
+    failedAt.set(name, Date.now());
+    done();
+  };
+  const onDone = () => {
+    failedAt.delete(name);
+    done();
+  };
+  scene.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, onError);
+  scene.load.once(`${Phaser.Loader.Events.FILE_KEY_COMPLETE}atlasjson-${key}`, onDone);
+  // A stopped scene's loader drops its listeners but can still finish the download; the game-wide texture manager still
+  // reports it, so a sheet nobody holds any more is freed as soon as it lands.
+  scene.textures.once(`${Phaser.Textures.Events.ADD_KEY}${key}`, () => {
+    if (!holders.get(name)?.size && !kept.has(name)) free(scene, name);
+  });
   return true;
 }
 
@@ -96,12 +135,17 @@ export const PixelVfx = {
     const s = SHEETS[name];
     if (!s) throw new Error(`PixelVfx: unknown effect '${name}'. The names are listed in docs/vfx-sheets.md.`);
     const key = keyOf(name);
+    if (options.hitStop && !s.hits.length && import.meta.env.DEV && !noHitsWarned.has(name)) {
+      noHitsWarned.add(name);
+      console.warn(`PixelVfx: '${name}' has no impact frames; do hit stop in game code.`);
+    }
     hold(scene, name, options.keep);
 
     const sprite = scene.add.sprite(x, y, '__DEFAULT').setDepth(options.depth ?? 1000).setFlipX(!!options.flip);
-    const onUpdate = (fn: () => void) => {
-      scene.events.on(Phaser.Scenes.Events.UPDATE, fn);
-      sprite.once(Phaser.GameObjects.Events.DESTROY, () => scene.events.off(Phaser.Scenes.Events.UPDATE, fn));
+    // After the physics step has moved bodies and their game objects.
+    const onPostUpdate = (fn: () => void) => {
+      scene.events.on(Phaser.Scenes.Events.POST_UPDATE, fn);
+      sprite.once(Phaser.GameObjects.Events.DESTROY, () => scene.events.off(Phaser.Scenes.Events.POST_UPDATE, fn));
       fn();
     };
 
@@ -111,7 +155,7 @@ export const PixelVfx = {
       sprite.setOrigin(0.5).setScrollFactor(0);
       const cam = scene.cameras.main;
       let scale = 0;
-      onUpdate(() => {
+      onPostUpdate(() => {
         const ox = cam.width * cam.originX, oy = cam.height * cam.originY;
         sprite.setPosition(ox + (cam.width / 2 - ox) / cam.zoomX, oy + (cam.height / 2 - oy) / cam.zoomY);
         const k = Math.ceil(Math.max(cam.width / (s.frameWidth * cam.zoomX), cam.height / (s.frameHeight * cam.zoomY)));
@@ -119,7 +163,7 @@ export const PixelVfx = {
       });
     } else if (options.follow) {
       const target = options.follow;
-      onUpdate(() => {
+      onPostUpdate(() => {
         if (!sprite.active) return;
         if (target.active === false) return sprite.destroy();
         sprite.setPosition(target.x + x, target.y + y);
@@ -140,21 +184,28 @@ export const PixelVfx = {
       }
       const repeat = options.repeat ?? (s.loop ? -1 : 0);
       sprite.play({ key, repeat });
-      if (repeat === 0) sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => sprite.destroy());
+      if (repeat >= 0) sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => sprite.destroy());
       if (options.hitStop) {
+        // Each freeze delays the frames after it, so a later hit lands later by the freezes before it.
+        let frozen = 0;
         for (const hit of s.hits) {
-          scene.time.delayedCall(hit.t * 1000, () => {
+          scene.time.delayedCall((hit.t + frozen) * 1000, () => {
             if (!sprite.active) return;
             sprite.anims.pause();
             if (typeof options.hitStop === 'function') options.hitStop(hit.freeze * 1000);
             scene.time.delayedCall(hit.freeze * 1000, () => sprite.active && sprite.anims.resume());
           });
+          frozen += hit.freeze;
         }
       }
     };
 
     if (scene.textures.exists(key)) {
       start();
+    } else if (Date.now() - (failedAt.get(name) ?? -Infinity) < RETRY_AFTER_MS) {
+      // Failed a moment ago: do not ask the host again yet.
+      warnLoad(name);
+      sprite.destroy();
     } else {
       // Not preloaded: load it now (hidden until it arrives).
       sprite.setVisible(false);
@@ -162,12 +213,18 @@ export const PixelVfx = {
       const failed = (file: Phaser.Loader.File) => {
         if (file.key !== key && file.multiFile?.key !== key) return;
         scene.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, failed);
-        console.warn(`PixelVfx: could not load '${name}' from ${PixelVfx.baseUrl}.`);
+        warnLoad(name);
         sprite.destroy();
       };
       scene.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, failed);
       scene.load.once(`${Phaser.Loader.Events.FILE_KEY_COMPLETE}atlasjson-${key}`, () => {
         scene.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, failed);
+        // The scene ended while the sheet was on its way: drop it again unless another scene holds it.
+        if (!holders.get(name)?.has(scene)) {
+          if (!holders.get(name)?.size && !kept.has(name)) free(scene, name);
+          sprite.destroy();
+          return;
+        }
         sprite.setVisible(true);
         start();
         checkMemory(scene);
