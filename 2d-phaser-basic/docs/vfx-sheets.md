@@ -26,7 +26,7 @@ library: origin at the sheet's pivot, right fps, loop or one-shot, crisp pixels,
 
 | The user asks for | Sheets | Add in code |
 |---|---|---|
-| “punchy”, “impactful”, “satisfying hit”, a sword or punch lands | `hit-spark`, `crit-hit` | `hitStop`, camera shake, a white flash on the target |
+| “punchy”, “impactful”, “satisfying hit”, a sword or punch lands | `hit-spark`, `crit-hit` | `hitStop` is only for sheets with impact frames (`hit-flash`, `heavy-landing`, `shield-block`, `level-up`); for `hit-spark`/`crit-hit` do a 60–90 ms hit stop in game code + camera shake + white flash |
 | A bullet or arrow hits | `bullet-impact` | camera shake |
 | Enemy dies, “pop”, “burst”, “vanish” | `cartoon-pow`, `small-explosion`, `poof` | `plasma-explosion` for energy/sci-fi; camera shake |
 | Block, parry | `shield-block` |  |
@@ -49,13 +49,18 @@ library: origin at the sheet's pivot, right fps, loop or one-shot, crisp pixels,
 3. `x, y` is where the effect stands: the feet of a character, the bottom of a blast, the contact point of a hit.
 4. Glow is baked into alpha, so effects read best over darker backgrounds; over very light ones they look faint.
 5. Sheets with impact frames (`hits` in `sheets.ts`) can hit-stop: `{ hitStop: true }` pauses the effect on them,
-   `{ hitStop: (ms) => … }` also lets you freeze your game for that long.
+   `{ hitStop: (ms) => … }` also lets you freeze your game for that long. Sheets with impact frames: `arcane-beam`, `arcane-missiles`, `blink-in`, `fire-ring`, `freeze`, `frost-nova`, `heavy-landing`, `hit-flash`, `shield-block`, `chain-lightning`, `charge-up`, `thunderclap`, `claw-swipe`, `dagger-flurry`, `double-slash`, `hammer-smash`, `heavy-cleave`, `scythe-reap`, `spear-sweep`, `spin-slash`, `sword-slash`, `thrust`, `uppercut`, `whip-crack`, `arrow-shot`, `dash-strike`, `earth-stomp`, `fireball-throw`, `ground-pound`, `holy-smite`, `ice-lance-throw`, `lightning-call`, `meteor-call`, `pistol-shots`, `rocket-launcher`, `sword-combo`, `root-snare`, `force-field`, `curse`, `life-steal`, `shatter-death`, `petrified`, `level-up`.
+   On any other sheet `hitStop` does nothing (a development warning says so): do the hit stop in game code.
 6. Full-screen effects (weather, transitions, nuke-style blasts) use a lot of mobile GPU memory (GPU MB below): at most
    one per scene, load it when needed (`play()` loads a sheet that was not preloaded), and it is freed when the scene ends.
+7. Never tween a PixelVfx sprite's `scale`/`scaleX`/`scaleY` (Game.ts converts scale tweens to displayWidth, so scale 2 →
+   tween 3 becomes 6×); for a size pop tween `displayWidth`/`displayHeight` to `frameWidth * k`.
+8. PixelVfx sheets load from `VFX_BASE_URL` in `sheets.ts` and are the platform's own assets — they are the one exception
+   to "declare every URL in src/assets.json".
 
 Options: `scale`, `depth` (default 1000), `flip` (directional effects face right; flip when facing left),
 `follow` (an object; `x, y` become offsets from it, and the effect goes when the object is destroyed), `repeat`
-(override loop/one-shot), `hitStop`, `keep`. Full-screen sheets (`rain`) ignore x, y and cover the camera at any zoom.
+(override loop/one-shot; any finite repeat also removes the effect when it ends), `hitStop`, `keep`. Full-screen sheets (`rain`) ignore x, y and cover the camera at any zoom.
 Sheets are freed when the scene that loaded them shuts down; pass `{ keep: true }` to `preload`/`play` to keep them.
 In development a console warning appears when the loaded sheets pass 64 MB of GPU memory.
 
@@ -172,7 +177,7 @@ Size is one frame in px; pivot is the anchor point inside it; GPU MB is the memo
 | `heavy-landing` | character landing hard after a jump or fall, dust rings and cracks at the feet. | 176x80 | 49, one-shot | 88, 60 | 0.5 |
 | `hit-flash` | character takes damage, red and white hurt flash with hit lines. | 80x64 | 16, one-shot | 40, 54 | 0.1 |
 | `hit-spark` | everyday melee hit spark at the contact point when a sword or punch lands. | 136x80 | 16, one-shot | 44, 64 | 0.2 |
-| `impact-frame` | anime full-screen impact frame flash with speed lines for a finishing blow or super move hit. | 320x180 | 10, loop, full-screen | 160, 90 | 1.8 |
+| `impact-frame` | anime full-screen impact frame flash with speed lines for a finishing blow or super move hit. | 320x180 | 10, one-shot, full-screen | 160, 90 | 1.8 |
 | `parry` | parry or sword clash when two blades meet, block with gold sparks. | 200x112 | 31, one-shot | 100, 96 | 0.9 |
 | `ricochet` | bullet ricochet glancing off the ground with sparks, near-miss gunfire. | 232x84 | 34, one-shot | 64, 60 | 0.4 |
 | `shield-block` | character blocking an attack with an energy shield in front, successful block or guard. | 148x104 | 34, one-shot | 40, 88 | 0.6 |
@@ -350,16 +355,16 @@ Size is one frame in px; pivot is the anchor point inside it; GPU MB is the memo
 
 | Name | Use for | Size | Frames | Pivot | GPU MB |
 |---|---|---|---|---|---|
-| `blinds` | full-screen scene transition closing and opening like window blinds between scenes. | 320x180 | 61, loop, full-screen | 0, 0 | 12.8 |
-| `burn-away` | full-screen scene transition burning the screen away with fire and embers. | 320x180 | 46, loop, full-screen | 0, 0 | 9.9 |
-| `crt-off` | full-screen retro CRT TV switch-off scene transition, game over or channel change. | 320x180 | 61, loop, full-screen | 0, 0 | 12.3 |
-| `diamond-wipe` | full-screen diamond wipe scene transition between levels or menus. | 320x180 | 61, loop, full-screen | 0, 0 | 9.3 |
-| `glitch-wipe` | full-screen digital glitch wipe scene transition for sci-fi or cyberpunk games. | 320x180 | 55, loop, full-screen | 0, 0 | 8.6 |
-| `iris` | full-screen iris-out circle scene transition, classic cartoon level end. | 320x180 | 67, loop, full-screen | 0, 0 | 10.7 |
-| `pixel-dissolve` | full-screen pixel dissolve scene transition between levels or rooms. | 320x180 | 67, loop, full-screen | 0, 0 | 13.1 |
-| `shatter-wipe` | full-screen glass shatter scene transition for a dramatic cut or battle start. | 320x180 | 85, loop, full-screen | 0, 0 | 15.2 |
-| `slash-wipe` | full-screen sword slash wipe scene transition for battle start or action games. | 320x180 | 52, loop, full-screen | 0, 0 | 9.0 |
-| `star-iris` | full-screen star-shaped iris scene transition for a level clear or cute game. | 320x180 | 67, loop, full-screen | 0, 0 | 10.7 |
+| `blinds` | full-screen scene transition closing and opening like window blinds between scenes. | 320x180 | 61, one-shot, full-screen | 0, 0 | 12.8 |
+| `burn-away` | full-screen scene transition burning the screen away with fire and embers. | 320x180 | 46, one-shot, full-screen | 0, 0 | 9.9 |
+| `crt-off` | full-screen retro CRT TV switch-off scene transition, game over or channel change. | 320x180 | 61, one-shot, full-screen | 0, 0 | 12.3 |
+| `diamond-wipe` | full-screen diamond wipe scene transition between levels or menus. | 320x180 | 61, one-shot, full-screen | 0, 0 | 9.3 |
+| `glitch-wipe` | full-screen digital glitch wipe scene transition for sci-fi or cyberpunk games. | 320x180 | 55, one-shot, full-screen | 0, 0 | 8.6 |
+| `iris` | full-screen iris-out circle scene transition, classic cartoon level end. | 320x180 | 67, one-shot, full-screen | 0, 0 | 10.7 |
+| `pixel-dissolve` | full-screen pixel dissolve scene transition between levels or rooms. | 320x180 | 67, one-shot, full-screen | 0, 0 | 13.1 |
+| `shatter-wipe` | full-screen glass shatter scene transition for a dramatic cut or battle start. | 320x180 | 85, one-shot, full-screen | 0, 0 | 15.2 |
+| `slash-wipe` | full-screen sword slash wipe scene transition for battle start or action games. | 320x180 | 52, one-shot, full-screen | 0, 0 | 9.0 |
+| `star-iris` | full-screen star-shaped iris scene transition for a level clear or cute game. | 320x180 | 67, one-shot, full-screen | 0, 0 | 10.7 |
 
 ### ui
 

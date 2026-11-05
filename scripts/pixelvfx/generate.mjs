@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Generates the PixelVfx helper for the Phaser templates from the agent8-library pixelfx metadata.
 //
-//   node scripts/pixelvfx/generate.mjs <agent8-library-dir> [--base-url <url>] [--out <template-dir> ...] [--only a,b,c]
+//   node scripts/pixelvfx/generate.mjs <agent8-library-dir> [--base-url <url>] [--out <template-dir> ...] [--only a,b,c] [--check]
 //
 // Reads <agent8-library-dir>/assets/2d/vfx/pixelfx/<category>/metadata.json (+ each sheet's JSON for impact timing) and
 // writes into every template:
@@ -9,8 +9,9 @@
 //   src/game/vfx/sheets.ts    VFX_BASE_URL, VfxName, one table per category
 //   docs/vfx-sheets.md        usage, which sheet when, rules, sheets by category
 // --base-url defaults to the library URL; pass another one to point a local copy at a local server or at public/.
+// --check writes nothing and exits 1 if any of those files differ from what would be generated (line endings ignored).
 
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,7 +27,7 @@ const SCREEN_SPACE = new Set(["weather"]);
 // "Which sheet when", in the words users write: request -> sheets + what to add in code. Names missing from the library
 // are dropped (a row with no sheet left is dropped too, unless it is a code-only row with an empty list).
 const WHEN = [
-  ["“punchy”, “impactful”, “satisfying hit”, a sword or punch lands", ["hit-spark", "crit-hit"], "`hitStop`, camera shake, a white flash on the target"],
+  ["“punchy”, “impactful”, “satisfying hit”, a sword or punch lands", ["hit-spark", "crit-hit"], "`hitStop` is only for sheets with impact frames (`hit-flash`, `heavy-landing`, `shield-block`, `level-up`); for `hit-spark`/`crit-hit` do a 60–90 ms hit stop in game code + camera shake + white flash"],
   ["A bullet or arrow hits", ["bullet-impact"], "camera shake"],
   ["Enemy dies, “pop”, “burst”, “vanish”", ["cartoon-pow", "small-explosion", "poof"], "`plasma-explosion` for energy/sci-fi; camera shake"],
   ["Block, parry", ["shield-block"], ""],
@@ -147,7 +148,8 @@ const when = WHEN.map(([moment, names, note]) => [moment, names.filter((n) => by
 const missing = WHEN.flatMap(([, names]) => names).filter((n) => !byName.has(n));
 if (missing.length) console.warn(`which-sheet-when: not in the library, dropped: ${missing.join(", ")}`);
 
-const loopWord = (s) => (s.screenSpace ? "loop, full-screen" : s.m.loop ? "loop" : "one-shot");
+const loopWord = (s) => `${s.m.loop ? "loop" : "one-shot"}${s.screenSpace ? ", full-screen" : ""}`;
+const withHits = sheets.filter((s) => s.hits.length).map((s) => `\`${s.name}\``);
 const docs = `# Pixel art VFX (PixelVfx)
 
 Read this before writing any effect.
@@ -186,13 +188,18 @@ ${when.map(([moment, names, note, codeOnly]) => `| ${moment} | ${codeOnly ? "—
 3. \`x, y\` is where the effect stands: the feet of a character, the bottom of a blast, the contact point of a hit.
 4. Glow is baked into alpha, so effects read best over darker backgrounds; over very light ones they look faint.
 5. Sheets with impact frames (\`hits\` in \`sheets.ts\`) can hit-stop: \`{ hitStop: true }\` pauses the effect on them,
-   \`{ hitStop: (ms) => … }\` also lets you freeze your game for that long.
+   \`{ hitStop: (ms) => … }\` also lets you freeze your game for that long. ${withHits.length ? `Sheets with impact frames: ${withHits.join(", ")}.` : "No sheet here has impact frames."}
+   On any other sheet \`hitStop\` does nothing (a development warning says so): do the hit stop in game code.
 6. Full-screen effects (weather, transitions, nuke-style blasts) use a lot of mobile GPU memory (GPU MB below): at most
    one per scene, load it when needed (\`play()\` loads a sheet that was not preloaded), and it is freed when the scene ends.
+7. Never tween a PixelVfx sprite's \`scale\`/\`scaleX\`/\`scaleY\` (Game.ts converts scale tweens to displayWidth, so scale 2 →
+   tween 3 becomes 6×); for a size pop tween \`displayWidth\`/\`displayHeight\` to \`frameWidth * k\`.
+8. PixelVfx sheets load from \`VFX_BASE_URL\` in \`sheets.ts\` and are the platform's own assets — they are the one exception
+   to "declare every URL in src/assets.json".
 
 Options: \`scale\`, \`depth\` (default 1000), \`flip\` (directional effects face right; flip when facing left),
 \`follow\` (an object; \`x, y\` become offsets from it, and the effect goes when the object is destroyed), \`repeat\`
-(override loop/one-shot), \`hitStop\`, \`keep\`. Full-screen sheets (\`rain\`) ignore x, y and cover the camera at any zoom.
+(override loop/one-shot; any finite repeat also removes the effect when it ends), \`hitStop\`, \`keep\`. Full-screen sheets (\`rain\`) ignore x, y and cover the camera at any zoom.
 Sheets are freed when the scene that loaded them shuts down; pass \`{ keep: true }\` to \`preload\`/\`play\` to keep them.
 In development a console warning appears when the loaded sheets pass 64 MB of GPU memory.
 
@@ -213,11 +220,23 @@ ${sheets
   .join("\n")}
 `;
 
-for (const out of outs) {
-  mkdirSync(join(out, "src", "game", "vfx"), { recursive: true });
-  mkdirSync(join(out, "docs"), { recursive: true });
-  copyFileSync(join(HERE, "PixelVfx.ts"), join(out, "src", "game", "vfx", "PixelVfx.ts"));
-  writeFileSync(join(out, "src", "game", "vfx", "sheets.ts"), sheetsTs);
-  writeFileSync(join(out, "docs", "vfx-sheets.md"), docs);
+const helper = readFileSync(join(HERE, "PixelVfx.ts"), "utf8");
+const files = outs.flatMap((out) => [
+  [join(out, "src", "game", "vfx", "PixelVfx.ts"), helper],
+  [join(out, "src", "game", "vfx", "sheets.ts"), sheetsTs],
+  [join(out, "docs", "vfx-sheets.md"), docs],
+]);
+
+if (args.includes("--check")) {
+  const lf = (t) => t.replace(/\r\n/g, "\n");
+  const stale = files.filter(([f, text]) => !existsSync(f) || lf(readFileSync(f, "utf8")) !== lf(text)).map(([f]) => f);
+  for (const f of stale) console.error(`stale: ${f}`);
+  console.log(stale.length ? `${stale.length} generated file(s) out of date; run node scripts/pixelvfx/generate.mjs <lib>` : `${files.length} generated files up to date`);
+  process.exit(stale.length ? 1 : 0);
+}
+
+for (const [f, text] of files) {
+  mkdirSync(dirname(f), { recursive: true });
+  writeFileSync(f, text);
 }
 console.log(`${sheets.length} sheets in ${categories.length} categories, base ${baseUrl} -> ${outs.join(", ")}`);
