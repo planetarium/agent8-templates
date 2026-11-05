@@ -2,7 +2,7 @@
 
 Refs #100 (라이브러리 쪽: planetarium/agent8-library#25)
 
-> 상태: **1·2·3단계(3c)·3d 완료. 3d에서 롤아웃 기준 충족(사용 5/5, 자제 2/2 Phaser 유지). 4단계(운영 URL)는 C1 sync 뒤.** 2026-11-04.
+> 상태: **1·2·3단계(3c)·3d·4단계 완료.** 3d에서 롤아웃 기준을 충족했다(사용 5/5, 자제 2/2 Phaser 유지). 4단계에서 운영 URL 하네스 1584/1584를 통과했다(2026-11-05). Draft 해제는 라이브러리 벡터 DB 등록 확인 뒤 사용자가 정한다.
 > **3d 결론: 고친 문구로는 롤아웃 가능.** 남은 조건은 C1 sync(운영 URL)와 4단계 재실측이다(아래 "3d 결론").
 > (3c 시점 결론, 3d로 대체됨) **결론: 지금 문구로는 롤아웃하지 않는다.** 스테이징에서 사용률이 0/5였다(파일럿 3a-2는 5/5). 에이전트가 첫 턴에 스스로 벡터 화풍을 고른 뒤 Context의 "벡터·HD·페인팅이면 예외" 문구를 근거로 헬퍼를 쓰지 않았다(아래 3단계). 예외 문구를 "사용자가 지정한 화풍일 때만"으로 좁히고 3단계를 한 번 더 돌린 뒤 PR을 연다.
 > 대상: `2d-phaser-basic`, `2d-phaser-sprite-character-gravity`. `basic-2d`(React·CSS)는 뺐다.
@@ -16,7 +16,7 @@ Refs #100 (라이브러리 쪽: planetarium/agent8-library#25)
 | 2 | Playwright 전수 재생 하네스(파일럿 시트 23장, CORS 켠 별도 오리진) | **152/152 검사 통과, 콘솔·네트워크 오류 0.** 23장 모두 로드·재생, one-shot 자동 destroy, loop 반복, flip·follow·hitStop·정수 배율 확인. `rain`이 zoom 0.5·1·2와 재생 뒤 zoom 변경·창 크기 변경에서 모두 화면을 덮음(파일럿 헬퍼는 zoom 0.5에서 화면의 1/4만 덮었음) |
 | 3 | 스테이징 실전 라운드(A2 5개 프롬프트 + 벡터 화풍 자제율 2개) | **사용 0/5**(파일럿 3a-2 5/5, 3a-1 0/4). 품질 3.8, ~27분 45초 / +206.5K. `setDisplaySize` 오용 0건이지만 스프라이트를 아예 안 써서 판정 대상이 없다. 에이전트가 Context를 다시 쓰며 "PixelVfx utilities remain available but unused for this smooth-vector game"이라고 적었다. **예외 문구가 사용을 막았다.** 자제율 2/2이지만 에이전트가 첫 턴에 Phaser를 걷어내 Canvas 2D로 갔기 때문이라 판별력이 없다 |
 | 3d | 문구를 고친 재측정(같은 5개 프롬프트 + 사용자가 벡터를 명시한 자제율 2개) | **사용 5/5, 맞는 시트 5/5, `setDisplaySize` 오용 0건, 자제율 2/2(Phaser 유지)**, 품질 4.0, ~31분 / +189.8K. 롤아웃 기준 충족 |
-| 4 | 라이브러리 URL 기준 하네스 재실행 | **대기** — C1 결과 sync 뒤. 운영 호스트는 확인함(아래) |
+| 4 | 운영 URL 기준 하네스 재실행 | **1584/1584 통과, 오류 0**(라이브러리 main `2532a177`, 244장, 488개 파일 모두 200). PNG 하나씩 받기 평균 2.4 s·중앙값 1.8 s, 가장 큰 `aurora` 4.1 MB 15.5 s(이 PC 0.2 MB/s). 표는 머지된 metadata로 재생성(2장 fps 변경) |
 | 5 | 트리밍 호환·메모리 위생(해제 훅·지연 로드·DEV 64 MB 경고) | **하네스 489/489 통과, 오류 0.** 직접 만든 트리밍 시트 22장이 원본과 픽셀 단위로 같은 자리에 그려짐(flip 포함 44/44). 씬 shutdown 때 해제·`keep` 유지·재로드, 지연 로드, DEV 경고 1회·배포 빌드에서 제거 확인. 헬퍼 사용 시 번들 **+6.5 KB, gzip +2.1 KB**(23장), 244장 표면 +41.3 KB / gzip +8.9 KB. **C1 실제 트리밍 시트(1da91d53, 244장)로 1584/1584 통과**(30장씩 9배치), 템플릿 표를 이 세트로 다시 생성 |
 
 ## 무엇을 넣었나
@@ -234,7 +234,7 @@ Tech Stack 줄은 "World effects"로, `Structure.md` 헬퍼 절은 "world effect
 - 남은 경미한 오용: `setTint`로 시트 색을 바꾸는 것(2건)과 처치에 `collect-burst`를 겹치는 것(1건). 다음에 문구를 손볼 때 문서 규칙에 "Do not tint sheets to recolor them; pick another sheet"와 Which sheet when의 처치 행에 "not `collect-burst` (that is for pickups)"를 더하는 것을 제안한다. 이번에는 문구를 바꾸지 않았다(측정한 문구를 그대로 둠).
 - 비용: 3a-2와 비슷하다(~31분 / +189.8K, 문서·헬퍼를 읽는 비용이 프롬프트마다 든다).
 
-**롤아웃 전에 남은 조건**: (1) C1 결과를 사용자가 sync 해 운영 URL `https://agent8-games.verse8.io/assets/2d/vfx/pixelfx/...`가 살아야 한다(지금은 404). (2) sync 뒤 4단계(운영 URL로 하네스 재실행)를 돌린다. (3) 이 zip은 시트 23장이고 운영 템플릿은 244장 문서(39.8 KB)다. 문서가 커져도 사용률이 유지되는지는 sync 뒤 운영 URL 판 zip으로 한 번 더 보는 것을 권한다(선택).
+**롤아웃 전에 남은 조건**: (1) C1 결과를 사용자가 sync 해 운영 URL `https://agent8-games.verse8.io/assets/2d/vfx/pixelfx/...`가 살아야 한다 — 11-05 충족. (2) sync 뒤 4단계(운영 URL로 하네스 재실행)를 돌린다 — 11-05 통과, 아래 4단계. (3) 이 zip은 시트 23장이고 운영 템플릿은 244장 문서(39.8 KB)다. 문서가 커져도 사용률이 유지되는지는 sync 뒤 운영 URL 판 zip으로 한 번 더 보는 것을 권한다(선택).
 
 비교 기준: 3a-2(파일럿 헬퍼) 5/5·맞는 시트 4/5·품질 4.0·`setDisplaySize` 오용 3건, 3c(이전 문구) 0/5·품질 3.8(지시의 "3b"는 이 이전 라운드 3c로 해석했다. 파일럿의 3b는 계획만 있고 돌리지 않았다). 3d가 3a-2 수준의 사용률(≥4/5)을 내고 자제율 2/2(Phaser 유지 상태)이면 롤아웃 가능으로 본다.
 
@@ -291,13 +291,39 @@ C1이 `origin/feat/pixelfx-vfx-sheets`에 트리밍 시트를 올렸다(3407daf2
 - 트리밍 전·후 픽셀 비교는 C1 세트로는 하지 않았다. fps를 바꿔 프레임이 달라졌기 때문이다. 같은 fps끼리의 비교(파일럿 23장 vs 직접 트리밍)는 위에서 22/22·flip 22/22로 통과했고, 하네스를 고친 뒤 다시 돌려도 489/489였다.
 - **두 템플릿의 `sheets.ts`·`docs/vfx-sheets.md`를 이 244장 세트로 다시 생성해 커밋했다**(이전 커밋은 파일럿 23장). 문서 39.8 KB, `sheets.ts` 51.9 KB. 헬퍼를 쓰는 씬의 번들은 gravity 기준 1,383,264 B / gzip 371,688 B로, upstream/main 대비 **+41,214 / +9,010**이다.
 
-## 4단계 — 라이브러리 URL 실측(C1 sync 뒤)
+## 4단계 — 운영 URL 실측(2026-11-05, 라이브러리 PR #26 머지·sync 뒤)
 
-C1이 229장 이상을 `assets/2d/vfx/pixelfx/`에 올리고 사용자가 sync 하면:
+planetarium/agent8-library#26이 머지됐고(`d455376a`, main HEAD `2532a177`), 사용자가 sync 해 CDN 업로드를 마쳤다(벡터 DB 등록은 아직이며 템플릿 동작과는 무관하다).
 
-1. `node scripts/pixelvfx/generate.mjs <C1 체크아웃>`로 두 템플릿의 `sheets.ts`·문서를 다시 만든다(`VFX_BASE_URL`은 기본값이 운영 값).
-2. `node experiments/pixelvfx/harness/run.mjs --work <임시> --base-url https://agent8-games.verse8.io/assets/2d/vfx/pixelfx --sheets-lib <C1 체크아웃>`로 운영 호스트에서 전수 재생을 다시 돌린다.
-3. 229장 기준 번들 증가분과 `docs/vfx-sheets.md` 크기를 다시 잰다.
+**표 재생성**: `git archive origin/main assets/2d/vfx/pixelfx`로 푼 뒤 `node scripts/pixelvfx/generate.mjs <폴더>`를 돌렸다. 244장 21개 카테고리이고, 머지 전 트리밍 세트(`1da91d53`)와는 2장이 다르다. `weather/shooting-stars`·`weather/storm`이 7→8 fps(70→80프레임)가 되어 `gpuBytes`가 15.4→17.6 MB다(라이브러리 예산 16 MB를 넘는다, `nuke` 20.7 MB와 함께 라이브러리 쪽 확인 필요). 두 템플릿의 `sheets.ts`·`docs/vfx-sheets.md`에 이 변경만 반영했다. 두 템플릿 모두 `bun run build`·`tsc --noEmit`(오류 0)를 다시 통과했다.
+
+**하네스**: `node experiments/pixelvfx/harness/run.mjs --work <임시> --base-url https://agent8-games.verse8.io/assets/2d/vfx/pixelfx --sheets-lib <폴더> --batch 30` — 앱은 로컬(127.0.0.1)에서, 시트는 운영 CDN에서 교차 출처로 받는다.
+
+| 항목 | 결과 |
+|---|---|
+| 검사 | **1584/1584 통과**, 콘솔 오류·실패한 요청·로더 오류 0. 244장 전수(30장씩 9배치) 로드·origin=pivot·fps·NEAREST·repeat·one-shot destroy·loop, flip·scale·follow·hitStop, `rain` zoom 0.5·1·2·재생 뒤 변경, 해제 훅, 지연 로드, DEV 경고(179 MB 배치에서 1회)·배포 빌드 경고 없음 |
+| 파일 응답 | 488개(PNG 244 + JSON 244) 모두 200, PNG 합계 124.5 MB |
+| 브라우저 안 로드 시간(한 배치에 30+4장을 동시에 받음) | PNG 평균 3,039 ms, 중앙값 1,556 ms, 최대 17,944 ms. JSON 평균 2,671 ms |
+| 하나씩 받은 시간(Node `fetch`, 대기열 없음) | PNG 평균 2,440 ms, 중앙값 1,797 ms. JSON 평균 565 ms. 124.5 MB / 733 s ≈ 0.2 MB/s(이 작업 PC 기준) |
+| 지연 로드(preload 없이 `play('rain')`·`play('hit-spark')`×2) | 도착해 재생을 마치기까지 2,582 ms |
+
+가장 큰 시트(파일 크기 순):
+
+| 시트 | PNG | 하나씩 | 브라우저 안(동시 로드) |
+|---|---|---|---|
+| `weather/aurora` | 4.12 MB | 15,521 ms | 17,944 ms |
+| `weather/god-rays` | 2.98 MB | 8,009 ms | 17,128 ms |
+| `transitions/pixel-dissolve` | 2.33 MB | 9,242 ms | 4,855 ms |
+| `explosions/nuke` | 2.22 MB | 4,094 ms | 1,935 ms |
+| `shadow/dark-explosion` | 2.07 MB | 4,488 ms | 4,286 ms |
+| `weather/storm` | 1.87 MB | 4,514 ms | 1,867 ms |
+
+해석:
+- 운영 URL에서 헬퍼·시트·교차 출처 로드가 모두 동작한다. **Draft 해제 조건인 4단계는 통과했다.**
+- 첫 실행에서는 지연 로드 검사 4개가 실패했다(1580/1584). 하네스가 2.5초에 판정했는데 운영 CDN에서는 그 안에 시트가 오지 않았다. 헬퍼 결함이 아니라 하네스 시간 가정의 문제라, 도착할 때까지(최대 30초) 기다렸다 판정하도록 고친 뒤 1584/1584가 됐다.
+- 처리량은 이 PC에서 0.2 MB/s로 낮았다(측정 위치·CDN 캐시 상태에 따라 다르다). 이 속도면 화면 전체 시트(1.9–4.1 MB)는 지연 로드 때 수 초에서 15초 늦게 나타난다. 문서 규칙 6("load it when needed")은 메모리 기준이다. 날씨처럼 시작 시점이 정해진 효과는 `preload`로 미리 받는 편이 체감이 낫다. 후속으로 문서에 "a full-screen sheet can take seconds to arrive; preload it in the scene that will use it" 한 줄을 제안한다(이번에는 문구를 바꾸지 않았다, 3d에서 잰 문구 유지).
+- Resource Timing의 `transferSize`가 0이었다(CDN이 `Timing-Allow-Origin`을 주지 않는다). 그래서 크기는 라이브러리 체크아웃의 파일 크기로 적었다.
+- 결과 원본: `t_mw1mfk6v_p6z5-assets/harness-prod/result.json`(`sequential` 필드에 파일별 시간).
 
 ## 남은 리스크
 

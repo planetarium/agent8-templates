@@ -93,7 +93,10 @@ const open = async (query, viewport, shot, after, { port = APP_PORT, base = base
   if (after) await after(page);
   await page.waitForFunction(() => window.__vfx?.done, null, { timeout: 120000 });
   const r = await page.evaluate(() => window.__vfx);
-  const run = { query, port, base, viewport, ...r, errors, failed, warnings: warnings.filter((w) => w.includes("PixelVfx")) };
+  // How long each sheet file took to arrive (Resource Timing; transferSize is 0 when cross-origin timing is not allowed).
+  const loads = await page.evaluate(() => performance.getEntriesByType("resource").filter((e) => e.name.includes("/pixelfx/"))
+    .map((e) => ({ url: e.name, ms: Math.round(e.duration), bytes: e.transferSize || e.encodedBodySize || 0 })));
+  const run = { query, port, base, viewport, ...r, errors, failed, loads, warnings: warnings.filter((w) => w.includes("PixelVfx")) };
   result.runs.push(run);
   await page.close();
   return run;
@@ -157,4 +160,32 @@ for (const c of bad) console.log(`FAIL ${c.name}: ${c.detail}`);
 for (const e of errs) console.log(`ERROR ${e}`);
 for (const r of result.runs) for (const c of r.coverage ?? []) console.log(JSON.stringify(c));
 for (const w of new Set(result.runs.flatMap((r) => r.warnings ?? []))) console.log(`WARN ${w}`);
+// Sheet load times from the playback batches (first load of each file).
+const seen = new Map();
+for (const r of result.runs) if (r.query.startsWith("mode=all") && r.port === APP_PORT) for (const l of r.loads ?? []) if (!seen.has(l.url)) seen.set(l.url, l);
+const pngs = [...seen.values()].filter((l) => l.url.endsWith(".png")), jsons = [...seen.values()].filter((l) => l.url.endsWith(".json"));
+const avg = (a) => (a.length ? Math.round(a.reduce((s, l) => s + l.ms, 0) / a.length) : 0);
+const med = (a) => (a.length ? [...a].map((l) => l.ms).sort((x, y) => x - y)[Math.floor(a.length / 2)] : 0);
+console.log(`LOAD in-browser (${batch} sheets at a time): png ${pngs.length} files avg ${avg(pngs)} ms median ${med(pngs)} ms max ${Math.max(0, ...pngs.map((l) => l.ms))} ms; json ${jsons.length} avg ${avg(jsons)} ms`);
+const lazyRun = result.runs.find((r) => r.query === "mode=lazy");
+if (lazyRun?.lazyMs != null) console.log(`LAZY rain + hit-spark loaded and played out in ${lazyRun.lazyMs} ms`);
+
+// One file at a time from the host (no queueing), sizes from the library checkout: what a single play()/preload waits.
+if (arg("--base-url") && sheetsLib) {
+  const dir = join(sheetsLib, "assets", "2d", "vfx", "pixelfx");
+  const files = gpu.map((g) => table.match(new RegExp(`'${g.name}': \\{ path: '([^']+)'`))[1]).flatMap((p) => [`${p}.png`, `${p}.json`]);
+  const timed = [];
+  for (const f of files) {
+    const t = Date.now();
+    const res = await fetch(`${baseUrl}/${f}`);
+    const body = Buffer.from(await res.arrayBuffer());
+    timed.push({ f, status: res.status, ms: Date.now() - t, bytes: existsSync(join(dir, f)) ? statSync(join(dir, f)).size : body.length });
+  }
+  result.sequential = timed;
+  writeFileSync(join(work, "result.json"), JSON.stringify(result, null, 2));
+  const tp = timed.filter((x) => x.f.endsWith(".png")), tj = timed.filter((x) => x.f.endsWith(".json"));
+  const mb = timed.reduce((s, x) => s + x.bytes, 0) / 1048576, secs = timed.reduce((s, x) => s + x.ms, 0) / 1000;
+  console.log(`SEQ ${timed.length} files, non-200 ${timed.filter((x) => x.status !== 200).length}; png avg ${avg(tp)} ms median ${med(tp)} ms; json avg ${avg(tj)} ms; ${mb.toFixed(1)} MB in ${secs.toFixed(1)} s (${(mb / secs).toFixed(1)} MB/s)`);
+  for (const x of [...tp].sort((a, b) => b.bytes - a.bytes).slice(0, 6)) console.log(`BIG ${x.f} ${(x.bytes / 1048576).toFixed(2)} MB ${x.ms} ms (in-browser ${seen.get(`${baseUrl}/${x.f}`)?.ms ?? "?"} ms)`);
+}
 process.exit(bad.length || errs.length ? 1 : 0);

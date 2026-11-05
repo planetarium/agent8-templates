@@ -131,7 +131,13 @@ export class MainScene extends Phaser.Scene {
     gone.destroy(); // destroyed before its sheet arrives: must not start or throw
     check('lazy: hidden until loaded', !rain.visible && !a.visible && this.load.isLoading());
     this.time.delayedCall(400, () => (out as any).shotReady = true);
-    this.time.delayedCall(2500, () => {
+    // Judge once everything arrived and the one-shots finished (or after 30 s); a remote host can take seconds.
+    const t0 = this.time.now;
+    const ready = () => (rain.visible && aDone && bDone) || this.time.now - t0 > 30000;
+    const wait = () => (ready() ? judge() : this.time.delayedCall(250, wait));
+    this.time.delayedCall(250, wait);
+    const judge = () => {
+      (out as any).lazyMs = Math.round(this.time.now - t0);
       const cam = this.cameras.main;
       check('lazy: rain loaded, visible and playing', rain.active && rain.visible && rain.texture.key === 'vfx:rain' && rain.anims.isPlaying);
       check('lazy: rain covers the screen', rain.displayWidth * cam.zoom >= cam.width && rain.displayHeight * cam.zoom >= cam.height, `${rain.displayWidth}x${rain.displayHeight}`);
@@ -139,7 +145,7 @@ export class MainScene extends Phaser.Scene {
       check('lazy: hit-spark scale 2 and pivot origin', a.scaleX === 2 || aDone);
       check('lazy: sprite destroyed before load did not start', !started.includes('heal'));
       out.done = true;
-    });
+    };
   }
 
   private all() {
