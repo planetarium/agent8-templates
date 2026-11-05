@@ -96,6 +96,20 @@ test("--check passes on fresh output and fails on a changed or missing file", (t
   assert.equal(run(lib, "--out", out, "--check").status, 1);
 });
 
+test("the library path works before or after --check and after value options", (t) => {
+  const tmp = mkdtempSync(join(tmpdir(), "pixelvfx-"));
+  t.after(() => rmSync(tmp, { recursive: true, force: true }));
+  const lib = join(tmp, "lib"), out = join(tmp, "template");
+  makeLibrary(lib);
+  assert.equal(run("--out", out, lib).status, 0);
+  assert.equal(run("--check", lib, "--out", out).status, 0);
+  assert.equal(run(lib, "--check", "--out", out).status, 0);
+  assert.equal(run("--out", out, "--check", lib).status, 0);
+  writeFileSync(join(out, "docs", "vfx-sheets.md"), "edited by hand\n");
+  assert.equal(run("--check", lib, "--out", out).status, 1);
+  assert.equal(run(lib, "--check", "--out", out).status, 1);
+});
+
 test("--only keeps the named sheets and rejects unknown names", (t) => {
   const tmp = mkdtempSync(join(tmpdir(), "pixelvfx-"));
   t.after(() => rmSync(tmp, { recursive: true, force: true }));

@@ -80,36 +80,55 @@ function checkMemory(scene: Phaser.Scene) {
   console.warn(`PixelVfx: ${loaded.length} VFX sheets use ${(bytes / 1048576).toFixed(0)} MB of GPU memory (over 64 MB, heavy on mobile). Preload only what the scene plays.`);
 }
 
-const warnLoad = (name: VfxName) => console.warn(`PixelVfx: could not load '${name}' from ${PixelVfx.baseUrl}.`);
+const warnLoad = (name: VfxName, base = PixelVfx.baseUrl) => console.warn(`PixelVfx: could not load '${name}' from ${base}.`);
 
-function queue(scene: Phaser.Scene, name: VfxName) {
+// A sheet nobody holds any more (its scene ended while it was loading) is freed as soon as it lands.
+function dropIfUnheld(scene: Phaser.Scene, name: VfxName) {
+  if (!holders.get(name)?.size && !kept.has(name)) free(scene, name);
+}
+
+/** Queues a sheet; onSettled(true) once its texture exists, onSettled(false) if it failed. Returns false if already loaded. */
+function queue(scene: Phaser.Scene, name: VfxName, onSettled?: (ok: boolean) => void) {
   const s = SHEETS[name];
   if (!s) throw new Error(`PixelVfx: unknown effect '${name}'. The names are listed in docs/vfx-sheets.md.`);
   const key = keyOf(name);
   if (scene.textures.exists(key)) return false;
-  const url = `${PixelVfx.baseUrl}/${s.path}`;
+  const base = PixelVfx.baseUrl;
+  const url = `${base}/${s.path}`;
   scene.load.atlas(key, `${url}.png`, `${url}.json`, XHR, XHR);
-  // Remember failures (preload or play) so play() does not keep asking a host that just failed.
-  const done = () => {
+
+  const fileDone = `${Phaser.Loader.Events.FILE_KEY_COMPLETE}atlasjson-${key}`;
+  const added = `${Phaser.Textures.Events.ADD_KEY}${key}`;
+  let settled = false;
+  const settle = (ok: boolean) => {
+    if (settled) return;
+    settled = true;
     scene.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, onError);
-    scene.load.off(`${Phaser.Loader.Events.FILE_KEY_COMPLETE}atlasjson-${key}`, onDone);
+    scene.load.off(fileDone, onDone);
+    scene.load.off(Phaser.Loader.Events.COMPLETE, onDone);
+    scene.textures.off(added, onAdded);
+    if (ok) {
+      failedAt.delete(name);
+      dropIfUnheld(scene, name);
+    } else {
+      // Remember the failure so play() does not keep asking a host that just failed.
+      failedAt.set(name, Date.now());
+      warnLoad(name, base);
+    }
+    onSettled?.(ok);
   };
   const onError = (file: Phaser.Loader.File) => {
-    if (file.key !== key && file.multiFile?.key !== key) return;
-    failedAt.set(name, Date.now());
-    done();
+    if (file.key === key || file.multiFile?.key === key) settle(false);
   };
-  const onDone = () => {
-    failedAt.delete(name);
-    done();
-  };
-  scene.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, onError);
-  scene.load.once(`${Phaser.Loader.Events.FILE_KEY_COMPLETE}atlasjson-${key}`, onDone);
+  // A 200 response that does not decode (a broken PNG or JSON) can finish without a texture: that is a failure too.
+  const onDone = () => settle(scene.textures.exists(key));
   // A stopped scene's loader drops its listeners but can still finish the download; the game-wide texture manager still
-  // reports it, so a sheet nobody holds any more is freed as soon as it lands.
-  scene.textures.once(`${Phaser.Textures.Events.ADD_KEY}${key}`, () => {
-    if (!holders.get(name)?.size && !kept.has(name)) free(scene, name);
-  });
+  // reports it.
+  const onAdded = () => dropIfUnheld(scene, name);
+  scene.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, onError);
+  scene.load.once(fileDone, onDone);
+  scene.load.once(Phaser.Loader.Events.COMPLETE, onDone);
+  scene.textures.once(added, onAdded);
   return true;
 }
 
@@ -187,13 +206,17 @@ export const PixelVfx = {
       if (repeat >= 0) sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => sprite.destroy());
       if (options.hitStop) {
         // Each freeze delays the frames after it, so a later hit lands later by the freezes before it.
-        let frozen = 0;
+        // Only the latest pause may resume: an earlier hit's resume landing on the same tick as the next pause is ignored.
+        let frozen = 0, latest = 0;
         for (const hit of s.hits) {
           scene.time.delayedCall((hit.t + frozen) * 1000, () => {
             if (!sprite.active) return;
+            const mine = ++latest;
             sprite.anims.pause();
             if (typeof options.hitStop === 'function') options.hitStop(hit.freeze * 1000);
-            scene.time.delayedCall(hit.freeze * 1000, () => sprite.active && sprite.anims.resume());
+            scene.time.delayedCall(hit.freeze * 1000, () => {
+              if (sprite.active && mine === latest) sprite.anims.resume();
+            });
           });
           frozen += hit.freeze;
         }
@@ -209,22 +232,9 @@ export const PixelVfx = {
     } else {
       // Not preloaded: load it now (hidden until it arrives).
       sprite.setVisible(false);
-      queue(scene, name);
-      const failed = (file: Phaser.Loader.File) => {
-        if (file.key !== key && file.multiFile?.key !== key) return;
-        scene.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, failed);
-        warnLoad(name);
-        sprite.destroy();
-      };
-      scene.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, failed);
-      scene.load.once(`${Phaser.Loader.Events.FILE_KEY_COMPLETE}atlasjson-${key}`, () => {
-        scene.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, failed);
-        // The scene ended while the sheet was on its way: drop it again unless another scene holds it.
-        if (!holders.get(name)?.has(scene)) {
-          if (!holders.get(name)?.size && !kept.has(name)) free(scene, name);
-          sprite.destroy();
-          return;
-        }
+      queue(scene, name, (ok) => {
+        // Failed (queue already warned), or the scene ended while the sheet was on its way.
+        if (!ok || !holders.get(name)?.has(scene)) return sprite.destroy();
         sprite.setVisible(true);
         start();
         checkMemory(scene);

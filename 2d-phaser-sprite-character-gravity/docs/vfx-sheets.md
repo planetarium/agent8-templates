@@ -54,7 +54,7 @@ library: origin at the sheet's pivot, right fps, loop or one-shot, crisp pixels,
 6. Full-screen effects (weather, transitions, nuke-style blasts) use a lot of mobile GPU memory (GPU MB below): at most
    one per scene, load it when needed (`play()` loads a sheet that was not preloaded), and it is freed when the scene ends.
 7. Never tween a PixelVfx sprite's `scale`/`scaleX`/`scaleY` (Game.ts converts scale tweens to displayWidth, so scale 2 →
-   tween 3 becomes 6×); for a size pop tween `displayWidth`/`displayHeight` to `frameWidth * k`.
+   tween 3 becomes 6×); for a size pop tween `displayWidth` to `frameWidth * k` and `displayHeight` to `frameHeight * k`.
 8. PixelVfx sheets load from `VFX_BASE_URL` in `sheets.ts` and are the platform's own assets — they are the one exception
    to "declare every URL in src/assets.json".
 

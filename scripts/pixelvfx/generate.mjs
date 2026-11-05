@@ -49,7 +49,9 @@ const opt = (flag) => {
   for (let i = 0; i < args.length; i++) if (args[i] === flag && args[i + 1]) values.push(args[++i]);
   return values;
 };
-const lib = args.find((a, i) => !a.startsWith("--") && !args[i - 1]?.startsWith("--"));
+// Options that take a value; boolean flags such as --check do not, so `--check <lib>` and `<lib> --check` both work.
+const VALUE_OPTIONS = new Set(["--base-url", "--out", "--only"]);
+const lib = args.find((a, i) => !a.startsWith("--") && !VALUE_OPTIONS.has(args[i - 1]));
 if (!lib) {
   console.error("usage: node scripts/pixelvfx/generate.mjs <agent8-library-dir> [--base-url <url>] [--out <template-dir> ...]");
   process.exit(1);
@@ -193,7 +195,7 @@ ${when.map(([moment, names, note, codeOnly]) => `| ${moment} | ${codeOnly ? "—
 6. Full-screen effects (weather, transitions, nuke-style blasts) use a lot of mobile GPU memory (GPU MB below): at most
    one per scene, load it when needed (\`play()\` loads a sheet that was not preloaded), and it is freed when the scene ends.
 7. Never tween a PixelVfx sprite's \`scale\`/\`scaleX\`/\`scaleY\` (Game.ts converts scale tweens to displayWidth, so scale 2 →
-   tween 3 becomes 6×); for a size pop tween \`displayWidth\`/\`displayHeight\` to \`frameWidth * k\`.
+   tween 3 becomes 6×); for a size pop tween \`displayWidth\` to \`frameWidth * k\` and \`displayHeight\` to \`frameHeight * k\`.
 8. PixelVfx sheets load from \`VFX_BASE_URL\` in \`sheets.ts\` and are the platform's own assets — they are the one exception
    to "declare every URL in src/assets.json".
 
