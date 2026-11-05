@@ -408,6 +408,6 @@ Size is one frame in px; pivot is the anchor point inside it; GPU MB is the memo
 | `fog` | full-screen fog or mist overlay for spooky, night or swamp levels. | 320x180 | 96, loop, full-screen | 160, 170 | 10.0 |
 | `god-rays` | full-screen sunbeam god rays overlay with floating dust for forests, temples or churches. | 320x180 | 70, loop, full-screen | 160, 170 | 15.4 |
 | `rain` | full-screen rain overlay for a rainy level or weather system. | 320x180 | 64, loop, full-screen | 160, 170 | 14.1 |
-| `shooting-stars` | full-screen shooting stars overlay for a night sky background or wish scene. | 320x180 | 70, loop, full-screen | 160, 180 | 15.4 |
+| `shooting-stars` | full-screen shooting stars overlay for a night sky background or wish scene. | 320x180 | 80, loop, full-screen | 160, 180 | 17.6 |
 | `snow` | full-screen gentle snowfall overlay for winter or Christmas levels. | 320x180 | 72, loop, full-screen | 160, 170 | 15.8 |
-| `storm` | full-screen thunderstorm overlay with heavy rain and lightning flashes for a stormy level. | 320x180 | 70, loop, full-screen | 160, 170 | 15.4 |
+| `storm` | full-screen thunderstorm overlay with heavy rain and lightning flashes for a stormy level. | 320x180 | 80, loop, full-screen | 160, 170 | 17.6 |

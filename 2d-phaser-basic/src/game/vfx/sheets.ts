@@ -343,9 +343,9 @@ export const WEATHER: Record<WeatherVfx, VfxSheet> = {
   'fog': { path: 'weather/fog', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 96, screenSpace: true, gpuBytes: 10531840, hits: [] },
   'god-rays': { path: 'weather/god-rays', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16128000, hits: [] },
   'rain': { path: 'weather/rain', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 64, screenSpace: true, gpuBytes: 14745600, hits: [] },
-  'shooting-stars': { path: 'weather/shooting-stars', frameWidth: 320, frameHeight: 180, pivot: [160, 180], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16108800, hits: [] },
+  'shooting-stars': { path: 'weather/shooting-stars', frameWidth: 320, frameHeight: 180, pivot: [160, 180], loop: true, fps: 8, frames: 80, screenSpace: true, gpuBytes: 18406400, hits: [] },
   'snow': { path: 'weather/snow', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 6, frames: 72, screenSpace: true, gpuBytes: 16588800, hits: [] },
-  'storm': { path: 'weather/storm', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 7, frames: 70, screenSpace: true, gpuBytes: 16128000, hits: [] },
+  'storm': { path: 'weather/storm', frameWidth: 320, frameHeight: 180, pivot: [160, 170], loop: true, fps: 8, frames: 80, screenSpace: true, gpuBytes: 18432000, hits: [] },
 };
 
 export type VfxName = ArcaneVfx | CrittersVfx | ExplosionsVfx | FireVfx | HolyVfx | IceVfx | ImpactsVfx | LightningVfx | MeleeVfx | MovesVfx | NatureVfx | PickupsVfx | ProjectilesVfx | ScifiVfx | ShadowVfx | SpawnVfx | StatusVfx | TransitionsVfx | UiVfx | WaterVfx | WeatherVfx;
