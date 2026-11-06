@@ -39,21 +39,23 @@ const BUILD = [
   'src/physics/PhysicsDemo.tsx',
 ];
 
-// Character game core, independent of the camera: controller, level, input,
-// character model and touch controls. View-specific files (config.ts,
-// App.tsx, game/state.ts, components/Player.tsx, components/CameraRig.tsx and
-// the docs) stay per folder.
-const CHARACTER = [
-  'src/assets.json',
+// Kinematic character controller: controller + its tests, the collision
+// types it needs (world.ts), movement input, animation and the character
+// model. Every template with a walking character.
+const CONTROLLER = [
   'src/game/anim.ts',
   'src/game/input.ts',
   'src/game/player.ts',
   'src/game/player.test.ts',
   'src/game/world.ts',
   'src/components/Character.tsx',
-  'src/components/Level.tsx',
-  'src/components/MobileControls.tsx',
 ];
+
+// Character views on the box / ramp / height-field stage: the controller plus
+// the level, asset list and touch controls. View-specific files (config.ts,
+// App.tsx, game/state.ts, components/Player.tsx, components/CameraRig.tsx and
+// the docs) stay per folder.
+const CHARACTER = [...CONTROLLER, 'src/assets.json', 'src/components/Level.tsx', 'src/components/MobileControls.tsx'];
 
 // package.json fields copied from the source (name, scripts etc. stay per folder).
 const PACKAGE_FIELDS = ['dependencies', 'devDependencies'];
@@ -63,6 +65,10 @@ const TARGETS = {
   'basic-3d-r3f-quarterview': [...BUILD, ...CHARACTER],
   'basic-3d-r3f-firstpersonview': [...BUILD, ...CHARACTER],
   'basic-3d-r3f-empty': BUILD,
+  // No character: its own flight loop, input and touch controls.
+  'basic-3d-r3f-flightview': BUILD,
+  // Voxel world instead of the box stage: own terrain, assets (block textures) and touch buttons.
+  'basic-3d-r3f-minecraft': [...BUILD, ...CONTROLLER],
 };
 
 const args = process.argv.slice(2);
@@ -76,6 +82,7 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log('');
   console.log(colorize('yellow', 'Shared files:'));
   console.log(colorize('gray', '  all targets:      ') + BUILD.join(', '));
+  console.log(colorize('gray', '  controller:       ') + CONTROLLER.join(', '));
   console.log(colorize('gray', '  character views:  ') + CHARACTER.join(', '));
   console.log(colorize('gray', '  package.json:     ') + PACKAGE_FIELDS.join(', '));
   console.log('');

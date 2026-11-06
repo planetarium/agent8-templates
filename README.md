@@ -30,8 +30,8 @@ cd agent8-templates
 
 ## 🧊 R3F 3D Templates (`basic-3d-r3f-*`)
 
-`basic-3d-r3f-freeview`, `-sideview`, `-quarterview`, `-firstpersonview` and
-`-empty` are React Three Fiber templates. Each folder is a complete project
+`basic-3d-r3f-freeview`, `-sideview`, `-quarterview`, `-firstpersonview`,
+`-empty`, `-flightview` and `-minecraft` are React Three Fiber templates. Each folder is a complete project
 (agent8 copies it as-is), so code that does not depend on the view is
 duplicated in every folder. `basic-3d-r3f-freeview` is the source of truth for
 that shared code: edit it there, then copy it out.
@@ -43,7 +43,7 @@ npm run 3d:check   # exit 1 if any copy differs from basic-3d-r3f-freeview
 
 Shared files (the list lives in `scripts/sync-3d-shared.js`):
 
-- All five folders: `.gitignore`, `index.html`, `postcss.config.js`,
+- All folders: `.gitignore`, `index.html`, `postcss.config.js`,
   `tailwind.config.js`, `tsconfig.json`, `vite.config.ts`, `src/main.tsx`,
   `src/index.css`, `src/physics/LazyPhysics.tsx`, `src/physics/PhysicsDemo.tsx`,
   and `dependencies` / `devDependencies` in `package.json`.
@@ -52,6 +52,10 @@ Shared files (the list lives in `scripts/sync-3d-shared.js`):
   `src/game/player.ts`, `src/game/player.test.ts`, `src/game/world.ts`,
   `src/components/Character.tsx`, `src/components/Level.tsx`,
   `src/components/MobileControls.tsx`.
+- minecraft: the controller only — `src/game/anim.ts`, `src/game/input.ts`,
+  `src/game/player.ts`, `src/game/player.test.ts`, `src/game/world.ts`,
+  `src/components/Character.tsx` (its assets, terrain and touch buttons are
+  its own). flightview and empty: the build files only.
 
 Everything else (`src/config.ts`, `src/App.tsx`, `src/game/state.ts`,
 `src/components/Player.tsx`, `src/components/CameraRig.tsx`, `AGENTS.md`,
