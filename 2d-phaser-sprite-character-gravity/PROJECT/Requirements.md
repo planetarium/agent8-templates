@@ -5,6 +5,7 @@
 - All gameplay code lives under `src/game/`; React under `src/components/` is a thin host and must not reach into Phaser objects directly.
 - Extend behavior by subclassing `Phaser.Physics.Arcade.Sprite` (same pattern as `SpriteCharacter`) or by adding new scenes under `src/game/scenes/`, not by inlining logic into `GameComponent.tsx`.
 - Load sprite/audio URLs and frame metadata through `src/assets.json` and read them in `preload()`; do not hardcode asset URLs inside scenes or characters.
+  - Exception: PixelVfx sheets load from `VFX_BASE_URL` in `src/game/vfx/sheets.ts` (the platform's own assets) through `PixelVfx.preload` / `PixelVfx.play`; do not copy them into `assets.json`.
 - Animation keys are namespaced by texture key (`` `${spriteKey}-left` ``, etc.) and guarded by `anims.exists(...)` — reuse that convention so multiple instances of the same sheet don't re-register animations.
 - Ground checks go through `body.touching.down || body.blocked.down`. New platforms must register with `this.physics.add.collider(player, platform)`.
 - The critical section in `Game.ts` (Sprite/Image scale + Tween overrides) is off-limits; build scaling logic on top of `setDisplaySize` + `setScale`, not by editing the patch.

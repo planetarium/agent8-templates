@@ -5,6 +5,7 @@
 - Keep the React/Phaser boundary clean: React mounts the container in `GameComponent`, Phaser owns everything under `src/game/`. Do not drive game state from React.
 - Add new scenes under `src/game/scenes/` and register them in the `scene: []` array inside `createGame` (`Game.ts`) — scene switching goes through `this.scene.start(key)`, not through React.
 - Declare all texture/audio URLs in `src/assets.json` and load them in the owning scene's `preload()`; do not hard-code URLs inside `create()` / `update()`.
+  - Exception: PixelVfx sheets load from `VFX_BASE_URL` in `src/game/vfx/sheets.ts` (the platform's own assets) through `PixelVfx.preload` / `PixelVfx.play`; do not copy them into `assets.json`.
 - Read canvas dimensions from `this.cameras.main` or `this.sys.game.canvas`; the game uses `Phaser.Scale.RESIZE`, so fixed pixel values drift.
 - Put physics bodies through Arcade Physics (`this.physics.add.existing(...)` / `this.physics.add.sprite(...)`); `gravity.y` defaults to `2000`.
 
