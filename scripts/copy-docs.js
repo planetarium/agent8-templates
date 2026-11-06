@@ -118,6 +118,10 @@ async function copyDocs() {
           if (target === 'basic-3d' && item === 'basic-3d') {
             continue;
           }
+          // The R3F templates carry their own AGENTS.md / PROJECT docs; docs/ is written for other stacks.
+          if (item.startsWith('basic-3d-r3f-')) {
+            continue;
+          }
           targetDirs.push(item);
         }
       }
