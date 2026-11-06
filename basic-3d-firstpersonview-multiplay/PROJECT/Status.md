@@ -2,7 +2,7 @@
 
 ## Implemented
 
-- Session flow: `NicknameSetup` → `RoomManager` (create/join) → `LobbyRoom` (character select + ready) → `GameScene`, driven by `App.tsx` and `@agent8/gameserver` subscriptions.
+- Session flow: `NicknameSetup` → `RoomManager` (create/join) → joining-room spinner (until `rsConnected`) → `LobbyRoom` (character select + ready) → `GameScene`, driven by `App.tsx` and `@agent8/gameserver` subscriptions.
 - First-person camera and movement via `vibe-starter-3d`'s `FirstPersonViewController`, with pointer-lock requested on canvas `pointerdown`.
 - Local player animation state machine (IDLE, WALK, RUN, JUMP, PUNCH, HIT, DIE) driven by keyboard + action keys; DIE / revive flow synced through `subscribeRoomMyState` and `revive` remote function.
 - Throttled network sync (100 ms + dirty thresholds) of position, rotation, and state via `updateMyState` remote function.

@@ -23,7 +23,7 @@ _Exact versions are in `package.json`._
 - `networkSyncStore.setServer(server)` must run whenever the connection toggles; it owns the periodic `handlePing` loop and exposes `rtt` to `RTT.tsx`.
 - Local player transform is sent via `server.remoteFunction('updateMyState', …)` throttled to 100 ms with position/rotation dirty checks (see `Player.tsx`). Do not bypass the throttle.
 - `NetworkContainer` drives remote players imperatively: it creates a `React.RefObject<RemotePlayerHandle>` per remote account and calls `syncState(state, position, rotation)` on each `subscribeRoomAllUserStates` update — remote transforms must not be driven through React props.
-- Server-side remote functions relied on by the client: `joinRoom`, `leaveRoom`, `setCharacter`, `toggleReady`, `updateMyState`, `handlePing`.
+- Server-side remote functions relied on by the client: `createRoom`, `setNickname`, `setCharacter`, `toggleReady`, `updateMyState`, `handlePing`. Room entry/exit is the SDK's `joinRoom` / `leaveRoom` from `useGameServer()`, which drive the server's `onRoomCreate` / `onRoomJoin` / `onRoomLeave` hooks — the server never joins rooms itself.
 - Character model and animation URLs are loaded via the `src/assets.json` manifest.
 </content>
 </invoke>

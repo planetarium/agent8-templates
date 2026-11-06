@@ -1,83 +1,98 @@
 class Server {
-  // Join a room or create a new one if roomId is not provided
-  async joinRoom(roomId, nickname) {
+  // Returns an id for a brand-new room. The room does not exist yet — the runtime
+  // creates it when the first client joins with the SDK's joinRoom(). The server
+  // never joins rooms in 2.0: $global.joinRoom() has been removed.
+  //
+  // No collision scan: getAllRoomIds() lists only ACTIVE rooms, so it cannot see
+  // the one id that matters — one just handed out and not yet joined. Two players
+  // creating a room at the same moment would both read the same snapshot anyway.
+  // A 32-bit random id makes a real collision vanishingly unlikely; a scan would
+  // cost a full room enumeration per click and still not close that window.
+  async createRoom() {
+    return 'Room' + Math.random().toString(16).substring(2, 10);
+  }
+
+  // Stores the nickname on the caller's global user state. onRoomJoin reads it back
+  // from there to seed the room user state, so the client calls this before joinRoom().
+  async setNickname(nickname) {
+    if (typeof nickname !== 'string' || nickname.trim() === '') {
+      throw new Error('닉네임을 입력해주세요');
+    }
+
+    const trimmed = nickname.trim();
+    await $global.updateMyState({ nickname: trimmed });
+
+    return trimmed;
+  }
+
+  // Runs once, when the first user joins and the room is created. Seed ONLY fields
+  // that no other code path writes: room hooks and remote functions are not
+  // serialized against each other, so this blind updateRoomState can land after a
+  // racing writer and would silently undo it. gameStarted is written by
+  // toggleReady() and is therefore NOT seeded here — an absent value reads as
+  // "not started" on the client, which is the same thing.
+  async onRoomCreate(roomId) {
+    await $room.updateRoomState({
+      initialized: true,
+      createdAt: Date.now(),
+    });
+  }
+
+  // Runs for every user entering the room. Seeding room user state belongs here now
+  // that the client, not the server, drives joining.
+  async onRoomJoin(roomId, account) {
+    // The nickname the client stored with setNickname() before joining.
+    const globalUserState = await $global.getUserState(account);
+    const nickname = globalUserState.nickname || 'Player';
+
+    // Room user state outlives a leave while the room is still alive, so a rejoining
+    // user would otherwise come back carrying their previous match's values.
+    await $room.clearUserState(account);
+    await $room.updateUserState(account, {
+      account,
+      joinedAt: Date.now(),
+      lastActive: Date.now(),
+      isReady: false,
+      nickname,
+      character: null,
+      stats: {
+        maxHp: 100,
+        currentHp: 100,
+      },
+    });
+
+    // Courtesy broadcast only. It is deliberately not awaited into the hook's
+    // result: throwing here fails the JOIN, the runtime rolls the user back out
+    // of $users, and the SDK retries silently until its deadline — re-running
+    // clearUserState on every attempt with nothing surfaced to the player.
     try {
-      if (!nickname || nickname.trim() === '') {
-        throw new Error('닉네임을 입력해주세요');
-      }
-
-      // If roomId is provided, join that specific room
-      // Otherwise, create a new room
-      const joinedRoomId = await $global.joinRoom(roomId);
-
-      // Initialize user state in the room with the provided nickname
-      const userState = {
-        account: $sender.account,
-        joinedAt: Date.now(),
-        lastActive: Date.now(),
-        isReady: false,
-        nickname: nickname.trim(),
-        character: null,
-        stats: {
-          maxHp: 100,
-          currentHp: 100,
-        },
-      };
-
-      await $room.updateUserState($sender.account, userState);
-
-      // Get current room state
-      const roomState = await $room.getRoomState();
-
-      // Initialize room state if it's a new room
-      if (!roomState.initialized) {
-        await $room.updateRoomState({
-          initialized: true,
-          lastActivity: Date.now(),
-          userCount: (roomState.$users || []).length,
-          gameStarted: false,
-        });
-      } else {
-        // Update room state to indicate a new user has joined
-        await $room.updateRoomState({
-          lastActivity: Date.now(),
-          userCount: (roomState.$users || []).length,
-        });
-      }
-
-      // Broadcast a system message that a new user has joined
       await $room.broadcastToRoom('system-message', {
         type: 'join',
-        account: $sender.account,
-        nickname: nickname.trim(),
+        account,
+        nickname,
         timestamp: Date.now(),
       });
-
-      return joinedRoomId;
     } catch (error) {
-      throw new Error(`방 참여 실패: ${error.message}`);
+      console.warn(`join broadcast failed for ${account}: ${error.message}`);
     }
   }
 
-  // Leave the current room
-  async leaveRoom() {
-    try {
-      // Get user state to include nickname in the system message
-      const userState = await $room.getUserState($sender.account);
+  // Runs on every exit, and is the only hook that does. An intentional exit —
+  // leaveRoom(), switching rooms, a closed tab — fires it at once. Only an
+  // involuntary drop waits out the runtime's 30s grace period, during which the
+  // user stays in $users so a brief network blip can reconnect into the same
+  // room. (Requires @agent8/gameserver >= 2.0.1; 2.0.0 sent no close code, so
+  // even a deliberate leave took the grace path.)
+  async onRoomLeave(roomId, account) {
+    const userState = await $room.getUserState(account);
 
-      // Broadcast a system message that the user is leaving
-      await $room.broadcastToRoom('system-message', {
-        type: 'leave',
-        account: $sender.account,
-        nickname: userState.nickname,
-        timestamp: Date.now(),
-      });
-
-      // Actually leave the room
-      return await $global.leaveRoom();
-    } catch (error) {
-      throw new Error(`방 나가기 실패: ${error.message}`);
-    }
+    // Broadcast a system message that the user has left
+    await $room.broadcastToRoom('system-message', {
+      type: 'leave',
+      account,
+      nickname: userState.nickname,
+      timestamp: Date.now(),
+    });
   }
 
   // Set character for the current user

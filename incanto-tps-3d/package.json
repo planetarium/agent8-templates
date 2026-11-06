@@ -10,7 +10,7 @@
     "verify": "bun verify.ts"
   },
   "dependencies": {
-    "@agent8/gameserver": "^1.10.2",
+    "@agent8/gameserver": "^2.0.1",
     "@dimforge/rapier2d-compat": "0.19.3",
     "@dimforge/rapier3d-compat": "0.19.3",
     "@pixiv/three-vrm": "^3.5.3",

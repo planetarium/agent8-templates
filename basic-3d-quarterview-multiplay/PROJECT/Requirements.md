@@ -8,7 +8,7 @@
 - Route all remote-player rendering through `NetworkContainer` — do not instantiate `RemotePlayer` elsewhere.
 - Use `networkSyncStore.setServer(server)` only in `App.tsx`; other components should consume the store.
 - No magic values — animation ids in `constants/character.ts`, rigid-body types in `constants/rigidBodyObjectType.ts`, keyboard bindings in `constants/controls.ts`.
-- Server methods (`joinRoom`, `leaveRoom`, `setCharacter`, `toggleReady`, `updateMyState`, `revive`, `handlePing`, `applyDamage`) are the only allowed entry points — extend `server.js` rather than inventing ad-hoc channels.
+- Server methods (`createRoom`, `setNickname`, `setCharacter`, `toggleReady`, `updateMyState`, `revive`, `handlePing`, `applyDamage`) and the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` lifecycle hooks are the only allowed entry points — extend `server.js` rather than inventing ad-hoc channels. Room entry/exit is the SDK's `joinRoom` / `leaveRoom`, never a remote function.
 
 ## Known Issues / Constraints
 

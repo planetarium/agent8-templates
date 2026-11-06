@@ -2,7 +2,7 @@
 
 ## `src/main.tsx`, `src/App.tsx`
 
-Entry point and root. `App` drives the full client flow: it reads `useGameServer()`, wires `networkSyncStore.setServer`, subscribes to `subscribeRoomState` (for `gameStarted`) and `subscribeRoomMyState` (for `character` + `isReady`), and switches between `NicknameSetup` → `RoomManager` → `LobbyRoom` → `GameScene`. `joinRoom` / `leaveRoom` are invoked as `server.remoteFunction` calls.
+Entry point and root. `App` drives the full client flow: it reads `useGameServer()`, wires `networkSyncStore.setServer`, subscribes (once `rsConnected`) to `subscribeRoomState` (for `gameStarted`) and `subscribeRoomMyState` (for `character` + `isReady`), and switches between `NicknameSetup` → `RoomManager` → a joining-room spinner → `LobbyRoom` → `GameScene`. `joinRoom` / `leaveRoom` come from `useGameServer()` and are the SDK's, not remote functions; `setNickname` and `createRoom` are the remote calls made around the join.
 
 ## `src/App.css`, `src/index.css`
 
@@ -57,4 +57,4 @@ Asset manifest — character `.glb` URLs (keyed by character name) and animation
 
 ## `server.js` (agent8 gameserver)
 
-Remote functions: `joinRoom`, `leaveRoom`, `setCharacter`, `toggleReady`, `updatePlayerTransform`, `sendMessage`, `sendEffectEvent`, `sendFireballEffect` (legacy), `handlePing`, `applyDamage`. `toggleReady` flips `roomState.gameStarted` on first ready; `$roomTick` is a stub.
+Remote functions: `createRoom`, `setNickname`, `setCharacter`, `toggleReady`, `updatePlayerTransform`, `sendMessage`, `sendEffectEvent`, `sendFireballEffect` (legacy), `handlePing`, `applyDamage`, plus the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` lifecycle hooks. `toggleReady` flips `roomState.gameStarted` on first ready; `$roomTick` is a stub.

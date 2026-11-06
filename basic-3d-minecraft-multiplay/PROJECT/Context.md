@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Three.js + React Three Fiber scaffold for a multiplayer voxel block game. A first-person player explores a procedurally generated Minecraft-style terrain built from instanced cubes and places new blocks via a center-screen raycast. Remote players, block state, and magic effects are synchronized through `@agent8/gameserver` (`joinRoom` → nickname + character select → ready → shared game scene). Terrain is generated once per room with `simplex-noise` using a deterministic `verse{roomId}` seed.
+Three.js + React Three Fiber scaffold for a multiplayer voxel block game. A first-person player explores a procedurally generated Minecraft-style terrain built from instanced cubes and places new blocks via a center-screen raycast. Remote players, block state, and magic effects are synchronized through `@agent8/gameserver` (nickname → SDK `joinRoom` → character select → ready → shared game scene). Terrain is generated once per room with `simplex-noise` using a deterministic `verse{roomId}` seed.
 
 ## Tech Stack
 

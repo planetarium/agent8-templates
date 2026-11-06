@@ -14,7 +14,7 @@
 
 - The local `Player`'s `CharacterRenderer` must stay `visible={false}`; enabling it breaks the FPV illusion.
 - Pointer lock is requested on canvas `pointerdown` and is desktop-only — no mobile input path is provided.
-- Remote functions used by the client (`joinRoom`, `leaveRoom`, `toggleReady`, `setCharacter`, `updateMyState`, `applyDamage`, `revive`, `handlePing`) must exist on the Agent8 game server; they are not part of this repository.
+- Remote functions used by the client (`createRoom`, `setNickname`, `toggleReady`, `setCharacter`, `updateMyState`, `applyDamage`, `revive`, `handlePing`) and the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` lifecycle hooks must exist on the Agent8 game server. Room entry/exit is not a remote function: it is `joinRoom` / `leaveRoom` from `useGameServer()`.
 - `vibe-starter-3d`'s `FirstPersonViewController` owns camera and movement; there is no local override.
 - The physics-ready raycast gate used in other templates is not present here — `Physics` runs immediately once `GameScene` mounts.
 </content>

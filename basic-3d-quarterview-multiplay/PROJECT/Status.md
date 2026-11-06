@@ -3,7 +3,7 @@
 ## Implemented
 
 - Connection + lobby flow: `NicknameSetup` → `RoomManager` (create/join) → `LobbyRoom` (character pick + ready) → `GameScene`
-- Agent8 gameserver integration (`@agent8/gameserver`): `joinRoom`, `leaveRoom`, `setCharacter`, `toggleReady`, `updateMyState`, `revive`, `applyDamage`, `handlePing`
+- Agent8 gameserver integration (`@agent8/gameserver`): SDK `joinRoom` / `leaveRoom` plus `createRoom`, `setNickname`, `setCharacter`, `toggleReady`, `updateMyState`, `revive`, `applyDamage`, `handlePing` and the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` hooks
 - Local player on `RigidBodyPlayer` with full humanoid animation set (idle, idle_01, walk, run, fast_run, jump, punch, punch_01, kick, kick_01, kick_02, melee attack, cast, hit, die) and dirty-checked, throttled state sync (~10 Hz)
 - Server-authoritative death / revive: local player subscribes to its own server state, triggers `DIE`, and auto-calls `revive`
 - Remote players via `NetworkContainer` + `RemotePlayer` (`NetworkObject` + `CapsuleCollider` + `CharacterRenderer`) with imperative `syncState` and floating nickname billboard

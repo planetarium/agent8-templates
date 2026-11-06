@@ -2,7 +2,7 @@
 
 ## `src/main.tsx`, `src/App.tsx`
 
-Entry point and root component. `App` wires `@agent8/gameserver` via `useGameServer`, drives the screen state machine (nickname → room manager → lobby → game), feeds the active server into `networkSyncStore`, and subscribes to room + room-my-state to track `gameStarted`, `isReady`, and selected character.
+Entry point and root component. `App` wires `@agent8/gameserver` via `useGameServer`, drives the screen state machine (nickname → room manager → joining → lobby → game), feeds the active server into `networkSyncStore`, and subscribes (once `rsConnected`) to room + room-my-state to track `gameStarted`, `isReady`, and selected character. Room membership lives in the SDK: `joinRoom`, `leaveRoom`, `currentRoomId` and `rsConnected` all come from `useGameServer()`.
 
 ## `src/App.css`, `src/index.css`
 

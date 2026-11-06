@@ -2,7 +2,7 @@
 
 ## `src/main.tsx`, `src/App.tsx`
 
-Entry point and root component. `App` owns the connection state machine: not-connected spinner → `NicknameSetup` → `RoomManager` → `LobbyRoom` → `GameScene`. It bridges the `@agent8/gameserver` client into `networkSyncStore` and subscribes to `roomState.gameStarted` to decide when to enter the 3D scene.
+Entry point and root component. `App` drives the screen state machine (not-connected spinner → `NicknameSetup` → `RoomManager` → joining-room spinner → `LobbyRoom` → `GameScene`), bridges the `@agent8/gameserver` client into `networkSyncStore`, and tracks `gameStarted` through `subscribeRoomState` plus this user's `isReady` through the `useRoomUserState(account)` hook. Room membership lives in the SDK: `joinRoom`, `leaveRoom`, `currentRoomId` and `rsConnected` all come from `useGameServer()`, and the room subscriptions only run once `rsConnected` is true — `$room` state is served over that second connection.
 
 ## `src/App.css`, `src/index.css`
 
@@ -68,4 +68,4 @@ Asset manifest — character GLBs, mixamorig animations, and the `minecraft` spr
 
 ## `server.js`
 
-Verse room server: `joinRoom`, `leaveRoom`, `toggleReady`, `setCharacter`, `updatePlayerTransform`, `addCube`, `initializeCubes`, `sendEffectEvent`, `handlePing`.
+Verse room server: `createRoom`, `setNickname`, `toggleReady`, `setCharacter`, `updatePlayerTransform`, `addCube`, `initializeCubes`, `sendEffectEvent`, `handlePing`, plus the `onRoomCreate` / `onRoomJoin` / `onRoomLeave` lifecycle hooks.
