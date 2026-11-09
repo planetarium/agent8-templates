@@ -40,10 +40,13 @@ const BUILD = [
 ];
 
 // Kinematic character controller: controller + its tests, the collision
-// types it needs (world.ts), movement input, animation and the character
-// model. Every template with a walking character.
+// types it needs (world.ts), the 3rd-person camera rules (camera.ts:
+// presets, collision, follow yaw), movement input, animation and the
+// character model. Every template with a walking character.
 const CONTROLLER = [
   'src/game/anim.ts',
+  'src/game/camera.ts',
+  'src/game/camera.test.ts',
   'src/game/input.ts',
   'src/game/player.ts',
   'src/game/player.test.ts',

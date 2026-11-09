@@ -23,7 +23,7 @@ bun run build && bun run preview
 
 | chunk | size |
 | --- | --- |
-| `index-*.js` (first load) | 1,159.81 kB |
+| `index-*.js` (first load) | 1,160.34 kB |
 | `PhysicsDemo-*.js` (rapier + inlined wasm) | 2,258.80 kB, fetched only when `LazyPhysics` mounts |
 
 ## Controls

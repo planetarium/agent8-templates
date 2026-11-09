@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { CAMERA } from '../config';
+import { FOLLOW, followYawStep, springDistance } from '../game/camera';
+import { nowSeconds } from '../game/input';
 import { player, rig, world } from '../game/state';
 import { raycast } from '../game/voxel';
 
@@ -26,6 +28,7 @@ function useOrbitControls() {
       const k = e.pointerType === 'touch' ? 0.009 : 0.005;
       rig.yaw -= (e.clientX - lx) * k;
       rig.pitch = THREE.MathUtils.clamp(rig.pitch + (e.clientY - ly) * k * 0.8, c.minPitch, c.maxPitch);
+      if (e.clientX !== lx || e.clientY !== ly) rig.draggedAt = nowSeconds();
       lx = e.clientX;
       ly = e.clientY;
     };
@@ -51,33 +54,46 @@ function useOrbitControls() {
   }, [gl]);
 }
 
-/** Third-person orbit around the player (yaw / pitch / distance in `rig`), kept out of the blocks. */
+/**
+ * Third-person orbit around the player (yaw / pitch / distance in `rig`,
+ * framing from CAMERA.free). Swings behind the motion when not dragged
+ * (CAMERA.followYaw), pulls in in front of blocks and eases back out.
+ */
 export function CameraRig() {
   const { camera } = useThree();
   const focus = useRef<THREE.Vector3 | null>(null);
-  const target = useMemo(() => new THREE.Vector3(), []);
+  const v = useMemo(() => ({ target: new THREE.Vector3(), look: new THREE.Vector3() }), []);
   useOrbitControls();
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.1);
+    const c = CAMERA.free;
     const p = player.pos;
-    target.set(p.x, p.y + CAMERA.free.height, p.z);
-    if (!focus.current) focus.current = target.clone();
-    const f = focus.current.lerp(target, 1 - Math.exp(-10 * dt));
+
+    if (CAMERA.followYaw && nowSeconds() - rig.draggedAt > FOLLOW.holdAfterDrag) {
+      rig.yaw = followYawStep(rig.yaw, player.vel.x, player.vel.z, dt);
+    }
+
+    v.target.set(p.x, p.y + c.height, p.z);
+    if (!focus.current) focus.current = v.target.clone();
+    const f = focus.current.lerp(v.target, 1 - Math.exp(-10 * dt));
 
     const cp = Math.cos(rig.pitch);
-    const dx = Math.sin(rig.yaw) * cp;
+    const sy = Math.sin(rig.yaw);
+    const cy = Math.cos(rig.yaw);
+    const dx = sy * cp;
     const dy = Math.sin(rig.pitch);
-    const dz = Math.cos(rig.yaw) * cp;
-    // pull in in front of the first block between the player and the camera
-    const hit = raycast(world, [f.x, f.y, f.z], [dx, dy, dz], rig.distance);
-    const d = hit ? Math.max(0.3, hit.distance - 0.25) : rig.distance;
-    camera.position.set(f.x + dx * d, f.y + dy * d, f.z + dz * d);
-    camera.lookAt(f);
+    const dz = cy * cp;
+    v.look.set(f.x + cy * c.shoulder, f.y, f.z - sy * c.shoulder);
+    // pull in in front of the first block between the player and the camera, ease back out
+    const hit = raycast(world, [v.look.x, v.look.y, v.look.z], [dx, dy, dz], rig.distance);
+    rig.reach = springDistance(rig.reach, hit ? Math.max(0.3, hit.distance - 0.3) : rig.distance, dt);
+    const d = rig.reach;
+    camera.position.set(v.look.x + dx * d, v.look.y + dy * d, v.look.z + dz * d);
+    camera.lookAt(v.look);
 
-    // Portrait screens get a wider FOV so the player is not cramped.
     const persp = camera as THREE.PerspectiveCamera;
-    const fov = persp.aspect < 1 ? 72 : 55;
+    const fov = persp.aspect < 1 ? c.portraitFov : c.fov;
     if (persp.fov !== fov) {
       persp.fov = fov;
       persp.updateProjectionMatrix();

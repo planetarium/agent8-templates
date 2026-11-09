@@ -22,7 +22,10 @@ enabled), a hint label, and `MobileControls`. Binds the keyboard.
   ramp, platform and height field, on a test course defined in the file.
 - `world.ts` — the stage: `BOXES` (just the floor), `RAMPS` and `FIELDS`
   (empty), plus the helpers `boxAabb`, `rampHeight`, `rampVertices`,
-  `fieldHeight`, `platformX`, `updatePlatformAabb`.
+  `fieldHeight`, `platformCenter`, `updatePlatformAabb`.
+- `camera.ts` / `camera.test.ts` — shared 3rd-person camera rules (presets,
+  collision, follow yaw) used by the orbit-camera templates; the side camera
+  does not use them.
 - `anim.ts` — shared animation state and `retarget()` for mixamo clip GLBs.
 - `state.ts` — the shared `player` (starts facing +x).
 
@@ -88,7 +91,8 @@ export const BOXES: Box[] = [
 ### Ramp (`RAMPS`)
 
 ```ts
-// A wedge on the floor rising along +x only: y = 0 at minX, `height` at maxX.
+// A wedge on the floor rising along +x (the default `dir`; '-x' rises the
+// other way): y = 0 at minX, `height` at maxX.
 // 1.5 m over 6 m ≈ 14°. Walk on from the low end; its tall end and the sides
 // where the surface is more than stepHeight (0.35) above the feet are walls.
 export const RAMPS: Ramp[] = [

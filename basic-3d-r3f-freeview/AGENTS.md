@@ -24,7 +24,14 @@ Read this, then `PROJECT/Structure.md`, before changing code.
 - Level geometry comes from `src/game/world.ts` (`BOXES`, `RAMPS`,
   `FIELDS`); the same data is drawn (`Level.tsx`) and collided
   (`stepPlayer`). Build the game's own map there — the stage ships empty.
+- Lay courses, goals and enemies out from the spawn toward the camera's
+  front (−z); x is the course's width. The player spawns facing −z.
 - Movement is camera-relative: W walks away from the camera (`rig.yaw`).
+- Camera framing is `CAMERA.preset` in `config.ts` ('follow' default,
+  'shoulder' for shooters, 'wide' for exploration / building); the camera
+  avoids level geometry and swings behind the motion (`followYaw`). Rules
+  and tests in `src/game/camera.ts` — `PROJECT/Structure.md` "Camera presets
+  by genre".
 - Touch controls render on touch devices before the first touch. Every new
   action needs a keyboard binding AND an on-screen button.
 - Rapier (`@react-three/rapier`) is installed but lazy: import it only from
@@ -44,6 +51,6 @@ Read this, then `PROJECT/Structure.md`, before changing code.
 bun install
 bun run dev        # local dev server
 bun run typecheck  # tsc --noEmit
-bun test           # controller tests (jump feel, step-up, ramp, platform, height field)
+bun test           # controller + camera tests (jump feel, step-up, ramp, platform, height field, camera collision, follow yaw)
 bun run build      # production build to dist/
 ```

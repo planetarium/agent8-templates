@@ -12,7 +12,8 @@
 - Walk / run / jump with coyote time and input buffer on the blocks;
   1-block steps need a jump; world edge is a wall (tested)
 - verse8 base character with retargeted mixamo clips, idle/walk/run/jump/fall
-- 3rd-person orbit camera that stays out of the blocks
+- 3rd-person orbit camera ('wide' preset; follow / shoulder one line away)
+  that stays out of the blocks, springs back, and swings behind the motion
 - Touch: joystick, MINE / PLACE / JUMP, block bar
 - Lazy rapier demo (`?physics=1` or `PHYSICS_DEMO = true`)
 

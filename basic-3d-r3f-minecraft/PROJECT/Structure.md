@@ -4,7 +4,8 @@
 
 `PHYSICS_DEMO`, and the tuning tables `PLAYER` (speeds, gravity, jump,
 coyote/buffer, `stepHeight`, `spawn` — overwritten with the terrain's spawn
-point), `CAMERA.free` (orbit distance and pitch), `VOXEL` (seed, world
+point), `CAMERA` (`preset` — 'wide' here, 'follow' or 'shoulder'; `free`
+— that preset's distance, pitch, eye height, FOV; `followYaw`), `VOXEL` (seed, world
 size and height, chunk size, active radius) and `BUILDER` (reach, click
 slop).
 
@@ -31,6 +32,12 @@ slop).
 - `player.test.ts` — the controller's own tests.
 - `world.ts` — the `Aabb` type the controller collides with (plus box /
   ramp / height-field helpers it understands).
+- `camera.ts` — pure camera rules shared with the other R3F templates:
+  `CAMERA_PRESETS` (follow 4.5 m / shoulder 3 m + 0.6 m right / wide 7 m),
+  `springDistance()`, `followYawStep()` (swing behind the motion, ≈ 0.6 s,
+  waits 2 s after a drag), `latchMoveYaw()`; `cameraReach()` is for box
+  stages — here the camera uses the voxel `raycast()`. Tests in
+  `camera.test.ts`.
 - `input.ts` — keyboard set, joystick axes, `jumpPressedAt`; `moveAxis()`, `wantsRun()`.
 - `anim.ts` — shared animation state and `retarget()` for mixamo clip GLBs.
 - `state.ts` — the shared `world`, `player`, camera `rig`, and `builder`
@@ -48,8 +55,10 @@ slop).
   against `collidersNear`, sets the animation state, draws `Character`.
 - `Character.tsx` — verse8 base character (a placeholder capsule until the
   GLB loads), clip cross-fade.
-- `CameraRig.tsx` — 3rd-person orbit (drag + wheel), pulled in in front of
-  the first block between the player and the camera.
+- `CameraRig.tsx` — 3rd-person orbit (drag + wheel), framing from
+  `CAMERA.free`; swings behind the motion when not dragged; pulled in in
+  front of the first block between the player and the camera, eased back
+  out when it clears.
 - `MobileControls.tsx` — joystick, MINE / PLACE, JUMP; shown on touch
   devices up front.
 

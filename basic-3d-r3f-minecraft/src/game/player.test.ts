@@ -2,7 +2,7 @@
 import { describe, expect, test } from 'bun:test';
 import { PLAYER } from '../config';
 import { createPlayer, stepPlayer, type PlayerState } from './player';
-import { boxAabb, updatePlatformAabb, type Aabb, type Box, type HeightField, type Platform, type Ramp } from './world';
+import { boxAabb, rampHeight, rampVertices, updatePlatformAabb, type Aabb, type Box, type HeightField, type Platform, type Ramp } from './world';
 
 const DT = 1 / 120;
 
@@ -18,7 +18,7 @@ const COURSE_BOXES: Box[] = [
 ];
 // 1.5 m over 6 m ≈ 14°.
 const COURSE_RAMP: Ramp = { minX: -11, maxX: -5, minZ: -1.5, maxZ: 1.5, height: 1.5, color: '' };
-const COURSE_PLATFORM: Platform = { size: [3, 0.3, 3], top: 1.5, z: 0, minX: 11.5, maxX: 17.5, speed: 2 };
+const COURSE_PLATFORM = { size: [3, 0.3, 3], top: 1.5, z: 0, minX: 11.5, maxX: 17.5, speed: 2 } satisfies Platform;
 // A ledge whose right edge is at x = 0, top at y = 0.
 const LEDGE: Aabb[] = [{ minX: -50, minY: -1, minZ: -5, maxX: 0, maxY: 0, maxZ: 5 }];
 const still = { x: 0, z: 0 };
@@ -228,6 +228,63 @@ describe('moving platform', () => {
     expect(p.grounded).toBe(true);
     expect(p.pos.y).toBeCloseTo(PLATFORM.top, 5);
     expect(drift).toBeLessThan(0.01);
+  });
+
+  test('a platform sliding along z (down a forward course) carries the rider too', () => {
+    const FERRY = { size: [3, 0.3, 3], top: 1.5, x: 0, minZ: -12, maxZ: -4, speed: 2 } satisfies Platform;
+    const plat: Aabb = { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0 };
+    updatePlatformAabb(plat, FERRY, 0);
+    const p = createPlayer();
+    Object.assign(p.pos, { x: 0, y: FERRY.top + 0.2, z: FERRY.minZ });
+    const jump = { jumpPressedAt: -Infinity };
+    for (let t = DT; t < 3; t += DT) {
+      updatePlatformAabb(plat, FERRY, t);
+      stepPlayer(p, still, jump, t, DT, [plat], false, []);
+    }
+    expect(p.grounded).toBe(true);
+    // landed a few frames after the start, then rode along: still on the platform, far from where it began
+    expect(Math.abs(p.pos.z - (plat.minZ + plat.maxZ) / 2)).toBeLessThan(0.5);
+    expect(p.pos.z).toBeGreaterThan(FERRY.minZ + 4);
+  });
+});
+
+describe('ramp directions', () => {
+  // The same 6 × 3 footprint rising each way; walking up it from the low edge reaches the top.
+  const base = { height: 1.5, color: '' };
+  const cases: [Ramp, { x: number; z: number }, { x: number; z: number }][] = [
+    [{ ...base, minX: -1.5, maxX: 1.5, minZ: -9, maxZ: -3, dir: '-z' }, { x: 0, z: -2 }, { x: 0, z: -1 }],
+    [{ ...base, minX: -1.5, maxX: 1.5, minZ: 3, maxZ: 9, dir: '+z' }, { x: 0, z: 2 }, { x: 0, z: 1 }],
+    [{ ...base, minX: -9, maxX: -3, minZ: -1.5, maxZ: 1.5, dir: '-x' }, { x: -2, z: 0 }, { x: -1, z: 0 }],
+  ];
+  for (const [ramp, start, move] of cases) {
+    test(`'${ramp.dir}' rises away from its low edge and is walkable`, () => {
+      const p = onFloor();
+      Object.assign(p.pos, start);
+      sim(p, move, [FLOOR], [ramp], () => Math.abs(p.pos.x) > 8.5 || Math.abs(p.pos.z) > 8.5);
+      expect(p.grounded).toBe(true);
+      expect(p.pos.y).toBeGreaterThan(1.3); // near the high edge
+      expect(p.pos.y).toBeCloseTo(rampHeight(ramp, p.pos.x, p.pos.z)!, 2);
+    });
+  }
+
+  test('every direction is the +x wedge turned: same winding (signed volume)', () => {
+    const vol = (v: number[]) => {
+      const p = (i: number) => [v[i * 3], v[i * 3 + 1], v[i * 3 + 2]];
+      const [a, b, c, d] = [p(0), p(1), p(2), p(4)];
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+      const w = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+      const h = [d[0] - a[0], d[1] - a[1], d[2] - a[2]];
+      return u[0] * (w[1] * h[2] - w[2] * h[1]) - u[1] * (w[0] * h[2] - w[2] * h[0]) + u[2] * (w[0] * h[1] - w[1] * h[0]);
+    };
+    const r = { minX: 0, maxX: 6, minZ: 0, maxZ: 3, height: 1.5, color: '' };
+    const sign = Math.sign(vol(rampVertices(r)));
+    for (const dir of ['-x', '+z', '-z'] as const) expect(Math.sign(vol(rampVertices({ ...r, dir })))).toBe(sign);
+    // high top corners sit at `height`
+    for (const dir of ['+x', '-x', '+z', '-z'] as const) {
+      const v = rampVertices({ ...r, dir });
+      expect(rampHeight({ ...r, dir }, v[12], v[14])).toBeCloseTo(1.5, 6);
+      expect(rampHeight({ ...r, dir }, v[0], v[2])).toBeCloseTo(0, 6);
+    }
   });
 });
 

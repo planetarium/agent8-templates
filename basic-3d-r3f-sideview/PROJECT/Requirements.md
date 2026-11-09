@@ -11,8 +11,9 @@
 
 ## Known Issues / Constraints
 
-- Ramps are wedges rising along +x only (`rampHeight`); the foot height is
-  sampled at the player's center.
+- Ramps are wedges rising along one axis (`dir`, default '+x'; on this
+  side-scroller use '+x' or '-x'); the foot height is sampled at the
+  player's center.
 - A moving platform pushes nothing: if it slides into a player who is not on
   it, the next downward step lifts the player on top.
 - Height fields: the slope check compares `heightAt` under the start and the

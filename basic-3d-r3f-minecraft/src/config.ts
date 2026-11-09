@@ -1,5 +1,6 @@
 // Game-wide settings. Minecraft: a seeded voxel world, a 3rd-person orbit
 // camera behind the player, a crosshair that mines and places blocks.
+import { CAMERA_PRESETS, type CameraPreset } from './game/camera';
 
 /** Mount the rapier demo (lazy chunk). Off by default so the first load stays light; `?physics=1` also enables it. */
 export const PHYSICS_DEMO = false;
@@ -28,8 +29,15 @@ export const PLAYER = {
   spawn: [0, 20, 0] as [number, number, number],
 };
 
+/** Camera framing: 'wide' (default here: see the ground you build on), 'follow' or 'shoulder' — see PROJECT/Structure.md. */
+const PRESET: CameraPreset = 'wide';
+
 export const CAMERA = {
-  free: { distance: 7, minDistance: 2, maxDistance: 14, pitch: 0.35, minPitch: -0.6, maxPitch: 1.2, height: 1.4 },
+  preset: PRESET,
+  /** The preset's numbers (distance, pitch, eye height, shoulder offset, FOV); tweak them here. */
+  free: { ...CAMERA_PRESETS[PRESET] },
+  /** While the player is not dragging, swing the camera behind the direction of motion. */
+  followYaw: true,
 };
 
 export const VOXEL = {

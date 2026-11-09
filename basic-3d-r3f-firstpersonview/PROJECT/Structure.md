@@ -22,7 +22,10 @@ keyboard.
   ramp, platform and height field, on a test course defined in the file.
 - `world.ts` — the stage: `BOXES` (just the floor), `RAMPS` and `FIELDS`
   (empty), plus the helpers `boxAabb`, `rampHeight`, `rampVertices`,
-  `fieldHeight`, `platformX`, `updatePlatformAabb`.
+  `fieldHeight`, `platformCenter`, `updatePlatformAabb`.
+- `camera.ts` / `camera.test.ts` — shared 3rd-person camera rules (presets,
+  collision, follow yaw) used by the orbit-camera templates; the
+  first-person camera does not use them.
 - `anim.ts` — animation state and `retarget()` for mixamo clip GLBs (used by
   `Character.tsx`; the local player does not animate).
 - `state.ts` — the shared `player` and look `rig` (yaw, pitch).
@@ -60,6 +63,10 @@ Obstacles go in `world.ts` `BOXES` / `RAMPS`, terrain in `FIELDS`
 (`HeightField`), moving platforms are AABBs that record `moved`. `Level.tsx`
 draws what is in `world.ts` and the player collides with the same data.
 
+**Course axis:** the player spawns looking toward −z. Lay courses, goals
+and enemies out from the spawn toward −z (z goes 0 → −3 → −6 …); x is the
+course's width.
+
 Controller numbers (`PLAYER` in `config.ts`): radius 0.35 m, height 1.6 m;
 `stepHeight` 0.35 m — a ledge this high or lower is walked onto, higher
 blocks; `maxSlope` 60° — a steeper height-field slope is a wall; jump apex
@@ -71,25 +78,27 @@ highest a jump reaches.
 ```ts
 export const BOXES: Box[] = [
   { pos: [0, -0.5, 0], size: [80, 1, 80], color: '#7fb069' }, // floor, top y = 0
+  // the course heads where the player first looks (−z); 3 m wide along x
   // three 0.3 m steps (each rise ≤ stepHeight 0.35: no jump needed)
-  { pos: [2.5, 0.15, 0], size: [1, 0.3, 3], color: '#d9c5a0' },
-  { pos: [3.5, 0.3, 0], size: [1, 0.6, 3], color: '#c9b48c' },
-  { pos: [4.5, 0.45, 0], size: [1, 0.9, 3], color: '#b9a378' },
+  { pos: [0, 0.15, -3], size: [3, 0.3, 1], color: '#d9c5a0' },
+  { pos: [0, 0.3, -4], size: [3, 0.6, 1], color: '#c9b48c' },
+  { pos: [0, 0.45, -5], size: [3, 0.9, 1], color: '#b9a378' },
   // 0.9 → 1.5 is a 0.6 m ledge: needs a jump
-  { pos: [6, 0.75, 0], size: [2, 1.5, 3], color: '#ca3c25' },
+  { pos: [0, 0.75, -6.5], size: [3, 1.5, 2], color: '#ca3c25' },
 ];
 ```
 
 ### Ramp (`RAMPS`)
 
 ```ts
-// A wedge on the floor rising along +x only: y = 0 at minX, `height` at maxX.
+// A wedge on the floor rising along −z (ahead of the spawn): y = 0 at maxZ,
+// `height` at minZ. `dir` is '+x' | '-x' | '+z' | '-z' (default '+x').
 // 1.5 m over 6 m ≈ 14°. Walk on from the low end; its tall end and the sides
 // where the surface is more than stepHeight (0.35) above the feet are walls.
 export const RAMPS: Ramp[] = [
-  { minX: -11, maxX: -5, minZ: -1.5, maxZ: 1.5, height: 1.5, color: '#e6aa68' },
+  { minX: -1.5, maxX: 1.5, minZ: -16, maxZ: -10, height: 1.5, dir: '-z', color: '#e6aa68' },
 ];
-// a landing box at the top: { pos: [-4, 0.75, 0], size: [2, 1.5, 3], color: '#4f6d7a' }
+// a landing box at the top: { pos: [0, 0.75, -17], size: [3, 1.5, 2], color: '#4f6d7a' }
 ```
 
 ### Moving platform (in `Player.tsx`)
@@ -97,7 +106,9 @@ export const RAMPS: Ramp[] = [
 ```tsx
 import { updatePlatformAabb, type Aabb, type Platform } from '../game/world';
 
-const LIFT: Platform = { size: [3, 0.3, 3], top: 1.5, z: 0, minX: 11.5, maxX: 17.5, speed: 2 };
+// A ferry down the course: center z slides between minZ and maxZ at x = 0.
+// (Across the course instead: { size, top, z: -23, minX: -3, maxX: 3, speed }.)
+const LIFT: Platform = { size: [3, 0.3, 3], top: 1.5, x: 0, minZ: -26, maxZ: -20, speed: 2 };
 const lift: Aabb = { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0 };
 updatePlatformAabb(lift, LIFT, 0);
 const COLLIDERS: Aabb[] = [...BOXES.map(boxAabb), lift];

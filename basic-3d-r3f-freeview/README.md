@@ -23,12 +23,12 @@ bun run build && bun run preview
 
 | chunk | size |
 | --- | --- |
-| `index-*.js` (first load) | 1,237.34 kB |
+| `index-*.js` (first load) | 1,240.04 kB |
 | `PhysicsDemo-*.js` (rapier + inlined wasm) | 2,257.66 kB, fetched only when `LazyPhysics` mounts |
 
 ## Controls
 
 | | |
 | --- | --- |
-| Desktop | WASD / arrows move (camera-relative), Shift run, Space jump, drag to orbit, wheel to zoom |
+| Desktop | WASD / arrows move (camera-relative), Shift run, Space jump, drag to orbit (the camera swings back behind you 2 s later), wheel to zoom |
 | Touch | stick (bottom-left, push to the rim to run), JUMP (bottom-right), drag the scene to orbit |

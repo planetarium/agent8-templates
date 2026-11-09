@@ -32,6 +32,8 @@ Read this, then `PROJECT/Structure.md`, before changing code.
 - Level geometry comes from `src/game/world.ts` (`BOXES`, `RAMPS`,
   `FIELDS`); the same data is drawn (`Level.tsx`) and collided
   (`stepPlayer`). Build the game's own map there — the stage ships empty.
+- Lay courses, goals and enemies out from the spawn toward the camera's
+  front (−z); x is the course's width. The player spawns looking toward −z.
 - Touch controls render on touch devices before the first touch. Every new
   action needs a keyboard binding AND an on-screen button.
 - Rapier (`@react-three/rapier`) is installed but lazy: import it only from

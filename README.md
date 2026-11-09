@@ -48,11 +48,13 @@ Shared files (the list lives in `scripts/sync-3d-shared.js`):
   `src/index.css`, `src/physics/LazyPhysics.tsx`, `src/physics/PhysicsDemo.tsx`,
   and `dependencies` / `devDependencies` in `package.json`.
 - Character views (sideview, quarterview, firstpersonview): also
-  `src/assets.json`, `src/game/anim.ts`, `src/game/input.ts`,
+  `src/assets.json`, `src/game/anim.ts`, `src/game/camera.ts`,
+  `src/game/camera.test.ts`, `src/game/input.ts`,
   `src/game/player.ts`, `src/game/player.test.ts`, `src/game/world.ts`,
   `src/components/Character.tsx`, `src/components/Level.tsx`,
   `src/components/MobileControls.tsx`.
-- minecraft: the controller only — `src/game/anim.ts`, `src/game/input.ts`,
+- minecraft: the controller only — `src/game/anim.ts`, `src/game/camera.ts`,
+  `src/game/camera.test.ts`, `src/game/input.ts`,
   `src/game/player.ts`, `src/game/player.test.ts`, `src/game/world.ts`,
   `src/components/Character.tsx` (its assets, terrain and touch buttons are
   its own). flightview and empty: the build files only.

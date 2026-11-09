@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { PHYSICS_DEMO } from './config';
+import { CAMERA, PHYSICS_DEMO } from './config';
 import { bindKeyboard } from './game/input';
 import { CameraRig } from './components/CameraRig';
 import { Level } from './components/Level';
@@ -18,7 +18,7 @@ export default function App() {
 
   return (
     <div className="relative h-full w-full">
-      <Canvas shadows dpr={[1, 2]} camera={{ fov: 55, near: 0.1, far: 500, position: [0, 4, 10] }}>
+      <Canvas shadows dpr={[1, 2]} camera={{ fov: CAMERA.free.fov, near: 0.1, far: 500, position: [0, 2, 5] }}>
         <Level />
         <Player />
         <CameraRig />

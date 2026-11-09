@@ -31,6 +31,9 @@ Read this, then `PROJECT/Structure.md`, before changing code.
 - Jump feel is tuned in `PLAYER` (`config.ts`): coyote time 0.12 s, input
   buffer 0.1 s from the press, both consumed by a jump.
 - Movement is camera-relative: W walks away from the camera (`rig.yaw`).
+- Camera framing is `CAMERA.preset` in `config.ts` ('wide' here; 'follow'
+  or 'shoulder'); it swings behind the motion (`followYaw`) and pulls in in
+  front of blocks. Rules and tests in `src/game/camera.ts`.
 - Touch controls render on touch devices before the first touch. Every new
   action needs a keyboard / mouse binding AND an on-screen button.
 - Rapier (`@react-three/rapier`) is installed but lazy: import it only from
@@ -50,6 +53,6 @@ Read this, then `PROJECT/Structure.md`, before changing code.
 bun install
 bun run dev        # local dev server (window.game in the console: world, player, builder, chunks)
 bun run typecheck  # tsc --noEmit
-bun test           # voxel + controller tests
+bun test           # voxel + controller + camera tests
 bun run build      # production build to dist/
 ```

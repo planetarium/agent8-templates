@@ -4,7 +4,10 @@
 
 Thin React Three Fiber game skeleton, freeview. The verse8 base character
 walks, runs and jumps on an empty stage (floor, sky, fog, sun); a
-3rd-person orbit camera follows it. Keyboard + mouse on desktop, joystick +
+3rd-person orbit camera follows it from just behind and above (preset
+'follow': 4.5 m, ≈ 10° down, eye height 1.3 m), stays out of walls and
+swings behind the direction of motion. Courses run from the spawn toward
+−z (the camera's front). Keyboard + mouse on desktop, joystick +
 JUMP button on touch devices. The game's map is built in
 `src/game/world.ts`: obstacles in `BOXES` / `RAMPS`, terrain as a
 `HeightField` in `FIELDS`, moving platforms as AABBs that record `moved`.

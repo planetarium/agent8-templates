@@ -7,11 +7,18 @@
 - Gameplay rules in pure modules under `src/game/` with `bun test` coverage.
 - Every action works on keyboard and on touch.
 - Rapier only behind `React.lazy` (`src/physics/`).
+- Courses, goals and enemies stretch from the spawn toward the camera's
+  front (−z); x is the course's width.
 
 ## Known Issues / Constraints
 
-- Ramps are wedges rising along +x only (`rampHeight`); the foot height is
-  sampled at the player's center.
+- Ramps are wedges rising along one axis (`dir`: '+x', '-x', '+z', '-z');
+  the foot height is sampled at the player's center.
+- The camera avoids static `BOXES`, `RAMPS` and `FIELDS`; moving platforms
+  are not in its obstacle list (add their AABBs in `CameraRig.tsx`).
+- Auto-follow yaw: holding a sideways key keeps running sideways while the
+  camera swings behind; release and press again to go where the camera
+  now faces.
 - A moving platform pushes nothing: if it slides into a player who is not on
   it, the next downward step lifts the player on top.
 - Height fields: the slope check compares `heightAt` under the start and the

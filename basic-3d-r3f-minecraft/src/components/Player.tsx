@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PLAYER } from '../config';
 import { anim } from '../game/anim';
+import { latchMoveYaw } from '../game/camera';
 import { input, moveAxis, nowSeconds, wantsRun } from '../game/input';
 import { stepPlayer } from '../game/player';
 import { player, rig, world } from '../game/state';
@@ -32,11 +33,13 @@ export function Player() {
 
   useFrame((_, delta) => {
     moveAxis(axis);
-    // camera-relative: forward = away from the camera; walk unless running
+    // camera-relative: forward = away from the camera; walk unless running.
+    // A held direction keeps its basis while the camera auto-follows (latchMoveYaw).
     const len = Math.hypot(axis.x, axis.y);
     const k = len > 0 ? (wantsRun() ? 1 : PLAYER.walkSpeed / PLAYER.runSpeed) / len : 0;
-    const s = Math.sin(rig.yaw);
-    const c = Math.cos(rig.yaw);
+    const yaw = latchMoveYaw(rig.latch, axis.x, axis.y, rig.yaw, nowSeconds() - rig.draggedAt < 0.15);
+    const s = Math.sin(yaw);
+    const c = Math.cos(yaw);
     move.x = (-s * axis.y + c * axis.x) * k;
     move.z = (-c * axis.y - s * axis.x) * k;
 
