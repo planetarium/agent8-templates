@@ -8,6 +8,9 @@
     "docs:copy": "node scripts/copy-docs.js --target=basic-3d",
     "docs:remove": "node scripts/remove-docs.js --target=basic-3d",
     "pixelvfx": "node scripts/pixelvfx/generate.mjs",
-    "test": "node --test test/pixelvfx.test.mjs"
+    "test": "node --test test/pixelvfx.test.mjs",
+    "3d:sync": "node scripts/sync-3d-shared.js",
+    "3d:check": "node scripts/sync-3d-shared.js --check",
+    "templates:check": "node scripts/check-templates.js"
   }
 }
