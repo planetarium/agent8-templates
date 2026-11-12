@@ -1,0 +1,12 @@
+{
+  "sprites": {
+    "2dbasic": {
+      "url": "https://agent8-games.verse8.io/assets/2d/sprite_characters/2dbasic.png",
+      "description": "2dbasic",
+      "metadata": {
+        "frameWidth": 111,
+        "frameHeight": 83
+      }
+    }
+  }
+}
