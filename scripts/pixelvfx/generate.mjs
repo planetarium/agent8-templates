@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "..", "..");
 const DEFAULT_BASE_URL = "https://agent8-games.verse8.io/assets/2d/vfx/pixelfx";
-const DEFAULT_OUT = ["2d-phaser-basic", "2d-phaser-sprite-character-gravity"];
+const DEFAULT_OUT = ["2d-phaser-basic", "2d-phaser-sprite-character-gravity", "2d-phaser4-basic", "2d-phaser4-sprite-character-gravity"];
 
 // Full-screen effects are drawn as a whole 320x180 scene rather than around an anchor point. metadata.screenSpace wins;
 // this is the fallback for metadata that does not carry it.
