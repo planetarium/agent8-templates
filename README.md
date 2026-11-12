@@ -30,9 +30,12 @@ cd agent8-templates
 
 ## 🧊 R3F 3D Templates (`basic-3d-r3f-*`)
 
-The seven R3F templates live in their own folders. A folder only becomes a
-choice for new projects once it has an entry in `templates.json`; folders
-without one are fine (the check below allows them).
+The seven R3F templates are the 3D default: they are the only 3D entries in
+`templates.json`, so new 3D projects start from one of them. The Incanto
+folders (`basic-3d`, `basic-3d-freeview` and the other `basic-3d-<view>`
+folders without `r3f`, and `incanto-*-3d`) and the `*-multiplay` (vibe)
+folders are no longer listed; they stay in the repo to support existing
+projects built from them. When to delete them is a separate decision.
 
 ```bash
 npm run templates:check   # templates.json is valid JSON, and every name is a folder (name = path)
