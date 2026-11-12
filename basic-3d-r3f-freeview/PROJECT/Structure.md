@@ -187,6 +187,21 @@ floor), and keep `heightAt` cheap — it runs several times per 1/120 s substep.
 For noise terrain, call the noise function (e.g. simplex-noise
 `createNoise2D`) inside `heightAt`.
 
+## Model parts (putting models in)
+
+Shared by every R3F template (`npm run 3d:sync` keeps them identical) and
+imported by no scene yet — import them when the game needs a model; don't
+rewrite them. Library models come at any scale (a mixamo rig is often a
+0.01 Armature); these measure the bounding box after `updateMatrixWorld`,
+scale to metres and stand the lowest point on y = 0. Model URLs go in
+`src/assets.json` `models`.
+
+| path | for | required |
+| --- | --- | --- |
+| `src/game/fitModel.ts` | `fitModel(object, { height })` → `{ unit, lift }`: draw with `scale={unit}`, `position-y={lift}` | `object`, `height` (m) |
+| `src/components/models/Props.tsx` | `<Props>`: a static model (crate, barrel, rock, house) at every `Placement` (`{ x, y, z, rotY, scale }`), instanced past 30 copies | `url`, `height` (m), `at` |
+| `src/components/models/AnimatedModel.tsx` | `<AnimatedModel>`: a rigged enemy / NPC, feet at its origin, facing +z; plays its own named clips, a mixamorig rig without them borrows idle / walk / run (`assets.json` `animations`, `game/anim.ts` `retarget`); `source={{ state }}` picks the clip | `url`, `height` (m) |
+
 ## Extension points
 
 - New obstacle / stairs / ramp / terrain / moving platform: see "Building the

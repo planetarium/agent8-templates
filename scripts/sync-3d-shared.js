@@ -54,6 +54,18 @@ const CONTROLLER = [
   'src/components/Character.tsx',
 ];
 
+// Putting models in: fitModel (metre size, feet on y = 0), static props and
+// rigged enemies / NPCs. Every template, but no scene imports them (agents
+// add them per game; unused, they stay out of the bundle). AnimatedModel
+// borrows clips through anim.ts retarget and the src/assets.json
+// `animations` idle / walk / run, so those come along.
+const MODELS = [
+  'src/game/anim.ts',
+  'src/game/fitModel.ts',
+  'src/components/models/Props.tsx',
+  'src/components/models/AnimatedModel.tsx',
+];
+
 // Character views on the box / ramp / height-field stage: the controller plus
 // the level, asset list and touch controls. View-specific files (config.ts,
 // App.tsx, game/state.ts, components/Player.tsx, components/CameraRig.tsx and
@@ -63,15 +75,17 @@ const CHARACTER = [...CONTROLLER, 'src/assets.json', 'src/components/Level.tsx',
 // package.json fields copied from the source (name, scripts etc. stay per folder).
 const PACKAGE_FIELDS = ['dependencies', 'devDependencies'];
 
+const bundle = (...lists) => [...new Set(lists.flat())];
+
 const TARGETS = {
-  'basic-3d-r3f-sideview': [...BUILD, ...CHARACTER],
-  'basic-3d-r3f-quarterview': [...BUILD, ...CHARACTER],
-  'basic-3d-r3f-firstpersonview': [...BUILD, ...CHARACTER],
-  'basic-3d-r3f-empty': BUILD,
+  'basic-3d-r3f-sideview': bundle(BUILD, CHARACTER, MODELS),
+  'basic-3d-r3f-quarterview': bundle(BUILD, CHARACTER, MODELS),
+  'basic-3d-r3f-firstpersonview': bundle(BUILD, CHARACTER, MODELS),
+  'basic-3d-r3f-empty': bundle(BUILD, MODELS),
   // No character: its own flight loop, input and touch controls.
-  'basic-3d-r3f-flightview': BUILD,
+  'basic-3d-r3f-flightview': bundle(BUILD, MODELS),
   // Voxel world instead of the box stage: own terrain, assets (block textures) and touch buttons.
-  'basic-3d-r3f-minecraft': [...BUILD, ...CONTROLLER],
+  'basic-3d-r3f-minecraft': bundle(BUILD, CONTROLLER, MODELS),
 };
 
 const args = process.argv.slice(2);
@@ -87,6 +101,7 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log(colorize('gray', '  all targets:      ') + BUILD.join(', '));
   console.log(colorize('gray', '  controller:       ') + CONTROLLER.join(', '));
   console.log(colorize('gray', '  character views:  ') + CHARACTER.join(', '));
+  console.log(colorize('gray', '  models:           ') + MODELS.join(', '));
   console.log(colorize('gray', '  package.json:     ') + PACKAGE_FIELDS.join(', '));
   console.log('');
   console.log(colorize('red', '⚠️  Important: Run these commands from the root directory of the workspace!'));
