@@ -63,6 +63,16 @@ sprite.setPipeline / setPostPipeline           filters (shaders), sprite.setLigh
 shape.createBitmapMask() + setMask()           sprite.enableFilters().filters.internal.addMask(shape)
 sprite.setTintFill(0xffffff)                   sprite.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL)
                                                (setTintFill only logs an error and draws nothing: a hit flash silently vanishes)
+group.children.each(fn) / .iterate(fn)         group.getChildren().forEach(fn)  or  for (const c of group.children) {…}
+group.children.entries / entries[i]           group.getChildren() / group.getChildren()[i]
+group.children.entries.length                  group.getLength()  or  group.children.size  (countActive(true) counts active ones)
+                                               (children.entries is now the native Set method: .length is 0, [i] is undefined, no error)
+group.children.contains(obj)                   group.contains(obj)  or  group.children.has(obj)
+physics.world.bodies / staticBodies .iterate   for (const body of this.physics.world.bodies) {…}
+new Phaser.Structs.Set()                       new Set()  (Group.children and world bodies are native Sets now)
+
+The group rows apply to every group: `this.add.group()`, `this.physics.add.group()`, `this.physics.add.staticGroup()`.
+`this.children` (the scene display list), `Phaser.Structs.List` and `Phaser.Structs.Map` still have `each`.
 
 ✅ Correct Example (REQUIRED - ALWAYS WRITE):
 const orb = this.add.image(x, y, 'orb');
@@ -76,5 +86,6 @@ Other Phaser 4 changes that bite: `Geom.Point` → `Math.Vector2`; `Math.TAU` is
 Before using an API you are not sure exists in Phaser 4, read the matching guide shipped inside the engine package:
 `node_modules/phaser/skills/<topic>/SKILL.md` — start with `v3-to-v4-migration`, `filters-and-postfx` (all filters),
 `v4-new-features`; also `tweens`, `sprites-and-images`, `physics-arcade`, `particles`, `cameras`, `scale-and-responsive`.
-Run `npx tsc --noEmit -p tsconfig.app.json` after writing effect code: it catches removed APIs that the build does not.
+Run `npx tsc --noEmit -p tsconfig.app.json` after writing effect or group code: it catches removed APIs that the build
+does not (except `children.entries.length` / `[i]`, which type-check and silently read nothing — use getChildren()).
 </userRequest>
