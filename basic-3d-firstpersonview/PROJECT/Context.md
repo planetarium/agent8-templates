@@ -1,43 +1,31 @@
-# Context — basic-3d-firstpersonview (Incanto)
+# Context — basic-3d-firstpersonview
 
 ## Project Overview
 
-The FIRST-PERSON character (camera at the eye, body invisible) on the Incanto engine: a 100×100 gray
-floor under sunset image-based lighting, one animated character
-(base-model.glb + mixamo clips), pointer-lock mouse look from inside the body (eyeHeight 0.64, camDistance
-0.01), WASD relative to where you face, a white crosshair, and a left-click
-tracer gun (200ms cooldown), Shift sprint, Space jump.
-ALL structure is `src/game.scene.json`; the only game code is two small
-behaviors (FollowLight, CharacterAnimator).
+Thin React Three Fiber game skeleton, first-person view. The camera sits at
+the player's eyes (1.5 m); the player walks, runs and jumps on an empty
+stage (floor, sky, fog, sun). Desktop: click to lock the mouse, mouse to
+look, WASD to move. Touch: joystick + JUMP, drag the scene to look. The
+local player is not drawn; a crosshair marks the center. The game's map is
+built in `src/game/world.ts`: obstacles in `BOXES` / `RAMPS`, terrain as a
+`HeightField` in `FIELDS`, moving platforms as AABBs that record `moved`.
 
 ## Tech Stack
 
 _Exact versions are in `package.json`._
 
-- **Game engine**: `incanto` — `CharacterController3D` does the heavy lifting
-- **Build / Lang**: Vite, TypeScript. No React/shell.
+- **Rendering**: three, @react-three/fiber, @react-three/drei
+- **Physics (lazy, optional)**: @react-three/rapier — only via `src/physics/`
+- **Framework / Build**: React, Vite, TypeScript, Tailwind CSS
+- **Multiplayer (unwired)**: `@agent8/gameserver`
 
 ## Critical Memory
 
-- READ THE SKILLS FIRST: `node_modules/incanto/skills/` — especially
-  `incanto-3d-character.md` (the controller + camera rigs) and
-  `incanto-building-3d-games.md` (HDRI presets, preload).
-- The Player is a DYNAMIC `RigidBody3D` (capsule r0.32 h0.96,
-  `fixedRotation: true`, friction 0) with a `CharacterController3D` child (`view: "firstPerson"`) —
-  NOT a CharacterBody3D. The controller floats the capsule on a spring and
-  moves it with impulses (vibe-starter parity numbers).
-- `environment.preset: "sunset"` is LIGHTING ONLY; the visible background is
-  `background: "#ffffff"` (the original shows the page through a transparent
-  canvas — we paint white explicitly).
-- Animations are mixamo GLBs declared as `animation` assets; the
-  CharacterAnimator behavior maps `movementStateChanged`
-  (idle/walk/run/fastRun/airborne) to clips. The model is ALREADY meter-scale:
-  targetHeight fit detects implausible skinned-rig measurements and renders
-  at authored scale (console warning is expected and fine).
-- `createGame3D({ pointer: true })` gives lock-on-click mouse look
-  (click the canvas to lock) — yaw/pitch live on the controller node.
-- The model Skin is `visible: false` — animations still run (original
-  parity) but you see nothing from inside; flip it on if you add a mirror.
-- uids are engine-generated (`newUid()` from 'incanto') — never hand-write.
-- `window.game` exposes the `createGame3D` Game handle in the console
-  (`game.engine`, `game.scene`, `game.dispose()`).
+- Player movement is a kinematic step (`src/game/player.ts`) against AABBs,
+  ramps and height fields from `src/game/world.ts`, not rapier. Grounded = landed on, or
+  stepped up onto, a box top, a ramp or a height field this step.
+- Movement follows the look yaw (`rig.yaw`, 0 = looking along −z).
+- Jump feel: coyote 0.12 s, buffer 0.1 s from the press, consumed on jump.
+- Per-frame state is mutable (`src/game/state.ts`), never React state.
+- Dynamic bodies (things that roll, tip over or get pushed) go in the lazy
+  rapier chunk under `src/physics/`, never hand-written physics.

@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-// Keeps the code shared by the basic-3d-r3f-* templates identical.
+// Keeps the code shared by the seven 3D templates (basic-3d and the six
+// basic-3d-<view> folders, React Three Fiber) identical.
 // Each template folder is a complete project (agent8 copies it as-is into a
 // user's project), so the shared files live in every folder. The source of
-// truth is basic-3d-r3f-freeview: edit there, then run `npm run 3d:sync`.
+// truth is basic-3d-freeview: edit there, then run `npm run 3d:sync`.
 // `npm run 3d:check` exits 1 if any copy differs from the source.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
@@ -23,7 +24,7 @@ const colors = {
 // Color helper function
 const colorize = (color, text) => `${colors[color]}${text}${colors.reset}`;
 
-const SOURCE = 'basic-3d-r3f-freeview';
+const SOURCE = 'basic-3d-freeview';
 
 // Build setup, page shell, the lazy rapier chunk and the import-order test
 // (config.ts stays a leaf so a module importing it can never load first):
@@ -88,14 +89,15 @@ const PACKAGE_FIELDS = ['dependencies', 'devDependencies'];
 const bundle = (...lists) => [...new Set(lists.flat())];
 
 const TARGETS = {
-  'basic-3d-r3f-sideview': bundle(BUILD, CHARACTER, MODELS),
-  'basic-3d-r3f-quarterview': bundle(BUILD, CHARACTER, MODELS),
-  'basic-3d-r3f-firstpersonview': bundle(BUILD, CHARACTER, MODELS),
-  'basic-3d-r3f-empty': bundle(BUILD, MODELS),
+  'basic-3d-sideview': bundle(BUILD, CHARACTER, MODELS),
+  'basic-3d-quarterview': bundle(BUILD, CHARACTER, MODELS),
+  'basic-3d-firstpersonview': bundle(BUILD, CHARACTER, MODELS),
+  // Empty stage, no character.
+  'basic-3d': bundle(BUILD, MODELS),
   // No character: its own flight loop, input and touch controls.
-  'basic-3d-r3f-flightview': bundle(BUILD, MODELS),
+  'basic-3d-flightview': bundle(BUILD, MODELS),
   // Voxel world instead of the box stage: own terrain, assets (block textures) and touch buttons.
-  'basic-3d-r3f-minecraft': bundle(BUILD, CONTROLLER, MODELS),
+  'basic-3d-minecraft': bundle(BUILD, CONTROLLER, MODELS),
 };
 
 const args = process.argv.slice(2);
@@ -104,7 +106,7 @@ const check = args.includes('--check');
 if (args.includes('--help') || args.includes('-h')) {
   console.log(colorize('blue', '📖 Usage:'));
   console.log('');
-  console.log(colorize('cyan', 'npm run 3d:sync') + colorize('gray', '    # Copy shared files from ' + SOURCE + ' to the other basic-3d-r3f-* folders'));
+  console.log(colorize('cyan', 'npm run 3d:sync') + colorize('gray', '    # Copy shared files from ' + SOURCE + ' to the other six 3D template folders'));
   console.log(colorize('cyan', 'npm run 3d:check') + colorize('gray', '   # Exit 1 if any copy differs from ' + SOURCE));
   console.log('');
   console.log(colorize('yellow', 'Shared files:'));

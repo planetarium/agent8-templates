@@ -1,15 +1,13 @@
-# Status — basic-3d (Incanto)
+# Status — basic-3d
 
 ## Implemented
 
-- Physical sky (`atmosphere`, sun at 35° elevation / 140° azimuth), shadows on,
-  low ambient so the sky's light does the work
-- Sun `DirectionalLight3D` casting shadows over a 30 m area
-- Ground: `StaticBody3D` 40×40 with a receiving skin
-- Marker cube at the origin (casts a shadow — the visible proof the stage is lit)
-- Camera framing the origin from [7, 6, 9]
-- React shell, console handle, loading card, agent8 embed handshake
+- Ground, sky, fog, hemisphere light, shadowed sun
+- Orbit camera (drag, pan, zoom; mouse and touch), kept above the ground
+- 21 × 21 grid; click / tap a cell to move the marker cube (tested grid math)
+- Lazy rapier demo (`?physics=1` or `PHYSICS_DEMO = true`)
 
-## Next steps
+## Not yet
 
-- Delete `Marker`, add the game.
+- Game rules, UI, sound
+- Multiplayer (`@agent8/gameserver` unwired)
