@@ -25,7 +25,9 @@ const colorize = (color, text) => `${colors[color]}${text}${colors.reset}`;
 
 const SOURCE = 'basic-3d-r3f-freeview';
 
-// Build setup, page shell and the lazy rapier chunk: every R3F template.
+// Build setup, page shell, the lazy rapier chunk and the import-order test
+// (config.ts stays a leaf so a module importing it can never load first):
+// every R3F template.
 const BUILD = [
   '.gitignore',
   'index.html',
@@ -37,15 +39,18 @@ const BUILD = [
   'src/index.css',
   'src/physics/LazyPhysics.tsx',
   'src/physics/PhysicsDemo.tsx',
+  'src/game/imports.test.ts',
 ];
 
 // Kinematic character controller: controller + its tests, the collision
 // types it needs (world.ts), the 3rd-person camera rules (camera.ts:
-// presets, collision, follow yaw), movement input, animation and the
-// character model. Every template with a walking character.
+// collision, follow yaw; cameraPresets.ts: the presets as import-free data
+// that config.ts reads), movement input, animation and the character model.
+// Every template with a walking character.
 const CONTROLLER = [
   'src/game/anim.ts',
   'src/game/camera.ts',
+  'src/game/cameraPresets.ts',
   'src/game/camera.test.ts',
   'src/game/input.ts',
   'src/game/player.ts',

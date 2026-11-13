@@ -24,13 +24,18 @@ enabled), a hint label, and `MobileControls`. Binds the keyboard.
 - `world.ts` — the stage: `BOXES` (just the floor), `RAMPS` and `FIELDS`
   (empty), plus the helpers `boxAabb`, `rampHeight`, `rampVertices`,
   `fieldHeight`, `platformCenter`, `updatePlatformAabb`.
-- `camera.ts` — pure camera rules: `CAMERA_PRESETS`, `cameraReach()`
+- `cameraPresets.ts` — `CAMERA_PRESETS` / `CameraPreset` as plain data with
+  no imports; `config.ts` imports only this, never `camera.ts` or `world.ts`.
+- `camera.ts` — pure camera rules (re-exports `CAMERA_PRESETS`): `cameraReach()`
   (how far the camera can sit before boxes, ramps or height fields block
   it, 0.3 m clear), `springDistance()` (pull in at once, ease out),
   `followYawStep()` (swing behind the motion), `latchMoveYaw()` (keep the
   movement basis while the camera swings).
 - `camera.test.ts` — `bun test` for presets, collision, spring, follow yaw
   and the latch.
+- `imports.test.ts` — `bun test` that `config.ts` stays a leaf (loads no game
+  module or package), so a `world.ts` that imports `config` and reads
+  `PLAYER` at load works.
 - `anim.ts` — shared animation state and `retarget()` for mixamo clip GLBs.
 - `state.ts` — the shared `player` and camera `rig` (yaw, pitch, wanted
   distance, current reach, last drag time, movement latch).
@@ -66,7 +71,7 @@ physics. Leave the player controller (`src/game/player.ts`) as it is.
 ## Camera presets by genre
 
 Switch with one line in `config.ts`: `const PRESET: CameraPreset = 'shoulder';`.
-The numbers live in `CAMERA_PRESETS` (`game/camera.ts`); `CAMERA.free` is a
+The numbers live in `CAMERA_PRESETS` (`game/cameraPresets.ts`); `CAMERA.free` is a
 copy you can tweak per game.
 
 | preset | for | distance (min–max) | pitch | eye height | shoulder | FOV landscape / portrait |

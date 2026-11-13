@@ -23,6 +23,8 @@ Binds the keyboard.
   `skyPosition(decor, t)`.
 - `flight.test.ts` — `bun test` for throttle, attitude, ground clamp,
   take-off, reset, gun and decor.
+- `imports.test.ts` — `bun test` that `config.ts` stays a leaf (loads no game
+  module or package), so game modules can import `config` safely.
 - `input.ts` — keyboard set, joystick, touch throttle / fire; `readFlight()`
   turns them into a `FlightInput`, `wantsFire()`.
 - `state.ts` — the shared `plane` and `gun`.

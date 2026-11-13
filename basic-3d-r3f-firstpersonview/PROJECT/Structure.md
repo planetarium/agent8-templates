@@ -25,7 +25,11 @@ keyboard.
   `fieldHeight`, `platformCenter`, `updatePlatformAabb`.
 - `camera.ts` / `camera.test.ts` — shared 3rd-person camera rules (presets,
   collision, follow yaw) used by the orbit-camera templates; the
-  first-person camera does not use them.
+  first-person camera does not use them. `cameraPresets.ts` holds the
+  presets as import-free data.
+- `imports.test.ts` — `bun test` that `config.ts` stays a leaf (loads no game
+  module or package), so a `world.ts` that imports `config` and reads
+  `PLAYER` at load works.
 - `anim.ts` — animation state and `retarget()` for mixamo clip GLBs (used by
   `Character.tsx`; the local player does not animate).
 - `state.ts` — the shared `player` and look `rig` (yaw, pitch).

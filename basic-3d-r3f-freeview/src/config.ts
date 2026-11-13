@@ -1,5 +1,7 @@
 // Game-wide settings. Freeview: 3rd-person orbit camera behind the player.
-import { CAMERA_PRESETS, type CameraPreset } from './game/camera';
+// Import only plain data here: game modules (world.ts, player.ts) import config,
+// so config importing them back would crash at start (see game/imports.test.ts).
+import { CAMERA_PRESETS, type CameraPreset } from './game/cameraPresets';
 
 /** Mount the rapier demo (lazy chunk). Off by default so the first load stays light; `?physics=1` also enables it. */
 export const PHYSICS_DEMO = false;

@@ -38,6 +38,11 @@ slop).
   waits 2 s after a drag), `latchMoveYaw()`; `cameraReach()` is for box
   stages — here the camera uses the voxel `raycast()`. Tests in
   `camera.test.ts`.
+- `cameraPresets.ts` — `CAMERA_PRESETS` / `CameraPreset` as plain data with
+  no imports (re-exported by `camera.ts`); `config.ts` imports only this.
+- `imports.test.ts` — `bun test` that `config.ts` stays a leaf (loads no game
+  module or package), so a `world.ts` or `voxel.ts` that imports `config`
+  works whichever loads first.
 - `input.ts` — keyboard set, joystick axes, `jumpPressedAt`; `moveAxis()`, `wantsRun()`.
 - `anim.ts` — shared animation state and `retarget()` for mixamo clip GLBs.
 - `state.ts` — the shared `world`, `player`, camera `rig`, and `builder`

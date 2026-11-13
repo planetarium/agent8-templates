@@ -1,6 +1,8 @@
 // Game-wide settings. Minecraft: a seeded voxel world, a 3rd-person orbit
 // camera behind the player, a crosshair that mines and places blocks.
-import { CAMERA_PRESETS, type CameraPreset } from './game/camera';
+// Import only plain data here: game modules (world.ts, player.ts, voxel.ts) import config,
+// so config importing them back would crash at start (see game/imports.test.ts).
+import { CAMERA_PRESETS, type CameraPreset } from './game/cameraPresets';
 
 /** Mount the rapier demo (lazy chunk). Off by default so the first load stays light; `?physics=1` also enables it. */
 export const PHYSICS_DEMO = false;

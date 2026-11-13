@@ -15,6 +15,8 @@ enabled), and a hint label.
 - `grid.ts` — pure `cellAt()` (world point → cell or null) and
   `cellCenter()` (cell → world point).
 - `grid.test.ts` — `bun test` for both, odd and even grids.
+- `imports.test.ts` — `bun test` that `config.ts` stays a leaf (loads no game
+  module or package), so game modules can import `config` safely.
 - `anim.ts` — `AnimState` and `retarget()` for mixamo clip GLBs, used by
   `components/models/AnimatedModel.tsx` (see "Model parts").
 
