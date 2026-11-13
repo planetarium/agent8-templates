@@ -209,6 +209,58 @@ describe('headroom (nothing lifts the player into a box above)', () => {
   });
 });
 
+describe('stopping next to a landing box on a slope (no fall through the surface)', () => {
+  // The Structure.md "ramp + landing box" layout: the top of the slope meets a box of the same height.
+  const RAMP: Ramp = { minX: 0, maxX: 6, minZ: -1.5, maxZ: 1.5, height: 1.5, color: '' };
+  const LANDING: Aabb = { minX: 6, minY: 0, minZ: -1.5, maxX: 9, maxY: 1.5, maxZ: 1.5 };
+  const SLOPE: HeightField = { minX: 0, maxX: 6, minZ: -1.5, maxZ: 1.5, heightAt: (x) => x * 0.25 };
+  const PLATEAU: HeightField = { minX: 0, maxX: 12, minZ: -3, maxZ: 3, heightAt: () => 1 };
+  // a slab only 0.15 m above the plateau (≤ RAMP_SNAP)
+  const LOW_SLAB: Aabb = { minX: 6, minY: 0.5, minZ: -3, maxX: 9, maxY: 1.15, maxZ: 3 };
+
+  /**
+   * Walk +x from `startX` until x ≥ stopX, let go and stand 2 s. Returns the worst depth below
+   * `surface(x)` (the slope / plateau under the player's center) after letting go.
+   */
+  function walkAndStop(dt: number, startX: number, stopX: number, boxes: Aabb[], ramps: Ramp[], fields: HeightField[], surface: (x: number) => number, startY = 0) {
+    const p = onFloor();
+    Object.assign(p.pos, { x: startX, y: startY, z: 0 });
+    const jump = { jumpPressedAt: -Infinity };
+    let t = 0;
+    for (let i = 0; i < 10 / dt && p.pos.x < stopX; i++) stepPlayer(p, { x: 1, z: 0 }, jump, (t += dt), dt, boxes, false, ramps, fields);
+    let below = 0;
+    for (let i = 0; i < 2 / dt; i++) {
+      stepPlayer(p, still, jump, (t += dt), dt, boxes, false, ramps, fields);
+      below = Math.max(below, surface(p.pos.x) - p.pos.y);
+    }
+    return below;
+  }
+  const slopeAt = (x: number) => Math.min(Math.max(x, 0), 6) * 0.25;
+
+  for (const dt of [1 / 120, 1 / 60, 1 / 30]) {
+    for (const stopX of [5.35, 5.6, 5.85]) {
+      test(`ramp + landing box, stop at x ${stopX} (dt 1/${Math.round(1 / dt)}): stays on the ramp`, () => {
+        expect(walkAndStop(dt, -1, stopX, [FLOOR, LANDING], [RAMP], [], slopeAt)).toBeLessThan(0.05);
+      });
+      test(`height field + landing box, stop at x ${stopX} (dt 1/${Math.round(1 / dt)}): stays on the field`, () => {
+        expect(walkAndStop(dt, -1, stopX, [FLOOR, LANDING], [], [SLOPE], slopeAt)).toBeLessThan(0.05);
+      });
+      test(`flat height field + slab 0.15 m above it, stop at x ${stopX} (dt 1/${Math.round(1 / dt)}): stays on the field`, () => {
+        expect(walkAndStop(dt, 1, stopX, [FLOOR, LOW_SLAB], [], [PLATEAU], () => 1, 1)).toBeLessThan(0.05);
+      });
+    }
+  }
+
+  test('a player already inside a thin prop on the ramp still stands on the ramp (an existing overlap does not block the snap)', () => {
+    // e.g. a sign post placed on the spawn: the player starts overlapping it
+    const post: Aabb = { minX: 2.9, minY: 0, minZ: -0.1, maxX: 3.1, maxY: 3, maxZ: 0.1 };
+    const p = onFloor();
+    Object.assign(p.pos, { x: 3, y: RAMP.height / 2 + 0.3, z: 0 });
+    sim(p, still, [FLOOR, post], [RAMP], () => false);
+    expect(p.pos.y).toBeCloseTo(rampHeight(RAMP, 3, 0)!, 3);
+  });
+});
+
 describe('the test course', () => {
   test('from the spawn, walking +x on z = 0 climbs the stairs to the 0.9 landing without jumping', () => {
     const p = createPlayer();

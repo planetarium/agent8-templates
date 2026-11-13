@@ -55,10 +55,15 @@ function land(p: PlayerState, b: Aabb) {
   p.ground = b;
 }
 
-/** Would the player's box with its feet at y overlap any collider (other than `except`)? The headroom check before any lift. */
+/**
+ * Would moving the feet to height y push the player into a collider (other than `except`)
+ * it does not already overlap? Checked before every lift (step-up, ramp / height-field
+ * snap up) and every snap down. A box the player is already inside does not count, so
+ * it never blocks standing on the surface.
+ */
 function blockedAt(p: PlayerState, y: number, colliders: Aabb[], except?: Aabb) {
   const at = { x: p.pos.x, y, z: p.pos.z };
-  return colliders.some((b) => b !== except && overlaps(at, b));
+  return colliders.some((b) => b !== except && overlaps(at, b) && !overlaps(p.pos, b));
 }
 
 const EPS = 1e-6;
@@ -120,9 +125,14 @@ function resolveRamps(p: PlayerState, ramps: Ramp[], wasGrounded: boolean, fromX
   }
 }
 
-/** Stand on a surface height h if falling onto it (or walking down it while grounded) and there is headroom there. */
+/**
+ * Stand on a surface height h if falling onto it (or walking down it while grounded) —
+ * unless that height pushes the player into a box. That holds going down too: a player
+ * just stepped up onto a landing box at the top of a slope stays on the box instead of
+ * being pulled down into its side (where every later snap would be refused).
+ */
 function snapTo(p: PlayerState, h: number, wasGrounded: boolean, colliders: Aabb[]) {
-  if (p.vel.y <= 0 && p.pos.y <= h + (wasGrounded ? RAMP_SNAP : 0) && !(h > p.pos.y && blockedAt(p, h, colliders))) {
+  if (p.vel.y <= 0 && p.pos.y <= h + (wasGrounded ? RAMP_SNAP : 0) && !blockedAt(p, h, colliders)) {
     p.pos.y = h;
     p.vel.y = 0;
     p.grounded = true;
