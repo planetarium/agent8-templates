@@ -1,25 +1,24 @@
-# Requirements — basic-3d-quarterview (Incanto)
+# Requirements — basic-3d-quarterview
 
 ## Coding Patterns
 
-- STRUCTURE in `src/game.scene.json`; LOGIC in behaviors registered in
-  `src/App.tsx`. The controller node handles movement/camera — don't
-  reimplement it in behaviors; tune its props (maxSpeed, jumpVelocity,
-  camDistance…) in JSON instead.
-- New animations: declare the GLB as an `animation` asset, extend
-  `STATE_CLIPS` in `behaviors.ts` (or set `skin.animation = '$key'` directly
-  for one-shots).
-- New world objects: StaticBody3D + box/sphere/capsule collider + a
-  MeshInstance3D/ModelInstance3D skin child. The character collides with
-  anything that has a collider — no registration step.
-- The on-screen JUMP/ATTACK buttons inject key codes through
-  `engine.input.handleKey` — wire new buttons the same way.
-- uids: `newUid()` from 'incanto'.
+- Function components with hooks. Per-frame work in `useFrame`, on mutable
+  objects — not React state.
+- Gameplay rules in pure modules under `src/game/` with `bun test` coverage.
+- Every action works on keyboard and on touch.
+- Rapier only behind `React.lazy` (`src/physics/`).
+- Courses, goals and enemies stretch from the spawn toward the camera's
+  front (−z, up the screen); x is the course's width.
 
 ## Known Issues / Constraints
 
-- ATTACK renders for visual parity but fires no gameplay (the original's
-  left-click shoots a bullet system we did not port to this template).
-- The character model is meter-scale; `targetHeight` fit logs a warning and
-  keeps authored scale (skinned rigs defeat bbox measurement) — expected.
-- Shadows ARE on here (sun castShadow, mapSize 4096, ±75 frustum).
+- Ramps are wedges rising along one axis (`dir`: '+x', '-x', '+z', '-z');
+  the foot height is sampled at the player's center.
+- A moving platform pushes nothing: if it slides into a player who is not on
+  it, the next downward step lifts the player on top.
+- Height fields: the slope check compares `heightAt` under the start and the
+  end of each substep, so a sudden jump in height is a wall while walking but
+  can be landed on from above. Ramps and boxes are not checked for slope.
+- The rapier demo crates do not collide with the player.
+- Tall boxes between the camera and the player can hide it (no fade-out).
+- `@agent8/gameserver` is installed but not wired.
