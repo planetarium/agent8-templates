@@ -23,6 +23,17 @@ const args = process.argv.slice(2);
 const targetArg = args.find((arg) => arg.startsWith('--target='));
 const target = targetArg ? targetArg.split('=')[1] : 'basic-3d';
 
+// The seven 3D templates (React Three Fiber): never overwritten by docs/.
+const R3F_TEMPLATES = [
+  'basic-3d',
+  'basic-3d-freeview',
+  'basic-3d-sideview',
+  'basic-3d-quarterview',
+  'basic-3d-firstpersonview',
+  'basic-3d-flightview',
+  'basic-3d-minecraft',
+];
+
 console.log(colorize('blue', '🚀 Starting docs copy script...\n'));
 
 // Check if path exists
@@ -115,7 +126,9 @@ async function copyDocs() {
 
       if (isDirectory(itemPath) && item !== 'docs' && item !== 'scripts' && item !== '.git' && item !== 'node_modules') {
         if (target === 'all' || item.startsWith(target)) {
-          if (target === 'basic-3d' && item === 'basic-3d') {
+          // The seven 3D templates (React Three Fiber) carry their own AGENTS.md / PROJECT docs;
+          // docs/ is written for other stacks.
+          if (R3F_TEMPLATES.includes(item)) {
             continue;
           }
           targetDirs.push(item);

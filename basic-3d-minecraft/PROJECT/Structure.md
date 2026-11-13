@@ -1,23 +1,123 @@
-# Structure — basic-3d-minecraft (Incanto)
+# Structure — basic-3d-minecraft
 
-## `index.html`
-Canvas, crosshair, tile bar, ADD CUBE/JUMP buttons, loading overlay.
+## `src/config.ts`
 
-## `src/game.scene.json`
-Environment (sky blue + ambient 1.2), input (move/jump/sprint/addCube),
-Voxels (VoxelGrid3D), Terrain node (generator script), Water plane, Player
-(RigidBody3D capsule + firstPerson controller + Builder script), Preview
-cube, 3 directional lights (sun FollowLight + cool fill + warm under),
-camera.
+`PHYSICS_DEMO`, and the tuning tables `PLAYER` (speeds, gravity, jump,
+coyote/buffer, `stepHeight`, `spawn` — overwritten with the terrain's spawn
+point), `CAMERA` (`preset` — 'wide' here, 'follow' or 'shoulder'; `free`
+— that preset's distance, pitch, eye height, FOV; `followYaw`), `VOXEL` (seed, world
+size and height, chunk size, active radius) and `BUILDER` (reach, click
+slop).
 
-## `src/behaviors.ts`
-Terrain (seeded simplex map + chunked trimesh colliders), Builder (raycast
-preview + placement), FollowLight. The simplex/LCG implementation mirrors
-the original generator.
+## `src/App.tsx`
 
-## `src/main.tsx` and `src/App.tsx`
-One `createGame3D` call (behaviors, physics auto, `pointer: true` lock) +
-tile-bar UI (writes Builder.selectedTile) + button key injection +
-`window.game`.
+`<Canvas>` with `Terrain`, `Player`, `CameraRig`, `Builder` (and
+`LazyPhysics` when enabled), the crosshair, a hint label, the `Hotbar` and
+`MobileControls`. Binds the keyboard.
 
-- `verify.ts` — headless proof that the baked tower is in the grid and solid (`bun run verify`).
+## `src/game/`
+
+- `voxel.ts` — pure voxel world: `lcgRandom()`, `heightFn()`,
+  `createWorld()`, `blockAt()` / `setBlock()` / `topAt()`, `spawnPoint()`;
+  chunks: `chunkOf()`, `chunkKey()`, `activeChunks()`, `chunksTouching()`;
+  meshing: `buildChunkMesh()` (exposed faces, grouped by `MATERIALS` slot);
+  `raycast()` (voxel traversal → block + face normal); `collidersNear()`
+  (blocks around the player as AABBs, out-of-world columns as walls);
+  `blockHitsPlayer()`.
+- `voxel.test.ts` — `bun test` for seed, heights, layers, spawn, chunks,
+  meshing, raycast, the 1-block step, the world edge.
+- `player.ts` — pure `stepPlayer()`: acceleration, jump (coyote + buffer),
+  gravity, axis-by-axis AABB collision with step-up, respawn below `killY`.
+  (Ramps, height fields and moving boxes are supported but unused here.)
+- `player.test.ts` — the controller's own tests.
+- `world.ts` — the `Aabb` type the controller collides with (plus box /
+  ramp / height-field helpers it understands).
+- `camera.ts` — pure camera rules shared with the other R3F templates:
+  `CAMERA_PRESETS` (follow 4.5 m / shoulder 3 m + 0.6 m right / wide 7 m),
+  `springDistance()`, `followYawStep()` (swing behind the motion, ≈ 0.6 s,
+  waits 2 s after a drag), `latchMoveYaw()`; `cameraReach()` is for box
+  stages — here the camera uses the voxel `raycast()`. Tests in
+  `camera.test.ts`.
+- `cameraPresets.ts` — `CAMERA_PRESETS` / `CameraPreset` as plain data with
+  no imports (re-exported by `camera.ts`); `config.ts` imports only this.
+- `imports.test.ts` — `bun test` that `config.ts` stays a leaf (loads no game
+  module or package), so a `world.ts` or `voxel.ts` that imports `config`
+  works whichever loads first.
+- `input.ts` — keyboard set, joystick axes, `jumpPressedAt`; `moveAxis()`, `wantsRun()`.
+- `anim.ts` — shared animation state and `retarget()` for mixamo clip GLBs.
+- `state.ts` — the shared `world`, `player`, camera `rig`, and `builder`
+  (selected block, crosshair target, dirty chunks). On the dev server also
+  `window.game`.
+
+## `src/components/`
+
+- `Terrain.tsx` — sky, fog, sun following the player, water plane, and
+  `Chunks`: one mesh per active chunk, built from `buildChunkMesh`, rebuilt
+  when its key is in `builder.dirty`; block materials with CDN textures.
+- `Builder.tsx` — crosshair raycast every frame, block outline, click /
+  right-click / 1-2-3 handling; `mineTarget()`, `placeAtTarget()`, `HOTBAR`.
+- `Player.tsx` — camera-relative input → `stepPlayer` in 1/120 s substeps
+  against `collidersNear`, sets the animation state, draws `Character`.
+- `Character.tsx` — verse8 base character (a placeholder capsule until the
+  GLB loads), clip cross-fade.
+- `CameraRig.tsx` — 3rd-person orbit (drag + wheel), framing from
+  `CAMERA.free`; swings behind the motion when not dragged; pulled in in
+  front of the first block between the player and the camera, eased back
+  out when it clears.
+- `MobileControls.tsx` — joystick, MINE / PLACE, JUMP; shown on touch
+  devices up front.
+
+## `src/physics/`
+
+Rapier (`@react-three/rapier`) is installed but lazy: import it only from
+files under `src/physics/` that are reached through `React.lazy`
+(`LazyPhysics.tsx`). A static import anywhere else puts ~2 MB of wasm into the
+first load. Dynamic bodies (balls, pins, stackable crates — anything that
+should roll, tip over or be pushed): switch on the lazy rapier path in
+`src/physics/` (mount `LazyPhysics` / `PhysicsDemo`, the `?physics` chunk) and
+build those bodies there with `@react-three/rapier`. Do not hand-write their
+physics. Leave the player controller (`src/game/player.ts`) as it is.
+
+- `LazyPhysics.tsx` — `React.lazy(() => import('./PhysicsDemo'))`.
+- `PhysicsDemo.tsx` — `<Physics>` with a floor collider at y = 0 (under
+  the terrain) and falling crates. For bodies on the blocks, give rapier
+  colliders for the blocks near them.
+
+## Numbers
+
+- Block 1 m; world x, z in [−40, 40), y in [0, 48); heights 5–15.
+- Player radius 0.35 m, height 1.6 m, `stepHeight` 0.35 m, jump apex
+  ≈ 1.56 m — a 1-block step needs a jump, a 2-block wall cannot be jumped.
+- 8 × 8 chunks; radius 3 → up to 29 drawn; a chunk mesh is a few hundred
+  faces.
+
+## Model parts (putting models in)
+
+Shared by every R3F template (`npm run 3d:sync` keeps them identical) and
+imported by no scene yet — import them when the game needs a model; don't
+rewrite them. Library models come at any scale (a mixamo rig is often a
+0.01 Armature); these measure the bounding box after `updateMatrixWorld`,
+scale to metres and stand the lowest point on y = 0. Model URLs go in
+`src/assets.json` `models`.
+
+| path | for | required |
+| --- | --- | --- |
+| `src/game/fitModel.ts` | `fitModel(object, { height })` → `{ unit, lift }`: draw with `scale={unit}`, `position-y={lift}` | `object`, `height` (m) |
+| `src/components/models/Props.tsx` | `<Props>`: a static model (crate, barrel, rock, house) at every `Placement` (`{ x, y, z, rotY, scale }`), instanced past 30 copies | `url`, `height` (m), `at` |
+| `src/components/models/AnimatedModel.tsx` | `<AnimatedModel>`: a rigged enemy / NPC, feet at its origin, facing +z; plays its own named clips, a mixamorig rig without them borrows idle / walk / run (`assets.json` `animations`, `game/anim.ts` `retarget`); `source={{ state }}` picks the clip; each clip it can play stands on its own lowest skinned point (`game/groundClips.ts`, sampled once per model URL), the lift easing over the cross-fade | `url`, `height` (m) |
+| `src/game/groundClips.ts` | `clipGroundOffsets(root, clips)` → per clip, the offset that puts the lowest skinned point of 9 samples on y = 0 (model units; `AnimatedModel` multiplies by `unit`) | `root`, `clips` |
+
+## Extension points
+
+- New block type: add an id in `voxel.ts`, a material slot in `MATERIALS`
+  + `slotOf()`, its texture in `src/assets.json` and `Terrain.tsx`, and an
+  entry in `HOTBAR` (`Builder.tsx`).
+- Different terrain: change `createWorld()` (keep it deterministic for a
+  seed) and its tests.
+- Bigger world: `VOXEL.size` / `height`; drawing stays bounded by
+  `activeRadius`.
+- New action: key / mouse handling in `Builder.tsx` + a button in
+  `MobileControls.tsx`.
+- New dynamic bodies: in `PhysicsDemo.tsx` (or another file under
+  `src/physics/` reached through `LazyPhysics`), mounted by default by setting
+  `PHYSICS_DEMO = true`.

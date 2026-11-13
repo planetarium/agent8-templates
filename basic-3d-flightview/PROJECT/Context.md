@@ -1,35 +1,32 @@
-# Context — basic-3d-flightview (Incanto)
+# Context — basic-3d-flightview
 
 ## Project Overview
 
-An airplane flight sim on the Incanto engine: a procedural box-built plane
-on a 1000m runway across grass and sea, atmospheric Sky shader, 500 seeded
-ground decorations + 150 drifting sky shapes, banking chase camera (FOV 30),
-HUD panel, Space-fired tracers, R reset. All flight constants mirror the
-original FlightViewController exactly.
+React Three Fiber flight game skeleton. A primitive airplane sits on a
+1000 m runway (100 centerline stripes) in a 1000 × 1000 m grass field inside
+a 10 km sea, under a sky shader with fog. Throttle up, pull back, take off;
+a chase camera follows and banks with the plane. Space fires tracers.
+Seeded scenery: 500 boxes / spheres / cylinders on the grass, 150 bright
+shapes drifting in circles 100–400 m up. HUD: speed (km/h) and altitude.
+Keyboard on desktop, joystick + throttle rocker + FIRE on touch devices.
 
 ## Tech Stack
 
-- **Game engine**: `incanto`; behaviors use `three` math directly (allowed
-  in GAME code — only engine core is three-free).
-- Vite + TypeScript, no shell framework.
+_Exact versions are in `package.json`._
+
+- **Rendering**: three, @react-three/fiber, @react-three/drei
+- **Physics (lazy, optional)**: @react-three/rapier — only via `src/physics/`
+- **Framework / Build**: React, Vite, TypeScript, Tailwind CSS
+- **Multiplayer (unwired)**: `@agent8/gameserver`
 
 ## Critical Memory
 
-- READ THE SKILLS FIRST: `node_modules/incanto/skills/`.
-- Flight is NOT the character controller: `FlightControl` is a plain
-  behavior holding a quaternion attitude (the node's Euler rotation is just
-  a mirror of it — never write node.rotation from elsewhere).
-- Constants are parity-critical: maxSpeed 120 (HUD caps at exactly
-  432.0 km/h), throttle +20/−80 per s, pitch 0.5 rad/s, roll π/2·0.5,
-  yaw accel 0.3, ground authority scales below 20 m/s, camera offset
-  (0,3,15) with slerp 0.08 / lerp 5, FOV 30 far 5000.
-- `environment.sky {sunPosition, turbidity, rayleigh}` is the three Sky
-  shader (drei <Sky> parity) — engine-rendered, not an asset.
-- Decor (500 ground + 150 floating) comes from `DecorSpawner` with seed
-  12345 — deterministic layout, not in the JSON (procedural decor is LOGIC).
-- HUD reads `plane.behavior.measuredSpeed` — a 5-frame rolling average like
-  the original, not the controller's internal speed.
-- uids are engine-generated (`newUid()` from 'incanto').
-- `window.game` exposes the `createGame3D` Game handle in the console
-  (`game.engine`, `game.scene`, `game.dispose()`).
+- The plane is a kinematic step (`src/game/flight.ts`), not a physics body:
+  speed along the nose, attitude as a quaternion, clamped above the ground.
+- Flight constants (`FLIGHT` in `config.ts`) come from the previous version
+  of this template: max 120 m/s (432 km/h), +20 / −80 m/s²,
+  pitch 0.5 rad/s, roll π/2 × 0.5 rad/s, yaw accel 0.3, full authority from
+  20 m/s, airborne above 1 m.
+- Per-frame state is mutable (`src/game/state.ts`), never React state.
+- Dynamic bodies (things that roll, tip over or get pushed) go in the lazy
+  rapier chunk under `src/physics/`, never hand-written physics.
