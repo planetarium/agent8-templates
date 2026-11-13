@@ -121,6 +121,28 @@ describe('meshing', () => {
     expect(m.faces).toBeGreaterThan(100); // at least every top
     expect(m.faces).toBeLessThan(1500);
   });
+
+  test('a worst-case chunk (every face exposed, one material) meshes without a call-stack / argument overflow', () => {
+    // 3D checkerboard of stone: 2,400 blocks, all 6 faces visible → 14,400 faces, 172,800 position floats
+    const w = emptyWorld();
+    for (let x = 0; x < 10; x++) for (let z = 0; z < 10; z++) for (let y = 0; y < 48; y++) if ((x + y + z) % 2 === 0) setBlock(w, x, y, z, STONE);
+    // V8 (the browser) throws RangeError on push(...array) past ~100k items; bun's JSC does not,
+    // so fail on any huge argument list here, whatever engine runs the test.
+    const push = Array.prototype.push;
+    Array.prototype.push = function (this: unknown[], ...items: unknown[]) {
+      if (items.length > 1000) throw new RangeError(`push() with ${items.length} arguments`);
+      return push.apply(this, items);
+    };
+    let m: ReturnType<typeof buildChunkMesh>;
+    try {
+      m = buildChunkMesh(w, 0, 0);
+    } finally {
+      Array.prototype.push = push;
+    }
+    expect(m.faces).toBe(2400 * 6 - 50); // the 50 bottom faces on y = 0 sit on the world floor
+    expect(m.positions.length).toBe(m.faces * 12);
+    expect(m.indices.length).toBe(m.faces * 6);
+  });
 });
 
 describe('raycast', () => {

@@ -10,6 +10,9 @@
 // - a jump consumes both, so one press = one jump
 // "Grounded" only ever comes from collision: the player moved down into a
 // box top, stepped up onto one, or stands on a ramp or height field this step.
+// Nothing lifts the player into a box: step-up, ramp and height-field snaps
+// check headroom first, and a box the player is already inside is ignored
+// (never landed on from below).
 
 import { PLAYER } from '../config';
 import { fieldHeight, rampHeight, type Aabb, type HeightField, type Ramp } from './world';
@@ -52,22 +55,34 @@ function land(p: PlayerState, b: Aabb) {
   p.ground = b;
 }
 
+/** Would the player's box with its feet at y overlap any collider (other than `except`)? The headroom check before any lift. */
+function blockedAt(p: PlayerState, y: number, colliders: Aabb[], except?: Aabb) {
+  const at = { x: p.pos.x, y, z: p.pos.z };
+  return colliders.some((b) => b !== except && overlaps(at, b));
+}
+
+const EPS = 1e-6;
+
 function moveAxis(p: PlayerState, axis: 'x' | 'y' | 'z', delta: number, colliders: Aabb[]) {
   if (delta === 0) return;
+  const from = p.pos[axis];
   p.pos[axis] += delta;
   for (const b of colliders) {
     if (!overlaps(p.pos, b)) continue;
     if (axis === 'y') {
-      if (delta < 0) land(p, b);
-      else {
+      // Only a box the feet (falling) or the head (rising) were clear of before this move
+      // stops it; a box the player was already inside never moves the player onto its top.
+      if (delta < 0 && from >= b.maxY - EPS) land(p, b);
+      else if (delta > 0 && from + PLAYER.height <= b.minY + EPS) {
         p.pos.y = b.minY - PLAYER.height;
         p.vel.y = 0;
       }
       continue;
     }
-    // Step-up: a low ledge hit while standing (or coming down) lifts the player onto it.
+    // Step-up: a low ledge hit while standing (or coming down) lifts the player onto it —
+    // if there is headroom up there; otherwise the ledge is a wall.
     const rise = b.maxY - p.pos.y;
-    if (rise <= PLAYER.stepHeight && (p.grounded || p.vel.y <= 0)) {
+    if (rise <= PLAYER.stepHeight && (p.grounded || p.vel.y <= 0) && !blockedAt(p, b.maxY, colliders, b)) {
       land(p, b);
       continue;
     }
@@ -79,30 +94,35 @@ function moveAxis(p: PlayerState, axis: 'x' | 'y' | 'z', delta: number, collider
   }
 }
 
-/** Ramps: stand on the surface, or treat a tall side as a wall (undo this step's horizontal move). */
-function resolveRamps(p: PlayerState, ramps: Ramp[], wasGrounded: boolean, fromX: number, fromZ: number) {
+/** Undo this step's horizontal move (a wall). */
+function undoHorizontal(p: PlayerState, fromX: number, fromZ: number) {
+  p.pos.x = fromX;
+  p.pos.z = fromZ;
+  p.vel.x = 0;
+  p.vel.z = 0;
+}
+
+/** Ramps: stand on the surface, or treat a tall side — or a box above the surface — as a wall. */
+function resolveRamps(p: PlayerState, ramps: Ramp[], wasGrounded: boolean, fromX: number, fromZ: number, colliders: Aabb[]) {
   for (const r of ramps) {
-    const h = rampHeight(r, p.pos.x, p.pos.z);
+    let h = rampHeight(r, p.pos.x, p.pos.z);
     if (h === null) continue;
     if (p.pos.y < h - PLAYER.stepHeight) {
-      p.pos.x = fromX;
-      p.pos.z = fromZ;
-      p.vel.x = 0;
-      p.vel.z = 0;
+      undoHorizontal(p, fromX, fromZ);
       continue;
     }
-    if (p.vel.y <= 0 && p.pos.y <= h + (wasGrounded ? RAMP_SNAP : 0)) {
-      p.pos.y = h;
-      p.vel.y = 0;
-      p.grounded = true;
-      p.ground = null;
+    if (h > p.pos.y && blockedAt(p, h, colliders)) {
+      undoHorizontal(p, fromX, fromZ);
+      h = rampHeight(r, fromX, fromZ);
+      if (h === null) continue;
     }
+    snapTo(p, h, wasGrounded, colliders);
   }
 }
 
-/** Stand on a surface height h if falling onto it (or walking down it while grounded). */
-function snapTo(p: PlayerState, h: number, wasGrounded: boolean) {
-  if (p.vel.y <= 0 && p.pos.y <= h + (wasGrounded ? RAMP_SNAP : 0)) {
+/** Stand on a surface height h if falling onto it (or walking down it while grounded) and there is headroom there. */
+function snapTo(p: PlayerState, h: number, wasGrounded: boolean, colliders: Aabb[]) {
+  if (p.vel.y <= 0 && p.pos.y <= h + (wasGrounded ? RAMP_SNAP : 0) && !(h > p.pos.y && blockedAt(p, h, colliders))) {
     p.pos.y = h;
     p.vel.y = 0;
     p.grounded = true;
@@ -112,10 +132,10 @@ function snapTo(p: PlayerState, h: number, wasGrounded: boolean) {
 
 /**
  * Height fields: like ramps, plus a slope limit. Walking up a slope steeper
- * than PLAYER.maxSlope, or into a face more than stepHeight above the feet,
- * undoes this step's horizontal move.
+ * than PLAYER.maxSlope, into a face more than stepHeight above the feet, or
+ * up under a box with no headroom undoes this step's horizontal move.
  */
-function resolveFields(p: PlayerState, fields: HeightField[], wasGrounded: boolean, fromX: number, fromZ: number) {
+function resolveFields(p: PlayerState, fields: HeightField[], wasGrounded: boolean, fromX: number, fromZ: number, colliders: Aabb[]) {
   const maxRise = Math.tan(PLAYER.maxSlope);
   for (const f of fields) {
     let h = fieldHeight(f, p.pos.x, p.pos.z);
@@ -123,15 +143,13 @@ function resolveFields(p: PlayerState, fields: HeightField[], wasGrounded: boole
     const run = Math.hypot(p.pos.x - fromX, p.pos.z - fromZ);
     const from = fieldHeight(f, fromX, fromZ);
     const tooSteep = wasGrounded && from !== null && run > 1e-9 && (h - from) / run > maxRise;
-    if (tooSteep || p.pos.y < h - PLAYER.stepHeight) {
-      p.pos.x = fromX;
-      p.pos.z = fromZ;
-      p.vel.x = 0;
-      p.vel.z = 0;
+    const noHeadroom = h > p.pos.y && blockedAt(p, h, colliders);
+    if (tooSteep || noHeadroom || p.pos.y < h - PLAYER.stepHeight) {
+      undoHorizontal(p, fromX, fromZ);
       h = fieldHeight(f, fromX, fromZ);
       if (h === null) continue;
     }
-    snapTo(p, h, wasGrounded);
+    snapTo(p, h, wasGrounded, colliders);
   }
 }
 
@@ -199,8 +217,8 @@ export function stepPlayer(
   moveAxis(p, 'x', p.vel.x * dt, colliders);
   moveAxis(p, 'z', p.vel.z * dt, colliders);
   if (lockZ) p.pos.z = 0;
-  resolveRamps(p, ramps, wasGrounded, fromX, fromZ);
-  resolveFields(p, fields, wasGrounded, fromX, fromZ);
+  resolveRamps(p, ramps, wasGrounded, fromX, fromZ, colliders);
+  resolveFields(p, fields, wasGrounded, fromX, fromZ, colliders);
   if (p.grounded) p.groundedAt = now;
 
   if (p.pos.y < PLAYER.killY) {

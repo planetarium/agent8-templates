@@ -155,6 +155,60 @@ describe('step-up', () => {
   });
 });
 
+describe('headroom (nothing lifts the player into a box above)', () => {
+  /** Highest feet height reached over 3 s of a constant move. */
+  function maxY(p: PlayerState, move: { x: number; z: number }, boxes: Aabb[], ramps: Ramp[] = [], fields: HeightField[] = []) {
+    const jump = { jumpPressedAt: -Infinity };
+    let top = p.pos.y;
+    for (let i = 0, t = 0; i < 360; i++) {
+      t += DT;
+      stepPlayer(p, move, jump, t, DT, boxes, false, ramps, fields);
+      top = Math.max(top, p.pos.y);
+    }
+    return top;
+  }
+
+  test('a 0.3 step under a ceiling 1.45 m above it blocks instead of lifting the player through the ceiling', () => {
+    // fits on the floor (1.6 < 1.75), not on the step (0.3 + 1.6 > 1.75)
+    const ceiling: Aabb = { minX: -5, minY: 1.75, minZ: -5, maxX: 10, maxY: 2.0, maxZ: 5 };
+    const p = onFloor();
+    expect(maxY(p, { x: 1, z: 0 }, [FLOOR, step(0.3), ceiling])).toBeLessThan(0.05);
+    expect(p.pos.x).toBeLessThan(1 - PLAYER.radius + 0.01);
+  });
+
+  test('the same step with room above still steps up', () => {
+    const ceiling: Aabb = { minX: -5, minY: 2.0, minZ: -5, maxX: 10, maxY: 2.3, maxZ: 5 };
+    const p = onFloor();
+    sim(p, { x: 1, z: 0 }, [FLOOR, step(0.3), ceiling], [], () => p.pos.x > 2);
+    expect(p.pos.y).toBeCloseTo(0.3, 5);
+  });
+
+  test('walking up a ramp under a slab stops below the slab instead of jumping on top of it', () => {
+    const slab: Aabb = { minX: -8, minY: 2.9, minZ: -5, maxX: -2, maxY: 3.3, maxZ: 5 };
+    const p = onFloor();
+    Object.assign(p.pos, { x: COURSE_RAMP.minX - 1, z: 0 });
+    const top = maxY(p, { x: 1, z: 0 }, [FLOOR, slab], [COURSE_RAMP]);
+    expect(top).toBeLessThan(slab.minY - PLAYER.height + 0.01);
+  });
+
+  test('a height field under a slab stops the player below the slab', () => {
+    const hill: HeightField = { minX: 0, maxX: 10, minZ: -5, maxZ: 5, heightAt: (x) => x * 0.25 };
+    const slab: Aabb = { minX: 3, minY: 2.4, minZ: -5, maxX: 9, maxY: 3.0, maxZ: 5 };
+    const p = onFloor();
+    Object.assign(p.pos, { x: 0.5, y: 0.125 });
+    const top = maxY(p, { x: 1, z: 0 }, [FLOOR, slab], [], [hill]);
+    expect(top).toBeLessThan(slab.minY - PLAYER.height + 0.01);
+  });
+
+  test('falling while the head is inside a box does not land on top of that box', () => {
+    const slab: Aabb = { minX: -2, minY: 2.0, minZ: -2, maxX: 2, maxY: 2.5, maxZ: 2 };
+    const p = onFloor();
+    Object.assign(p.pos, { x: 0, y: 1.0, z: 0 }); // head at 2.6, inside the slab
+    sim(p, still, [FLOOR, slab], [], () => p.grounded);
+    expect(p.pos.y).toBeCloseTo(0, 5);
+  });
+});
+
 describe('the test course', () => {
   test('from the spawn, walking +x on z = 0 climbs the stairs to the 0.9 landing without jumping', () => {
     const p = createPlayer();

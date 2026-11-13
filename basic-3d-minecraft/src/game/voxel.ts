@@ -173,6 +173,10 @@ export type ChunkMesh = {
   faces: number;
 };
 
+function append(to: number[], from: number[]) {
+  for (let i = 0; i < from.length; i++) to.push(from[i]);
+}
+
 /** Faces of chunk (cx, cz) that touch air, grouped by material slot. */
 export function buildChunkMesh(w: World, cx: number, cz: number): ChunkMesh {
   const C = VOXEL.chunk;
@@ -203,9 +207,10 @@ export function buildChunkMesh(w: World, cx: number, cz: number): ChunkMesh {
       const v = out.positions.length / 3 + q * 4;
       out.indices.push(v, v + 1, v + 2, v, v + 2, v + 3);
     }
-    out.positions.push(...s.positions);
-    out.normals.push(...s.normals);
-    out.uvs.push(...s.uvs);
+    // A loop, not push(...array): a crowded chunk can pass V8's argument limit (~100k).
+    append(out.positions, s.positions);
+    append(out.normals, s.normals);
+    append(out.uvs, s.uvs);
     out.groups.push({ start, count: quads * 6, materialIndex });
     out.faces += quads;
   });

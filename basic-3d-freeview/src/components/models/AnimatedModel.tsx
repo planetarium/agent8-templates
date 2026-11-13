@@ -106,7 +106,8 @@ export function AnimatedModel({
 }) {
   return (
     <Suspense fallback={fallback}>
-      <Model url={url} height={height} source={source} />
+      {/* A new url or height means new clips: remount so the playing-clip ref and the lift ease start fresh. */}
+      <Model key={`${url}|${height}`} url={url} height={height} source={source} />
     </Suspense>
   );
 }
