@@ -63,9 +63,12 @@ const CONTROLLER = [
 // rigged enemies / NPCs. Every template, but no scene imports them (agents
 // add them per game; unused, they stay out of the bundle). AnimatedModel
 // borrows clips through anim.ts retarget and the src/assets.json
-// `animations` idle / walk / run, so those come along.
+// `animations` idle / walk / run, so those come along. retarget.test.ts (with
+// its trimmed-rig fixture) checks that retargeted feet stay on the ground.
 const MODELS = [
   'src/game/anim.ts',
+  'src/game/retarget.test.ts',
+  'src/game/retarget.fixture.json',
   'src/game/fitModel.ts',
   'src/components/models/Props.tsx',
   'src/components/models/AnimatedModel.tsx',
