@@ -161,7 +161,8 @@ scale to metres and stand the lowest point on y = 0. Model URLs go in
 | --- | --- | --- |
 | `src/game/fitModel.ts` | `fitModel(object, { height })` → `{ unit, lift }`: draw with `scale={unit}`, `position-y={lift}` | `object`, `height` (m) |
 | `src/components/models/Props.tsx` | `<Props>`: a static model (crate, barrel, rock, house) at every `Placement` (`{ x, y, z, rotY, scale }`), instanced past 30 copies | `url`, `height` (m), `at` |
-| `src/components/models/AnimatedModel.tsx` | `<AnimatedModel>`: a rigged enemy / NPC, feet at its origin, facing +z; plays its own named clips, a mixamorig rig without them borrows idle / walk / run (`assets.json` `animations`, `game/anim.ts` `retarget`); `source={{ state }}` picks the clip | `url`, `height` (m) |
+| `src/components/models/AnimatedModel.tsx` | `<AnimatedModel>`: a rigged enemy / NPC, feet at its origin, facing +z; plays its own named clips, a mixamorig rig without them borrows idle / walk / run (`assets.json` `animations`, `game/anim.ts` `retarget`); `source={{ state }}` picks the clip; each clip it can play stands on its own lowest skinned point (`game/groundClips.ts`, sampled once per model URL), the lift easing over the cross-fade | `url`, `height` (m) |
+| `src/game/groundClips.ts` | `clipGroundOffsets(root, clips)` → per clip, the offset that puts the lowest skinned point of 9 samples on y = 0 (model units; `AnimatedModel` multiplies by `unit`) | `root`, `clips` |
 
 ## Extension points
 
