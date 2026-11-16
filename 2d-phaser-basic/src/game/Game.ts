@@ -13,6 +13,9 @@ export const createGame = (parent: string) => {
     width: window.innerWidth,
     height: window.innerHeight,
     parent: parent,
+    // Same as the Phaser 3 template (phaser 3.90 also defaults roundPixels to false). Phaser 4 only rounds
+    // unscaled, axis-aligned objects even when this is true, so turning it on does not snap setDisplaySize sprites.
+    roundPixels: false,
     physics: {
       default: "arcade",
       arcade: {
