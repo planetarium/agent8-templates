@@ -1,72 +1,68 @@
-/**
- * basic-3d-minecraft on Incanto: an 80×80 seeded voxel world rendered in one
- * instanced draw call, first-person pointer-lock controls, crosshair raycast
- * with a translucent preview cube, F/left-click places the selected tile.
- */
-import { createGame3D, VOXEL_PALETTE } from 'incanto/3d';
-import { useEffect, useRef } from 'react';
-import { Builder, FollowLight, Terrain } from './behaviors';
-import sceneJson from './game.scene.json';
+import { useCallback, useEffect, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { PHYSICS_DEMO } from './config';
+import { bindKeyboard } from './game/input';
+import { builder } from './game/state';
+import type { Block } from './game/voxel';
+import { Builder, HOTBAR } from './components/Builder';
+import { CameraRig } from './components/CameraRig';
+import { MobileControls, useIsTouch } from './components/MobileControls';
+import { Player } from './components/Player';
+import { Terrain } from './components/Terrain';
+import { LazyPhysics } from './physics/LazyPhysics';
 
-export function App() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const HINT = 'WASD: move · Shift: run · Space: jump · click: mine · right-click: place · 1 / 2 / 3: block · drag: look · wheel: zoom';
+const TOUCH_HINT = 'stick: move · JUMP · MINE / PLACE at the crosshair · drag: look';
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    // StrictMode runs this effect twice against the SAME canvas element, and a
-    // second engine on one canvas is two renderers fighting for one context.
-    // The flag lives on the element, so it lasts exactly as long as the thing
-    // it guards — a page-level game like this one never unmounts otherwise.
-    if (!canvas || (canvas as { _incanto?: true })._incanto) return;
-    (canvas as { _incanto?: true })._incanto = true;
+/** Block picker: keys 1 / 2 / 3 or a tap. React state is fine here — it changes on a key press, not per frame. */
+function Hotbar({ selected, onSelect }: { selected: Block; onSelect: (b: Block) => void }) {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-10 flex justify-center gap-2">
+      {HOTBAR.map((h, i) => (
+        <button
+          key={h.block}
+          type="button"
+          className={`pointer-events-auto flex h-11 w-11 flex-col items-center justify-center rounded border-2 text-[10px] font-bold text-white shadow ${h.block === selected ? 'border-white' : 'border-black/30'}`}
+          style={{ background: h.color }}
+          onClick={() => {
+            builder.selected = h.block;
+            onSelect(h.block);
+          }}
+        >
+          <span>{i + 1}</span>
+          <span>{h.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
-    void (async () => {
-      // createGame3D boots everything: register (behaviors included) → load →
-      // physics (auto) → keyboard + pointer-lock look → renderer → start.
-      const game = await createGame3D({
-        debug: import.meta.env.VITE_INCANTO_DEBUG === '1',
-        canvas,
-        scene: sceneJson,
-        behaviors: { FollowLight, Terrain, Builder },
-        pointer: true, // lockOnClick — FPS mouse look
-      });
+export default function App() {
+  const physics = PHYSICS_DEMO || new URLSearchParams(window.location.search).get('physics') === '1';
+  const touch = useIsTouch();
+  const [selected, setSelected] = useState<Block>(builder.selected);
+  const onSelect = useCallback((b: Block) => setSelected(b), []);
+  useEffect(bindKeyboard, []);
 
-      document.querySelector('#loading')?.remove();
-
-      // tile bar: 5 selectable tiles (grass, dirt, stone, sand, gold block)
-      const TILES = [1, 2, 3, 11, 24];
-      const player = game.scene.root.getNodesByName('Player')[0];
-      const bar = document.querySelector('#tilebar') as HTMLElement;
-      const render = (selected: number): void => {
-        bar.innerHTML = '';
-        for (const tile of TILES) {
-          const chip = document.createElement('button');
-          chip.type = 'button';
-          chip.className = `tile-chip${tile === selected ? ' selected' : ''}`;
-          const top = VOXEL_PALETTE[tile]?.[4] ?? [1, 1, 1];
-          chip.style.background = `rgb(${Math.round((top[0] as number) * 255)}, ${Math.round((top[1] as number) * 255)}, ${Math.round((top[2] as number) * 255)})`;
-          chip.addEventListener('click', () => {
-            const builder = player?.behavior as Builder | null;
-            if (builder) builder.selectedTile = tile;
-            render(tile);
-          });
-          bar.appendChild(chip);
-        }
-      };
-      render(1);
-
-      for (const [id, code] of [
-        ['btn-jump', 'Space'],
-        ['btn-attack', 'KeyF'],
-      ] as const) {
-        const el = document.querySelector(`#${id}`);
-        el?.addEventListener('pointerdown', () => game.engine.input.handleKey(code, true));
-        el?.addEventListener('pointerup', () => game.engine.input.handleKey(code, false));
-      }
-
-      Object.assign(window, { game });
-    })();
-  }, []);
-
-  return <canvas ref={canvasRef} id="game" />;
+  return (
+    <div className="relative h-full w-full">
+      <Canvas shadows dpr={[1, 2]} camera={{ fov: 55, near: 0.1, far: 200, position: [0, 20, 10] }}>
+        <Terrain />
+        <Player />
+        <CameraRig />
+        <Builder onSelect={onSelect} />
+        {physics && <LazyPhysics />}
+      </Canvas>
+      {/* crosshair: the Builder ray goes through the screen center */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute left-1/2 top-0 h-4 w-0.5 -translate-x-1/2 bg-white/90 mix-blend-difference" />
+        <div className="absolute left-0 top-1/2 h-0.5 w-4 -translate-y-1/2 bg-white/90 mix-blend-difference" />
+      </div>
+      <div className="pointer-events-none absolute left-3 top-3 rounded bg-black/40 px-2 py-1 text-xs text-white">
+        {touch ? TOUCH_HINT : HINT}
+      </div>
+      <Hotbar selected={selected} onSelect={onSelect} />
+      <MobileControls touch={touch} />
+    </div>
+  );
 }

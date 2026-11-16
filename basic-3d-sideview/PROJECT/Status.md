@@ -1,29 +1,17 @@
-# Status — basic-3d-sideview (Incanto)
+# Status — basic-3d-sideview
 
 ## Implemented
 
-- Preload screen with a real progress bar over all CDN assets
-  (`preloadUrls` + `assetUrls`)
-- `game.scene.json`: sunset IBL + white background, gravity −9.81, input map
-  (move/jump/sprint), model + 5 mixamo animation assets, Floor
-  (StaticBody3D 100×100 + dark-gray skin), Player (dynamic RigidBody3D
-  capsule + CharacterController3D `view: "free"` camDistance 4 +
-  ModelInstance3D skin), FollowLight sun, current Camera3D
-- Behaviors: FollowLight (sun tracks player at [30,100,30]),
-  CharacterAnimator (movement state → clip)
-- Pointer-lock mouse look, wheel zoom disabled (original parity: min==max)
-- JUMP button (injects Space), ATTACK button (visual parity)
+- Fixed side camera on +z with look-ahead toward the facing direction
+- Walk / run (Shift or stick at the rim) / jump with coyote time, input
+  buffer, consume-on-jump; step-up, ramp, moving platform, height field (all tested)
+- Player locked to the z = 0 plane
+- verse8 base character with retargeted mixamo clips, idle/walk/run/jump/fall
+- Keyboard and touch joystick + JUMP
+- Empty stage: floor, sky, fog, hemisphere light, shadowed sun
+- Lazy rapier demo (`?physics=1` or `PHYSICS_DEMO = true`)
 
-## Parity vs the original (measured)
+## Not yet
 
-- Camera holds (charX, charY+1, +10) at lerp 5; run/jump across the first
-  gap measured; punch → clip plays once → returns to the movement state
-- Jump apex ≈ +1.25m with visibly faster falls (fallingGravityScale 2.5)
-- Composition: dark void, gray platform ribbon side-on, character
-  with cast shadow on the start block, buttons bottom-right — screenshot-compared side by side
-
-## Knowing divergences
-
-- ATTACK button fires nothing (original spawns bullets via a stores+R3F
-  effect system)
-- No camera-blocking pull-in (nothing to block in this scene)
+- Sound, game rules
+- Multiplayer (`@agent8/gameserver` unwired)

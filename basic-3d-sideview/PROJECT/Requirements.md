@@ -1,29 +1,24 @@
-# Requirements — basic-3d-sideview (Incanto)
+# Requirements — basic-3d-sideview
 
 ## Coding Patterns
 
-- STRUCTURE in `src/game.scene.json`; LOGIC in behaviors registered in
-  `src/App.tsx`. The controller node handles movement/camera — don't
-  reimplement it in behaviors; tune its props (maxSpeed, jumpVelocity,
-  camDistance…) in JSON instead.
-- New animations: declare the GLB as an `animation` asset, extend
-  `STATE_CLIPS` in `behaviors.ts` (or set `skin.animation = '$key'` directly
-  for one-shots).
-- New world objects: StaticBody3D + box/sphere/capsule collider + a
-  MeshInstance3D/ModelInstance3D skin child. The character collides with
-  anything that has a collider — no registration step.
-- The on-screen JUMP/ATTACK buttons inject key codes through
-  `engine.input.handleKey` — wire new buttons the same way.
-- uids: `newUid()` from 'incanto'.
+- Function components with hooks. Per-frame work in `useFrame`, on mutable
+  objects — not React state.
+- Gameplay rules in pure modules under `src/game/` with `bun test` coverage.
+- Every action works on keyboard and on touch.
+- Rapier only behind `React.lazy` (`src/physics/`).
+- Gameplay objects overlap the z = 0 line; z > 0 stays empty (camera side).
 
 ## Known Issues / Constraints
 
-- ATTACK button = punch (KeyF injection): one-shot mixamo clip through
-  `animationLoop:false` + the `animationFinished` signal, locking movement
-  animation switches while acting.
-- The character model is meter-scale; `targetHeight` fit logs a warning and
-  keeps authored scale (skinned rigs defeat bbox measurement) — expected.
-- Camera collision (pull-in when geometry blocks the view) is not
-  implemented; nothing in this scene can block the camera.
-- Shadows are not enabled in this template yet (FollowLight tracks position
-  only).
+- Ramps are wedges rising along one axis (`dir`, default '+x'; on this
+  side-scroller use '+x' or '-x'); the foot height is sampled at the
+  player's center.
+- A moving platform pushes nothing: if it slides into a player who is not on
+  it, the next downward step lifts the player on top.
+- Height fields: the slope check compares `heightAt` under the start and the
+  end of each substep, so a sudden jump in height is a wall while walking but
+  can be landed on from above. Ramps and boxes are not checked for slope.
+- The rapier demo crates do not collide with the player.
+- The joystick's up / down axis is ignored.
+- `@agent8/gameserver` is installed but not wired.

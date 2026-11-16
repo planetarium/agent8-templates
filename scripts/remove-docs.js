@@ -23,6 +23,18 @@ const args = process.argv.slice(2);
 const targetArg = args.find((arg) => arg.startsWith('--target='));
 const target = targetArg ? targetArg.split('=')[1] : 'basic-3d';
 
+// The seven 3D templates (React Three Fiber): docs:copy never writes docs/ there, so
+// docs:remove never deletes a docs/ folder there either (it would be the game's own).
+const R3F_TEMPLATES = [
+  'basic-3d',
+  'basic-3d-freeview',
+  'basic-3d-sideview',
+  'basic-3d-quarterview',
+  'basic-3d-firstpersonview',
+  'basic-3d-flightview',
+  'basic-3d-minecraft',
+];
+
 console.log(colorize('blue', '🗑️  Starting docs removal script...\n'));
 
 // Check if path exists
@@ -88,7 +100,7 @@ async function removeDocs() {
 
       if (isDirectory(itemPath) && item !== 'docs' && item !== 'scripts' && item !== '.git' && item !== 'node_modules') {
         if (target === 'all' || item.startsWith(target)) {
-          if (target === 'basic-3d' && item === 'basic-3d') {
+          if (R3F_TEMPLATES.includes(item)) {
             continue;
           }
           const docsPath = join(itemPath, 'docs');

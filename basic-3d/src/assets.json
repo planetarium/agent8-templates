@@ -1,1 +1,18 @@
-{}
+{
+  "models": {},
+  "textures": {},
+  "animations": {
+    "anims/idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
+      "description": "idle loop (mixamorig) — borrowed by AnimatedModel for rigs without clips"
+    },
+    "anims/walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
+      "description": "walk loop, in place (mixamorig) — borrowed by AnimatedModel"
+    },
+    "anims/run": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
+      "description": "run loop, in place (mixamorig) — borrowed by AnimatedModel"
+    }
+  }
+}

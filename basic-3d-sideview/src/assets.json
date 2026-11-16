@@ -2,33 +2,25 @@
   "models": {
     "characters/base": {
       "url": "https://agent8-games.verse8.io/assets/3d/characters/realistic style/base-model.glb",
-      "description": "characters/base (model) \u2014 referenced by the scene as $characters/base"
+      "description": "verse8 base character (mixamorig rig)"
     }
   },
   "animations": {
     "anims/idle": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/idle-00.glb",
-      "description": "anims/idle (animation) \u2014 referenced by the scene as $anims/idle"
+      "description": "idle loop (mixamorig)"
     },
     "anims/walk": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/walk.glb",
-      "description": "anims/walk (animation) \u2014 referenced by the scene as $anims/walk"
+      "description": "walk loop, in place (mixamorig)"
     },
     "anims/run": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-medium.glb",
-      "description": "anims/run (animation) \u2014 referenced by the scene as $anims/run"
-    },
-    "anims/runFast": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/run-fast.glb",
-      "description": "anims/runFast (animation) \u2014 referenced by the scene as $anims/runFast"
+      "description": "run loop, in place (mixamorig)"
     },
     "anims/jump": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb",
-      "description": "anims/jump (animation) \u2014 referenced by the scene as $anims/jump"
-    },
-    "anims/punch": {
-      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/punch-00.glb",
-      "description": "anims/punch (animation) \u2014 referenced by the scene as $anims/punch"
+      "description": "jump, played once and held while airborne (mixamorig)"
     }
   }
 }

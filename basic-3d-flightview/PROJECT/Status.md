@@ -1,26 +1,23 @@
-# Status — basic-3d-flightview (Incanto)
+# Status — basic-3d-flightview
 
 ## Implemented
 
-- Scene: Sky shader (sun [-20,30,10], turbidity 0.8, rayleigh 0.4),
-  ambient 1.2, sea 10000² #77aaff / grass 1000² #3d711c / runway 6×1000
-  #51595c, procedural plane (7 box parts + propeller), FollowLight shadow
-  sun, chase Camera3D fov 30 far 5000
-- Behaviors: FlightControl (full constant set + quaternion attitude +
-  banking chase cam + bullets + R reset + 5-frame measured speed),
-  RunwayMarkings (100 stripes), DecorSpawner (500 ground + 150 floating,
-  seed 12345), FollowLight
-- HUD panel (Players/Health/Speed/Altitude + controls), bottom hint line
+- Kinematic flight: throttle, pitch / roll about the plane's axes, yaw rate
+  about world up, ground authority below 20 m/s, ground clamp, reset (all
+  tested)
+- Primitive airplane (fuselage, cockpit, nose cone, propeller that spins with
+  speed, wings, tail) — a swap point for a model
+- Banking chase camera (offset (0, 3, 15), attitude slerp 0.08, position
+  follow), wider FOV on portrait screens
+- Tracer bullets: 200 m/s, 500 ms, 200 ms cooldown (tested)
+- Runway with 100 stripes, grass, sea, sky shader, fog, shadowed sun that
+  follows the plane
+- Seeded scenery: 500 ground shapes + 150 drifting sky shapes, instanced
+- HUD: speed (5-step average, km/h), altitude
+- Keyboard and touch (joystick, throttle rocker ▲ / ▼, FIRE)
+- Lazy rapier demo (`?physics=1` or `PHYSICS_DEMO = true`)
 
-## Parity vs the original (measured)
+## Not yet
 
-- SAME HUD VALUE at the same input sequence: ours and the running original
-  both read exactly "Speed: 432.0 km/h" at full throttle (120 m/s × 3.6)
-- Takeoff: W 3.5s + ↑ 1.2s → altitude 125m; composition screenshot-matched
-  (runway/markings/plane/decor/HUD panel)
-
-## Knowing divergences
-
-- No wingtip trails / muzzle flash / explosion particles
-- Health/Players are static labels (no gameplay behind them in the
-  original either)
+- Targets, hits, health, sound
+- Multiplayer (`@agent8/gameserver` unwired)
