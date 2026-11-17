@@ -19,3 +19,4 @@
 - Attack hitbox is a plain `Phaser.GameObjects.Rectangle` with Arcade physics added; no overlap handler is wired — damage logic is the caller's responsibility.
 - `attackSound` is declared but never loaded or assigned; the `try/catch` around `.play()` is dead code until audio is added to `assets.json`.
 - `console.log("Jumping!")` fires every successful jump — strip before shipping.
+- Phaser 4: `vite build` (the `build` script) does not type-check, so a Phaser 3 API that no longer exists (`preFX`, `postFX`, `setPipeline`, `createBitmapMask`) builds fine and throws when the scene runs. Check effect code with `npx tsc --noEmit -p tsconfig.app.json`.

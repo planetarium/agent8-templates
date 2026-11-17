@@ -17,4 +17,5 @@
 - `tailwindcss` is configured but the only React surface is a full-viewport container, so utility classes have no target until UI is added.
 - `assets.json` ships empty (`{"sprites": {}}`); `MainScene.preload()` is a no-op until entries are added.
 - `MainScene.cursors` is declared but never assigned — input bindings (e.g. `this.input.keyboard.createCursorKeys()`) still need to be wired.
+- Phaser 4: `vite build` (the `build` script) does not type-check, so a Phaser 3 API that no longer exists (`preFX`, `postFX`, `setPipeline`, `createBitmapMask`) builds fine and throws when the scene runs. Check effect code with `npx tsc --noEmit -p tsconfig.app.json`.
 - `index.html` posts `GAME_SIZE_RESPONSE` to `window.parent` for embed hosts; if you change the mount size, the reported dimensions follow the document, not the Phaser canvas.
