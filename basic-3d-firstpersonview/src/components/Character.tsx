@@ -6,6 +6,7 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import assets from '../assets.json';
 import { PLAYER } from '../config';
 import { anim, retarget, type AnimState } from '../game/anim';
+import { HeldProp, usesRifleClips, type Hold } from './models/HeldProp';
 
 const MODEL = assets.models['characters/base'].url;
 const CLIP_URLS = {
@@ -13,6 +14,13 @@ const CLIP_URLS = {
   walk: assets.animations['anims/walk'].url,
   run: assets.animations['anims/run'].url,
   jump: assets.animations['anims/jump'].url,
+};
+/** Holding a gun: rifle idle / walk / run (no rifle jump in the library). */
+const RIFLE_URLS: typeof CLIP_URLS = {
+  ...CLIP_URLS,
+  idle: assets.animations['anims/rifle-idle'].url,
+  walk: assets.animations['anims/rifle-walk'].url,
+  run: assets.animations['anims/rifle-run'].url,
 };
 type ClipName = keyof typeof CLIP_URLS;
 const CLIP_NAMES = Object.keys(CLIP_URLS) as ClipName[];
@@ -38,9 +46,10 @@ function Capsule() {
   );
 }
 
-function Model() {
+function Model({ hold }: { hold?: Hold }) {
   const gltf = useGLTF(MODEL);
-  const sources = useGLTF(CLIP_NAMES.map((n) => CLIP_URLS[n]));
+  const urls = usesRifleClips(hold) ? RIFLE_URLS : CLIP_URLS;
+  const sources = useGLTF(CLIP_NAMES.map((n) => urls[n]));
   const { scene, clips } = useMemo(() => {
     const scene = clone(gltf.scene);
     scene.traverse((o) => {
@@ -86,15 +95,20 @@ function Model() {
   return (
     <group ref={group}>
       <primitive object={scene} />
+      {hold && <HeldProp rig={scene} {...hold} />}
     </group>
   );
 }
 
-/** The verse8 base character (feet at the origin, facing +z); a capsule until it loads. */
-export function Character() {
+/**
+ * The verse8 base character (feet at the origin, facing +z); a capsule until it loads.
+ * `hold` puts a weapon / tool in its hand (models/HeldProp); a gun switches to the rifle clips.
+ */
+export function Character({ hold }: { hold?: Hold } = {}) {
   return (
     <Suspense fallback={<Capsule />}>
-      <Model />
+      {/* other clips = a fresh mixer, so the playing-clip ref starts over */}
+      <Model key={usesRifleClips(hold) ? 'rifle' : 'plain'} hold={hold} />
     </Suspense>
   );
 }

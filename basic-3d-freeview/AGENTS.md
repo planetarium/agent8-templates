@@ -44,6 +44,9 @@ Read this, then `PROJECT/Structure.md`, before changing code.
   their physics. Leave the player controller (`src/game/player.ts`) as it is.
 - Register asset URLs in `src/assets.json`; load models with drei `useGLTF`
   inside `<Suspense>`.
+- A weapon or tool in a hand: pass `hold={{ url, aim, muzzle }}` to
+  `<Character>` / `<AnimatedModel>` (`PROJECT/Structure.md` "Model parts").
+  Don't parent weapons to bones yourself.
 
 ## Commands
 

@@ -207,6 +207,14 @@ scale to metres and stand the lowest point on y = 0. Model URLs go in
 | `src/components/models/Props.tsx` | `<Props>`: a static model (crate, barrel, rock, house) at every `Placement` (`{ x, y, z, rotY, scale }`), instanced past 30 copies | `url`, `height` (m), `at` |
 | `src/components/models/AnimatedModel.tsx` | `<AnimatedModel>`: a rigged enemy / NPC, feet at its origin, facing +z; plays its own named clips, a mixamorig rig without them borrows idle / walk / run (`assets.json` `animations`, `game/anim.ts` `retarget`); `source={{ state }}` picks the clip; each clip it can play stands on its own lowest skinned point (`game/groundClips.ts`, sampled once per model URL), the lift easing over the cross-fade | `url`, `height` (m) |
 | `src/game/groundClips.ts` | `clipGroundOffsets(root, clips)` → per clip, the offset that puts the lowest skinned point of 9 samples on y = 0 (model units; `AnimatedModel` multiplies by `unit`) | `root`, `clips` |
+| `src/components/models/HeldProp.tsx` (`game/hold.ts`, `game/grip.ts`) | A weapon / tool in a character's hand: the `hold` prop of `<Character>` (player) and `<AnimatedModel>` (enemies / NPCs). It looks the grip up by the weapon URL (library table `game/grips.json`), else estimates it from the shape. A gun sits in the right fist, lies along both hands, turns toward `aim`, and switches idle / walk / run to the rifle clips. Melee weapons follow the wrist. Each frame, `muzzle` gets the muzzle's world position and direction: start shots there. Works on any rig (no hand bones → in front of the body); if anything fails, only the weapon is dropped. Don't attach weapons to bones by hand, and don't overwrite `anims/idle` with a rifle clip | `url` (`src/assets.json`); optional `aim`, `muzzle`, `override` (grip fields), `side`, `kind`, `rifleClips` |
+
+```tsx
+const aim = { yaw: 0, pitch: 0, weight: 1 }; // world yaw (0 = +z, atan2(dx, dz)), pitch up +; mutate per frame
+const muzzle = newMuzzle();                  // from models/HeldProp
+<Character hold={{ url: assets.models['weapons/rifle'].url, aim, muzzle }} />
+// fire: if (muzzle.valid) spawn at (muzzle.x, muzzle.y, muzzle.z), heading (muzzle.dx, muzzle.dy, muzzle.dz)
+```
 
 ## Extension points
 

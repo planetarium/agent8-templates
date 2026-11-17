@@ -21,6 +21,18 @@
     "anims/jump": {
       "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/jump.glb",
       "description": "jump, played once and held while airborne (mixamorig)"
+    },
+    "anims/rifle-idle": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/rifle-idle.glb",
+      "description": "idle loop holding a rifle in both hands (mixamorig) — played instead of idle while a character holds a gun"
+    },
+    "anims/rifle-walk": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/rifle-walk.glb",
+      "description": "walk loop holding a rifle, in place (mixamorig)"
+    },
+    "anims/rifle-run": {
+      "url": "https://agent8-games.verse8.io/assets/3d/animations/mixamorig/rifle-run.glb",
+      "description": "run loop holding a rifle, in place (mixamorig)"
     }
   },
   "textures": {
