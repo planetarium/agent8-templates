@@ -5,7 +5,9 @@
 // so it never lags the hand:
 // - gun: the grip point sits in the grip hand's fist; the barrel lies along the line from the grip
 //   hand to the support hand (when that hand is 0.12–0.7 m away and in front of the body — the
-//   rifle clips hold it there), else along the body's facing, and turns toward `aim` by its weight.
+//   rifle clips hold it there), else along the body's facing, and turns toward `aim` by its weight
+//   — never more than MAX_BARREL_YAW (60°) from the body's facing. <Character> / <AnimatedModel>
+//   turn the drawn body to the aim (followAim), so an aiming character faces where it shoots.
 // - melee (blade / hafted / polearm): fixed in the hand's grip frame, so it follows the wrist.
 // The holder cancels the bone's world scale, so the weapon keeps its size in metres.
 //
@@ -151,6 +153,44 @@ export function gripFrame(hand: THREE.Object3D, palm = 0.25): { frame: THREE.Mat
  */
 const MELEE_IN_HAND = new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, 1), new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0));
 
+/**
+ * Widest horizontal angle between a gun's barrel and the body's facing (60°). A rifleman turns
+ * the torso about this far before the feet have to move; past it the barrel would cross the
+ * support arm and chest. The rifle clips hold it within 4–26° and a turning enemy's barrel lagged
+ * up to 51°, so the cap only bites when the aim is beside or behind a body that does not turn.
+ */
+export const MAX_BARREL_YAW = Math.PI / 3;
+/** How fast the drawn body turns to the aim (1/s), like the player controller's facing ease. */
+export const BODY_TURN = 14;
+
+const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
+/** World yaw of a direction (0 = +z, π/2 = +x), the convention of `Aim.yaw`. */
+export const yawOf = (x: number, z: number) => Math.atan2(x, z);
+
+/** Turns `dir` about world up so it is at most `max` from `body` horizontally (pitch kept). */
+export function clampYaw(dir: THREE.Vector3, body: THREE.Vector3, max = MAX_BARREL_YAW) {
+  const h = Math.hypot(dir.x, dir.z);
+  if (h < 1e-6) return dir;
+  const by = yawOf(body.x, body.z);
+  const d = wrap(yawOf(dir.x, dir.z) - by);
+  if (Math.abs(d) <= max) return dir;
+  const y = by + Math.sign(d) * max;
+  dir.x = Math.sin(y) * h;
+  dir.z = Math.cos(y) * h;
+  return dir;
+}
+
+/**
+ * The body follows the aim: the yaw to add to a character model drawn under a parent facing
+ * `parentYaw`, eased from `current` over `dt`. Full weight turns the body onto `aim.yaw`; no aim
+ * or weight 0 eases back to 0 (the body faces where the movement code points it).
+ */
+export function followAim(current: number, parentYaw: number, aim: Aim | undefined, dt: number, rate = BODY_TURN) {
+  const w = aim ? Math.min(1, Math.max(0, aim.weight)) : 0;
+  const target = w > 0 ? wrap(aim!.yaw - parentYaw) * w : 0;
+  return wrap(current + wrap(target - current) * Math.min(1, dt * rate));
+}
+
 /** Support hand counts as "on the gun" this far from the grip hand (m), in front of the body. */
 const HANDS = { min: 0.12, max: 0.7 };
 /** How fast a gun's barrel swings to a new direction (1/s). */
@@ -259,6 +299,7 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
       if (!gun) want.addScaledVector(UP, 1.5).normalize(); // melee with no hand: tip up and forward
       if (dir.lengthSq() === 0 || dt === 0) dir.copy(want);
       else dir.lerp(want, 1 - Math.exp(-SWING * dt)).normalize();
+      if (gun) clampYaw(dir, body); // never through the body, whatever the aim or the swing lag
       // canonical +Z = dir, +Y = world up made perpendicular (sights up)
       y.copy(UP).addScaledVector(dir, -UP.dot(dir));
       if (y.lengthSq() < 1e-6) y.copy(body).negate();

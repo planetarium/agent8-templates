@@ -6,7 +6,7 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import assets from '../assets.json';
 import { PLAYER } from '../config';
 import { anim, retarget, type AnimState } from '../game/anim';
-import { HeldProp, usesRifleClips, type Hold } from './models/HeldProp';
+import { HeldProp, useBodyFollowsAim, usesRifleClips, type Hold } from './models/HeldProp';
 
 const MODEL = assets.models['characters/base'].url;
 const CLIP_URLS = {
@@ -64,6 +64,7 @@ function Model({ hold }: { hold?: Hold }) {
   }, [gltf, sources]);
 
   const group = useRef<THREE.Group>(null);
+  useBodyFollowsAim(group, hold); // aiming a gun: the drawn body turns to the aim
   const { actions } = useAnimations(clips, group);
   const current = useRef<ClipName | null>(null);
   const jumps = useRef(anim.jumps);

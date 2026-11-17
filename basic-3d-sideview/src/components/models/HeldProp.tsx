@@ -1,11 +1,12 @@
 // Shared by every R3F template — import it, don't rewrite it.
 // A weapon / tool in a character's hand. <Character> and <AnimatedModel> render it for their
 // `hold` prop on the clone they draw; games don't render it directly.
-import { Component, Suspense, useLayoutEffect, useRef, type ReactNode } from 'react';
+import { Component, Suspense, useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { gripMatrix, kindOf, resolveGrip, sceneVertices, type Grip, type GripKind } from '../../game/grip';
-import { holdInHand, type Aim, type Muzzle, type Side } from '../../game/hold';
+import { followAim, holdInHand, yawOf, type Aim, type Muzzle, type Side } from '../../game/hold';
 
 export type { Aim, Muzzle } from '../../game/hold';
 
@@ -18,7 +19,11 @@ export type Hold = {
   override?: Partial<Grip>;
   /** Kind when the URL is not in the table and its name does not tell (gun / blade / hafted / polearm). */
   kind?: GripKind;
-  /** Gun only: where it points. World yaw (0 = +z), pitch (up +), weight 0–1. Mutate it per frame. */
+  /**
+   * Gun only: where it points. World yaw (0 = +z, atan2(dx, dz)), pitch (up +), weight 0–1; mutate
+   * it per frame. The drawn body turns to the aim yaw by the weight; the barrel stays within 60° of
+   * the body either way.
+   */
   aim?: Aim;
   /** Gun only: filled every frame with the muzzle's world position / direction — start shots here. */
   muzzle?: Muzzle;
@@ -33,6 +38,32 @@ export const newMuzzle = (): Muzzle => ({ x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 1,
 export function usesRifleClips(hold?: Hold) {
   if (!hold || hold.rifleClips === false) return false;
   return (hold.override?.kind ?? hold.kind ?? kindOf(hold.url)) === 'gun';
+}
+
+const _q = new THREE.Quaternion();
+const _v = new THREE.Vector3();
+
+/**
+ * A character aiming a gun faces the aim: turns `group` (the drawn model, under the body the
+ * movement code rotates) toward `hold.aim.yaw` by its weight, and back when the aim drops. The
+ * movement code's facing is left alone. No gun or no aim: the group stays at 0.
+ */
+export function useBodyFollowsAim(group: RefObject<THREE.Group | null>, hold?: Hold) {
+  const gun = !!hold && (hold.override?.kind ?? hold.kind ?? kindOf(hold.url)) === 'gun';
+  const aim = useRef(hold?.aim);
+  aim.current = gun ? hold?.aim : undefined;
+  useFrame((_, delta) => {
+    const g = group.current;
+    if (!g || (!aim.current && g.rotation.y === 0)) return;
+    let parentYaw = 0;
+    if (g.parent) {
+      g.parent.getWorldQuaternion(_q);
+      _v.set(0, 0, 1).applyQuaternion(_q);
+      parentYaw = yawOf(_v.x, _v.z);
+    }
+    const y = followAim(g.rotation.y, parentYaw, aim.current, Math.min(delta, 0.1));
+    g.rotation.y = Math.abs(y) < 1e-4 && !aim.current ? 0 : y;
+  });
 }
 
 /** A weapon that fails to load or attach is left out; the character and the game go on. */

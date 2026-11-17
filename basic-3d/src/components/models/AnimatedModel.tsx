@@ -8,7 +8,7 @@ import assets from '../../assets.json';
 import { retarget, type AnimState } from '../../game/anim';
 import { fitModel } from '../../game/fitModel';
 import { clipGroundOffsets } from '../../game/groundClips';
-import { HeldProp, usesRifleClips, type Hold } from './HeldProp';
+import { HeldProp, useBodyFollowsAim, usesRifleClips, type Hold } from './HeldProp';
 
 // The template's shared mixamo clips (src/assets.json `animations`): any model on the
 // mixamorig skeleton that ships without clips of its own can borrow them — the rifle set while
@@ -67,6 +67,7 @@ function Model({ url, height, source, hold }: { url: string; height: number; sou
   }, [url, gltf, shared, height, rifle]);
 
   const group = useRef<THREE.Group>(null);
+  useBodyFollowsAim(group, hold); // aiming a gun: the drawn body turns to the aim
   const { actions, names } = useAnimations(clips, group);
   const current = useRef('');
   // lift eases from the old clip's ground offset to the new one's over the cross-fade

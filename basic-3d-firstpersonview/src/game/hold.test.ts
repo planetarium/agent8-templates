@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'bun:test';
 import * as THREE from 'three';
 import { gripForUrl, gripMatrix, kindOf, libraryKey, resolveGrip, validGrip, type Grip } from './grip';
-import { findHand, gripFrame, holdInHand, type Muzzle } from './hold';
+import { clampYaw, findHand, followAim, gripFrame, holdInHand, MAX_BARREL_YAW, type Muzzle } from './hold';
 
 const box = (len: number) => {
   const root = new THREE.Group();
@@ -215,9 +215,10 @@ describe('gun: two hands and aim', () => {
   });
   test('aim with weight 1 points the barrel at the aim; the sights stay up', () => {
     const r = rig();
-    const aim = { yaw: Math.PI / 2, pitch: 0.2, weight: 1 }; // +x, a little up
+    const yaw = (40 * Math.PI) / 180; // inside the 60° cap, a little up
+    const aim = { yaw, pitch: 0.2, weight: 1 };
     const { fwd, held } = hold(r, 'gun', { aim });
-    const want = new THREE.Vector3(Math.cos(0.2), Math.sin(0.2), 0);
+    const want = new THREE.Vector3(Math.sin(yaw) * Math.cos(0.2), Math.sin(0.2), Math.cos(yaw) * Math.cos(0.2));
     expect(fwd.angleTo(want)).toBeLessThan(1e-3);
     const up = new THREE.Vector3(0, 1, 0).applyQuaternion(new THREE.Quaternion().setFromRotationMatrix(held.holder.matrixWorld));
     expect(up.y).toBeGreaterThan(0.9);
@@ -227,6 +228,45 @@ describe('gun: two hands and aim', () => {
     r.rotation.y = Math.PI / 2; // facing +x
     const { fwd } = hold(r, 'gun');
     expect(fwd.angleTo(new THREE.Vector3(1, 0, 0))).toBeLessThan(1e-3);
+  });
+});
+
+describe('aiming: the body follows, the barrel never goes through the body', () => {
+  const deg = (r: number) => (r * 180) / Math.PI;
+  const yawOfDir = (v: THREE.Vector3) => Math.atan2(v.x, v.z);
+  const diff = (a: number, b: number) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
+
+  for (const off of [0, 90, 180]) {
+    test(`aim ${off}° off the facing: the body turns onto it within 0.5 s`, () => {
+      const parentYaw = 0.3; // where the movement code points the body
+      const aim = { yaw: parentYaw + (off * Math.PI) / 180, pitch: 0, weight: 1 };
+      let y = 0;
+      for (let t = 0; t < 0.5; t += 1 / 60) y = followAim(y, parentYaw, aim, 1 / 60);
+      expect(deg(diff(parentYaw + y, aim.yaw))).toBeLessThan(1);
+    });
+    test(`aim ${off}° off a body that does not turn: barrel within ${Math.round(deg(MAX_BARREL_YAW))}° of the body`, () => {
+      const r = rig();
+      const aim = { yaw: (off * Math.PI) / 180, pitch: 0, weight: 1 };
+      const { fwd } = hold(r, 'gun', { aim });
+      expect(deg(diff(yawOfDir(fwd), 0))).toBeLessThanOrEqual(deg(MAX_BARREL_YAW) + 1e-6);
+      if (off === 0) expect(deg(diff(yawOfDir(fwd), 0))).toBeLessThan(0.1);
+    });
+  }
+  test('half weight turns the body half way; no aim or weight 0 eases back to the facing', () => {
+    let y = 0;
+    for (let i = 0; i < 120; i++) y = followAim(y, 0, { yaw: 1, pitch: 0, weight: 0.5 }, 1 / 60);
+    expect(y).toBeCloseTo(0.5, 3);
+    for (let i = 0; i < 120; i++) y = followAim(y, 0, undefined, 1 / 60);
+    expect(Math.abs(y)).toBeLessThan(1e-3);
+    expect(followAim(0, 0, { yaw: 2, pitch: 0, weight: 0 }, 1 / 60)).toBe(0);
+  });
+  test('the cap keeps pitch and leaves directions inside it alone', () => {
+    const body = new THREE.Vector3(0, 0, 1);
+    const inside = new THREE.Vector3(Math.sin(0.5), 0.2, Math.cos(0.5));
+    expect(clampYaw(inside.clone(), body).distanceTo(inside)).toBeLessThan(1e-9);
+    const behind = clampYaw(new THREE.Vector3(0, 0.3, -1), body);
+    expect(behind.y).toBe(0.3);
+    expect(deg(diff(yawOfDir(behind), 0))).toBeCloseTo(60, 5);
   });
 });
 
