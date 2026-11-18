@@ -1,7 +1,17 @@
 # Pixel art VFX (PixelVfx)
 
-Read this before writing any effect. The effects live in the Agent8 asset library; find them with the resource search,
-keep the ones the game plays in `src/game/vfx/effects.ts`, and play them with `src/game/vfx/PixelVfx.ts`.
+Read this before writing any effect. The Agent8 asset library has ready-made pixel art effect sheets for:
+**hits and slashes** (impacts, melee), **explosions**, **pickups: coins, gems, hearts** (spinning in the world and
+the collect burst), **heals and buffs** (holy, nature), **status effects** (stun, poison, burn, freeze), **projectiles**
+(fireballs, arrows, bullets, magic missiles), **fire and torches**, **weather: rain and snow** (full-screen),
+**spawns and deaths**, **screen transitions**, plus arcane, ice, lightning, shadow, water, sci-fi magic, attack moves
+(sword combo, ground pound, spell casts) and small animated critters. Examples: `hit-spark`, `coin-spin`, `rain`.
+
+**Every world effect in the game gets its own search** — not just hits: each pickup lying in the world (a spinning
+coin, gem or heart), each collect, each weather, each status, each projectile, each explosion. Search
+(`search_resources_vectordb_items`), keep the chosen results in `src/game/vfx/effects.ts`, and play them with
+`src/game/vfx/PixelVfx.ts`. **Never draw a world effect (graphics, particles, tweens) without searching for it first**;
+when you do draw one because nothing fit, leave a one-line comment with what you searched.
 
 ```ts
 // src/game/vfx/effects.ts: search results, url + metadata copied as returned
@@ -25,11 +35,13 @@ PixelVfx.play(this, EFFECTS.hitSpark, enemy.x, enemy.y, { scale: 2 }); // anywhe
 cleans up. It returns the sprite: **one-shots destroy themselves**, **loops** run until you call `sprite.destroy()`
 (keep the returned sprite).
 
-## 1. Search first
+## 1. Search first, once per world effect
 
-1. Call `search_resources_vectordb_items` with what the moment looks like plus `pixel art VFX sprite sheet`, in English
-   (`sword hit spark pixel art VFX sprite sheet`, `coin pickup sparkle pixel art VFX sprite sheet`). The tool calls its
-   results "3D game resources", but it also finds these 2D effects.
+1. List the world effects the game shows (each hit, explosion, death, pickup in the world, collect, heal, status,
+   projectile, fire, weather) and search for **each one**: call `search_resources_vectordb_items` with what it looks like
+   plus `pixel art VFX sprite sheet`, in English (`sword hit spark pixel art VFX sprite sheet`, `spinning gold coin pixel
+   art VFX sprite sheet`, `rain weather pixel art VFX sprite sheet`). One search for the hit does not cover the coin or
+   the rain. The tool calls its results "3D game resources", but it also finds these 2D effects.
 2. Pick a result whose `url` ends in `.png` and contains `/vfx/pixelfx/`. Skip the `.json` results (they are a sheet's
    frame data), audio (`.mp3`) and effects from other art styles (`/2d/projects/...`). The description may be cut short:
    judge by the name in the url, `metadata.category` and the description you see.
@@ -40,14 +52,16 @@ cleans up. It returns the sprite: **one-shots destroy themselves**, **loops** ru
 
 ## 2. Nothing fits: make it
 
-If the search has no effect that fits, make one: generate it with the image / sprite sheet generation tools if you have
-them, or draw it in code (Phaser particles, graphics, tweens). Leave a one-line comment with what you searched, e.g.
-`// searched "ice shatter pixel art VFX sprite sheet": no match`.
+Only after that effect's search came back with nothing that fits, make it: generate it with the image / sprite sheet
+generation tools if you have them, or draw it in code (Phaser particles, graphics, tweens). Put a one-line comment with
+what you searched next to that code, e.g. `// searched "ice shatter pixel art VFX sprite sheet": no match`. A world
+effect drawn in code without such a comment means the search was skipped — do the search instead.
 
 ## What is a sheet, what is code
 
-- **World effects → a searched sheet played with PixelVfx**: hits, explosions, deaths, pickups, heals and buffs,
-  status, projectiles, weather. Hand-draw one only when the search has nothing that fits (above).
+- **World effects → a searched sheet played with PixelVfx**: hits, explosions, deaths, pickups (including coins, gems
+  and hearts lying or spinning in the world, not only the collect burst), heals and buffs, status, projectiles, fire,
+  weather (rain, snow). Hand-draw one only when its own search has nothing that fits (above).
 - **UI feedback and screen effects → code** (tweens, graphics, camera effects): tap glows, ripples, scale bounces,
   floating number text, vignettes, screen flashes, camera shake. Do not force a sheet onto UI.
 - They usually go together: a hit = a hit spark sheet + hit stop + camera shake + flash; a pickup = a collect burst
