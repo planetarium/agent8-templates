@@ -6,6 +6,7 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import assets from '../assets.json';
 import { PLAYER } from '../config';
 import { anim, retarget, type AnimState } from '../game/anim';
+import { HeldProp, type Hold } from './models/HeldProp';
 
 const MODEL = assets.models['characters/base'].url;
 const CLIP_URLS = {
@@ -38,7 +39,7 @@ function Capsule() {
   );
 }
 
-function Model() {
+function Model({ hold }: { hold?: Hold }) {
   const gltf = useGLTF(MODEL);
   const sources = useGLTF(CLIP_NAMES.map((n) => CLIP_URLS[n]));
   const { scene, clips } = useMemo(() => {
@@ -86,15 +87,19 @@ function Model() {
   return (
     <group ref={group}>
       <primitive object={scene} />
+      {hold && <HeldProp rig={scene} {...hold} />}
     </group>
   );
 }
 
-/** The verse8 base character (feet at the origin, facing +z); a capsule until it loads. */
-export function Character() {
+/**
+ * The verse8 base character (feet at the origin, facing +z); a capsule until it loads.
+ * `hold`: a weapon / prop in its hand — `{ url }` from src/assets.json (models/HeldProp.tsx).
+ */
+export function Character({ hold }: { hold?: Hold } = {}) {
   return (
     <Suspense fallback={<Capsule />}>
-      <Model />
+      <Model hold={hold} />
     </Suspense>
   );
 }

@@ -41,6 +41,13 @@ Read this, then `PROJECT/Structure.md`, before changing code.
   their physics.
 - Register asset URLs in `src/assets.json`; load models with drei `useGLTF`
   inside `<Suspense>`.
+- Weapons and hand-held props (gun, sword, axe, torch …): put the library
+  model's URL in `src/assets.json` and pass `hold={{ url }}` to
+  `<AnimatedModel>`. How it is held (grip point, direction, real length)
+  comes from the asset's info file on its own — don't copy search-result
+  metadata into assets.json or code, don't attach models to hand bones or
+  rotate / scale them yourself. Only to change how this game holds it:
+  `hold={{ url, override }}`. `PROJECT/Structure.md` "Model parts".
 
 ## Commands
 

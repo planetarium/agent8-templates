@@ -8,6 +8,7 @@ import assets from '../../assets.json';
 import { retarget, type AnimState } from '../../game/anim';
 import { fitModel } from '../../game/fitModel';
 import { clipGroundOffsets } from '../../game/groundClips';
+import { HeldProp, type Hold } from './HeldProp';
 
 // The template's shared mixamo clips (src/assets.json `animations`): any model on the
 // mixamorig skeleton that ships without clips of its own can borrow them.
@@ -28,7 +29,7 @@ function pickClip(names: string[], want: AnimState) {
   return find(want) ?? (want === 'run' ? find('walk') : undefined) ?? find('idle') ?? names[0];
 }
 
-function Model({ url, height, source }: { url: string; height: number; source?: { state: AnimState } }) {
+function Model({ url, height, source, hold }: { url: string; height: number; source?: { state: AnimState }; hold?: Hold }) {
   const gltf = useGLTF(url);
   const shared = useGLTF(SHARED_URLS);
   const { scene, clips, unit, lift, ground } = useMemo(() => {
@@ -84,6 +85,7 @@ function Model({ url, height, source }: { url: string; height: number; source?: 
   return (
     <group ref={group} scale={unit} position-y={lift}>
       <primitive object={scene} />
+      {hold && <HeldProp rig={scene} {...hold} />}
     </group>
   );
 }
@@ -98,16 +100,19 @@ export function AnimatedModel({
   height,
   source,
   fallback = null,
+  hold,
 }: {
   url: string;
   height: number;
   source?: { state: AnimState };
   fallback?: ReactNode;
+  /** a weapon / prop in its hand: `{ url }` from src/assets.json (see HeldProp.tsx) */
+  hold?: Hold;
 }) {
   return (
     <Suspense fallback={fallback}>
       {/* A new url or height means new clips: remount so the playing-clip ref and the lift ease start fresh. */}
-      <Model key={`${url}|${height}`} url={url} height={height} source={source} />
+      <Model key={`${url}|${height}`} url={url} height={height} source={source} hold={hold} />
     </Suspense>
   );
 }
