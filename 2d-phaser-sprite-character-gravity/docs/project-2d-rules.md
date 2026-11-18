@@ -2,8 +2,9 @@
 YOU MUST follow these rules EXACTLY:
 
 1. 🚨 USE IMAGE GENERATION TOOL: When available, create detailed visual assets with specific prompts (style + colors + details + background)
+   (World effects — hits, explosions, pickups, weather — search the asset library first: docs/vfx-sheets.md)
 2. 🔥 DISPLAY SIZE ONLY: NEVER use scaleX/scaleY in tweens - ONLY use displayWidth/displayHeight 
-   (PixelVfx exception: never tween a PixelVfx sprite's scale either; for a size pop tween displayWidth/displayHeight to frameWidth * k — whole-number k)
+   (PixelVfx exception: never tween a PixelVfx sprite's scale either; for a size pop tween displayWidth/displayHeight to metadata.frameWidth * k — whole-number k)
 3. 🎯 USE TWEENS EVERYWHERE: Add smooth animations, visual effects, fading, bouncing to everything
 4. 🌟 ADD FILTERS: Add visual shader effects for a professional look with Phaser 4 filters
    (`enableFilters()` + `filters.internal` / `filters.external`, cameras need no enableFilters). See the PHASER 4 rule below
@@ -11,7 +12,8 @@ YOU MUST follow these rules EXACTLY:
 6. 💎 MAKE IT PROFESSIONAL: Polish every feature to production quality
 7. ✅ BACKTICKS FOR STRINGS: Always use backticks (`) for multi-line strings
 8. 📐 SET DISPLAY SIZE: When adding images/sprites, ALWAYS use setDisplaySize() to control dimensions
-   (VFX exception: PixelVfx sprites from src/game/vfx take only a whole-number `scale` option — NEVER setDisplaySize them. See docs/vfx-sheets.md)
+   (VFX exception: PixelVfx sprites from src/game/vfx take only a whole-number `scale` option — NEVER setDisplaySize them.
+   Find effects with search_resources_vectordb_items first; generate or draw one only when nothing fits. See docs/vfx-sheets.md)
 
 🚨 CRITICAL RULE - NEVER BREAK THIS:
 When tweening size changes, you MUST use displayWidth/displayHeight!!!
@@ -48,7 +50,7 @@ const sprite = this.add.image(x, y, 'texture');
 sprite.setDisplaySize(200, 150);  // ✅ MANDATORY! Always control dimensions
 
 ✅ VFX exception (PixelVfx sprites only):
-PixelVfx.play(this, 'hit-spark', x, y, { scale: 2 });  // ✅ size with whole-number scale; ❌ never setDisplaySize a PixelVfx sprite
+PixelVfx.play(this, EFFECTS.hitSpark, x, y, { scale: 2 });  // ✅ size with whole-number scale; ❌ never setDisplaySize a PixelVfx sprite
 
 🚨 CRITICAL RULE - THIS PROJECT IS PHASER 4, NOT PHASER 3:
 Phaser 3 FX, pipeline and mask APIs were removed. `vite build` does not type-check, so the build still passes and the
