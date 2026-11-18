@@ -6,6 +6,8 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import assets from '../assets.json';
 import { PLAYER } from '../config';
 import { anim, retarget, type AnimState } from '../game/anim';
+import { aimSpine, findSpine, splitClip, stepLegs, type LegState } from '../game/aimRig';
+import { findHand, yawOf } from '../game/hold';
 import { HeldProp, useBodyFollowsAim, usesRifleClips, type Hold } from './models/HeldProp';
 
 const MODEL = assets.models['characters/base'].url;
@@ -27,6 +29,8 @@ const CLIP_NAMES = Object.keys(CLIP_URLS) as ClipName[];
 /** Falling reuses the jump clip (held on its last frame). */
 const CLIP_OF: Record<AnimState, ClipName> = { idle: 'idle', walk: 'walk', run: 'run', jump: 'jump', fall: 'jump' };
 const FADE = 0.15;
+const _q = new THREE.Quaternion();
+const _v = new THREE.Vector3();
 
 /** Shown until the model has loaded. */
 function Capsule() {
@@ -50,21 +54,26 @@ function Model({ hold }: { hold?: Hold }) {
   const gltf = useGLTF(MODEL);
   const urls = usesRifleClips(hold) ? RIFLE_URLS : CLIP_URLS;
   const sources = useGLTF(CLIP_NAMES.map((n) => urls[n]));
-  const { scene, clips } = useMemo(() => {
+  const aiming = usesRifleClips(hold) && !!hold?.aim;
+  const { scene, clips, split } = useMemo(() => {
     const scene = clone(gltf.scene);
     scene.traverse((o) => {
       if ((o as THREE.Mesh).isMesh) o.castShadow = true;
     });
-    const clips = CLIP_NAMES.map((name, i) => {
+    const full = CLIP_NAMES.map((name, i) => {
       const c = retarget(sources[i].animations[0], scene, sources[i].scene);
       c.name = name;
       return c;
     });
-    return { scene, clips };
-  }, [gltf, sources]);
+    // aiming a gun on a rig with a spine: legs and upper body play separately (game/aimRig.ts)
+    const split = aiming ? findSpine(scene) : null;
+    const clips = split ? full.flatMap((c) => Object.values(splitClip(c, split))) : full;
+    return { scene, clips, split };
+  }, [gltf, sources, aiming]);
 
   const group = useRef<THREE.Group>(null);
-  useBodyFollowsAim(group, hold); // aiming a gun: the drawn body turns to the aim
+  // aiming a gun without a split body: the whole drawn body turns to the aim
+  useBodyFollowsAim(group, split ? undefined : hold);
   const { actions } = useAnimations(clips, group);
   const current = useRef<ClipName | null>(null);
   const jumps = useRef(anim.jumps);
@@ -93,10 +102,50 @@ function Model({ hold }: { hold?: Hold }) {
     current.current = name;
   });
 
+  // Split body (after the mixer has posed the rig): the legs walk where the character moves —
+  // backwards when the aim is behind — and the upper body holds the rifle pose turned onto the aim.
+  const legs = useRef<LegState | null>(null);
+  const upper = useRef<string | null>(null);
+  const spineState = useRef({ base: [] as THREE.Quaternion[], set: [] as THREE.Quaternion[], corrYaw: 0, corrPitch: 0 });
+  const hands = useMemo(() => {
+    const grip = findHand(scene, 'Right');
+    return grip ? { grip, support: findHand(scene, 'Left') } : null;
+  }, [scene]);
+  const failed = useRef(false);
+  useFrame((_, delta) => {
+    const g = group.current;
+    const aim = hold?.aim;
+    if (!split || !g || !aim || failed.current) return;
+    try {
+      aimFrame(g, aim, delta);
+    } catch (e) {
+      failed.current = true; // keep the game running: legs and arms just play the clips
+      console.warn('split-body aiming stopped', e);
+    }
+  });
+  function aimFrame(g: THREE.Group, aim: NonNullable<Hold['aim']>, delta: number) {
+    const moving = anim.state === 'walk' || anim.state === 'run';
+    const up = `${moving ? anim.state : 'idle'}:up`;
+    if (up !== upper.current) {
+      actions[up]?.reset().fadeIn(FADE).play();
+      if (upper.current) actions[upper.current]?.fadeOut(FADE);
+      upper.current = up;
+    }
+    g.parent?.getWorldQuaternion(_q);
+    _v.set(0, 0, 1).applyQuaternion(_q);
+    const moveYaw = yawOf(_v.x, _v.z); // the movement code turns the parent to the walking direction
+    const aimYaw = aim.weight > 0 ? aim.yaw : moveYaw;
+    legs.current = stepLegs(legs.current ?? { yaw: moveYaw, reversed: false, turning: false }, aimYaw, moveYaw, moving, Math.min(delta, 0.1));
+    g.rotation.y = Math.atan2(Math.sin(legs.current.yaw - moveYaw), Math.cos(legs.current.yaw - moveYaw));
+    const lower = actions[CLIP_OF[anim.state]];
+    if (lower) lower.timeScale = moving && legs.current.reversed ? -1 : 1;
+    if (hands && aim.weight > 0) aimSpine(split!, hands, { yaw: aim.yaw, pitch: aim.pitch }, legs.current.yaw, spineState.current);
+  }
+
   return (
     <group ref={group}>
       <primitive object={scene} />
-      {hold && <HeldProp rig={scene} {...hold} />}
+      {hold && <HeldProp rig={scene} {...hold} aimByBody={!!split} />}
     </group>
   );
 }
@@ -109,7 +158,7 @@ export function Character({ hold }: { hold?: Hold } = {}) {
   return (
     <Suspense fallback={<Capsule />}>
       {/* other clips = a fresh mixer, so the playing-clip ref starts over */}
-      <Model key={usesRifleClips(hold) ? 'rifle' : 'plain'} hold={hold} />
+      <Model key={`${usesRifleClips(hold) ? 'rifle' : 'plain'}|${!!hold?.aim}`} hold={hold} />
     </Suspense>
   );
 }

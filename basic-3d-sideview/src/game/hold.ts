@@ -24,7 +24,7 @@ export type Aim = { yaw: number; pitch: number; weight: number };
 export type Muzzle = { x: number; y: number; z: number; dx: number; dy: number; dz: number; valid: boolean };
 
 /** Bone names without prefixes / separators: "mixamorig:RightHand" → "righthand", "Hand_R" → "handr". */
-const norm = (name: string) => name.toLowerCase().replace(/^mixamorig:?/, '').replace(/[\s_.:\-|]/g, '');
+export const norm = (name: string) => name.toLowerCase().replace(/^mixamorig:?/, '').replace(/[\s_.:\-|]/g, '');
 
 const HAND_END: Record<Side, string[]> = {
   Right: ['righthand', 'handright', 'handr', 'rhand', 'rwrist', 'wristr', 'rightwrist'],
@@ -207,6 +207,11 @@ export type HoldOptions = {
   muzzle?: Muzzle;
   /** The muzzle tip in the canonical frame (metres), from gripMatrix. */
   tip?: THREE.Vector3;
+  /**
+   * True while the upper body does the aiming (aimRig): the barrel then only follows the hands —
+   * no turn toward `aim` and no MAX_BARREL_YAW cap, which are for bodies that do not aim.
+   */
+  aimByBody?: () => boolean;
 };
 
 export type Held = { holder: THREE.Group; fit: HandFit; hand?: THREE.Object3D; dispose: () => void };
@@ -291,15 +296,16 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
         const len = other.length();
         if (len > HANDS.min && len < HANDS.max && other.dot(body) > 0) want.copy(other).divideScalar(len);
       }
-      if (gun && opts.aim && opts.aim.weight > 0) {
+      const byBody = gun && hand && !!opts.aimByBody?.();
+      if (gun && !byBody && opts.aim && opts.aim.weight > 0) {
         const cp = Math.cos(opts.aim.pitch);
         aimDir.set(Math.sin(opts.aim.yaw) * cp, Math.sin(opts.aim.pitch), Math.cos(opts.aim.yaw) * cp);
         want.lerp(aimDir, Math.min(1, opts.aim.weight)).normalize();
       }
       if (!gun) want.addScaledVector(UP, 1.5).normalize(); // melee with no hand: tip up and forward
-      if (dir.lengthSq() === 0 || dt === 0) dir.copy(want);
+      if (dir.lengthSq() === 0 || dt === 0 || byBody) dir.copy(want); // aimed by the body: exactly on the hands
       else dir.lerp(want, 1 - Math.exp(-SWING * dt)).normalize();
-      if (gun) clampYaw(dir, body); // never through the body, whatever the aim or the swing lag
+      if (gun && !byBody) clampYaw(dir, body); // never through the body, whatever the aim or the swing lag
       // canonical +Z = dir, +Y = world up made perpendicular (sights up)
       y.copy(UP).addScaledVector(dir, -UP.dot(dir));
       if (y.lengthSq() < 1e-6) y.copy(body).negate();

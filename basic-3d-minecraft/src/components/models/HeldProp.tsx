@@ -80,11 +80,13 @@ class HoldBoundary extends Component<{ children: ReactNode }, { failed: boolean 
   }
 }
 
-function Prop({ rig, url, side, override, kind, aim, muzzle }: Hold & { rig: THREE.Object3D }) {
+type Internal = { rig: THREE.Object3D; aimByBody?: boolean };
+
+function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody }: Hold & Internal) {
   const gltf = useGLTF(url);
   // aim / muzzle are read while drawing: keep the latest without re-attaching
-  const live = useRef({ aim, muzzle });
-  live.current = { aim, muzzle };
+  const live = useRef({ aim, muzzle, aimByBody });
+  live.current = { aim, muzzle, aimByBody };
   const overrideKey = JSON.stringify(override ?? null);
   useLayoutEffect(() => {
     const model = gltf.scene.clone(true);
@@ -109,6 +111,7 @@ function Prop({ rig, url, side, override, kind, aim, muzzle }: Hold & { rig: THR
       get muzzle() {
         return live.current.muzzle;
       },
+      aimByBody: () => !!live.current.aimByBody,
     });
     held.holder.userData.held = { url, kind: res.grip.kind, source: res.source, lengthM: res.grip.lengthM, fit: held.fit };
     return held.dispose;
@@ -117,7 +120,7 @@ function Prop({ rig, url, side, override, kind, aim, muzzle }: Hold & { rig: THR
 }
 
 /** Render inside the model component, with `rig` = the clone that is drawn. */
-export function HeldProp(props: Hold & { rig: THREE.Object3D }) {
+export function HeldProp(props: Hold & Internal) {
   return (
     <HoldBoundary key={props.url}>
       <Suspense fallback={null}>

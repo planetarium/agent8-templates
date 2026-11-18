@@ -58,6 +58,9 @@ const CONTROLLER = [
   'src/game/player.test.ts',
   'src/game/world.ts',
   'src/components/Character.tsx',
+  // Character aiming a gun: legs walk, upper body aims (split body)
+  'src/game/aimRig.ts',
+  'src/game/aimRig.test.ts',
 ];
 
 // Putting models in: fitModel (metre size, feet on y = 0), static props and
