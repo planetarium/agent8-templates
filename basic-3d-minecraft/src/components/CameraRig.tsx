@@ -21,7 +21,8 @@ function useOrbitControls() {
       active = e.pointerId;
       lx = e.clientX;
       ly = e.clientY;
-      el.setPointerCapture?.(e.pointerId);
+      // capture the drag, unless a game has locked the pointer (capturing then throws InvalidStateError)
+      if (!document.pointerLockElement) el.setPointerCapture?.(e.pointerId);
     };
     const move = (e: PointerEvent) => {
       if (e.pointerId !== active) return;
