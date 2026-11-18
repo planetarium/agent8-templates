@@ -18,8 +18,12 @@
 import * as THREE from 'three';
 import { gripFrame, norm, yawOf } from './hold';
 
-/** Legs face at most this far off the movement direction (45°): more and the feet slide sideways. */
-export const LEG_MAX = Math.PI / 4;
+/**
+ * Legs face at most this far off the movement direction (25°). Strafing with the aim 90° off,
+ * 45° left the feet skating at 0.54 m per metre walked, 25° at 0.33 (whole-body turn: 0.97);
+ * the upper body twists the rest, within TWIST_MAX.
+ */
+export const LEG_MAX = (25 * Math.PI) / 180;
 /** Aim this far behind the movement → backpedal (legs turn round, clip plays backwards)… */
 export const REV_ON = (110 * Math.PI) / 180;
 /** …and back to forward walking under this (the 40° gap keeps it from flickering at 90°). */
