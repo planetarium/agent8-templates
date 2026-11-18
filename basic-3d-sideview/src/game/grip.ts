@@ -1,16 +1,20 @@
 // Weapon grip values -> a prop in the hand. Used by components/models/HeldProp.tsx.
 // Grip (the `grip` key of an asset info file, see assetMeta.ts):
-//   kind: gun | blade | hafted | polearm
+//   kind: gun (crossbows too) | blade | hafted | polearm | bow
 //   point: fist centre, gltf.scene coordinates (GLTFLoader scene, node transforms applied)
-//   forward: muzzle / tip / head (unit), up: sights (gun) or edge / striking face (melee) (unit)
-//   lengthM: real length in metres (extent of the vertices along `forward`), review: checked | low
+//   forward: muzzle / tip / head / where the arrow flies (unit)
+//   up: sights (gun), edge / striking face (melee), upper limb (bow) (unit)
+//   lengthM: real length in metres ALONG `forward`, for every kind (a 1.3 m recurve bow: 0.547);
+//     scale = lengthM / extent of the model's vertices along `forward`. review: checked | low
+// A kind this code doesn't know (the library may add some) is "no grip": the shape estimate
+// holds it, its pose is never used with a guessed hand mapping.
 // Resolution order: game override > info file grip > shape estimate at runtime (gripEstimate.ts).
 import * as THREE from 'three';
 import type { AssetMeta } from './assetMeta';
 import { canonMatrix, estimate } from './gripEstimate';
 import { warnOnce } from './hold';
 
-export const GRIP_KINDS = ['gun', 'blade', 'hafted', 'polearm'] as const;
+export const GRIP_KINDS = ['gun', 'blade', 'hafted', 'polearm', 'bow'] as const;
 export type GripKind = (typeof GRIP_KINDS)[number];
 export type V3 = [number, number, number];
 export type Grip = { kind: GripKind; point: V3; forward: V3; up: V3; lengthM: number; review?: 'checked' | 'low' };
@@ -23,7 +27,7 @@ export type GripOverride = { kind?: GripKind; lengthM?: number } & ({ point: V3;
 export type Resolved = { grip: Grip; source: GripSource; overridden: (keyof Grip)[] };
 
 /** Used only when nothing says how long the weapon is (estimate path, no override). */
-export const DEFAULT_LENGTH_M: Record<GripKind, number> = { gun: 0.7, blade: 0.9, hafted: 0.6, polearm: 1.8 };
+export const DEFAULT_LENGTH_M: Record<GripKind, number> = { gun: 0.7, blade: 0.9, hafted: 0.6, polearm: 1.8, bow: 0.5 };
 
 const isKind = (k: unknown): k is GripKind => GRIP_KINDS.includes(k as GripKind);
 const isV3 = (a: unknown): a is V3 => Array.isArray(a) && a.length === 3 && a.every((x) => typeof x === 'number' && Number.isFinite(x));
@@ -36,7 +40,7 @@ function isPose(point: unknown, forward: unknown, up: unknown): boolean {
   return Math.abs(f.normalize().dot(u.normalize())) < 0.99;
 }
 
-/** The grip of an info file, validated; null when absent / malformed. */
+/** The grip of an info file, validated; null when absent / malformed / of an unknown kind. */
 export function gripFromMeta(meta: AssetMeta | null | undefined): Grip | null {
   const g = meta?.grip as Partial<Grip> | undefined;
   if (!g || typeof g !== 'object') return null;
@@ -45,8 +49,8 @@ export function gripFromMeta(meta: AssetMeta | null | undefined): Grip | null {
 }
 
 /**
- * Weapon kind when there is no usable grip: the info file's `grip.kind` / `kind`, then its tags
- * ("weapons ranged" → gun, "weapons melee" → blade). An asset with no info file (generated models)
+ * Weapon kind when there is no usable grip: the info file's `grip.kind` / `kind` when known, then
+ * its tags ("weapons ranged" → gun, or bow when the file name says bow; "weapons melee" → blade). An asset with no info file (generated models)
  * falls back to words in its URL — a stopgap until those carry info files; pass `kind` on `hold`
  * when it guesses wrong. Anything else (torch, staff, tool) is held like a blade, tip up out of the fist.
  */
@@ -54,16 +58,18 @@ export function kindOf(meta: AssetMeta | null | undefined, url: string): GripKin
   const g = meta?.grip as { kind?: unknown } | undefined;
   if (isKind(g?.kind)) return g.kind;
   if (isKind(meta?.kind)) return meta.kind;
-  const GUN = /ranged|gun|rifle|pistol|shotgun|sniper|smg|blaster|revolver|ak-?47|m4a1|m16|uzi|mp5|musket|flintlock|carbine|launcher|bazooka/i;
+  const GUN = /ranged|gun|rifle|pistol|shotgun|sniper|smg|blaster|revolver|ak-?47|m4a1|m16|uzi|mp5|musket|flintlock|carbine|launcher|bazooka|crossbow/i;
   const POLE = /spear|halberd|polearm|lance|glaive|trident|pike/i;
   const HAFT = /axe|hammer|mace|mallet|club|hatchet|pickaxe/i;
+  const name = decodeURIComponent(url.split(/[?#]/)[0]).split('/').pop() ?? '';
+  const bow = /bow/i.test(name) && !/crossbow/i.test(name); // crossbows are held like guns
   const words = Array.isArray(meta?.tags) ? meta.tags.join(' ') : '';
   if (words) {
-    if (GUN.test(words)) return 'gun';
+    if (GUN.test(words)) return bow ? 'bow' : 'gun';
     if (/melee|sword|blade|knife|dagger/i.test(words)) return 'blade';
   }
   // stopgap: no info file kind / tags
-  const name = decodeURIComponent(url.split(/[?#]/)[0]).split('/').slice(-2).join('/');
+  if (bow) return 'bow';
   if (GUN.test(name)) return 'gun';
   if (POLE.test(name)) return 'polearm';
   if (HAFT.test(name)) return 'hafted';
@@ -106,7 +112,8 @@ export function extentAlong(pos: Float32Array, dir: V3) {
 
 /** Shape-only fallback. */
 export function estimateGrip(scene: THREE.Object3D, kind: GripKind, lengthM?: number): Grip {
-  const e = estimate(sceneTriangles(scene), kind === 'gun' ? 'gun' : 'melee');
+  // bows have no estimator of their own (library bows carry a grip); the gun rules are the closer fit
+  const e = estimate(sceneTriangles(scene), kind === 'gun' || kind === 'bow' ? 'gun' : 'melee');
   return { kind, point: e.grip, forward: e.fwd, up: e.up, lengthM: lengthM ?? DEFAULT_LENGTH_M[kind] };
 }
 
@@ -136,17 +143,17 @@ export function resolveGrip(scene: THREE.Object3D, opts: { grip?: Grip | null; o
 /**
  * Canonical weapon frame (grip = origin, +Z = forward, +Y = up, metres) -> hand frame
  * (X = where a pointed index finger points, Y = knuckle line pinky → index, Z = X × Y).
- * gun: muzzle along the finger, sights up the knuckle line. melee: tip out of the top of the fist,
- * edge toward the finger direction.
+ * gun and bow: muzzle / arrow along the finger, sights / upper limb up the knuckle line. melee: tip
+ * out of the top of the fist, edge toward the finger direction.
  */
 export function handMap(kind: GripKind) {
   const m = new THREE.Matrix4();
-  if (kind === 'gun') m.makeBasis(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0), new THREE.Vector3(1, 0, 0));
+  if (kind === 'gun' || kind === 'bow') m.makeBasis(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0), new THREE.Vector3(1, 0, 0));
   else m.makeBasis(new THREE.Vector3(0, 0, 1), new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0));
   return m;
 }
 
-/** Model length along forward (model units) and the matrix model -> hand frame. */
+/** Model length along forward (model units), scale = lengthM / that length (every kind), and the matrix model -> hand frame. */
 export function gripMatrix(scene: THREE.Object3D, g: Grip) {
   const lengthModel = extentAlong(sceneTriangles(scene), g.forward);
   const scale = lengthModel > 0 ? g.lengthM / lengthModel : 1;

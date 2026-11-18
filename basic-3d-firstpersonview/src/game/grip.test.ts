@@ -33,10 +33,18 @@ describe('grip from the info file', () => {
   test('malformed grips are no grip', () => {
     expect(gripFromMeta(meta({ grip: { ...G, forward: [1, 0] } }))).toBeNull();
     expect(gripFromMeta(meta({ grip: { ...G, up: [2, 0, 0] } }))).toBeNull(); // parallel to forward
-    expect(gripFromMeta(meta({ grip: { ...G, kind: 'bow' } }))).toBeNull();
     expect(gripFromMeta(meta({ grip: { ...G, lengthM: 0 } }))).toBeNull();
     expect(gripFromMeta(meta({}))).toBeNull();
     expect(gripFromMeta(null)).toBeNull();
+  });
+  test('a kind this code does not know is no grip: its pose is not used, the estimate holds it', () => {
+    const unknown = meta({ grip: { ...G, kind: 'sling' }, tags: ['3d', 'objects', 'weapons ranged'] });
+    expect(gripFromMeta(unknown)).toBeNull();
+    const kind = kindOf(unknown, 'https://agent8-games.verse8.io/assets/3d/objects/weapons%20ranged/sling.glb');
+    expect(kind).toBe('gun'); // from the tags, not the unknown kind
+    const r = resolveGrip(stick(), { grip: gripFromMeta(unknown), kind });
+    expect(r.source).toBe('estimate');
+    expect(r.grip.point).not.toEqual(G.point);
   });
   test('no grip -> shape estimate', () => {
     const est = resolveGrip(stick(), { grip: null, kind: 'gun' });
@@ -89,6 +97,13 @@ describe('weapon kind without a grip', () => {
     expect(kindOf(null, 'https://x/assets/long_spear.glb')).toBe('polearm');
     expect(kindOf(null, 'https://x/assets/torch.glb')).toBe('blade');
   });
+  test('bows: from the file name under ranged tags or alone; crossbows are guns', () => {
+    const ranged = meta({ tags: ['3d', 'objects', 'weapons ranged'] });
+    expect(kindOf(ranged, 'https://x/assets/blue_gem_recurve_bow.glb')).toBe('bow');
+    expect(kindOf(ranged, 'https://x/assets/gem_inlaid_crossbow.glb')).toBe('gun');
+    expect(kindOf(null, 'https://x/assets/longbow.glb')).toBe('bow');
+    expect(kindOf(null, 'https://x/assets/simple_wood_crossbow.glb')).toBe('gun');
+  });
 });
 
 describe('model -> hand frame', () => {
@@ -101,5 +116,22 @@ describe('model -> hand frame', () => {
     expect(p.length()).toBeLessThan(1e-6);
     const tip = new THREE.Vector3(1, 0, 0).applyMatrix4(matrix);
     expect(tip.x).toBeCloseTo(0.8 * 0.8, 5); // tip is 0.8 model units ahead of the grip
+  });
+  test('bow: held like a gun (arrow along the finger, upper limb up), scale = lengthM / extent along forward', () => {
+    // a bow 0.5 units deep along -X (string -> riser, the arrow's way) and 2 units tall (the limbs)
+    const bow = new THREE.Group();
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2, 0.05));
+    m.position.set(-0.25, 1, 0);
+    bow.add(m);
+    const B: Grip = { kind: 'bow', point: [-0.1, 1, 0], forward: [-1, 0, 0], up: [0, 1, 0], lengthM: 0.547 };
+    expect(gripFromMeta(meta({ grip: B }))).toEqual(B);
+    const { matrix, lengthModel, scale } = gripMatrix(bow, B);
+    expect(lengthModel).toBeCloseTo(0.5, 5); // along forward, not the 2-unit limb span
+    expect(scale).toBeCloseTo(0.547 / 0.5, 5);
+    const ahead = new THREE.Vector3(-0.5, 1, 0).applyMatrix4(matrix); // the riser front, 0.4 ahead of the grip
+    expect(ahead.x).toBeCloseTo(0.4 * scale, 5);
+    const top = new THREE.Vector3(-0.1, 2, 0).applyMatrix4(matrix); // upper limb tip
+    expect(top.y).toBeCloseTo(1 * scale, 5);
+    expect(Math.abs(top.x)).toBeLessThan(1e-6);
   });
 });
