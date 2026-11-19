@@ -5,19 +5,24 @@ import { Component, Suspense, useLayoutEffect, useRef, type ReactNode, type RefO
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { gripMatrix, kindOf, resolveGrip, sceneVertices, type Grip, type GripKind } from '../../game/grip';
+import { useAssetMeta, type AssetMeta } from '../../game/assetMeta';
+import { gripFromMeta, gripMatrix, kindOf, resolveGrip, sceneVertices, type GripKind, type GripOverride } from '../../game/grip';
 import { followAim, holdInHand, yawOf, type Aim, type Muzzle, type Side } from '../../game/hold';
 
 export type { Aim, Muzzle } from '../../game/hold';
+export { useAssetMetaWhenRead } from '../../game/assetMeta';
 
 export type Hold = {
-  /** Weapon GLB URL (src/assets.json). Its grip comes from the library table by this URL. */
+  /** Weapon GLB URL (src/assets.json). How it is held comes from the asset's info file (`<url>.meta.json`) by this URL. */
   url: string;
   /** Hand that holds it (default Right). A gun's barrel lies toward the other hand. */
   side?: Side;
-  /** Grip fields that win over the library value / estimate (e.g. `{ lengthM: 0.9 }`). */
-  override?: Partial<Grip>;
-  /** Kind when the URL is not in the table and its name does not tell (gun / blade / hafted / polearm). */
+  /**
+   * Grip values that win over the info file / estimate: `kind`, `lengthM`, `muzzleTip` one by
+   * one (e.g. `{ lengthM: 0.9 }`); `point`, `forward`, `up` only all three together.
+   */
+  override?: GripOverride;
+  /** Kind when the info file has no grip and its tags / file name do not tell (gun / blade / hafted / polearm / bow). */
   kind?: GripKind;
   /**
    * Gun only: where it points. World yaw (0 = +z, atan2(dx, dz)), pitch (up +), weight 0–1; mutate
@@ -34,10 +39,18 @@ export type Hold = {
 /** A muzzle object to pass as `hold.muzzle` (read `.valid` before using it). */
 export const newMuzzle = (): Muzzle => ({ x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 1, valid: false });
 
-/** Whether this hold plays the rifle clips: a gun, unless `rifleClips: false`. */
-export function usesRifleClips(hold?: Hold) {
+/** The kind a hold is held as: override > info file grip > `hold.kind` > info file tags / file name. */
+export function holdKind(hold: Hold, meta: AssetMeta | null): GripKind {
+  return hold.override?.kind ?? gripFromMeta(meta)?.kind ?? hold.kind ?? kindOf(meta, hold.url);
+}
+
+/**
+ * Whether this hold plays the rifle clips: a gun, unless `rifleClips: false`. `meta` = the
+ * weapon's info file (`useAssetMetaWhenRead(hold?.url)`; null until it arrives).
+ */
+export function usesRifleClips(hold: Hold | undefined, meta: AssetMeta | null) {
   if (!hold || hold.rifleClips === false) return false;
-  return (hold.override?.kind ?? hold.kind ?? kindOf(hold.url)) === 'gun';
+  return holdKind(hold, meta) === 'gun';
 }
 
 const _q = new THREE.Quaternion();
@@ -48,8 +61,8 @@ const _v = new THREE.Vector3();
  * movement code rotates) toward `hold.aim.yaw` by its weight, and back when the aim drops. The
  * movement code's facing is left alone. No gun or no aim: the group stays at 0.
  */
-export function useBodyFollowsAim(group: RefObject<THREE.Group | null>, hold?: Hold) {
-  const gun = !!hold && (hold.override?.kind ?? hold.kind ?? kindOf(hold.url)) === 'gun';
+export function useBodyFollowsAim(group: RefObject<THREE.Group | null>, hold: Hold | undefined, meta: AssetMeta | null) {
+  const gun = !!hold && holdKind(hold, meta) === 'gun';
   const aim = useRef(hold?.aim);
   aim.current = gun ? hold?.aim : undefined;
   useFrame((_, delta) => {
@@ -84,6 +97,8 @@ type Internal = { rig: THREE.Object3D; aimByBody?: boolean };
 
 function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody }: Hold & Internal) {
   const gltf = useGLTF(url);
+  // the info file (<url>.meta.json): suspends like useGLTF; null = none (404, other host, timeout)
+  const meta = useAssetMeta(url);
   // aim / muzzle are read while drawing: keep the latest without re-attaching
   const live = useRef({ aim, muzzle, aimByBody });
   live.current = { aim, muzzle, aimByBody };
@@ -94,7 +109,7 @@ function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody }: Hold &
       if ((o as THREE.Mesh).isMesh) o.castShadow = true;
     });
     const pos = sceneVertices(model);
-    const res = resolveGrip(pos, { url, override: JSON.parse(overrideKey) ?? undefined, kind });
+    const res = resolveGrip(pos, { grip: gripFromMeta(meta), override: JSON.parse(overrideKey) ?? undefined, kind: kind ?? kindOf(meta, url) });
     const { matrix, tip } = gripMatrix(pos, res.grip);
     const prop = new THREE.Group();
     prop.name = 'held-prop';
@@ -113,9 +128,9 @@ function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody }: Hold &
       },
       aimByBody: () => !!live.current.aimByBody,
     });
-    held.holder.userData.held = { url, kind: res.grip.kind, source: res.source, lengthM: res.grip.lengthM, fit: held.fit };
+    held.holder.userData.held = { url, kind: res.grip.kind, source: res.source, lengthM: res.grip.lengthM, muzzleTip: !!res.grip.muzzleTip, fit: held.fit };
     return held.dispose;
-  }, [rig, gltf, url, side, overrideKey, kind]);
+  }, [rig, gltf, meta, url, side, overrideKey, kind]);
   return null;
 }
 

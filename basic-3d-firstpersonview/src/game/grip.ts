@@ -2,74 +2,99 @@
 // turns the model into the canonical held frame (grip point at the origin, +Z = muzzle / tip,
 // +Y = sights / edge, metres).
 //
-// Grip values (agent8-library metadata `grip`, plus `muzzleTip`), all in the GLB scene's own
-// coordinates (node transforms applied):
-//   kind: gun | blade | hafted | polearm
-//   point: where the fist closes (gun: the pistol grip)
-//   forward: muzzle / tip / head direction (unit), up: sights (gun) or edge / striking face (unit)
-//   lengthM: real length in metres, along `forward`
-//   muzzleTip: the muzzle end (gun), where a shot starts
-// Resolution: game override > the value for the weapon URL (grips.json, generated from the
-// library by scripts/grips.mjs) > a shape estimate.
+// Grip values: the `grip` key of the weapon's asset info file (assetMeta.ts; agent8-library
+// contract), all in the GLB scene's own coordinates (node transforms applied):
+//   kind: gun (crossbows too) | blade | hafted | polearm | bow
+//   point: where the fist closes (gun: the pistol grip; bow: the riser)
+//   forward: muzzle / tip / head / where the arrow flies (unit)
+//   up: sights (gun), edge / striking face (melee), upper limb (bow) (unit)
+//   lengthM: real length in metres ALONG `forward`, for every kind (a 1.3 m recurve bow: 0.547)
+//   muzzleTip: gun only, where a shot leaves the weapon; without it, the front end along forward
+//   review: checked | low
+// A kind this code does not know (the library may add some) is "no grip": the shape estimate
+// holds it, its pose is never used.
+// Resolution: game override > info file grip > shape estimate (gripEstimate.ts).
 import * as THREE from 'three';
+import type { AssetMeta } from './assetMeta';
 import { canonMatrix, estimate } from './gripEstimate';
-import TABLE from './grips.json';
 
-export type GripKind = 'gun' | 'blade' | 'hafted' | 'polearm';
+export const GRIP_KINDS = ['gun', 'blade', 'hafted', 'polearm', 'bow'] as const;
+export type GripKind = (typeof GRIP_KINDS)[number];
 export type V3 = [number, number, number];
-export type Grip = { kind: GripKind; point: V3; forward: V3; up: V3; lengthM: number; muzzleTip?: V3 };
-export type GripSource = 'override' | 'library' | 'estimate';
-export type Resolved = { grip: Grip; source: GripSource };
-
-const KINDS: GripKind[] = ['gun', 'blade', 'hafted', 'polearm'];
+export type Grip = { kind: GripKind; point: V3; forward: V3; up: V3; lengthM: number; muzzleTip?: V3; review?: 'checked' | 'low' };
+export type GripSource = 'override' | 'meta' | 'estimate';
+/**
+ * What a game may replace: `kind`, `lengthM` and `muzzleTip` (gun) one by one; the pose
+ * (`point`, `forward`, `up`) only as all three together, so a later fix of the info file can't
+ * mix with half of an old pose.
+ */
+export type GripOverride = { kind?: GripKind; lengthM?: number; muzzleTip?: V3 } & ({ point: V3; forward: V3; up: V3 } | { point?: never; forward?: never; up?: never });
+export type Resolved = { grip: Grip; source: GripSource; overridden: (keyof Grip)[] };
 
 /** Used only when nothing says how long the weapon is (estimate path, no override). */
-export const DEFAULT_LENGTH_M: Record<GripKind, number> = { gun: 0.7, blade: 0.9, hafted: 0.6, polearm: 1.8 };
+export const DEFAULT_LENGTH_M: Record<GripKind, number> = { gun: 0.7, blade: 0.9, hafted: 0.6, polearm: 1.8, bow: 0.5 };
+
+const isKind = (k: unknown): k is GripKind => GRIP_KINDS.includes(k as GripKind);
+const isV3 = (a: unknown): a is V3 => Array.isArray(a) && a.length === 3 && a.every((x) => typeof x === 'number' && Number.isFinite(x));
+const isLength = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x > 0 && x < 20;
+/** forward and up: non-zero, not parallel. */
+function isPose(point: unknown, forward: unknown, up: unknown): boolean {
+  if (!isV3(point) || !isV3(forward) || !isV3(up)) return false;
+  const f = new THREE.Vector3(...forward), u = new THREE.Vector3(...up);
+  if (f.lengthSq() < 1e-12 || u.lengthSq() < 1e-12) return false;
+  return Math.abs(f.normalize().dot(u.normalize())) < 0.99;
+}
+
+const warned = new Set<string>();
+/** console.warn once per message. */
+export function warnOnce(msg: string) {
+  if (warned.has(msg)) return;
+  warned.add(msg);
+  console.warn(msg);
+}
+
+/** The grip of an info file, validated; null when absent / malformed / of an unknown kind. `muzzleTip` is kept for guns only. */
+export function gripFromMeta(meta: AssetMeta | null | undefined): Grip | null {
+  const g = meta?.grip as Partial<Grip> | undefined;
+  if (!g || typeof g !== 'object') return null;
+  if (!isKind(g.kind) || !isPose(g.point, g.forward, g.up) || !isLength(g.lengthM)) return null;
+  const out: Grip = { kind: g.kind, point: g.point as V3, forward: g.forward as V3, up: g.up as V3, lengthM: g.lengthM };
+  if (g.kind === 'gun' && isV3(g.muzzleTip)) out.muzzleTip = g.muzzleTip;
+  if (g.review === 'checked' || g.review === 'low') out.review = g.review;
+  return out;
+}
 
 /**
- * The library path of a model URL ("weapons/ak47.glb", "objects/weapons ranged/x.glb"): the part
- * after /assets/3d/, URL-decoded, lower case (the CDN serves both 3d and 3D, raw and %20 spaces).
+ * Weapon kind when there is no usable grip: the info file's `grip.kind` / `kind` when known, then
+ * its tags ("weapons ranged" → gun, or bow when the file name says bow; "weapons melee" → blade).
+ * An asset with no info file (generated models) falls back to words in its URL — pass `kind` on
+ * `hold` when it guesses wrong. Anything else (torch, staff, tool) is held like a blade.
  */
-export function libraryKey(url: string): string | null {
-  let path = url;
+export function kindOf(meta: AssetMeta | null | undefined, url: string): GripKind {
+  const g = meta?.grip as { kind?: unknown } | undefined;
+  if (isKind(g?.kind)) return g.kind;
+  if (isKind(meta?.kind)) return meta.kind;
+  const GUN = /ranged|gun|rifle|pistol|shotgun|sniper|smg|blaster|revolver|ak-?47|m4a1|m16|uzi|mp5|musket|flintlock|carbine|launcher|bazooka|crossbow/i;
+  const POLE = /spear|halberd|polearm|lance|glaive|trident|pike/i;
+  const HAFT = /axe|hammer|mace|mallet|club|hatchet|pickaxe/i;
+  let path = url.split(/[?#]/)[0];
   try {
-    path = decodeURIComponent(new URL(url, 'http://x').pathname);
+    path = decodeURIComponent(path);
   } catch {
-    // not a URL: match the raw string
+    // keep the raw string
   }
-  const m = path.match(/\/assets\/3d\/(.+\.glb)$/i);
-  return m ? m[1].toLowerCase() : null;
-}
-
-const v3 = (a: unknown): a is V3 => Array.isArray(a) && a.length === 3 && a.every((x) => typeof x === 'number' && Number.isFinite(x));
-
-/** A grip object if it is well formed (unit-ish vectors, positive length), else null. */
-export function validGrip(g: unknown): Grip | null {
-  const o = g as Partial<Grip> | null | undefined;
-  if (!o || !KINDS.includes(o.kind as GripKind) || !v3(o.point) || !v3(o.forward) || !v3(o.up)) return null;
-  if (!(typeof o.lengthM === 'number' && o.lengthM > 0 && o.lengthM < 20)) return null;
-  const f = new THREE.Vector3(...o.forward), u = new THREE.Vector3(...o.up);
-  if (f.lengthSq() < 1e-6 || u.lengthSq() < 1e-6 || f.normalize().cross(u.normalize()).lengthSq() < 1e-4) return null;
-  if (o.muzzleTip !== undefined && !v3(o.muzzleTip)) return null;
-  return { kind: o.kind as GripKind, point: o.point, forward: o.forward, up: o.up, lengthM: o.lengthM, ...(o.muzzleTip ? { muzzleTip: o.muzzleTip } : {}) };
-}
-
-const GRIPS = (TABLE as { grips: Record<string, unknown> }).grips;
-
-/** The library's grip for a weapon URL, or null when the table does not have it. */
-export function gripForUrl(url: string): Grip | null {
-  const key = libraryKey(url);
-  return key ? validGrip(GRIPS[key]) : null;
-}
-
-/** Kind from the URL alone (table first, then the folder / file name). */
-export function kindOf(url: string): GripKind {
-  const g = gripForUrl(url);
-  if (g) return g.kind;
-  const k = (libraryKey(url) ?? url).toLowerCase();
-  if (/weapons ranged|^weapons\/|gun|rifle|pistol|revolver|blaster|carbine|smg|launcher/.test(k)) return 'gun';
-  if (/spear|halberd|glaive|polearm|trident|lance|pike|staff/.test(k)) return 'polearm';
-  if (/axe|hammer|mace|club|maul|hatchet/.test(k)) return 'hafted';
+  const name = path.split('/').pop() ?? '';
+  const bow = /bow/i.test(name) && !/crossbow/i.test(name); // crossbows are held like guns
+  const words = Array.isArray(meta?.tags) ? meta.tags.join(' ') : '';
+  if (words) {
+    if (GUN.test(words)) return bow ? 'bow' : 'gun';
+    if (/melee|sword|blade|knife|dagger/i.test(words)) return 'blade';
+  }
+  if (bow) return 'bow';
+  // the library's own folder for guns is "weapons/"
+  if (GUN.test(name) || /\/assets\/3d\/weapons\//i.test(path)) return 'gun';
+  if (POLE.test(name)) return 'polearm';
+  if (HAFT.test(name)) return 'hafted';
   return 'blade';
 }
 
@@ -107,53 +132,63 @@ export function extentAlong(pos: Float32Array, dir: V3) {
   return { lo, hi };
 }
 
-/** The muzzle end when the values have none: centre of the vertices in the front 2 % along forward. */
+/**
+ * The muzzle end when the values have none (agent8-library contract): the model's front end along
+ * forward, on the line through the grip point.
+ */
 export function frontTip(pos: Float32Array, g: Grip): V3 {
   const f = new THREE.Vector3(...g.forward).normalize();
-  const { lo, hi } = extentAlong(pos, g.forward);
-  const cut = hi - 0.02 * (hi - lo);
-  const c = new THREE.Vector3();
-  let n = 0;
-  for (let i = 0; i < pos.length; i += 3) {
-    if (pos[i] * f.x + pos[i + 1] * f.y + pos[i + 2] * f.z >= cut) {
-      c.x += pos[i]; c.y += pos[i + 1]; c.z += pos[i + 2];
-      n++;
-    }
-  }
-  if (!n) return [g.point[0] + f.x * (hi - lo), g.point[1] + f.y * (hi - lo), g.point[2] + f.z * (hi - lo)];
-  c.divideScalar(n);
-  return [c.x, c.y, c.z];
+  const p = new THREE.Vector3(...g.point);
+  const { hi } = extentAlong(pos, g.forward);
+  const ahead = Number.isFinite(hi) ? hi - p.dot(f) : 0;
+  p.addScaledVector(f, ahead);
+  return [p.x, p.y, p.z];
 }
 
-/** Shape-only fallback: kind comes from the caller (URL / override). */
+/** Shape-only fallback: kind comes from the caller (info file tags / URL / override). */
 export function estimateGrip(pos: Float32Array, kind: GripKind, lengthM?: number): Grip {
-  const e = estimate(pos, kind === 'gun' ? 'gun' : 'melee');
+  // bows have no estimator of their own (library bows carry a grip); the gun rules are the closer fit
+  const e = estimate(pos, kind === 'gun' || kind === 'bow' ? 'gun' : 'melee');
   return { kind, point: e.grip, forward: e.fwd, up: e.up, lengthM: lengthM ?? DEFAULT_LENGTH_M[kind] };
 }
 
 /**
- * override > the URL's library value > shape estimate. A partial override replaces only the
- * fields it names (on top of the library value or the estimate); a full one is used as-is.
+ * override > info file grip > shape estimate. `kind`, `lengthM` and `muzzleTip` replace the base
+ * one by one; a pose override needs all of point / forward / up, or it is ignored (one warning).
  */
-export function resolveGrip(pos: Float32Array, opts: { url: string; override?: Partial<Grip>; kind?: GripKind }): Resolved {
-  const o = opts.override ?? {};
-  const full = validGrip(o);
-  if (full) return { grip: full, source: 'override' };
-  const lib = gripForUrl(opts.url);
-  const kind = o.kind ?? opts.kind ?? lib?.kind ?? kindOf(opts.url);
-  const base = lib ?? estimateGrip(pos, kind, o.lengthM);
-  const touched = Object.keys(o).length > 0;
-  const merged = validGrip({ ...base, ...o }) ?? base;
-  return { grip: merged, source: touched ? 'override' : lib ? 'library' : 'estimate' };
+export function resolveGrip(pos: Float32Array, opts: { grip?: Grip | null; override?: GripOverride; kind?: GripKind }): Resolved {
+  const o = (opts.override ?? {}) as Partial<Grip>;
+  const patch: Partial<Grip> = {};
+  if (isKind(o.kind)) patch.kind = o.kind;
+  if (isLength(o.lengthM)) patch.lengthM = o.lengthM;
+  if (isV3(o.muzzleTip)) patch.muzzleTip = o.muzzleTip;
+  const posed = o.point !== undefined || o.forward !== undefined || o.up !== undefined;
+  if (posed) {
+    if (isPose(o.point, o.forward, o.up)) Object.assign(patch, { point: o.point, forward: o.forward, up: o.up });
+    else warnOnce('hold: override point / forward / up must be given together (valid vectors); the pose override is ignored');
+  }
+  const overridden = Object.keys(patch) as (keyof Grip)[];
+  let base: Grip;
+  if (patch.point) {
+    const kind = patch.kind ?? opts.grip?.kind ?? opts.kind ?? 'blade';
+    base = { kind, point: patch.point, forward: patch.forward!, up: patch.up!, lengthM: opts.grip?.lengthM ?? DEFAULT_LENGTH_M[kind] };
+    if (opts.grip?.muzzleTip) base.muzzleTip = opts.grip.muzzleTip;
+  } else if (opts.grip) base = opts.grip;
+  else base = estimateGrip(pos, patch.kind ?? opts.kind ?? 'blade', patch.lengthM);
+  const source: GripSource = overridden.length ? 'override' : opts.grip ? 'meta' : 'estimate';
+  const grip: Grip = { ...base, ...patch };
+  if (grip.kind !== 'gun') delete grip.muzzleTip; // the muzzle tip is a gun's only
+  return { grip, source, overridden };
 }
 
 /**
  * Model (scene coordinates) → canonical held frame in metres (grip at the origin, +Z forward,
- * +Y up). Also the muzzle tip in that frame and the model length along forward.
+ * +Y up). Also the muzzle tip in that frame (`muzzleTip`, else the front end) and the model
+ * length along forward; scale = lengthM / that length, for every kind.
  */
 export function gripMatrix(pos: Float32Array, g: Grip) {
   const { lo, hi } = extentAlong(pos, g.forward);
-  const lengthModel = hi - lo || 1;
+  const lengthModel = hi - lo > 0 ? hi - lo : 1;
   const scale = g.lengthM / lengthModel;
   const matrix = canonMatrix(g.forward, g.up, g.point, scale);
   const tip = new THREE.Vector3(...(g.muzzleTip ?? frontTip(pos, g))).applyMatrix4(matrix);

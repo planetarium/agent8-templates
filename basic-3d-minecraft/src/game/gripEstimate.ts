@@ -1,6 +1,6 @@
-// Shape-only grip estimate: the fallback for a weapon the grip table (grips.json) does not know.
+// Shape-only grip estimate: the fallback for a weapon whose asset info file has no grip.
 // Right for about a third of the library's weapons on every count (grip point within 3 cm,
-// forward within 10°, up within 15°) and for two thirds on direction alone — the table wins.
+// forward within 10°, up within 15°) and for two thirds on direction alone — the info file wins.
 // Canonical weapon frame: grip point = origin, +Z = muzzle / tip / head,
 // +Y = up (gun: sights side; melee: the edge / striking face), +X = Y × Z.
 // Input: triangles in the authored space of the GLB scene (node transforms applied).

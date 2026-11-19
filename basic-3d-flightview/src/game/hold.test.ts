@@ -1,77 +1,13 @@
-// The hold part (hold.ts + grip.ts): grip values by URL, and a weapon that follows the hand on any
-// rig — full fingers, a few fingers, a bare hand bone, no hand at all — without ever throwing.
+// The hold part (hold.ts): a weapon that follows the hand on any rig — full fingers, a few
+// fingers, a bare hand bone, no hand at all — without ever throwing, and on the real library hand
+// rigs (hold.fixture.json, trimmed from the agent8-library character GLBs: a census of right-hand
+// finger-root sets — most library characters are reduced rigs — and per class the node chain
+// scene root -> hand plus the finger roots). Grip values: grip.test.ts.
 import { describe, expect, test } from 'bun:test';
 import * as THREE from 'three';
-import { gripForUrl, gripMatrix, kindOf, libraryKey, resolveGrip, validGrip, type Grip } from './grip';
-import { clampYaw, findHand, followAim, gripFrame, holdInHand, MAX_BARREL_YAW, type Muzzle } from './hold';
-
-const box = (len: number) => {
-  const root = new THREE.Group();
-  const m = new THREE.Mesh(new THREE.BoxGeometry(len, 0.1, 0.05));
-  m.position.x = len / 2; // spans x 0..len
-  root.add(m);
-  return root;
-};
-const verts = (o: THREE.Object3D) => {
-  const out: number[] = [];
-  o.updateMatrixWorld(true);
-  o.traverse((c) => {
-    const m = c as THREE.Mesh;
-    if (!m.isMesh) return;
-    const p = m.geometry.getAttribute('position');
-    const v = new THREE.Vector3();
-    for (let i = 0; i < p.count; i++) {
-      v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld);
-      out.push(v.x, v.y, v.z);
-    }
-  });
-  return new Float32Array(out);
-};
-const G: Grip = { kind: 'gun', point: [0.2, 0, 0], forward: [1, 0, 0], up: [0, 1, 0], lengthM: 0.8 };
-
-describe('grip values', () => {
-  test('library key ignores host, 3d / 3D, %20 and case', () => {
-    expect(libraryKey('https://agent8-games.verse8.io/assets/3D/objects/weapons%20ranged/Tactical_Frontgrip_Rifle.glb')).toBe('objects/weapons ranged/tactical_frontgrip_rifle.glb');
-    expect(libraryKey('https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb')).toBe('weapons/ak47.glb');
-    expect(libraryKey('/models/my-sword.glb')).toBeNull();
-  });
-  test('the table answers by URL; unknown URLs fall back to a kind from the name', () => {
-    const g = gripForUrl('https://agent8-games.verse8.io/assets/3D/objects/weapons ranged/tactical_frontgrip_rifle.glb');
-    expect(g?.kind).toBe('gun');
-    expect(g?.muzzleTip).toHaveLength(3);
-    expect(gripForUrl('https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb')?.lengthM).toBeCloseTo(0.88, 5);
-    expect(gripForUrl('https://x/assets/3d/objects/weapons ranged/not_in_table_rifle.glb')).toBeNull();
-    expect(kindOf('https://x/assets/3d/objects/weapons ranged/not_in_table_rifle.glb')).toBe('gun');
-    expect(kindOf('https://x/assets/3d/objects/weapons melee/rusty_axe.glb')).toBe('hafted');
-  });
-  test('malformed values are rejected', () => {
-    expect(validGrip(G)).toEqual(G);
-    expect(validGrip({ ...G, forward: [1, 0] })).toBeNull();
-    expect(validGrip({ ...G, up: [2, 0, 0] })).toBeNull(); // parallel to forward
-    expect(validGrip({ ...G, lengthM: 0 })).toBeNull();
-  });
-  test('order: game override > library value > estimate', () => {
-    const pos = verts(box(1));
-    const url = 'https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb';
-    expect(resolveGrip(pos, { url }).source).toBe('library');
-    const part = resolveGrip(pos, { url, override: { lengthM: 1.2 } });
-    expect(part.source).toBe('override');
-    expect(part.grip.lengthM).toBe(1.2);
-    expect(part.grip.point).toEqual(gripForUrl(url)!.point);
-    expect(resolveGrip(pos, { url, override: G }).grip).toEqual(G);
-    const est = resolveGrip(pos, { url: 'https://x/unknown_pistol.glb' });
-    expect(est.source).toBe('estimate');
-    expect(est.grip.kind).toBe('gun');
-    expect(est.grip.lengthM).toBe(0.7);
-  });
-  test('grip point → origin, forward → +Z, real length = lengthM, tip at the front', () => {
-    const { matrix, scale, lengthModel, tip } = gripMatrix(verts(box(1)), G);
-    expect(lengthModel).toBeCloseTo(1, 5);
-    expect(scale).toBeCloseTo(0.8, 5);
-    expect(new THREE.Vector3(...G.point).applyMatrix4(matrix).length()).toBeLessThan(1e-6);
-    expect(tip.z).toBeCloseTo(0.8 * 0.8, 4); // front is 0.8 model units ahead of the grip
-  });
-});
+import type { Grip } from './grip';
+import { clampYaw, findHand, followAim, gripFrame, holdInHand, MAX_BARREL_YAW, type HandFit, type Muzzle, type Side } from './hold';
+import fixture from './hold.fixture.json';
 
 type RigOpts = { fingers?: 'all' | 'thumb-index' | 'none'; hands?: boolean; names?: 'mixamo' | 'claythis'; scale?: number };
 /**
@@ -281,4 +217,149 @@ describe('melee: follows the wrist', () => {
     const after = new THREE.Vector3(0, 0, 1).applyQuaternion(q);
     expect(after.angleTo(fwd)).toBeCloseTo(Math.PI / 2, 2);
   });
+});
+
+describe('bow: by the riser, no muzzle', () => {
+  test('the arrow points where the fingers point, the upper limb out of the top of the fist; muzzle not valid', () => {
+    const r = rig();
+    const { held, m } = hold(r, 'bow');
+    const hand = findHand(r, 'Right')!;
+    const frame = hand.matrixWorld.clone().multiply(gripFrame(hand, 'Right').frame);
+    const fx = new THREE.Vector3(), fy = new THREE.Vector3(), fz = new THREE.Vector3();
+    frame.extractBasis(fx, fy, fz);
+    const q = new THREE.Quaternion().setFromRotationMatrix(held.holder.matrixWorld);
+    expect(new THREE.Vector3(0, 0, 1).applyQuaternion(q).angleTo(fx.normalize())).toBeLessThan(1e-3);
+    expect(new THREE.Vector3(0, 1, 0).applyQuaternion(q).angleTo(fy.normalize())).toBeLessThan(1e-3);
+    expect(m.valid).toBe(false);
+  });
+});
+
+// ---- the real library hand rigs (hold.fixture.json) ----
+type Node = { name: string; t?: number[]; r?: number[]; s?: number[] };
+type RigData = { class: string; chain: Node[]; fingers: Node[] };
+const RIGS = fixture.rigs as Record<string, RigData>;
+
+/** The chain as GLTFLoader builds it, finger roots under the hand; `keep` filters the fingers. */
+function build(d: RigData, keep: (name: string) => boolean = () => true) {
+  const root = new THREE.Group();
+  let parent: THREE.Object3D = root;
+  const node = (n: Node) => {
+    const o = n.name.startsWith('mixamorig') ? new THREE.Bone() : new THREE.Object3D();
+    o.name = n.name;
+    if (n.t) o.position.fromArray(n.t);
+    if (n.r) o.quaternion.fromArray(n.r);
+    if (n.s) o.scale.fromArray(n.s);
+    return o;
+  };
+  for (const n of d.chain) {
+    const o = node(n);
+    parent.add(o);
+    parent = o;
+  }
+  for (const f of d.fingers) if (keep(f.name)) parent.add(node(f));
+  root.updateMatrixWorld(true);
+  return root;
+}
+const sideOf = (key: string) => key.split('#')[1] as Side;
+const fullFit = (cls: string): HandFit => (/Pinky|Ring|Index\+Middle/.test(cls) ? 'fingers' : cls === 'hand only' ? 'hand' : 'partial');
+
+/** The grip frame in world space: fist centre and its three axes. */
+function worldFrame(root: THREE.Object3D, side: Side) {
+  const hand = findHand(root, side)!;
+  const f = gripFrame(hand, side);
+  const m = hand.matrixWorld.clone().multiply(f.frame);
+  const o = new THREE.Vector3(), x = new THREE.Vector3(), y = new THREE.Vector3(), z = new THREE.Vector3();
+  m.extractBasis(x, y, z);
+  o.setFromMatrixPosition(m);
+  return { fit: f.fit, origin: o, fwd: x.normalize(), up: y.normalize(), palm: z.normalize(), wrist: hand.getWorldPosition(new THREE.Vector3()) };
+}
+const angle = (a: THREE.Vector3, b: THREE.Vector3) => THREE.MathUtils.radToDeg(a.angleTo(b));
+
+describe('library hand rigs', () => {
+  test('census: most characters are reduced rigs, and every class has a sample here', () => {
+    const c = fixture.census as Record<string, number>;
+    const total = Object.values(c).reduce((s, n) => s + n, 0);
+    expect(total).toBe(327);
+    expect(c['Index+Middle+Pinky+Ring+Thumb'] + c['Index+Middle+Ring+Thumb']).toBe(75);
+    expect(c['Index']).toBe(124); // knight-templar: RightHandIndex1-4 only
+    expect(c['hand only'] + c['no hand bone']).toBe(18);
+    const sampled = new Set(Object.values(RIGS).map((r) => r.class));
+    for (const k of Object.keys(c)) expect(sampled.has(k)).toBe(true);
+  });
+
+  test('every rig with a hand bone holds a weapon in the hand: real size, finite, in front of the wrist', () => {
+    for (const [key, d] of Object.entries(RIGS)) {
+      if (d.class === 'no hand bone') continue;
+      const side = sideOf(key);
+      const root = build(d);
+      const held = holdInHand(root, new THREE.Group(), { kind: 'blade', side });
+      const scene = new THREE.Scene();
+      scene.add(root);
+      scene.updateMatrixWorld(true);
+      expect(held.hand).toBeDefined();
+      expect(held.holder.visible).toBe(true);
+      // the holder cancels the bone's world scale: the weapon keeps its size in metres
+      expect(new THREE.Vector3().setFromMatrixScale(held.holder.matrixWorld).x).toBeCloseTo(1, 4);
+      const w = worldFrame(root, side);
+      expect(w.fit).toBe(fullFit(d.class));
+      // the fist centre sits in front of the wrist, about a hand's length out (any character size)
+      const forearm = held.hand!.parent!.getWorldPosition(new THREE.Vector3()).distanceTo(w.wrist);
+      const reach = w.origin.distanceTo(w.wrist) / forearm;
+      expect(reach).toBeGreaterThan(0.1);
+      expect(reach).toBeLessThan(0.8);
+      expect(w.origin.clone().sub(w.wrist).dot(w.fwd)).toBeGreaterThan(0);
+    }
+  });
+
+  test('a rig with no hand bone: held in front of the body, no throw', () => {
+    const d = Object.values(RIGS).find((r) => r.class === 'no hand bone')!;
+    const root = build(d);
+    const held = holdInHand(root, new THREE.Group(), { kind: 'gun' });
+    expect(held.fit).toBe('body');
+    const scene = new THREE.Scene();
+    scene.add(root);
+    expect(() => scene.updateMatrixWorld(true)).not.toThrow();
+    expect(held.holder.matrixWorld.elements.every(Number.isFinite)).toBe(true);
+  });
+
+  test('a full rig read as a bare hand stays close to its finger frame', () => {
+    for (const [key, d] of Object.entries(RIGS)) {
+      if (!/Pinky/.test(d.class)) continue;
+      const side = sideOf(key);
+      const full = worldFrame(build(d), side);
+      const bare = worldFrame(build(d, () => false), side);
+      expect(full.fit).toBe('fingers');
+      expect(bare.fit).toBe('hand');
+      const handLen = full.origin.distanceTo(full.wrist);
+      // fingers spread up to ~37° off the hand bone's +Y in the library
+      expect(angle(full.fwd, bare.fwd)).toBeLessThan(40);
+      expect(angle(full.up, bare.up)).toBeLessThan(40);
+      // fist centre within a third of the hand length
+      expect(bare.origin.distanceTo(full.origin)).toBeLessThan(0.35 * handLen);
+    }
+  });
+
+  // Bind poses differ per character (T / A pose), but a shared clip sets the same hand bone
+  // rotations on both, so the frame that matters is the one in the hand bone's own space.
+  for (const [name, cls] of [['knight-templar', 'index chain only']] as const) {
+    test(`${name} (${cls}) is held like the base character, both hands`, () => {
+      const local = (key: string, side: Side) => {
+        const f = gripFrame(findHand(build(RIGS[key]), side)!, side);
+        const x = new THREE.Vector3(), y = new THREE.Vector3(), z = new THREE.Vector3();
+        f.frame.extractBasis(x, y, z);
+        return { fit: f.fit, x, y, z };
+      };
+      for (const side of ['Right', 'Left'] as Side[]) {
+        const key = `characters/realistic style/${name}.glb#${side}`;
+        if (!RIGS[key]) throw new Error(`fixture has no ${key}`);
+        const base = local(`characters/realistic style/base-model.glb#${side}`, side);
+        const other = local(key, side);
+        expect(base.fit).toBe('fingers');
+        expect(other.fit).toBe('partial');
+        expect(angle(base.x, other.x)).toBeLessThan(20);
+        expect(angle(base.y, other.y)).toBeLessThan(20);
+        expect(angle(base.z, other.z)).toBeLessThan(20);
+      }
+    });
+  }
 });

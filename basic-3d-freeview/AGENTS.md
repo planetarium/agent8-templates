@@ -46,7 +46,10 @@ Read this, then `PROJECT/Structure.md`, before changing code.
   inside `<Suspense>`.
 - A weapon or tool in a hand: pass `hold={{ url, aim, muzzle }}` to
   `<Character>` / `<AnimatedModel>` (`PROJECT/Structure.md` "Model parts").
-  Don't parent weapons to bones yourself.
+  How it is held (grip point, direction, real length, muzzle) comes from the
+  asset's info file on its own — don't copy search-result grip values into
+  `src/assets.json` or code. Only to change how this game holds it:
+  `hold={{ url, override }}`. Don't parent weapons to bones yourself.
 
 ## Commands
 

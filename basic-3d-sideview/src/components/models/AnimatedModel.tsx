@@ -8,7 +8,8 @@ import assets from '../../assets.json';
 import { retarget, type AnimState } from '../../game/anim';
 import { fitModel } from '../../game/fitModel';
 import { clipGroundOffsets } from '../../game/groundClips';
-import { HeldProp, useBodyFollowsAim, usesRifleClips, type Hold } from './HeldProp';
+import type { AssetMeta } from '../../game/assetMeta';
+import { HeldProp, useAssetMetaWhenRead, useBodyFollowsAim, usesRifleClips, type Hold } from './HeldProp';
 
 // The template's shared mixamo clips (src/assets.json `animations`): any model on the
 // mixamorig skeleton that ships without clips of its own can borrow them — the rifle set while
@@ -31,9 +32,9 @@ function pickClip(names: string[], want: AnimState) {
   return find(want) ?? (want === 'run' ? find('walk') : undefined) ?? find('idle') ?? names[0];
 }
 
-function Model({ url, height, source, hold }: { url: string; height: number; source?: { state: AnimState }; hold?: Hold }) {
+function Model({ url, height, source, hold, meta }: { url: string; height: number; source?: { state: AnimState }; hold?: Hold; meta: AssetMeta | null }) {
   const gltf = useGLTF(url);
-  const rifle = usesRifleClips(hold);
+  const rifle = usesRifleClips(hold, meta);
   const shared = useGLTF(rifle ? RIFLE_URLS : SHARED_URLS);
   const { scene, clips, unit, lift, ground } = useMemo(() => {
     const scene = clone(gltf.scene); // skinned models need a real skeleton clone per instance
@@ -67,7 +68,7 @@ function Model({ url, height, source, hold }: { url: string; height: number; sou
   }, [url, gltf, shared, height, rifle]);
 
   const group = useRef<THREE.Group>(null);
-  useBodyFollowsAim(group, hold); // aiming a gun: the drawn body turns to the aim
+  useBodyFollowsAim(group, hold, meta); // aiming a gun: the drawn body turns to the aim
   const { actions, names } = useAnimations(clips, group);
   const current = useRef('');
   // lift eases from the old clip's ground offset to the new one's over the cross-fade
@@ -114,10 +115,12 @@ export function AnimatedModel({
   hold?: Hold;
   fallback?: ReactNode;
 }) {
+  // the weapon's info file says whether it is a gun; until it arrives, its file name does
+  const meta = useAssetMetaWhenRead(hold?.url);
   return (
     <Suspense fallback={fallback}>
       {/* A new url, height or clip set means new clips: remount so the playing-clip ref and the lift ease start fresh. */}
-      <Model key={`${url}|${height}|${usesRifleClips(hold)}`} url={url} height={height} source={source} hold={hold} />
+      <Model key={`${url}|${height}|${usesRifleClips(hold, meta)}`} url={url} height={height} source={source} hold={hold} meta={meta} />
     </Suspense>
   );
 }

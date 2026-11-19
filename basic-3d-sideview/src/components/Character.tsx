@@ -7,8 +7,9 @@ import assets from '../assets.json';
 import { PLAYER } from '../config';
 import { anim, retarget, type AnimState } from '../game/anim';
 import { aimSpine, findSpine, splitClip, stepLegs, type LegState } from '../game/aimRig';
+import type { AssetMeta } from '../game/assetMeta';
 import { findHand, yawOf } from '../game/hold';
-import { HeldProp, useBodyFollowsAim, usesRifleClips, type Hold } from './models/HeldProp';
+import { HeldProp, useAssetMetaWhenRead, useBodyFollowsAim, usesRifleClips, type Hold } from './models/HeldProp';
 
 const MODEL = assets.models['characters/base'].url;
 const CLIP_URLS = {
@@ -50,11 +51,11 @@ function Capsule() {
   );
 }
 
-function Model({ hold }: { hold?: Hold }) {
+function Model({ hold, meta }: { hold?: Hold; meta: AssetMeta | null }) {
   const gltf = useGLTF(MODEL);
-  const urls = usesRifleClips(hold) ? RIFLE_URLS : CLIP_URLS;
+  const urls = usesRifleClips(hold, meta) ? RIFLE_URLS : CLIP_URLS;
   const sources = useGLTF(CLIP_NAMES.map((n) => urls[n]));
-  const aiming = usesRifleClips(hold) && !!hold?.aim;
+  const aiming = usesRifleClips(hold, meta) && !!hold?.aim;
   const { scene, clips, split } = useMemo(() => {
     const scene = clone(gltf.scene);
     scene.traverse((o) => {
@@ -73,7 +74,7 @@ function Model({ hold }: { hold?: Hold }) {
 
   const group = useRef<THREE.Group>(null);
   // aiming a gun without a split body: the whole drawn body turns to the aim
-  useBodyFollowsAim(group, split ? undefined : hold);
+  useBodyFollowsAim(group, split ? undefined : hold, meta);
   const { actions } = useAnimations(clips, group);
   const current = useRef<ClipName | null>(null);
   const jumps = useRef(anim.jumps);
@@ -155,10 +156,13 @@ function Model({ hold }: { hold?: Hold }) {
  * `hold` puts a weapon / tool in its hand (models/HeldProp); a gun switches to the rifle clips.
  */
 export function Character({ hold }: { hold?: Hold } = {}) {
+  // the weapon's info file says whether it is a gun; until it arrives, its file name does
+  const meta = useAssetMetaWhenRead(hold?.url);
+  const rifle = usesRifleClips(hold, meta);
   return (
     <Suspense fallback={<Capsule />}>
       {/* other clips = a fresh mixer, so the playing-clip ref starts over */}
-      <Model key={`${usesRifleClips(hold) ? 'rifle' : 'plain'}|${!!hold?.aim}`} hold={hold} />
+      <Model key={`${rifle ? 'rifle' : 'plain'}|${!!hold?.aim}`} hold={hold} meta={meta} />
     </Suspense>
   );
 }

@@ -71,19 +71,24 @@ const CONTROLLER = [
 // each playable clip on the ground. retarget.test.ts (with its trimmed-rig
 // fixture) checks that retargeted feet stay on the ground. HeldProp puts a
 // weapon in a hand (AnimatedModel and Character render it for `hold`):
-// hold.ts places it, grip.ts finds its grip by URL in grips.json (generated
-// by scripts/grips/generate.mjs) or estimates one (gripEstimate.ts).
+// hold.ts places it (hold.fixture.json: library hand rigs, most of them
+// reduced), assetMeta.ts reads the weapon's info file (<url>.meta.json on
+// the CDN), grip.ts takes its grip from there or estimates one
+// (gripEstimate.ts).
 const MODELS = [
   'src/game/anim.ts',
   'src/game/retarget.test.ts',
   'src/game/retarget.fixture.json',
   'src/game/fitModel.ts',
   'src/game/groundClips.ts',
+  'src/game/assetMeta.ts',
+  'src/game/assetMeta.test.ts',
   'src/game/grip.ts',
+  'src/game/grip.test.ts',
   'src/game/gripEstimate.ts',
-  'src/game/grips.json',
   'src/game/hold.ts',
   'src/game/hold.test.ts',
+  'src/game/hold.fixture.json',
   'src/components/models/Props.tsx',
   'src/components/models/AnimatedModel.tsx',
   'src/components/models/HeldProp.tsx',

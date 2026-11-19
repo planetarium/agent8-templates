@@ -8,7 +8,9 @@
 //   rifle clips hold it there), else along the body's facing, and turns toward `aim` by its weight
 //   — never more than MAX_BARREL_YAW (60°) from the body's facing. <Character> / <AnimatedModel>
 //   turn the drawn body to the aim (followAim), so an aiming character faces where it shoots.
-// - melee (blade / hafted / polearm): fixed in the hand's grip frame, so it follows the wrist.
+// - melee (blade / hafted / polearm) and bow: fixed in the hand's grip frame, so it follows the
+//   wrist (a bow by its riser: arrow along the fingers, upper limb out of the top of the fist).
+// Only a gun reports a muzzle (bows have no muzzle tip: the arrow leaves from the drawn string).
 // The holder cancels the bone's world scale, so the weapon keeps its size in metres.
 //
 // It never takes the game down: missing finger bones → the hand bone alone; no hand bone → in
@@ -93,57 +95,72 @@ function perpendicular(v: THREE.Vector3) {
   return a.addScaledVector(v, -a.dot(v)).normalize();
 }
 
+/** Hand length over forearm length (wrist → middle knuckle / elbow → wrist), median of the 75 full library rigs. */
+const HAND_PER_FOREARM = 0.55;
+
 /**
  * The grip frame of a hand in the hand bone's local space:
  * - origin: the fist centre — 70 % of the way from the wrist to the knuckles, a quarter hand
- *   length out of the palm (when the thumb tells which side the palm is)
+ *   length out of the palm
  * - +X: wrist → knuckles, +Y: knuckle line pinky → index (top of the fist), +Z: X × Y
- * With fewer bones it degrades: knuckles from whatever fingers / children exist, else 8 cm along
- * the forearm → hand line; the up axis from the thumb, else any perpendicular.
+ * `fingers`: the index root and a second finger root (pinky, ring or middle) give the knuckle line;
+ * the thumb picks the palm side.
+ * Reduced rigs (most library characters: one index chain, or the hand bone only —
+ * hold.fixture.json) use the mixamo hand bone's own axes instead: +Y runs along the hand, the
+ * knuckle line is +X on the right hand / −X on the left, the palm faces +Z (measured on the 75 full
+ * library rigs: fingers within 1–37° of +Y, palm normal within 1° of Z). A finger root, when there
+ * is one, sets the forward direction and the hand length (`partial`); with none the hand length
+ * comes from the forearm (`hand`).
  */
-export function gripFrame(hand: THREE.Object3D, palm = 0.25): { frame: THREE.Matrix4; fit: HandFit } {
+export function gripFrame(hand: THREE.Object3D, side: Side = 'Right', palm = 0.25): { frame: THREE.Matrix4; fit: HandFit } {
   const f = findFingers(hand);
   const pos = (o?: THREE.Object3D) => (o ? inHand(hand, o) : null);
-  const index = pos(f.index), middle = pos(f.middle), pinky = pos(f.pinky) ?? pos(f.ring), thumb = pos(f.thumb);
+  const index = pos(f.index), middle = pos(f.middle), thumb = pos(f.thumb);
+  const second = pos(f.pinky) ?? pos(f.ring) ?? (index && middle ? middle : null);
   let fit: HandFit;
-  let knuckle: THREE.Vector3;
-  let up: THREE.Vector3 | null = null;
-  const knuckles = [index, middle, pinky].filter((v): v is THREE.Vector3 => !!v && v.lengthSq() > 1e-12);
-  if (index && middle && pinky) {
+  let fwd: THREE.Vector3, up: THREE.Vector3, len: number;
+  let palmDir: THREE.Vector3 | null;
+  if (index && second && index.distanceToSquared(second) > 1e-12) {
     fit = 'fingers';
-    knuckle = middle;
-    up = index.clone().sub(pinky);
-  } else if (knuckles.length) {
-    fit = 'partial';
-    knuckle = knuckles.reduce((s, v) => s.add(v), new THREE.Vector3()).divideScalar(knuckles.length);
-    if (index && pinky) up = index.clone().sub(pinky);
-    else if (thumb) up = thumb.clone();
+    const knuckle = middle ?? index;
+    fwd = knuckle.clone().normalize();
+    up = index.clone().sub(second);
+    up.addScaledVector(fwd, -up.dot(fwd));
+    if (up.lengthSq() < 1e-12) up = perpendicular(fwd);
+    up.normalize();
+    len = knuckle.length();
+    const across = new THREE.Vector3().crossVectors(fwd, up).normalize();
+    palmDir = thumb ? across.multiplyScalar(thumb.dot(across) < 0 ? -1 : 1) : null;
   } else {
-    // no finger knuckles: other children (fingers with unknown names), else along the forearm
+    const z = new THREE.Vector3(0, 0, 1);
+    // finger roots with known or unknown names (not the thumb)
     const kids = hand.children.filter((c) => c.position.lengthSq() > 1e-12 && !(f.thumb && c === f.thumb));
-    if (kids.length) {
-      fit = 'partial';
-      knuckle = kids.reduce((s, c) => s.add(c.position), new THREE.Vector3()).divideScalar(kids.length);
-    } else {
-      fit = 'hand';
-      // forearm → hand, in hand space: the parent origin seen from the hand, reversed
-      const parentInHand = hand.parent ? hand.position.clone().negate().applyQuaternion(hand.quaternion.clone().invert()) : new THREE.Vector3(0, -1, 0);
-      const dir = parentInHand.lengthSq() > 1e-12 ? parentInHand.normalize().negate() : new THREE.Vector3(0, 1, 0);
-      hand.updateWorldMatrix(true, false);
-      const s = _q.setFromMatrixScale(hand.matrixWorld);
-      const unit = (Math.abs(s.x) + Math.abs(s.y) + Math.abs(s.z)) / 3 || 1;
-      knuckle = dir.multiplyScalar(0.08 / unit);
+    const tip = (middle ?? index)?.clone() ?? (kids.length ? kids.reduce((s, c) => s.add(c.position), new THREE.Vector3()).divideScalar(kids.length) : null);
+    fit = tip ? 'partial' : 'hand';
+    fwd = tip ? tip.clone().addScaledVector(z, -tip.dot(z)) : new THREE.Vector3();
+    if (fwd.lengthSq() < 1e-12) fwd.set(0, 1, 0);
+    fwd.normalize();
+    up = new THREE.Vector3(side === 'Right' ? 1 : -1, 0, 0);
+    up.addScaledVector(fwd, -up.dot(fwd));
+    if (up.lengthSq() < 1e-12) up = perpendicular(fwd);
+    up.normalize();
+    if (tip && tip.length() > 1e-6) len = tip.length();
+    else {
+      // no finger roots: from the forearm (the hand's position in its parent), in hand units
+      const s = Math.abs(hand.scale.x) || 1;
+      len = (HAND_PER_FOREARM * hand.position.length()) / s;
+      if (!(len > 0)) {
+        hand.updateWorldMatrix(true, false);
+        const w = _q.setFromMatrixScale(hand.matrixWorld);
+        len = 0.08 / ((Math.abs(w.x) + Math.abs(w.y) + Math.abs(w.z)) / 3 || 1);
+      }
     }
-    if (thumb) up = thumb.clone();
+    palmDir = z;
   }
-  const fwd = knuckle.clone().normalize();
-  if (up) up.addScaledVector(fwd, -up.dot(fwd));
-  if (!up || up.lengthSq() < 1e-12) up = perpendicular(fwd);
-  up.normalize();
-  const side = new THREE.Vector3().crossVectors(fwd, up).normalize();
-  const origin = knuckle.clone().multiplyScalar(0.7);
-  if (fit === 'fingers' && thumb) origin.addScaledVector(side, (thumb.dot(side) < 0 ? -1 : 1) * palm * knuckle.length());
-  const frame = new THREE.Matrix4().makeBasis(fwd, up, side).setPosition(origin);
+  const across = new THREE.Vector3().crossVectors(fwd, up).normalize();
+  const origin = fwd.clone().multiplyScalar(0.7 * len);
+  if (palmDir) origin.addScaledVector(palmDir, palm * len);
+  const frame = new THREE.Matrix4().makeBasis(fwd, up, across).setPosition(origin);
   return { frame, fit };
 }
 
@@ -152,6 +169,8 @@ export function gripFrame(hand: THREE.Object3D, palm = 0.25): { frame: THREE.Mat
  * the tip comes out of the top of the fist (+Y), the edge faces where the fingers point (+X).
  */
 const MELEE_IN_HAND = new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, 1), new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0));
+/** Bow: the arrow flies where the fingers point (+X), the upper limb comes out of the top of the fist (+Y). */
+const BOW_IN_HAND = new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0), new THREE.Vector3(1, 0, 0));
 
 /**
  * Widest horizontal angle between a gun's barrel and the body's facing (60°). A rifleman turns
@@ -203,9 +222,9 @@ export type HoldOptions = {
   side?: Side;
   /** Gun only: where to point (world yaw, 0 = +z; pitch up +), and how much (0–1). */
   aim?: Aim;
-  /** Filled every frame with the muzzle's world position / direction. */
+  /** Gun only: filled every frame with the muzzle's world position / direction (other kinds: `valid` false). */
   muzzle?: Muzzle;
-  /** The muzzle tip in the canonical frame (metres), from gripMatrix. */
+  /** The muzzle tip in the canonical frame (metres), from gripMatrix (info file `muzzleTip`, else the front end). */
   tip?: THREE.Vector3;
   /**
    * True while the upper body does the aiming (aimRig): the barrel then only follows the hands —
@@ -235,10 +254,10 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
   let gripLocal = new THREE.Matrix4();
   let supportLocal: THREE.Vector3 | null = null;
   if (hand) {
-    const g = gripFrame(hand);
+    const g = gripFrame(hand, side);
     fit = g.fit;
     gripLocal = g.frame;
-    if (support) supportLocal = new THREE.Vector3().setFromMatrixPosition(gripFrame(support).frame);
+    if (support) supportLocal = new THREE.Vector3().setFromMatrixPosition(gripFrame(support, side === 'Right' ? 'Left' : 'Right').frame);
   }
   // rig height for the body fallback (rig units)
   let height = 1.7;
@@ -302,7 +321,7 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
         aimDir.set(Math.sin(opts.aim.yaw) * cp, Math.sin(opts.aim.pitch), Math.cos(opts.aim.yaw) * cp);
         want.lerp(aimDir, Math.min(1, opts.aim.weight)).normalize();
       }
-      if (!gun) want.addScaledVector(UP, 1.5).normalize(); // melee with no hand: tip up and forward
+      if (!gun && opts.kind !== 'bow') want.addScaledVector(UP, 1.5).normalize(); // melee with no hand: tip up and forward
       if (dir.lengthSq() === 0 || dt === 0 || byBody) dir.copy(want); // aimed by the body: exactly on the hands
       else dir.lerp(want, 1 - Math.exp(-SWING * dt)).normalize();
       if (gun && !byBody) clampYaw(dir, body); // never through the body, whatever the aim or the swing lag
@@ -316,7 +335,7 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
     } else {
       // melee: the hand's grip frame, scale removed
       world.multiplyMatrices(hand.matrixWorld, gripLocal).decompose(pos, quat, scl);
-      basis.makeRotationFromQuaternion(quat).multiply(MELEE_IN_HAND);
+      basis.makeRotationFromQuaternion(quat).multiply(opts.kind === 'bow' ? BOW_IN_HAND : MELEE_IN_HAND);
       quat.setFromRotationMatrix(basis);
     }
     world.compose(grip, quat, one);
@@ -329,7 +348,8 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
     holder.matrix.copy(parent.matrixWorld).invert().multiply(world);
     holder.matrixWorldNeedsUpdate = true;
     const m = opts.muzzle;
-    if (m) {
+    if (m && !gun) m.valid = false;
+    else if (m) {
       tipW.copy(opts.tip ?? x.set(0, 0, 0)).applyMatrix4(world);
       x.set(0, 0, 1).applyQuaternion(quat);
       m.x = tipW.x; m.y = tipW.y; m.z = tipW.z;
