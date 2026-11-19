@@ -6,7 +6,7 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import assets from '../assets.json';
 import { PLAYER } from '../config';
 import { anim, retarget, type AnimState } from '../game/anim';
-import { aimSpine, findSpine, splitClip, splitsBody, stepLegs, weightedAim, type LegState } from '../game/aimRig';
+import { aimSpine, findSpine, splitClip, splitsBody, stepLegs, weightedAim, type AimArc, type LegState } from '../game/aimRig';
 import type { AssetMeta } from '../game/assetMeta';
 import { findHand, yawOf } from '../game/hold';
 import { HeldProp, useAssetMetaWhenRead, useBodyFollowsAim, usesRifleClips, type Hold } from './models/HeldProp';
@@ -107,7 +107,8 @@ function Model({ hold, meta }: { hold?: Hold; meta: AssetMeta | null }) {
   // Split body (after the mixer has posed the rig): the legs walk where the character moves —
   // backwards when the aim is behind — and the upper body holds the rifle pose turned onto the aim.
   const legs = useRef<LegState | null>(null);
-  const upper = useRef<string | null>(null);
+  const arc = useRef<AimArc>({ delta: 0 });
+  const upper =useRef<string | null>(null);
   const spineState = useRef({ base: [] as THREE.Quaternion[], set: [] as THREE.Quaternion[], corrYaw: 0, corrPitch: 0 });
   const hands = useMemo(() => {
     const grip = findHand(scene, 'Right');
@@ -136,8 +137,9 @@ function Model({ hold, meta }: { hold?: Hold; meta: AssetMeta | null }) {
     g.parent?.getWorldQuaternion(_q);
     _v.set(0, 0, 1).applyQuaternion(_q);
     const moveYaw = yawOf(_v.x, _v.z); // the movement code turns the parent to the walking direction
-    // weight = how far from the movement facing toward the aim (0 = not aiming, 1 = on the aim)
-    const to = weightedAim(aim, moveYaw);
+    // weight = how far from the movement facing toward the aim (0 = not aiming, 1 = on the aim);
+    // `arc` keeps an aim straight behind on the side it came round on
+    const to = weightedAim(aim, moveYaw, arc.current);
     legs.current = stepLegs(legs.current ?? { yaw: moveYaw, reversed: false, turning: false }, to.yaw, moveYaw, moving, Math.min(delta, 0.1));
     g.rotation.y = Math.atan2(Math.sin(legs.current.yaw - moveYaw), Math.cos(legs.current.yaw - moveYaw));
     const lower = actions[CLIP_OF[anim.state]];

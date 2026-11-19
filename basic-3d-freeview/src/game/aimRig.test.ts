@@ -2,7 +2,7 @@
 // body putting the line between the hands onto the aim.
 import { describe, expect, test } from 'bun:test';
 import * as THREE from 'three';
-import { aimSpine, findSpine, LEG_MAX, splitClip, spineShares, splitsBody, stepLegs, TWIST_MAX, twistFor, weightedAim, type LegState } from './aimRig';
+import { aimSpine, findSpine, LEG_MAX, splitClip, spineShares, splitsBody, stepLegs, TWIST_MAX, twistFor, weightedAim, type AimArc, type LegState } from './aimRig';
 
 const deg = (d: number) => (d * Math.PI) / 180;
 const diff = (a: number, b: number) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
@@ -174,5 +174,72 @@ describe('aim weight on a split body', () => {
     // 20° apart: half of the 40° between the facing and the aim
     expect(diff(run(1), run(0.5))).toBeGreaterThan(deg(18));
     expect(diff(run(1), run(0.5))).toBeLessThan(deg(22));
+  });
+});
+
+describe('an aim that is not a number never reaches the legs', () => {
+  /** Thirty frames of the legs following what weightedAim gives, standing and walking. */
+  const legsAfter = (aim: { yaw: number; pitch: number; weight: number }) => {
+    const arc: AimArc = { delta: 0 };
+    let s: LegState = { yaw: deg(10), reversed: false, turning: false };
+    const seen: number[] = [];
+    for (let i = 0; i < 30; i++) {
+      const to = weightedAim(aim, deg(10), arc);
+      s = stepLegs(s, to.yaw, deg(10), i >= 15, 1 / 60);
+      seen.push(to.yaw, to.pitch, s.yaw);
+    }
+    return seen;
+  };
+  test('weight 0 reads nothing of the aim: a NaN yaw or pitch leaves the movement facing, level', () => {
+    const to = weightedAim({ yaw: NaN, pitch: NaN, weight: 0 }, deg(10));
+    expect(to).toEqual({ yaw: deg(10), pitch: 0, weight: 0 });
+    expect(legsAfter({ yaw: NaN, pitch: NaN, weight: 0 }).every(Number.isFinite)).toBe(true);
+  });
+  test('weight 1 with a yaw or pitch that is not finite is no aim: weight 0, the legs stay finite', () => {
+    for (const aim of [{ yaw: Infinity, pitch: 0, weight: 1 }, { yaw: NaN, pitch: 0, weight: 1 }, { yaw: 0.5, pitch: NaN, weight: 0.5 }, { yaw: -Infinity, pitch: Infinity, weight: 1 }]) {
+      expect(weightedAim(aim, deg(10))).toEqual({ yaw: deg(10), pitch: 0, weight: 0 });
+      expect(legsAfter(aim).every(Number.isFinite)).toBe(true);
+    }
+  });
+});
+
+describe('aiming straight behind at a weight under 1', () => {
+  test('the aim wobbling ±1° about straight behind does not throw the target from side to side', () => {
+    const arc: AimArc = { delta: 0 };
+    let last = weightedAim({ yaw: deg(179), pitch: 0, weight: 0.5 }, 0, arc).yaw;
+    expect(last).toBeCloseTo(deg(89.5), 9);
+    let widest = 0;
+    for (let i = 0; i < 20; i++) {
+      const yaw = weightedAim({ yaw: deg(i % 2 ? 179 : -179), pitch: 0, weight: 0.5 }, 0, arc).yaw;
+      widest = Math.max(widest, diff(yaw, last));
+      last = yaw;
+    }
+    expect(widest).toBeLessThan(deg(2)); // 1° per frame: half of the 2° wobble (the short way each frame: 179°)
+  });
+  test('so does the movement facing wobbling under a still aim', () => {
+    const arc: AimArc = { delta: 0 };
+    let last = weightedAim({ yaw: deg(180), pitch: 0, weight: 0.5 }, deg(1), arc).yaw;
+    let widest = 0;
+    for (let i = 0; i < 20; i++) {
+      const yaw = weightedAim({ yaw: deg(180), pitch: 0, weight: 0.5 }, deg(i % 2 ? 1 : -1), arc).yaw;
+      widest = Math.max(widest, diff(yaw, last));
+      last = yaw;
+    }
+    expect(widest).toBeLessThan(deg(4));
+  });
+  test('it keeps its side past ±180° and changes side only once 45° clear of straight behind', () => {
+    const arc: AimArc = { delta: 0 };
+    const at = (d: number) => weightedAim({ yaw: deg(d), pitch: 0, weight: 0.5 }, 0, arc).yaw;
+    expect(at(170)).toBeCloseTo(deg(85), 9);
+    expect(at(-170)).toBeCloseTo(deg(95), 9); // 190° round the same side
+    expect(at(-140)).toBeCloseTo(deg(110), 9); // 220°
+    expect(at(-130)).toBeCloseTo(deg(-65), 9); // clear of behind: the short way again
+    expect(at(-170)).toBeCloseTo(deg(-85), 9);
+  });
+  test('without the memory, or at full weight, nothing changes: the aim itself', () => {
+    expect(weightedAim({ yaw: deg(-179), pitch: 0, weight: 0.5 }, 0).yaw).toBeCloseTo(deg(-89.5), 9);
+    const arc: AimArc = { delta: 0 };
+    weightedAim({ yaw: deg(179), pitch: 0, weight: 1 }, 0, arc);
+    expect(diff(weightedAim({ yaw: deg(-179), pitch: 0, weight: 1 }, 0, arc).yaw, deg(-179))).toBeLessThan(1e-9);
   });
 });

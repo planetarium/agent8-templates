@@ -51,16 +51,42 @@ export function splitsBody(gun: boolean, hold: { aim?: unknown; side?: 'Right' |
 }
 
 /**
- * The aim a split body turns to at `aim.weight` (0–1, clamped): that share of the way from the
- * movement facing (`restYaw`, level) to the aim, in yaw (the short way round) and in pitch. The
- * same meaning as the whole-body turn's weight (hold.ts followAim).
+ * An aim almost straight behind the movement (within this of ±180°) keeps the side it came round
+ * on: the short way flips sign there with every degree the aim or the movement wobbles, and at a
+ * weight under 1 each flip would throw the upper body to the other side in one frame.
  */
-export function weightedAim(aim: { yaw: number; pitch: number; weight: number }, restYaw: number) {
+export const ARC_KEEP = Math.PI / 4;
+
+/** What weightedAim remembers between frames: the yaw difference it used last (rad, may pass ±π). */
+export type AimArc = { delta: number };
+
+/**
+ * The aim a split body turns to at `aim.weight` (0–1, clamped): that share of the way from the
+ * movement facing (`restYaw`, level) to the aim, in yaw and in pitch. The same meaning as the
+ * whole-body turn's weight (hold.ts followAim).
+ * - Weight 0 (or not a number) reads nothing of the aim: the movement facing, level, weight 0.
+ *   So does an aim whose yaw or pitch is not finite — it is no aim.
+ * - Yaw goes the short way round. With `arc` (kept by the caller across frames) an aim within
+ *   ARC_KEEP of straight behind stays on the side it was last frame, going past ±180° if it has
+ *   to, and only changes side once it is ARC_KEEP clear of straight behind.
+ */
+export function weightedAim(aim: { yaw: number; pitch: number; weight: number }, restYaw: number, arc?: AimArc) {
   const w = Math.min(1, Math.max(0, aim.weight)) || 0;
-  return { yaw: wrap(restYaw + wrap(aim.yaw - restYaw) * w), pitch: aim.pitch * w, weight: w };
+  if (!(w > 0) || !Number.isFinite(aim.yaw) || !Number.isFinite(aim.pitch)) {
+    if (arc) arc.delta = 0;
+    return { yaw: wrap(restYaw), pitch: 0, weight: 0 };
+  }
+  let d = wrap(aim.yaw - restYaw);
+  if (arc) {
+    const was = arc.delta;
+    const behind = Math.PI - ARC_KEEP;
+    if (was * d < 0 && Math.abs(was) > behind && Math.abs(d) > behind) d += 2 * Math.PI * Math.sign(was);
+    arc.delta = d;
+  }
+  return { yaw: wrap(restYaw + d * w), pitch: aim.pitch * w, weight: w };
 }
 
-export type SpineRig ={ hips: THREE.Object3D; spine: THREE.Object3D[]; upper: Set<string> };
+export type SpineRig = { hips: THREE.Object3D; spine: THREE.Object3D[]; upper: Set<string> };
 
 /**
  * Hips and the spine chain above them (bones named spine / chest, child after child), or null when

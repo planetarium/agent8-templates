@@ -12,7 +12,7 @@
 // - Info files live under lower-case `/assets/3d/` only; old `/assets/3D/` asset URLs (still
 //   served, and what search returned before 2026-11-18) are asked there.
 // - Unknown keys are kept and ignored (keys are only ever added; `v` stays 1).
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 
 export type AssetMeta = { v: 1; tags?: string[]; [key: string]: unknown };
 
@@ -38,6 +38,8 @@ export function metaUrlOf(assetUrl: string): string | null {
 const cache = new Map<string, Promise<AssetMeta | null>>();
 /** Results that have arrived, by info file URL. */
 const settled = new Map<string, AssetMeta | null>();
+/** Told whenever an answer is stored in `settled` (subscribeAssetMeta). */
+const listeners = new Set<() => void>();
 // one shared promise: React's `use` reads a settled promise it has seen before without suspending again
 const NONE: Promise<AssetMeta | null> = Promise.resolve(null);
 let warnedSlow = false;
@@ -87,6 +89,7 @@ export function loadAssetMeta(assetUrl: string, timeoutMs = META_TIMEOUT_MS): Pr
           // bad JSON: no info
         }
         settled.set(url, m);
+        for (const fn of [...listeners]) fn();
         return m;
       });
     p = asked;
@@ -103,27 +106,35 @@ export function peekAssetMeta(assetUrl: string): AssetMeta | null | undefined {
 }
 
 /**
- * React, without suspending: null until the info file arrives, then re-renders with it. For
- * choices that must not hold up the first frame (which clips a character plays). After a failure
- * that may pass it stays null; the next mount asks again.
+ * Calls `fn` whenever an info file's answer is stored (any URL — read yours with peekAssetMeta).
+ * Whoever asked: a request another component made later counts too. Returns the unsubscribe.
  */
-export function useAssetMetaWhenRead(assetUrl: string | undefined): AssetMeta | null {
-  const [, arrived] = useState(0);
-  const now = assetUrl ? peekAssetMeta(assetUrl) : null;
-  useEffect(() => {
-    if (!assetUrl || now !== undefined) return;
-    let live = true;
-    loadAssetMeta(assetUrl).then(() => live && arrived((n) => n + 1));
-    return () => {
-      live = false;
-    };
-  }, [assetUrl, now]);
-  return now ?? null;
+export function subscribeAssetMeta(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
-/** Tests only: forget what was read. */
+/**
+ * React, without suspending: null until the info file arrives, then re-renders with it. For
+ * choices that must not hold up the first frame (which clips a character plays). It asks once per
+ * mount; after a failure that may pass it stays null until an answer is stored — by the next
+ * mount, or by another component asking again (the held weapon does) — and then re-renders.
+ */
+export function useAssetMetaWhenRead(assetUrl: string | undefined): AssetMeta | null {
+  const read = () => (assetUrl ? (peekAssetMeta(assetUrl) ?? null) : null);
+  const meta = useSyncExternalStore(subscribeAssetMeta, read, read);
+  useEffect(() => {
+    if (assetUrl && peekAssetMeta(assetUrl) === undefined) void loadAssetMeta(assetUrl);
+  }, [assetUrl]);
+  return meta;
+}
+
+/** Tests only: forget what was read (and who listens). */
 export function resetAssetMeta() {
   cache.clear();
   settled.clear();
+  listeners.clear();
   warnedSlow = false;
 }

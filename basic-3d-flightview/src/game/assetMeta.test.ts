@@ -1,6 +1,6 @@
 // The asset info file loader: which URLs it asks, how, and what "no info" covers.
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
-import { loadAssetMeta, META_TIMEOUT_MS, metaUrlOf, peekAssetMeta, resetAssetMeta } from './assetMeta';
+import { loadAssetMeta, META_TIMEOUT_MS, metaUrlOf, peekAssetMeta, resetAssetMeta, subscribeAssetMeta } from './assetMeta';
 
 const LIB = 'https://agent8-games.verse8.io/assets/3d/objects/weapons melee/sword.glb';
 const realFetch = globalThis.fetch;
@@ -119,5 +119,31 @@ describe('old upper-case /assets/3D/ URLs', () => {
     await loadAssetMeta('https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb');
     expect(calls).toHaveLength(1);
     expect(calls[0].url).toBe('https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb.meta.json');
+  });
+});
+
+describe('subscribers hear when an answer is stored', () => {
+  test('first request fails in passing, a later one succeeds: the subscriber is told and reads the new value', async () => {
+    let told = 0;
+    const off = subscribeAssetMeta(() => told++);
+    answer(() => Promise.reject(new TypeError('Failed to fetch')));
+    expect(await loadAssetMeta(LIB)).toBeNull(); // what a character got on its first render
+    expect(told).toBe(0); // nothing stored: still unknown
+    expect(peekAssetMeta(LIB)).toBeUndefined();
+    answer(() => json({ v: 1, grip: { kind: 'gun' } }));
+    await loadAssetMeta(LIB); // someone else asks again (the held weapon, on its mount)
+    expect(told).toBe(1);
+    expect(peekAssetMeta(LIB)).toEqual({ v: 1, grip: { kind: 'gun' } });
+    off();
+    await loadAssetMeta(LIB.replace('sword', 'axe'));
+    expect(told).toBe(1); // unsubscribed
+  });
+  test('a stored "no info" (404) is an answer too', async () => {
+    let told = 0;
+    subscribeAssetMeta(() => told++);
+    answer(() => json('not found', 404));
+    await loadAssetMeta(LIB);
+    expect(told).toBe(1);
+    expect(peekAssetMeta(LIB)).toBeNull();
   });
 });
