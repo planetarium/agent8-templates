@@ -216,6 +216,39 @@ const muzzle = newMuzzle();                  // from models/HeldProp
 // fire: if (muzzle.valid) spawn at (muzzle.x, muzzle.y, muzzle.z), heading (muzzle.dx, muzzle.dy, muzzle.dz)
 ```
 
+An enemy that holds a gun gets its own muzzle: one `newMuzzle()` per enemy,
+made once and kept in that enemy's state, passed in its `hold`.
+
+```tsx
+import { AnimatedModel } from './components/models/AnimatedModel';
+import { newMuzzle, type Aim, type Muzzle } from './components/models/HeldProp';
+
+// plain mutable state (not React state); the weapon writes e.muzzle every frame
+type Enemy = { id: number; x: number; z: number; aim: Aim; muzzle: Muzzle; cooldown: number };
+const enemies: Enemy[] = SPAWNS.map((s, id) => ({ id, x: s.x, z: s.z, aim: { yaw: 0, pitch: 0, weight: 1 }, muzzle: newMuzzle(), cooldown: 1 }));
+
+{enemies.map((e) => (
+  <group key={e.id} position={[e.x, 0, e.z]}>
+    <AnimatedModel url={assets.models['enemies/soldier'].url} height={1.8} hold={{ url: assets.models['weapons/rifle'].url, aim: e.aim, muzzle: e.muzzle }} />
+  </group>
+))}
+
+// in useFrame, per enemy: aim at the player, shoot from its own muzzle
+e.aim.yaw = Math.atan2(player.x - e.x, player.z - e.z);
+e.cooldown -= dt;
+if (e.cooldown <= 0 && e.muzzle.valid) {
+  spawnBullet(e.muzzle.x, e.muzzle.y, e.muzzle.z, e.muzzle.dx, e.muzzle.dy, e.muzzle.dz);
+  e.cooldown = 1.2;
+}
+// muzzle.valid is false until the weapon is loaded into the hand: that shot is skipped, the
+// cooldown stays at 0 and the enemy fires on the first frame the muzzle is filled
+```
+
+Every character that holds a gun in its hand — player or enemy — fires from
+its own `muzzle`. Don't spawn its shots at the body position plus a height.
+This does not cover guns that are not in a hand (turrets, vehicles), melee
+weapons, or games without weapons.
+
 ## Extension points
 
 - New obstacle / stairs / ramp / terrain / moving platform: see "Building the

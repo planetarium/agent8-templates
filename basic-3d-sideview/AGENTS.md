@@ -42,6 +42,17 @@ Read this, then `PROJECT/Structure.md`, before changing code.
   their physics. Leave the player controller (`src/game/player.ts`) as it is.
 - Register asset URLs in `src/assets.json`; load models with drei `useGLTF`
   inside `<Suspense>`.
+- A weapon or tool in a hand: pass `hold={{ url, aim, muzzle }}` to
+  `<Character>` / `<AnimatedModel>` (`PROJECT/Structure.md` "Model parts").
+  How it is held (grip point, direction, real length, muzzle) comes from the
+  asset's info file on its own — don't copy search-result grip values into
+  `src/assets.json` or code. Only to change how this game holds it:
+  `hold={{ url, override }}`. Don't parent weapons to bones yourself.
+- A character holding a gun in its hand — player or enemy — fires from its
+  own `muzzle` (one `newMuzzle()` per character, passed in its `hold`),
+  never from its body position plus a height. Skip a shot while
+  `muzzle.valid` is false. Guns not in a hand (turrets, vehicles), melee
+  weapons and games without weapons are not covered.
 
 ## Commands
 

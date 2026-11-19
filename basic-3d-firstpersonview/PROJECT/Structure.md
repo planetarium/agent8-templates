@@ -165,6 +165,39 @@ scale to metres and stand the lowest point on y = 0. Model URLs go in
 | `src/game/groundClips.ts` | `clipGroundOffsets(root, clips)` → per clip, the offset that puts the lowest skinned point of 9 samples on y = 0 (model units; `AnimatedModel` multiplies by `unit`) | `root`, `clips` |
 | `src/components/models/HeldProp.tsx` (`game/hold.ts`, `game/grip.ts`, `game/assetMeta.ts`) | A weapon / tool in a character's hand: the `hold` prop of `<AnimatedModel>` (enemies / NPCs) and `<Character>` (NPCs / other players — the local player has no body here). How it is held (grip point, direction, real length, muzzle) comes from the weapon's asset info file on its own (`<url>.meta.json` next to the GLB on the CDN, read by `game/assetMeta.ts`); a weapon without one is estimated from its shape. Don't copy grip values into `src/assets.json` or code. A gun sits in the right fist, lies along both hands, turns toward `aim` (pass `aim` and the body aims: `<Character>` on a rig with a spine keeps the legs walking where it moves — backwards when the aim is behind — and turns the upper body onto the aim, the gun following the hands (`game/aimRig.ts`); other rigs and `<AnimatedModel>` turn the whole drawn body by the aim's weight, the barrel within 60° of it. World yaw, 0 = +z, `atan2(dx, dz)`, pitch up +), and switches idle / walk / run to the rifle clips. `aim.weight` (0–1) is how far the body goes from its movement facing to the aim, split body or whole (0.5 = half the yaw / pitch difference). To stop aiming for a moment keep the `aim` object and set `weight` to 0 — adding or removing `aim` on a `<Character>`'s gun swaps its clip set (it re-mounts). A gun in the left hand (`side: 'Left'`) aims with the whole body. Melee weapons follow the wrist; a bow is held by its riser. Each frame, `muzzle` (from `newMuzzle()`) gets the muzzle's world position (the info file's `muzzleTip`, else the barrel's front end) and direction: start shots there. Works on any rig (no hand bones → in front of the body); if anything fails, only the weapon is dropped. Don't attach weapons to bones by hand, and don't overwrite `anims/idle` with a rifle clip | `url` (`src/assets.json`); optional `aim`, `muzzle`, `override` (`kind`, `lengthM`, `muzzleTip` one by one; `point` / `forward` / `up` only all three together), `side`, `kind`, `rifleClips` |
 
+An enemy that holds a gun gets its own muzzle: one `newMuzzle()` per enemy,
+made once and kept in that enemy's state, passed in its `hold`.
+
+```tsx
+import { AnimatedModel } from './components/models/AnimatedModel';
+import { newMuzzle, type Aim, type Muzzle } from './components/models/HeldProp';
+
+// plain mutable state (not React state); the weapon writes e.muzzle every frame
+type Enemy = { id: number; x: number; z: number; aim: Aim; muzzle: Muzzle; cooldown: number };
+const enemies: Enemy[] = SPAWNS.map((s, id) => ({ id, x: s.x, z: s.z, aim: { yaw: 0, pitch: 0, weight: 1 }, muzzle: newMuzzle(), cooldown: 1 }));
+
+{enemies.map((e) => (
+  <group key={e.id} position={[e.x, 0, e.z]}>
+    <AnimatedModel url={assets.models['enemies/soldier'].url} height={1.8} hold={{ url: assets.models['weapons/rifle'].url, aim: e.aim, muzzle: e.muzzle }} />
+  </group>
+))}
+
+// in useFrame, per enemy: aim at the player, shoot from its own muzzle
+e.aim.yaw = Math.atan2(player.x - e.x, player.z - e.z);
+e.cooldown -= dt;
+if (e.cooldown <= 0 && e.muzzle.valid) {
+  spawnBullet(e.muzzle.x, e.muzzle.y, e.muzzle.z, e.muzzle.dx, e.muzzle.dy, e.muzzle.dz);
+  e.cooldown = 1.2;
+}
+// muzzle.valid is false until the weapon is loaded into the hand: that shot is skipped, the
+// cooldown stays at 0 and the enemy fires on the first frame the muzzle is filled
+```
+
+Every character that holds a gun in its hand — player or enemy — fires from
+its own `muzzle`. Don't spawn its shots at the body position plus a height.
+This does not cover guns that are not in a hand (turrets, vehicles), melee
+weapons, or games without weapons.
+
 ## Extension points
 
 - New obstacle / stairs / ramp / terrain / moving platform: see "Building the
