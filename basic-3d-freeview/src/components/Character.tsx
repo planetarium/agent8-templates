@@ -6,7 +6,7 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import assets from '../assets.json';
 import { PLAYER } from '../config';
 import { anim, retarget, type AnimState } from '../game/anim';
-import { aimSpine, findSpine, splitClip, stepLegs, type LegState } from '../game/aimRig';
+import { aimSpine, findSpine, splitClip, splitsBody, stepLegs, weightedAim, type LegState } from '../game/aimRig';
 import type { AssetMeta } from '../game/assetMeta';
 import { findHand, yawOf } from '../game/hold';
 import { HeldProp, useAssetMetaWhenRead, useBodyFollowsAim, usesRifleClips, type Hold } from './models/HeldProp';
@@ -55,7 +55,8 @@ function Model({ hold, meta }: { hold?: Hold; meta: AssetMeta | null }) {
   const gltf = useGLTF(MODEL);
   const urls = usesRifleClips(hold, meta) ? RIFLE_URLS : CLIP_URLS;
   const sources = useGLTF(CLIP_NAMES.map((n) => urls[n]));
-  const aiming = usesRifleClips(hold, meta) && !!hold?.aim;
+  // split body: a gun with an aim, in the right hand (a left-hand gun keeps the whole-body turn)
+  const aiming = splitsBody(usesRifleClips(hold, meta), hold);
   const { scene, clips, split } = useMemo(() => {
     const scene = clone(gltf.scene);
     scene.traverse((o) => {
@@ -135,12 +136,13 @@ function Model({ hold, meta }: { hold?: Hold; meta: AssetMeta | null }) {
     g.parent?.getWorldQuaternion(_q);
     _v.set(0, 0, 1).applyQuaternion(_q);
     const moveYaw = yawOf(_v.x, _v.z); // the movement code turns the parent to the walking direction
-    const aimYaw = aim.weight > 0 ? aim.yaw : moveYaw;
-    legs.current = stepLegs(legs.current ?? { yaw: moveYaw, reversed: false, turning: false }, aimYaw, moveYaw, moving, Math.min(delta, 0.1));
+    // weight = how far from the movement facing toward the aim (0 = not aiming, 1 = on the aim)
+    const to = weightedAim(aim, moveYaw);
+    legs.current = stepLegs(legs.current ?? { yaw: moveYaw, reversed: false, turning: false }, to.yaw, moveYaw, moving, Math.min(delta, 0.1));
     g.rotation.y = Math.atan2(Math.sin(legs.current.yaw - moveYaw), Math.cos(legs.current.yaw - moveYaw));
     const lower = actions[CLIP_OF[anim.state]];
     if (lower) lower.timeScale = moving && legs.current.reversed ? -1 : 1;
-    if (hands && aim.weight > 0) aimSpine(split!, hands, { yaw: aim.yaw, pitch: aim.pitch }, legs.current.yaw, spineState.current);
+    if (hands && to.weight > 0) aimSpine(split!, hands, to, legs.current.yaw, spineState.current);
   }
 
   return (
@@ -161,8 +163,10 @@ export function Character({ hold }: { hold?: Hold } = {}) {
   const rifle = usesRifleClips(hold, meta);
   return (
     <Suspense fallback={<Capsule />}>
-      {/* other clips = a fresh mixer, so the playing-clip ref starts over */}
-      <Model key={`${rifle ? 'rifle' : 'plain'}|${!!hold?.aim}`} hold={hold} meta={meta} />
+      {/* other clips = a fresh mixer, so the playing-clip ref starts over. Only the clip set
+          re-mounts: rifle or plain, split (gun + aim + right hand) or whole — an `aim` on a
+          sword, or a left-hand gun's, changes nothing here */}
+      <Model key={`${rifle ? 'rifle' : 'plain'}|${splitsBody(rifle, hold) ? 'split' : 'whole'}`} hold={hold} meta={meta} />
     </Suspense>
   );
 }

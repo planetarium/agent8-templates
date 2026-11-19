@@ -52,6 +52,10 @@ export function warnOnce(msg: string) {
   warned.add(msg);
   console.warn(msg);
 }
+/** Tests only: forget which warnings were given. */
+export function resetGripWarnings() {
+  warned.clear();
+}
 
 /** The grip of an info file, validated; null when absent / malformed / of an unknown kind. `muzzleTip` is kept for guns only. */
 export function gripFromMeta(meta: AssetMeta | null | undefined): Grip | null {

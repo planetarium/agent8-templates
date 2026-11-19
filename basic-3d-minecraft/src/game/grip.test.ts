@@ -3,7 +3,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import * as THREE from 'three';
 import type { AssetMeta } from './assetMeta';
-import { gripFromMeta, gripMatrix, kindOf, resolveGrip, sceneVertices, type Grip, type GripOverride } from './grip';
+import { gripFromMeta, gripMatrix, kindOf, resetGripWarnings, resolveGrip, sceneVertices, type Grip, type GripOverride } from './grip';
 
 /** A box along +X spanning x 0..len (scene coordinates), 0.1 tall. */
 const box = (len: number) => {
@@ -20,6 +20,7 @@ const AK47 = { forward: [1, 0, 0], kind: 'gun', lengthM: 0.88, muzzleTip: [0.470
 
 let warn: ReturnType<typeof spyOn>;
 beforeEach(() => {
+  resetGripWarnings(); // the once-per-message warnings are module state: start each test (and each rerun) clean
   warn = spyOn(console, 'warn').mockImplementation(() => {});
 });
 afterEach(() => warn.mockRestore());

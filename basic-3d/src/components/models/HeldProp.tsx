@@ -1,11 +1,11 @@
 // Shared by every R3F template — import it, don't rewrite it.
 // A weapon / tool in a character's hand. <Character> and <AnimatedModel> render it for their
 // `hold` prop on the clone they draw; games don't render it directly.
-import { Component, Suspense, useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { Component, Suspense, use, useLayoutEffect, useMemo, useRef, type ReactNode, type RefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { useAssetMeta, type AssetMeta } from '../../game/assetMeta';
+import { loadAssetMeta, type AssetMeta } from '../../game/assetMeta';
 import { gripFromMeta, gripMatrix, kindOf, resolveGrip, sceneVertices, type GripKind, type GripOverride } from '../../game/grip';
 import { followAim, holdInHand, yawOf, type Aim, type Muzzle, type Side } from '../../game/hold';
 
@@ -26,11 +26,17 @@ export type Hold = {
   kind?: GripKind;
   /**
    * Gun only: where it points. World yaw (0 = +z, atan2(dx, dz)), pitch (up +), weight 0–1; mutate
-   * it per frame. The drawn body turns to the aim yaw by the weight; the barrel stays within 60° of
-   * the body either way.
+   * it per frame. `weight` is how much of the way from the movement facing to the aim the body
+   * goes (0 = not aiming, 0.5 = half the yaw / pitch difference, 1 = on the aim), the same for a
+   * split body (`<Character>`, right hand) and a whole-body turn; the barrel stays within 60° of
+   * the body either way. To stop aiming for a moment keep the object and set `weight` to 0 —
+   * adding / removing `aim` on a gun swaps the clip set (the character re-mounts).
    */
   aim?: Aim;
-  /** Gun only: filled every frame with the muzzle's world position / direction — start shots here. */
+  /**
+   * Gun only: filled every frame with the muzzle's world position / direction — start shots here.
+   * An object that is no longer passed (replaced, or the weapon is gone) is left `valid: false`.
+   */
   muzzle?: Muzzle;
   /** Rifle idle / walk / run clips while holding a gun (default true for guns). */
   rifleClips?: boolean;
@@ -94,11 +100,12 @@ class HoldBoundary extends Component<{ children: ReactNode }, { failed: boolean 
 }
 
 type Internal = { rig: THREE.Object3D; aimByBody?: boolean };
+type Info = { info: Promise<AssetMeta | null> };
 
-function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody }: Hold & Internal) {
+function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody, info }: Hold & Internal & Info) {
   const gltf = useGLTF(url);
   // the info file (<url>.meta.json): suspends like useGLTF; null = none (404, other host, timeout)
-  const meta = useAssetMeta(url);
+  const meta = use(info);
   // aim / muzzle are read while drawing: keep the latest without re-attaching
   const live = useRef({ aim, muzzle, aimByBody });
   live.current = { aim, muzzle, aimByBody };
@@ -136,10 +143,12 @@ function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody }: Hold &
 
 /** Render inside the model component, with `rig` = the clone that is drawn. */
 export function HeldProp(props: Hold & Internal) {
+  // asked once per mount and kept: after a failure that may pass, the next mount asks again
+  const info = useMemo(() => loadAssetMeta(props.url), [props.url]);
   return (
     <HoldBoundary key={props.url}>
       <Suspense fallback={null}>
-        <Prop {...props} />
+        <Prop {...props} info={info} />
       </Suspense>
     </HoldBoundary>
   );

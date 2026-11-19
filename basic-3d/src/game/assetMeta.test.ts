@@ -1,6 +1,6 @@
 // The asset info file loader: which URLs it asks, how, and what "no info" covers.
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
-import { loadAssetMeta, metaUrlOf, resetAssetMeta } from './assetMeta';
+import { loadAssetMeta, META_TIMEOUT_MS, metaUrlOf, peekAssetMeta, resetAssetMeta } from './assetMeta';
 
 const LIB = 'https://agent8-games.verse8.io/assets/3d/objects/weapons melee/sword.glb';
 const realFetch = globalThis.fetch;
@@ -57,11 +57,67 @@ describe('loadAssetMeta', () => {
     expect(warn).not.toHaveBeenCalled();
   });
   test('slower than the time limit: no info, one warning', async () => {
-    answer((_, init) => new Promise((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))));
-    const t0 = Date.now();
-    expect(await loadAssetMeta(LIB, 30)).toBeNull();
-    expect(Date.now() - t0).toBeLessThan(1000);
-    expect(await loadAssetMeta(LIB.replace('sword', 'axe'), 30)).toBeNull();
-    expect(warn).toHaveBeenCalledTimes(1);
+    // the time limit by hand, not by the wall clock: the timer's callback is kept and fired here
+    const realSet = globalThis.setTimeout, realClear = globalThis.clearTimeout;
+    const timers: { fn: () => void; ms: number }[] = [];
+    globalThis.setTimeout = ((fn: () => void, ms: number) => timers.push({ fn, ms })) as unknown as typeof setTimeout;
+    globalThis.clearTimeout = (() => {}) as typeof clearTimeout;
+    try {
+      answer((_, init) => new Promise((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))));
+      const slow = loadAssetMeta(LIB);
+      const slow2 = loadAssetMeta(LIB.replace('sword', 'axe'));
+      expect(timers.map((t) => t.ms)).toEqual([META_TIMEOUT_MS, META_TIMEOUT_MS]);
+      for (const t of timers) t.fn(); // the limit passes
+      expect(await slow).toBeNull();
+      expect(await slow2).toBeNull();
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      globalThis.setTimeout = realSet;
+      globalThis.clearTimeout = realClear;
+    }
+  });
+});
+
+describe('what is kept for the page and what is asked again', () => {
+  test('an answer is kept: the file, 404, bad JSON, another v — one request however often it is asked', async () => {
+    for (const r of [() => json({ v: 1 }), () => json('not found', 404), () => json('{oops'), () => json({ v: 2 })]) {
+      resetAssetMeta();
+      calls = [];
+      answer(r);
+      const first = await loadAssetMeta(LIB);
+      expect(await loadAssetMeta(LIB)).toEqual(first);
+      expect(calls).toHaveLength(1);
+      expect(peekAssetMeta(LIB)).toEqual(first); // settled: null means "no info", for good
+    }
+  });
+  test('a failure that may pass (network error, 5xx) is no info now and asked again next time', async () => {
+    for (const fail of [() => Promise.reject(new TypeError('Failed to fetch')), () => json('bad gateway', 502)]) {
+      resetAssetMeta();
+      calls = [];
+      answer(fail);
+      const first = loadAssetMeta(LIB);
+      expect(loadAssetMeta(LIB)).toBe(first); // while it is on its way: the same request
+      expect(await first).toBeNull();
+      expect(peekAssetMeta(LIB)).toBeUndefined(); // not settled
+      answer(() => json({ v: 1, grip: { kind: 'gun' } }));
+      expect(await loadAssetMeta(LIB)).toEqual({ v: 1, grip: { kind: 'gun' } });
+      expect(calls).toHaveLength(2);
+    }
+  });
+});
+
+describe('old upper-case /assets/3D/ URLs', () => {
+  test('the info file is asked under lower-case /assets/3d/, where the library writes it', () => {
+    expect(metaUrlOf('https://agent8-games.verse8.io/assets/3D/weapons/ak47.glb')).toBe('https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb.meta.json');
+    // only that path segment: the rest of the path keeps its case
+    expect(metaUrlOf('https://agent8-games.verse8.io/assets/3D/Objects/3D/Sword.glb')).toBe('https://agent8-games.verse8.io/assets/3d/Objects/3D/Sword.glb.meta.json');
+    expect(metaUrlOf('https://agent8-games.verse8.io/assets/2D/x.png')).toBe('https://agent8-games.verse8.io/assets/2D/x.png.meta.json');
+  });
+  test('both spellings share one request', async () => {
+    answer(() => json({ v: 1 }));
+    await loadAssetMeta('https://agent8-games.verse8.io/assets/3D/weapons/ak47.glb');
+    await loadAssetMeta('https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb');
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe('https://agent8-games.verse8.io/assets/3d/weapons/ak47.glb.meta.json');
   });
 });

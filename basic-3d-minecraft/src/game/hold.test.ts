@@ -219,6 +219,79 @@ describe('melee: follows the wrist', () => {
   });
 });
 
+describe('gun in the left hand', () => {
+  test('aim with weight 1 (whole-body turn, no split): the muzzle points at the aim, not along the body', () => {
+    const r = rig();
+    const yaw = (40 * Math.PI) / 180;
+    const { m, fwd } = hold(r, 'gun', { side: 'Left', aim: { yaw, pitch: 0.2, weight: 1 } });
+    const want = new THREE.Vector3(Math.sin(yaw) * Math.cos(0.2), Math.sin(0.2), Math.cos(yaw) * Math.cos(0.2));
+    expect(m.valid).toBe(true);
+    expect(new THREE.Vector3(m.dx, m.dy, m.dz).angleTo(want)).toBeLessThan(1e-3);
+    expect(fwd.angleTo(want)).toBeLessThan(1e-3);
+  });
+});
+
+describe('the muzzle object', () => {
+  test('passing another object leaves the old one not valid; so does taking the weapon off', () => {
+    const r = rig();
+    const a = muzzle(), b = muzzle();
+    const live = { muzzle: a as Muzzle | undefined };
+    const held = holdInHand(r, new THREE.Group(), {
+      kind: 'gun',
+      tip: tipLocal,
+      get muzzle() {
+        return live.muzzle;
+      },
+    });
+    const scene = new THREE.Scene();
+    scene.add(r);
+    scene.updateMatrixWorld(true);
+    expect(a.valid).toBe(true);
+    live.muzzle = b; // the game passes a new object
+    scene.updateMatrixWorld(true);
+    expect(b.valid).toBe(true);
+    expect(a.valid).toBe(false);
+    live.muzzle = undefined; // the game stops asking
+    scene.updateMatrixWorld(true);
+    expect(b.valid).toBe(false);
+    live.muzzle = a;
+    scene.updateMatrixWorld(true);
+    expect(a.valid).toBe(true);
+    held.dispose();
+    expect(a.valid).toBe(false);
+  });
+});
+
+describe('the barrel swings to a new direction over time', () => {
+  test('by the clock it is given: part of the way after 50 ms, on the aim after a second', () => {
+    const r = rig();
+    let t = 10; // seconds
+    const aim = { yaw: 0, pitch: 0, weight: 0 };
+    const held = holdInHand(r, new THREE.Group(), { kind: 'gun', aim, now: () => t });
+    const scene = new THREE.Scene();
+    scene.add(r);
+    const fwd = () => {
+      scene.updateMatrixWorld(true);
+      return new THREE.Vector3(0, 0, 1).applyQuaternion(new THREE.Quaternion().setFromRotationMatrix(held.holder.matrixWorld));
+    };
+    const start = fwd(); // along the hands
+    const yaw = (40 * Math.PI) / 180;
+    Object.assign(aim, { yaw, weight: 1 });
+    const want = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
+    const whole = start.angleTo(want);
+    t += 0.05;
+    const part = fwd().angleTo(want);
+    expect(part).toBeGreaterThan(0.2 * whole); // not snapped
+    expect(part).toBeLessThan(0.6 * whole); // 1 − e^(−18 · 0.05) ≈ 59 % of the way
+    let left = part;
+    for (let i = 0; i < 10; i++) {
+      t += 0.1;
+      left = fwd().angleTo(want);
+    }
+    expect(left).toBeLessThan(1e-3);
+  });
+});
+
 describe('bow: by the riser, no muzzle', () => {
   test('the arrow points where the fingers point, the upper limb out of the top of the fist; muzzle not valid', () => {
     const r = rig();

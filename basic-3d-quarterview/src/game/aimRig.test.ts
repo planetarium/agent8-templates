@@ -2,7 +2,7 @@
 // body putting the line between the hands onto the aim.
 import { describe, expect, test } from 'bun:test';
 import * as THREE from 'three';
-import { aimSpine, findSpine, LEG_MAX, splitClip, spineShares, stepLegs, TWIST_MAX, twistFor, type LegState } from './aimRig';
+import { aimSpine, findSpine, LEG_MAX, splitClip, spineShares, splitsBody, stepLegs, TWIST_MAX, twistFor, weightedAim, type LegState } from './aimRig';
 
 const deg = (d: number) => (d * Math.PI) / 180;
 const diff = (a: number, b: number) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
@@ -120,5 +120,59 @@ describe('upper body', () => {
     const q = s.spine[2].quaternion.clone();
     aimSpine(s, { grip }, { yaw: deg(30), pitch: 0 }, 0, state);
     expect(s.spine[2].quaternion.angleTo(q)).toBeLessThan(1e-9);
+  });
+});
+
+describe('when the body splits', () => {
+  const aim = { yaw: 0, pitch: 0, weight: 1 };
+  test('a gun with an aim in the right hand (the default) splits', () => {
+    expect(splitsBody(true, { aim })).toBe(true);
+    expect(splitsBody(true, { aim, side: 'Right' })).toBe(true);
+  });
+  test('a left-hand gun does not: the spine is turned by the right hand, so it keeps the whole-body turn', () => {
+    expect(splitsBody(true, { aim, side: 'Left' })).toBe(false);
+  });
+  test('no gun, or no aim object: no split — an aim on a sword changes nothing', () => {
+    expect(splitsBody(false, { aim })).toBe(false);
+    expect(splitsBody(true, {})).toBe(false);
+    expect(splitsBody(true, undefined)).toBe(false);
+  });
+});
+
+describe('aim weight on a split body', () => {
+  test('weight is the share of the way from the movement facing to the aim, yaw and pitch', () => {
+    const aim = { yaw: deg(60), pitch: deg(20), weight: 0.5 };
+    const half = weightedAim(aim, deg(10));
+    expect(half.yaw).toBeCloseTo(deg(35), 9); // half of the 50° between facing and aim
+    expect(half.pitch).toBeCloseTo(deg(10), 9);
+    expect(weightedAim({ ...aim, weight: 1 }, deg(10)).yaw).toBeCloseTo(deg(60), 9);
+    const none = weightedAim({ ...aim, weight: 0 }, deg(10));
+    expect(none.yaw).toBeCloseTo(deg(10), 9);
+    expect(none.pitch).toBe(0);
+    expect(none.weight).toBe(0);
+  });
+  test('the short way round, and weights outside 0–1 are clamped', () => {
+    expect(diff(weightedAim({ yaw: deg(-170), pitch: 0, weight: 0.5 }, deg(170)).yaw, deg(180))).toBeLessThan(1e-9);
+    expect(weightedAim({ yaw: deg(60), pitch: 0, weight: 3 }, 0).yaw).toBeCloseTo(deg(60), 9);
+    expect(weightedAim({ yaw: deg(60), pitch: 0, weight: -1 }, 0).yaw).toBeCloseTo(0, 9);
+    expect(weightedAim({ yaw: deg(60), pitch: 0, weight: NaN }, 0).weight).toBe(0);
+  });
+  test('weight 0.5: the line between the hands ends half way between the facing and the aim', () => {
+    const run = (weight: number) => {
+      const r = rig();
+      const s = findSpine(r)!;
+      const grip = r.getObjectByName('mixamorigRightHand')!;
+      const support = r.getObjectByName('mixamorigLeftHand')!;
+      const state = { base: [] as THREE.Quaternion[], set: [] as THREE.Quaternion[], corrYaw: 0, corrPitch: 0 };
+      const to = weightedAim({ yaw: deg(40), pitch: 0, weight }, 0);
+      for (let i = 0; i < 6; i++) aimSpine(s, { grip, support }, to, 0, state);
+      r.updateMatrixWorld(true);
+      const a = grip.getWorldPosition(new THREE.Vector3());
+      const b = support.getWorldPosition(new THREE.Vector3()).sub(a);
+      return Math.atan2(b.x, b.z);
+    };
+    // 20° apart: half of the 40° between the facing and the aim
+    expect(diff(run(1), run(0.5))).toBeGreaterThan(deg(18));
+    expect(diff(run(1), run(0.5))).toBeLessThan(deg(22));
   });
 });

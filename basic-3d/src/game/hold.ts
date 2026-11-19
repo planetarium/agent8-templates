@@ -231,6 +231,8 @@ export type HoldOptions = {
    * no turn toward `aim` and no MAX_BARREL_YAW cap, which are for bodies that do not aim.
    */
   aimByBody?: () => boolean;
+  /** The clock the barrel's swing eases by, in seconds (default `performance.now() / 1000`); tests pass their own. */
+  now?: () => number;
 };
 
 export type Held = { holder: THREE.Group; fit: HandFit; hand?: THREE.Object3D; dispose: () => void };
@@ -287,12 +289,25 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
   const one = new THREE.Vector3(1, 1, 1);
   let last = 0;
   let failed = false;
+  // `opts.muzzle` may be a getter (the game can pass another object any frame): the object written
+  // last is marked not valid as soon as it is no longer the one passed
+  let written: Muzzle | undefined;
+  const muzzleNow = () => {
+    const m = opts.muzzle;
+    if (written && written !== m) written.valid = false;
+    written = m;
+    return m;
+  };
+  const noMuzzle = () => {
+    const m = muzzleNow();
+    if (m) m.valid = false;
+  };
 
   /** World pose of the canonical frame for this frame → holder.matrix. */
   const solve = () => {
     const parent = holder.parent;
     if (!parent) return;
-    const now = performance.now() / 1000;
+    const now = opts.now ? opts.now() : performance.now() / 1000;
     const dt = last ? Math.min(0.1, Math.max(0, now - last)) : 0;
     last = now;
     rig.matrixWorld.decompose(pos, quat, scl);
@@ -341,13 +356,13 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
     world.compose(grip, quat, one);
     if (!world.elements.every(Number.isFinite)) {
       holder.visible = false;
-      if (opts.muzzle) opts.muzzle.valid = false;
+      noMuzzle();
       return;
     }
     holder.visible = true;
     holder.matrix.copy(parent.matrixWorld).invert().multiply(world);
     holder.matrixWorldNeedsUpdate = true;
-    const m = opts.muzzle;
+    const m = muzzleNow();
     if (m && !gun) m.valid = false;
     else if (m) {
       tipW.copy(opts.tip ?? x.set(0, 0, 0)).applyMatrix4(world);
@@ -366,7 +381,7 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
       } catch (e) {
         failed = true;
         holder.visible = false;
-        if (opts.muzzle) opts.muzzle.valid = false;
+        noMuzzle();
         console.warn('held weapon hidden: placing it failed', e);
       }
     }
@@ -379,7 +394,7 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
     hand,
     dispose: () => {
       holder.removeFromParent();
-      if (opts.muzzle) opts.muzzle.valid = false;
+      noMuzzle();
     },
   };
 }

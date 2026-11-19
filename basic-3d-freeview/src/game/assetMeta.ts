@@ -6,8 +6,13 @@
 // - Always revalidated (`cache: 'no-cache'`): a fixed value reaches the game on the next load.
 // - 404 / CORS / network error / bad JSON / another `v` = "no info" (null), silently. A request
 //   slower than META_TIMEOUT_MS is "no info" too, with one console warning.
+// - An answer (the file, 404, bad JSON, another `v`) is kept for the page's life. A failure that
+//   may pass (network error, time limit, 5xx) is "no info" for whoever asked, and forgotten: the
+//   next component that mounts asks again.
+// - Info files live under lower-case `/assets/3d/` only; old `/assets/3D/` asset URLs (still
+//   served, and what search returned before 2026-11-18) are asked there.
 // - Unknown keys are kept and ignored (keys are only ever added; `v` stays 1).
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type AssetMeta = { v: 1; tags?: string[]; [key: string]: unknown };
 
@@ -24,8 +29,10 @@ export function metaUrlOf(assetUrl: string): string | null {
     return null;
   }
   const base = u.origin + u.pathname;
-  if (!META_PREFIXES.some((p) => base.startsWith(p))) return null;
-  return `${base}.meta.json`;
+  const prefix = META_PREFIXES.find((p) => base.startsWith(p));
+  if (!prefix) return null;
+  const rest = base.slice(prefix.length);
+  return `${prefix}${rest.startsWith('3D/') ? `3d/${rest.slice(3)}` : rest}.meta.json`;
 }
 
 const cache = new Map<string, Promise<AssetMeta | null>>();
@@ -42,7 +49,15 @@ function parse(j: unknown): AssetMeta | null {
   return j as AssetMeta;
 }
 
-/** The info file of an asset, read once per page load per URL. Resolves to null when there is none. */
+/** A failure that may pass: the request is forgotten so a later mount asks again. */
+const RETRY: unique symbol = Symbol('retry');
+
+/**
+ * The info file of an asset, read once per page load per URL. Resolves to null when there is
+ * none. After a network error, the time limit or a 5xx it resolves to null too, but the next call
+ * asks again — so keep the promise you got (a parent's useMemo) instead of calling this on every
+ * render of a component that suspends on it.
+ */
 export function loadAssetMeta(assetUrl: string, timeoutMs = META_TIMEOUT_MS): Promise<AssetMeta | null> {
   const url = metaUrlOf(assetUrl);
   if (!url) return NONE;
@@ -50,21 +65,31 @@ export function loadAssetMeta(assetUrl: string, timeoutMs = META_TIMEOUT_MS): Pr
   if (!p) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-    p = fetch(url, { cache: 'no-cache', signal: ctrl.signal })
-      .then((r) => (r.ok ? r.json() : null))
-      .then(parse)
-      .catch(() => {
+    const asked: Promise<AssetMeta | null> = fetch(url, { cache: 'no-cache', signal: ctrl.signal })
+      .then<string | typeof RETRY | null>((r) => (r.ok ? r.text() : r.status >= 500 ? RETRY : null))
+      .catch((): typeof RETRY => {
         if (ctrl.signal.aborted && !warnedSlow) {
           warnedSlow = true;
           console.warn(`asset info file took over ${timeoutMs} ms, going on without it: ${url}`);
         }
-        return null;
+        return RETRY;
       })
       .finally(() => clearTimeout(timer))
-      .then((m) => {
+      .then((body) => {
+        if (body === RETRY) {
+          if (cache.get(url) === asked) cache.delete(url);
+          return null;
+        }
+        let m: AssetMeta | null = null;
+        try {
+          m = typeof body === 'string' ? parse(JSON.parse(body)) : null;
+        } catch {
+          // bad JSON: no info
+        }
         settled.set(url, m);
         return m;
       });
+    p = asked;
     cache.set(url, p);
   }
   return p;
@@ -77,14 +102,10 @@ export function peekAssetMeta(assetUrl: string): AssetMeta | null | undefined {
   return settled.get(url);
 }
 
-/** React: suspends (like useGLTF) until the info file is read; null when there is none. */
-export function useAssetMeta(assetUrl: string): AssetMeta | null {
-  return use(loadAssetMeta(assetUrl));
-}
-
 /**
  * React, without suspending: null until the info file arrives, then re-renders with it. For
- * choices that must not hold up the first frame (which clips a character plays).
+ * choices that must not hold up the first frame (which clips a character plays). After a failure
+ * that may pass it stays null; the next mount asks again.
  */
 export function useAssetMetaWhenRead(assetUrl: string | undefined): AssetMeta | null {
   const [, arrived] = useState(0);

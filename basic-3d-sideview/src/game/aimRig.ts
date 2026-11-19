@@ -41,7 +41,26 @@ export const LEG_TURN = 10;
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 const clamp = (v: number, m: number) => Math.max(-m, Math.min(m, v));
 
-export type SpineRig = { hips: THREE.Object3D; spine: THREE.Object3D[]; upper: Set<string> };
+/**
+ * Whether a character aims with a split body: it holds a gun, has an `aim`, and the gun is in the
+ * right hand. The spine is turned by the right hand → left hand line, so a left-hand gun keeps the
+ * whole-body turn (followAim).
+ */
+export function splitsBody(gun: boolean, hold: { aim?: unknown; side?: 'Right' | 'Left' } | undefined): boolean {
+  return gun && !!hold?.aim && (hold.side ?? 'Right') === 'Right';
+}
+
+/**
+ * The aim a split body turns to at `aim.weight` (0–1, clamped): that share of the way from the
+ * movement facing (`restYaw`, level) to the aim, in yaw (the short way round) and in pitch. The
+ * same meaning as the whole-body turn's weight (hold.ts followAim).
+ */
+export function weightedAim(aim: { yaw: number; pitch: number; weight: number }, restYaw: number) {
+  const w = Math.min(1, Math.max(0, aim.weight)) || 0;
+  return { yaw: wrap(restYaw + wrap(aim.yaw - restYaw) * w), pitch: aim.pitch * w, weight: w };
+}
+
+export type SpineRig ={ hips: THREE.Object3D; spine: THREE.Object3D[]; upper: Set<string> };
 
 /**
  * Hips and the spine chain above them (bones named spine / chest, child after child), or null when
