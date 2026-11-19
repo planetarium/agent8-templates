@@ -16,7 +16,7 @@
 // One-shot upper-body actions (recoil, a swing) would be a third action on the upper half, played
 // over the aim layer before aimSpine runs.
 import * as THREE from 'three';
-import { gripFrame, norm, yawOf } from './hold';
+import { aimWeight, gripFrame, norm, yawOf, type Aim } from './hold';
 
 /**
  * Legs face at most this far off the movement direction (25°). Strafing with the aim 90° off,
@@ -57,33 +57,69 @@ export function splitsBody(gun: boolean, hold: { aim?: unknown; side?: 'Right' |
  */
 export const ARC_KEEP = Math.PI / 4;
 
-/** What weightedAim remembers between frames: the yaw difference it used last (rad, may pass ±π). */
-export type AimArc = { delta: number };
+/**
+ * How fast the weighted target yaw may turn at a weight near 0 (720°/s); at weight w the limit is
+ * AIM_SLEW / (1 − w), so it grows without bound toward weight 1 and full weight is never held
+ * back. Only a target that jumps hits it: the side change ARC_KEEP clear of straight behind (a
+ * jump of w × 360°), or the movement facing turning round under a part-weight aim. A hand-moved
+ * aim does not: 720°/s of target at weight 0.5 is the crosshair sweeping 1440°/s.
+ */
+export const AIM_SLEW = 4 * Math.PI;
+
+/**
+ * Under this weight the upper body fades between the clip's own pose (weight 0) and the pose
+ * turned onto the weighted aim, so nothing steps as the weight leaves 0. From here up it is
+ * exactly on the weighted aim.
+ */
+export const AIM_FADE = 0.1;
+/** How much of the aimed spine pose a weight gets: 0 at 0, 1 from AIM_FADE up. */
+export const aimBlend = (weight: number) => Math.min(1, Math.max(0, weight / AIM_FADE)) || 0;
+
+/**
+ * What weightedAim remembers between frames: the yaw difference it used last (rad, may pass ±π)
+ * and the target yaw it gave last (absent while there is no aim).
+ */
+export type AimArc = { delta: number; yaw?: number };
 
 /**
  * The aim a split body turns to at `aim.weight` (0–1, clamped): that share of the way from the
  * movement facing (`restYaw`, level) to the aim, in yaw and in pitch. The same meaning as the
  * whole-body turn's weight (hold.ts followAim).
  * - Weight 0 (or not a number) reads nothing of the aim: the movement facing, level, weight 0.
- *   So does an aim whose yaw or pitch is not finite — it is no aim.
+ *   So does an aim whose yaw or pitch is not finite — it is no aim (hold.ts aimWeight).
  * - Yaw goes the short way round. With `arc` (kept by the caller across frames) an aim within
  *   ARC_KEEP of straight behind stays on the side it was last frame, going past ±180° if it has
  *   to, and only changes side once it is ARC_KEEP clear of straight behind.
+ * - With `arc` and `dt` (seconds since the last call) the target yaw turns at most
+ *   AIM_SLEW / (1 − weight) per second, so a side change swings over instead of jumping. At weight
+ *   1 there is no limit: the target is the aim, the same frame.
  */
-export function weightedAim(aim: { yaw: number; pitch: number; weight: number }, restYaw: number, arc?: AimArc) {
-  const w = Math.min(1, Math.max(0, aim.weight)) || 0;
-  if (!(w > 0) || !Number.isFinite(aim.yaw) || !Number.isFinite(aim.pitch)) {
-    if (arc) arc.delta = 0;
-    return { yaw: wrap(restYaw), pitch: 0, weight: 0 };
+export function weightedAim(aim: Aim, restYaw: number, arc?: AimArc, dt?: number) {
+  const rest = Number.isFinite(restYaw) ? restYaw : 0;
+  const w = aimWeight(aim);
+  if (!(w > 0)) {
+    if (arc) {
+      arc.delta = 0;
+      arc.yaw = undefined;
+    }
+    return { yaw: wrap(rest), pitch: 0, weight: 0 };
   }
-  let d = wrap(aim.yaw - restYaw);
+  let d = wrap(aim.yaw - rest);
   if (arc) {
     const was = arc.delta;
     const behind = Math.PI - ARC_KEEP;
     if (was * d < 0 && Math.abs(was) > behind && Math.abs(d) > behind) d += 2 * Math.PI * Math.sign(was);
     arc.delta = d;
   }
-  return { yaw: wrap(restYaw + d * w), pitch: aim.pitch * w, weight: w };
+  let yaw = wrap(rest + d * w);
+  if (arc) {
+    const last = arc.yaw;
+    if (w < 1 && last !== undefined && Number.isFinite(last) && dt !== undefined && Number.isFinite(dt)) {
+      yaw = wrap(last + clamp(wrap(yaw - last), (AIM_SLEW * Math.max(0, dt)) / (1 - w)));
+    }
+    arc.yaw = yaw;
+  }
+  return { yaw, pitch: aim.pitch * w, weight: w };
 }
 
 export type SpineRig = { hips: THREE.Object3D; spine: THREE.Object3D[]; upper: Set<string> };
@@ -128,8 +164,16 @@ export function splitClip(clip: THREE.AnimationClip, rig: SpineRig) {
 
 export type LegState = { yaw: number; reversed: boolean; turning: boolean };
 
-/** One step of the lower body's yaw: where the legs face and whether they walk backwards. */
+/**
+ * One step of the lower body's yaw: where the legs face and whether they walk backwards. A yaw
+ * that is not finite counts as the movement direction (a leg yaw: starts over from it; an aim: no
+ * aim; the movement itself: 0), and a `dt` that is not finite as no time — the legs never go NaN.
+ */
 export function stepLegs(s: LegState, aimYaw: number, moveYaw: number, moving: boolean, dt: number): LegState {
+  if (!Number.isFinite(moveYaw)) moveYaw = 0;
+  if (!Number.isFinite(aimYaw)) aimYaw = moveYaw;
+  if (!Number.isFinite(s.yaw)) s = { ...s, yaw: moveYaw };
+  if (!Number.isFinite(dt)) dt = 0;
   let target: number;
   let reversed = false;
   let turning = false;
@@ -143,7 +187,7 @@ export function stepLegs(s: LegState, aimYaw: number, moveYaw: number, moving: b
     turning = s.turning ? off > STAND_DONE : off > STAND_TURN;
     target = turning ? aimYaw : s.yaw;
   }
-  const yaw = wrap(s.yaw + wrap(target - s.yaw) * Math.min(1, dt * LEG_TURN));
+  const yaw = wrap(s.yaw + wrap(target - s.yaw) * Math.min(1, Math.max(0, dt * LEG_TURN)));
   return { yaw, reversed, turning };
 }
 
@@ -169,6 +213,8 @@ const _b = new THREE.Vector3();
  * Turns the spine of a posed rig (call after the mixer) so the line between the hands points along
  * `aim`. Keeps the bones' clip pose in `base` and the learnt correction in `state`, so it can run
  * every frame without piling up. Returns the twist used (rad) and the hands-line error left (rad).
+ * `blend` (0–1, default 1) leaves the spine that share of the way from the clip pose to the aimed
+ * one (aimBlend). An aim or leg yaw that is not finite turns nothing.
  */
 export function aimSpine(
   rig: SpineRig,
@@ -176,8 +222,10 @@ export function aimSpine(
   aim: { yaw: number; pitch: number },
   legYaw: number,
   state: { base: THREE.Quaternion[]; set: THREE.Quaternion[]; corrYaw: number; corrPitch: number; gripLocal?: THREE.Vector3; supportLocal?: THREE.Vector3 },
+  blend = 1,
 ) {
   const { spine } = rig;
+  if (!Number.isFinite(aim.yaw) || !Number.isFinite(aim.pitch) || !Number.isFinite(legYaw)) return { twist: 0, err: 0 };
   // the clip pose: what the mixer wrote this frame (or, for a bone no clip moves, the pose before our turn)
   for (let i = 0; i < spine.length; i++) {
     const q = spine[i].quaternion;
@@ -187,7 +235,8 @@ export function aimSpine(
   state.gripLocal ??= new THREE.Vector3().setFromMatrixPosition(gripFrame(hands.grip).frame);
   if (hands.support) state.supportLocal ??= new THREE.Vector3().setFromMatrixPosition(gripFrame(hands.support).frame);
   const shares = spineShares(spine.length);
-  let twist = 0, err = 0;
+  let twist = 0,
+    err = 0;
   for (let pass = 0; pass < 2; pass++) {
     twist = twistFor(aim.yaw, legYaw, state.corrYaw);
     const pitch = clamp(aim.pitch + state.corrPitch, PITCH_MAX);
@@ -217,9 +266,18 @@ export function aimSpine(
     _b.divideScalar(len);
     const ey = wrap(aim.yaw - yawOf(_b.x, _b.z));
     const ep = clamp(aim.pitch, PITCH_MAX) - Math.asin(Math.max(-1, Math.min(1, _b.y)));
+    if (!Number.isFinite(ey) || !Number.isFinite(ep)) break; // a broken bone matrix: learn nothing from it
     err = Math.hypot(ey, ep);
     state.corrYaw = clamp(state.corrYaw + ey, Math.PI / 4);
     state.corrPitch = clamp(state.corrPitch + ep, Math.PI / 4);
+  }
+  // part of the way from the clip pose to the aimed pose (weights under AIM_FADE)
+  const k = Math.min(1, Math.max(0, blend));
+  if (k < 1) {
+    for (let i = 0; i < spine.length; i++) {
+      spine[i].quaternion.copy(state.base[i]).slerp(state.set[i], k);
+      state.set[i].copy(spine[i].quaternion);
+    }
   }
   return { twist, err };
 }

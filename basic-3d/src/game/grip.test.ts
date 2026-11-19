@@ -3,7 +3,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import * as THREE from 'three';
 import type { AssetMeta } from './assetMeta';
-import { gripFromMeta, gripMatrix, kindOf, resetGripWarnings, resolveGrip, sceneVertices, type Grip, type GripOverride } from './grip';
+import { estimateGrip, gripFromMeta, gripMatrix, kindOf, resetGripWarnings, resolveGrip, sceneVertices, type Grip, type GripOverride } from './grip';
 
 /** A box along +X spanning x 0..len (scene coordinates), 0.1 tall. */
 const box = (len: number) => {
@@ -16,7 +16,15 @@ const box = (len: number) => {
 const G: Grip = { kind: 'gun', point: [0.2, 0, 0], forward: [1, 0, 0], up: [0, 1, 0], lengthM: 0.8 };
 const meta = (extra: Record<string, unknown>) => ({ v: 1, ...extra }) as AssetMeta;
 // the production info file of weapons/ak47_lowpoly.glb (2026-11-18)
-const AK47 = { forward: [1, 0, 0], kind: 'gun', lengthM: 0.88, muzzleTip: [0.47026, 0.02947, 0], point: [-0.02105, -0.05023, 0], review: 'checked', up: [0, 1, 0] };
+const AK47 = {
+  forward: [1, 0, 0],
+  kind: 'gun',
+  lengthM: 0.88,
+  muzzleTip: [0.47026, 0.02947, 0],
+  point: [-0.02105, -0.05023, 0],
+  review: 'checked',
+  up: [0, 1, 0],
+};
 
 let warn: ReturnType<typeof spyOn>;
 beforeEach(() => {
@@ -151,5 +159,39 @@ describe('model -> held frame', () => {
     const top = new THREE.Vector3(-0.1, 2, 0).applyMatrix4(matrix); // upper limb tip: canonical +Y
     expect(top.y).toBeCloseTo(1 * scale, 5);
     expect(Math.abs(top.z)).toBeLessThan(1e-6);
+  });
+});
+
+describe('a model the shape estimate cannot read', () => {
+  const unreadable: [string, Float32Array][] = [
+    ['no triangles', new Float32Array(0)],
+    ['vertices that are not numbers', new Float32Array(9).fill(NaN)],
+    ['every vertex in one point', new Float32Array(9)],
+  ];
+  for (const [label, pos] of unreadable) {
+    test(`${label}: held by its origin, +Z forward — a finite pose and matrix, no throw`, () => {
+      for (const kind of ['gun', 'blade', 'bow'] as const) {
+        const g = estimateGrip(pos, kind);
+        expect([...g.point, ...g.forward, ...g.up].every(Number.isFinite)).toBe(true);
+        const r = resolveGrip(pos, { grip: null, kind });
+        expect(r.source).toBe('estimate');
+        const { matrix, tip, scale } = gripMatrix(pos, r.grip);
+        expect(matrix.elements.every(Number.isFinite)).toBe(true);
+        expect(tip.toArray().every(Number.isFinite)).toBe(true);
+        expect(Number.isFinite(scale)).toBe(true);
+      }
+    });
+  }
+  test('an info file grip on such a model is still used, with a finite matrix', () => {
+    const { matrix, tip } = gripMatrix(new Float32Array(9).fill(NaN), G);
+    expect(matrix.elements.every(Number.isFinite)).toBe(true);
+    expect(tip.toArray().every(Number.isFinite)).toBe(true);
+  });
+  test('override numbers that are not finite are not taken', () => {
+    const o = resolveGrip(box(1), { grip: G, override: { lengthM: NaN, muzzleTip: [Infinity, 0, 0] } as GripOverride });
+    expect(o.overridden).toEqual([]);
+    expect(o.grip).toEqual(G);
+    const pose = resolveGrip(box(1), { grip: G, override: { point: [NaN, 0, 0], forward: [1, 0, 0], up: [0, 1, 0] } as GripOverride });
+    expect(pose.grip.point).toEqual(G.point);
   });
 });

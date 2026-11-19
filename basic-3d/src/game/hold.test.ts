@@ -6,7 +6,7 @@
 import { describe, expect, test } from 'bun:test';
 import * as THREE from 'three';
 import type { Grip } from './grip';
-import { clampYaw, findHand, followAim, gripFrame, holdInHand, MAX_BARREL_YAW, type HandFit, type Muzzle, type Side } from './hold';
+import { aimWeight, clampYaw, findHand, followAim, gripFrame, holdInHand, MAX_BARREL_YAW, type HandFit, type Muzzle, type Side } from './hold';
 import fixture from './hold.fixture.json';
 
 type RigOpts = { fingers?: 'all' | 'thumb-index' | 'none'; hands?: boolean; names?: 'mixamo' | 'claythis'; scale?: number };
@@ -67,7 +67,9 @@ function hold(r: THREE.Object3D, kind: Grip['kind'], extra: Partial<Parameters<t
   const scene = new THREE.Scene();
   scene.add(r);
   scene.updateMatrixWorld(true); // what the renderer does before each frame
-  const pos = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3();
+  const pos = new THREE.Vector3(),
+    q = new THREE.Quaternion(),
+    s = new THREE.Vector3();
   held.holder.matrixWorld.decompose(pos, q, s);
   const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(q);
   return { held, m, pos, fwd, s, scene };
@@ -234,7 +236,8 @@ describe('gun in the left hand', () => {
 describe('the muzzle object', () => {
   test('passing another object leaves the old one not valid; so does taking the weapon off', () => {
     const r = rig();
-    const a = muzzle(), b = muzzle();
+    const a = muzzle(),
+      b = muzzle();
     const live = { muzzle: a as Muzzle | undefined };
     const held = holdInHand(r, new THREE.Group(), {
       kind: 'gun',
@@ -298,7 +301,9 @@ describe('bow: by the riser, no muzzle', () => {
     const { held, m } = hold(r, 'bow');
     const hand = findHand(r, 'Right')!;
     const frame = hand.matrixWorld.clone().multiply(gripFrame(hand, 'Right').frame);
-    const fx = new THREE.Vector3(), fy = new THREE.Vector3(), fz = new THREE.Vector3();
+    const fx = new THREE.Vector3(),
+      fy = new THREE.Vector3(),
+      fz = new THREE.Vector3();
     frame.extractBasis(fx, fy, fz);
     const q = new THREE.Quaternion().setFromRotationMatrix(held.holder.matrixWorld);
     expect(new THREE.Vector3(0, 0, 1).applyQuaternion(q).angleTo(fx.normalize())).toBeLessThan(1e-3);
@@ -341,7 +346,10 @@ function worldFrame(root: THREE.Object3D, side: Side) {
   const hand = findHand(root, side)!;
   const f = gripFrame(hand, side);
   const m = hand.matrixWorld.clone().multiply(f.frame);
-  const o = new THREE.Vector3(), x = new THREE.Vector3(), y = new THREE.Vector3(), z = new THREE.Vector3();
+  const o = new THREE.Vector3(),
+    x = new THREE.Vector3(),
+    y = new THREE.Vector3(),
+    z = new THREE.Vector3();
   m.extractBasis(x, y, z);
   o.setFromMatrixPosition(m);
   return { fit: f.fit, origin: o, fwd: x.normalize(), up: y.normalize(), palm: z.normalize(), wrist: hand.getWorldPosition(new THREE.Vector3()) };
@@ -400,7 +408,10 @@ describe('library hand rigs', () => {
       if (!/Pinky/.test(d.class)) continue;
       const side = sideOf(key);
       const full = worldFrame(build(d), side);
-      const bare = worldFrame(build(d, () => false), side);
+      const bare = worldFrame(
+        build(d, () => false),
+        side,
+      );
       expect(full.fit).toBe('fingers');
       expect(bare.fit).toBe('hand');
       const handLen = full.origin.distanceTo(full.wrist);
@@ -418,7 +429,9 @@ describe('library hand rigs', () => {
     test(`${name} (${cls}) is held like the base character, both hands`, () => {
       const local = (key: string, side: Side) => {
         const f = gripFrame(findHand(build(RIGS[key]), side)!, side);
-        const x = new THREE.Vector3(), y = new THREE.Vector3(), z = new THREE.Vector3();
+        const x = new THREE.Vector3(),
+          y = new THREE.Vector3(),
+          z = new THREE.Vector3();
         f.frame.extractBasis(x, y, z);
         return { fit: f.fit, x, y, z };
       };
@@ -435,4 +448,76 @@ describe('library hand rigs', () => {
       }
     });
   }
+});
+
+describe('an aim that is not a number is no aim', () => {
+  const bad = [
+    { yaw: NaN, pitch: 0, weight: 1 },
+    { yaw: Infinity, pitch: 0, weight: 1 },
+    { yaw: 0.5, pitch: NaN, weight: 1 },
+    { yaw: 0.5, pitch: -Infinity, weight: 0.5 },
+    { yaw: 0.5, pitch: 0, weight: NaN },
+  ];
+  test('aimWeight: the clamped weight; 0 without an aim or with a yaw / pitch / weight that is not finite', () => {
+    expect(aimWeight(undefined)).toBe(0);
+    expect(aimWeight({ yaw: 1, pitch: 0, weight: 0.4 })).toBe(0.4);
+    expect(aimWeight({ yaw: 1, pitch: 0, weight: 7 })).toBe(1);
+    expect(aimWeight({ yaw: 1, pitch: 0, weight: -2 })).toBe(0);
+    for (const aim of bad) expect(aimWeight(aim)).toBe(0);
+  });
+  test('whole-body turn: the body eases back to its facing and stays finite; a NaN turn starts over', () => {
+    for (const aim of bad) {
+      let y = 0.8;
+      for (let i = 0; i < 60; i++) y = followAim(y, 0.3, aim, 1 / 60);
+      expect(Number.isFinite(y)).toBe(true);
+      expect(Math.abs(y)).toBeLessThan(1e-3);
+    }
+    expect(followAim(NaN, 0, { yaw: 0.5, pitch: 0, weight: 1 }, 1)).toBeCloseTo(0.5, 9);
+    expect(Number.isFinite(followAim(0.2, NaN, { yaw: 0.5, pitch: 0, weight: 1 }, 1 / 60))).toBe(true);
+    expect(followAim(0.2, 0, { yaw: 0.5, pitch: 0, weight: 1 }, NaN)).toBeCloseTo(0.2, 9);
+  });
+  test('the barrel: lies along the hands as with no aim, stays drawn, and takes a real aim again afterwards', () => {
+    for (const first of bad) {
+      const r = rig();
+      const plain = hold(rig(), 'gun').fwd;
+      const aim = { ...first };
+      let t = 5;
+      const m = muzzle();
+      const held = holdInHand(r, new THREE.Group(), { kind: 'gun', aim, muzzle: m, tip: tipLocal, now: () => t });
+      const scene = new THREE.Scene();
+      scene.add(r);
+      const fwd = () => {
+        t += 0.1;
+        scene.updateMatrixWorld(true);
+        return new THREE.Vector3(0, 0, 1).applyQuaternion(new THREE.Quaternion().setFromRotationMatrix(held.holder.matrixWorld));
+      };
+      for (let i = 0; i < 3; i++) fwd();
+      expect(held.holder.visible).toBe(true);
+      expect(held.holder.matrixWorld.elements.every(Number.isFinite)).toBe(true);
+      expect(m.valid).toBe(true);
+      expect([m.x, m.y, m.z, m.dx, m.dy, m.dz].every(Number.isFinite)).toBe(true);
+      expect(fwd().angleTo(plain)).toBeLessThan(1e-3);
+      const yaw = (30 * Math.PI) / 180;
+      Object.assign(aim, { yaw, pitch: 0, weight: 1 });
+      let last = fwd();
+      for (let i = 0; i < 12; i++) last = fwd();
+      expect(last.angleTo(new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)))).toBeLessThan(1e-3);
+    }
+  });
+  test('half weight, the aim straight opposite the barrel: a direction, not nothing', () => {
+    const r = rig({ hands: false }); // the barrel lies along the body facing (+z)
+    const { held, m } = hold(r, 'gun', { aim: { yaw: Math.PI, pitch: 0, weight: 0.5 } });
+    expect(held.holder.visible).toBe(true);
+    expect(held.holder.matrixWorld.elements.every(Number.isFinite)).toBe(true);
+    expect(Math.hypot(m.dx, m.dy, m.dz)).toBeCloseTo(1, 6);
+  });
+  test('a clock that is not a number: the barrel is placed as if no time passed', () => {
+    const r = rig();
+    const held = holdInHand(r, new THREE.Group(), { kind: 'gun', aim: { yaw: 0.5, pitch: 0, weight: 1 }, now: () => NaN });
+    const scene = new THREE.Scene();
+    scene.add(r);
+    for (let i = 0; i < 3; i++) scene.updateMatrixWorld(true);
+    expect(held.holder.visible).toBe(true);
+    expect(held.holder.matrixWorld.elements.every(Number.isFinite)).toBe(true);
+  });
 });

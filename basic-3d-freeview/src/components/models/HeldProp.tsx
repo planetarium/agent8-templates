@@ -5,7 +5,7 @@ import { Component, Suspense, use, useLayoutEffect, useMemo, useRef, type ReactN
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { loadAssetMeta, type AssetMeta } from '../../game/assetMeta';
+import { latestAssetMeta, loadAssetMeta, useStoredAssetMeta, type AssetMeta } from '../../game/assetMeta';
 import { gripFromMeta, gripMatrix, kindOf, resolveGrip, sceneVertices, type GripKind, type GripOverride } from '../../game/grip';
 import { followAim, holdInHand, yawOf, type Aim, type Muzzle, type Side } from '../../game/hold';
 
@@ -30,7 +30,10 @@ export type Hold = {
    * goes (0 = not aiming, 0.5 = half the yaw / pitch difference, 1 = on the aim), the same for a
    * split body (`<Character>`, right hand) and a whole-body turn; the barrel stays within 60° of
    * the body either way. To stop aiming for a moment keep the object and set `weight` to 0 —
-   * adding / removing `aim` on a gun swaps the clip set (the character re-mounts).
+   * adding / removing `aim` on a gun swaps the clip set (the character re-mounts). Weight 1 is on
+   * the aim the same frame; a part weight turns to a far-off target at a limited rate instead of
+   * jumping, and under 0.1 the upper body fades between its clip pose and the aim. A yaw, pitch or
+   * weight that is not a finite number counts as not aiming.
    */
   aim?: Aim;
   /**
@@ -105,7 +108,11 @@ type Info = { info: Promise<AssetMeta | null> };
 function Prop({ rig, url, side, override, kind, aim, muzzle, aimByBody, info }: Hold & Internal & Info) {
   const gltf = useGLTF(url);
   // the info file (<url>.meta.json): suspends like useGLTF; null = none (404, other host, timeout)
-  const meta = use(info);
+  const first = use(info);
+  // …and when this request failed in passing and a later one (another character's, the next
+  // mount's) gets the file, the stored answer: the weapon is re-held with its real grip
+  useStoredAssetMeta(url);
+  const meta = latestAssetMeta(url, first);
   // aim / muzzle are read while drawing: keep the latest without re-attaching
   const live = useRef({ aim, muzzle, aimByBody });
   live.current = { aim, muzzle, aimByBody };

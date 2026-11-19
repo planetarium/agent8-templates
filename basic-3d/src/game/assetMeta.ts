@@ -117,14 +117,33 @@ export function subscribeAssetMeta(fn: () => void): () => void {
 }
 
 /**
+ * What a component that already got `first` from its own request should use now: the stored
+ * answer once there is one (its own, or a later request by anyone that succeeded after its own
+ * failed in passing), else what it got.
+ */
+export function latestAssetMeta(assetUrl: string, first: AssetMeta | null): AssetMeta | null {
+  const stored = peekAssetMeta(assetUrl);
+  return stored === undefined ? first : stored;
+}
+
+/**
+ * React: the stored answer for an asset (null while there is none), re-rendering when one is
+ * stored. It asks nothing itself — every reader of info files goes through this, so all of them
+ * see an answer the moment any of them gets it.
+ */
+export function useStoredAssetMeta(assetUrl: string | undefined): AssetMeta | null {
+  const read = () => (assetUrl ? (peekAssetMeta(assetUrl) ?? null) : null);
+  return useSyncExternalStore(subscribeAssetMeta, read, read);
+}
+
+/**
  * React, without suspending: null until the info file arrives, then re-renders with it. For
  * choices that must not hold up the first frame (which clips a character plays). It asks once per
  * mount; after a failure that may pass it stays null until an answer is stored — by the next
  * mount, or by another component asking again (the held weapon does) — and then re-renders.
  */
 export function useAssetMetaWhenRead(assetUrl: string | undefined): AssetMeta | null {
-  const read = () => (assetUrl ? (peekAssetMeta(assetUrl) ?? null) : null);
-  const meta = useSyncExternalStore(subscribeAssetMeta, read, read);
+  const meta = useStoredAssetMeta(assetUrl);
   useEffect(() => {
     if (assetUrl && peekAssetMeta(assetUrl) === undefined) void loadAssetMeta(assetUrl);
   }, [assetUrl]);

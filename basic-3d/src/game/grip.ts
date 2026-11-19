@@ -28,7 +28,9 @@ export type GripSource = 'override' | 'meta' | 'estimate';
  * (`point`, `forward`, `up`) only as all three together, so a later fix of the info file can't
  * mix with half of an old pose.
  */
-export type GripOverride = { kind?: GripKind; lengthM?: number; muzzleTip?: V3 } & ({ point: V3; forward: V3; up: V3 } | { point?: never; forward?: never; up?: never });
+export type GripOverride = { kind?: GripKind; lengthM?: number; muzzleTip?: V3 } & (
+  { point: V3; forward: V3; up: V3 } | { point?: never; forward?: never; up?: never }
+);
 export type Resolved = { grip: Grip; source: GripSource; overridden: (keyof Grip)[] };
 
 /** Used only when nothing says how long the weapon is (estimate path, no override). */
@@ -40,7 +42,8 @@ const isLength = (x: unknown): x is number => typeof x === 'number' && Number.is
 /** forward and up: non-zero, not parallel. */
 function isPose(point: unknown, forward: unknown, up: unknown): boolean {
   if (!isV3(point) || !isV3(forward) || !isV3(up)) return false;
-  const f = new THREE.Vector3(...forward), u = new THREE.Vector3(...up);
+  const f = new THREE.Vector3(...forward),
+    u = new THREE.Vector3(...up);
   if (f.lengthSq() < 1e-12 || u.lengthSq() < 1e-12) return false;
   return Math.abs(f.normalize().dot(u.normalize())) < 0.99;
 }
@@ -127,7 +130,8 @@ export function sceneVertices(root: THREE.Object3D): Float32Array {
 /** Extent of the vertices along `dir` (model units): lo, hi. */
 export function extentAlong(pos: Float32Array, dir: V3) {
   const f = new THREE.Vector3(...dir).normalize();
-  let lo = Infinity, hi = -Infinity;
+  let lo = Infinity,
+    hi = -Infinity;
   for (let i = 0; i < pos.length; i += 3) {
     const d = pos[i] * f.x + pos[i + 1] * f.y + pos[i + 2] * f.z;
     if (d < lo) lo = d;
@@ -149,11 +153,21 @@ export function frontTip(pos: Float32Array, g: Grip): V3 {
   return [p.x, p.y, p.z];
 }
 
-/** Shape-only fallback: kind comes from the caller (info file tags / URL / override). */
+/**
+ * Shape-only fallback: kind comes from the caller (info file tags / URL / override). A model the
+ * shape rules cannot read (no triangles, vertices that are not numbers, all in one point) is held
+ * by its own origin, +Z forward, +Y up — never a pose that is not finite.
+ */
 export function estimateGrip(pos: Float32Array, kind: GripKind, lengthM?: number): Grip {
-  // bows have no estimator of their own (library bows carry a grip); the gun rules are the closer fit
-  const e = estimate(pos, kind === 'gun' || kind === 'bow' ? 'gun' : 'melee');
-  return { kind, point: e.grip, forward: e.fwd, up: e.up, lengthM: lengthM ?? DEFAULT_LENGTH_M[kind] };
+  const length = lengthM ?? DEFAULT_LENGTH_M[kind];
+  try {
+    // bows have no estimator of their own (library bows carry a grip); the gun rules are the closer fit
+    const e = estimate(pos, kind === 'gun' || kind === 'bow' ? 'gun' : 'melee');
+    if (isPose(e.grip, e.fwd, e.up)) return { kind, point: e.grip, forward: e.fwd, up: e.up, lengthM: length };
+  } catch {
+    // nothing to estimate from
+  }
+  return { kind, point: [0, 0, 0], forward: [0, 0, 1], up: [0, 1, 0], lengthM: length };
 }
 
 /**

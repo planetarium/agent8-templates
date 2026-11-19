@@ -26,7 +26,11 @@ export type Aim = { yaw: number; pitch: number; weight: number };
 export type Muzzle = { x: number; y: number; z: number; dx: number; dy: number; dz: number; valid: boolean };
 
 /** Bone names without prefixes / separators: "mixamorig:RightHand" → "righthand", "Hand_R" → "handr". */
-export const norm = (name: string) => name.toLowerCase().replace(/^mixamorig:?/, '').replace(/[\s_.:\-|]/g, '');
+export const norm = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/^mixamorig:?/, '')
+    .replace(/[\s_.:\-|]/g, '');
 
 const HAND_END: Record<Side, string[]> = {
   Right: ['righthand', 'handright', 'handr', 'rhand', 'rwrist', 'wristr', 'rightwrist'],
@@ -115,7 +119,9 @@ const HAND_PER_FOREARM = 0.55;
 export function gripFrame(hand: THREE.Object3D, side: Side = 'Right', palm = 0.25): { frame: THREE.Matrix4; fit: HandFit } {
   const f = findFingers(hand);
   const pos = (o?: THREE.Object3D) => (o ? inHand(hand, o) : null);
-  const index = pos(f.index), middle = pos(f.middle), thumb = pos(f.thumb);
+  const index = pos(f.index),
+    middle = pos(f.middle),
+    thumb = pos(f.thumb);
   const second = pos(f.pinky) ?? pos(f.ring) ?? (index && middle ? middle : null);
   let fit: HandFit;
   let fwd: THREE.Vector3, up: THREE.Vector3, len: number;
@@ -200,14 +206,28 @@ export function clampYaw(dir: THREE.Vector3, body: THREE.Vector3, max = MAX_BARR
 }
 
 /**
+ * How much an aim counts, 0–1: its weight, clamped. 0 — no aim — when there is none, when the
+ * weight is not a number, or when its yaw or pitch is not finite. Everything that turns something
+ * toward an aim (the body, the barrel, the split body) asks this first and reads yaw / pitch only
+ * when it is above 0, so a NaN from the game never gets into a rotation.
+ */
+export function aimWeight(aim: Aim | undefined): number {
+  if (!aim || !Number.isFinite(aim.yaw) || !Number.isFinite(aim.pitch)) return 0;
+  return Math.min(1, Math.max(0, aim.weight)) || 0;
+}
+
+/**
  * The body follows the aim: the yaw to add to a character model drawn under a parent facing
  * `parentYaw`, eased from `current` over `dt`. Full weight turns the body onto `aim.yaw`; no aim
- * or weight 0 eases back to 0 (the body faces where the movement code points it).
+ * or weight 0 eases back to 0 (the body faces where the movement code points it). A `current`,
+ * `parentYaw` or `dt` that is not finite starts over from 0 instead of staying NaN.
  */
 export function followAim(current: number, parentYaw: number, aim: Aim | undefined, dt: number, rate = BODY_TURN) {
-  const w = aim ? Math.min(1, Math.max(0, aim.weight)) : 0;
-  const target = w > 0 ? wrap(aim!.yaw - parentYaw) * w : 0;
-  return wrap(current + wrap(target - current) * Math.min(1, dt * rate));
+  const w = aimWeight(aim);
+  const from = Number.isFinite(current) ? current : 0;
+  const target = w > 0 && Number.isFinite(parentYaw) ? wrap(aim!.yaw - parentYaw) * w : 0;
+  const k = Number.isFinite(dt) && Number.isFinite(rate) ? Math.min(1, Math.max(0, dt * rate)) : 0;
+  return wrap(from + wrap(target - from) * k);
 }
 
 /** Support hand counts as "on the gun" this far from the grip hand (m), in front of the body. */
@@ -308,7 +328,7 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
     const parent = holder.parent;
     if (!parent) return;
     const now = opts.now ? opts.now() : performance.now() / 1000;
-    const dt = last ? Math.min(0.1, Math.max(0, now - last)) : 0;
+    const dt = last ? Math.min(0.1, Math.max(0, now - last)) : 0; // a clock that is NaN: `last` is falsy, no time passed
     last = now;
     rig.matrixWorld.decompose(pos, quat, scl);
     body.set(0, 0, 1).applyQuaternion(quat).setY(0);
@@ -319,7 +339,11 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
     else {
       const h = height * scl.y;
       x.crossVectors(UP, body).normalize(); // body's left
-      grip.copy(pos).addScaledVector(UP, NO_HAND.up * h).addScaledVector(body, NO_HAND.forward * h).addScaledVector(x, (side === 'Right' ? -1 : 1) * NO_HAND.side * h);
+      grip
+        .copy(pos)
+        .addScaledVector(UP, NO_HAND.up * h)
+        .addScaledVector(body, NO_HAND.forward * h)
+        .addScaledVector(x, (side === 'Right' ? -1 : 1) * NO_HAND.side * h);
     }
 
     if (gun || !hand) {
@@ -331,13 +355,16 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
         if (len > HANDS.min && len < HANDS.max && other.dot(body) > 0) want.copy(other).divideScalar(len);
       }
       const byBody = gun && hand && !!opts.aimByBody?.();
-      if (gun && !byBody && opts.aim && opts.aim.weight > 0) {
-        const cp = Math.cos(opts.aim.pitch);
-        aimDir.set(Math.sin(opts.aim.yaw) * cp, Math.sin(opts.aim.pitch), Math.cos(opts.aim.yaw) * cp);
-        want.lerp(aimDir, Math.min(1, opts.aim.weight)).normalize();
+      const aim = opts.aim;
+      const w = gun && !byBody ? aimWeight(aim) : 0; // 0 for an aim that is not finite: no aim
+      if (aim && w > 0) {
+        const cp = Math.cos(aim.pitch);
+        aimDir.set(Math.sin(aim.yaw) * cp, Math.sin(aim.pitch), Math.cos(aim.yaw) * cp);
+        want.lerp(aimDir, w).normalize();
       }
       if (!gun && opts.kind !== 'bow') want.addScaledVector(UP, 1.5).normalize(); // melee with no hand: tip up and forward
-      if (dir.lengthSq() === 0 || dt === 0 || byBody) dir.copy(want); // aimed by the body: exactly on the hands
+      // first frame, aimed by the body (exactly on the hands), or a direction that is no longer one
+      if (!(dir.lengthSq() > 1e-8) || dt === 0 || byBody) dir.copy(want);
       else dir.lerp(want, 1 - Math.exp(-SWING * dt)).normalize();
       if (gun && !byBody) clampYaw(dir, body); // never through the body, whatever the aim or the swing lag
       // canonical +Z = dir, +Y = world up made perpendicular (sights up)
@@ -367,8 +394,12 @@ export function holdInHand(rig: THREE.Object3D, prop: THREE.Object3D, opts: Hold
     else if (m) {
       tipW.copy(opts.tip ?? x.set(0, 0, 0)).applyMatrix4(world);
       x.set(0, 0, 1).applyQuaternion(quat);
-      m.x = tipW.x; m.y = tipW.y; m.z = tipW.z;
-      m.dx = x.x; m.dy = x.y; m.dz = x.z;
+      m.x = tipW.x;
+      m.y = tipW.y;
+      m.z = tipW.z;
+      m.dx = x.x;
+      m.dy = x.y;
+      m.dz = x.z;
       m.valid = true;
     }
   };

@@ -2,7 +2,23 @@
 // body putting the line between the hands onto the aim.
 import { describe, expect, test } from 'bun:test';
 import * as THREE from 'three';
-import { aimSpine, findSpine, LEG_MAX, splitClip, spineShares, splitsBody, stepLegs, TWIST_MAX, twistFor, weightedAim, type AimArc, type LegState } from './aimRig';
+import {
+  AIM_FADE,
+  AIM_SLEW,
+  aimBlend,
+  aimSpine,
+  findSpine,
+  LEG_MAX,
+  splitClip,
+  spineShares,
+  splitsBody,
+  stepLegs,
+  TWIST_MAX,
+  twistFor,
+  weightedAim,
+  type AimArc,
+  type LegState,
+} from './aimRig';
 
 const deg = (d: number) => (d * Math.PI) / 180;
 const diff = (a: number, b: number) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
@@ -25,7 +41,13 @@ function rig({ spine = 3 } = {}) {
   const arm = (side: 'Right' | 'Left', hand: [number, number, number]) => {
     const s = bone(`mixamorig${side}Shoulder`, top, [side === 'Right' ? -0.15 : 0.15, 0.05, 0]);
     const h = bone(`mixamorig${side}Hand`, s, hand);
-    for (const [f, p] of [['Index1', [0.02, 0, 0.09]], ['Middle1', [0, 0, 0.095]], ['Pinky1', [-0.03, 0, 0.085]], ['Thumb1', [0.03, -0.02, 0.03]]] as const) bone(`mixamorig${side}Hand${f}`, h, [...p] as [number, number, number]);
+    for (const [f, p] of [
+      ['Index1', [0.02, 0, 0.09]],
+      ['Middle1', [0, 0, 0.095]],
+      ['Pinky1', [-0.03, 0, 0.085]],
+      ['Thumb1', [0.03, -0.02, 0.03]],
+    ] as const)
+      bone(`mixamorig${side}Hand${f}`, h, [...p] as [number, number, number]);
   };
   arm('Right', [0.05, -0.1, 0.25]);
   arm('Left', [-0.1, -0.05, 0.55]);
@@ -53,7 +75,10 @@ describe('which rigs split', () => {
     const track = (n: string) => new THREE.QuaternionKeyframeTrack(`${n}.quaternion`, [0], [0, 0, 0, 1]);
     const clip = new THREE.AnimationClip('walk', 1, [
       new THREE.VectorKeyframeTrack('mixamorigHips.position', [0], [0, 1, 0]),
-      track('mixamorigHips'), track('mixamorigLeftUpLeg'), track('mixamorigSpine'), track('mixamorigRightHand'),
+      track('mixamorigHips'),
+      track('mixamorigLeftUpLeg'),
+      track('mixamorigSpine'),
+      track('mixamorigRightHand'),
     ]);
     const { lower, upper } = splitClip(clip, s);
     expect(lower.name).toBe('walk');
@@ -196,7 +221,12 @@ describe('an aim that is not a number never reaches the legs', () => {
     expect(legsAfter({ yaw: NaN, pitch: NaN, weight: 0 }).every(Number.isFinite)).toBe(true);
   });
   test('weight 1 with a yaw or pitch that is not finite is no aim: weight 0, the legs stay finite', () => {
-    for (const aim of [{ yaw: Infinity, pitch: 0, weight: 1 }, { yaw: NaN, pitch: 0, weight: 1 }, { yaw: 0.5, pitch: NaN, weight: 0.5 }, { yaw: -Infinity, pitch: Infinity, weight: 1 }]) {
+    for (const aim of [
+      { yaw: Infinity, pitch: 0, weight: 1 },
+      { yaw: NaN, pitch: 0, weight: 1 },
+      { yaw: 0.5, pitch: NaN, weight: 0.5 },
+      { yaw: -Infinity, pitch: Infinity, weight: 1 },
+    ]) {
       expect(weightedAim(aim, deg(10))).toEqual({ yaw: deg(10), pitch: 0, weight: 0 });
       expect(legsAfter(aim).every(Number.isFinite)).toBe(true);
     }
@@ -241,5 +271,124 @@ describe('aiming straight behind at a weight under 1', () => {
     const arc: AimArc = { delta: 0 };
     weightedAim({ yaw: deg(179), pitch: 0, weight: 1 }, 0, arc);
     expect(diff(weightedAim({ yaw: deg(-179), pitch: 0, weight: 1 }, 0, arc).yaw, deg(-179))).toBeLessThan(1e-9);
+  });
+});
+
+describe('numbers that are not finite never stay in the legs or the spine', () => {
+  test('stepLegs: a NaN leg yaw starts over from the movement, a NaN aim is no aim, a NaN dt no time', () => {
+    const ok = (s: LegState) => Number.isFinite(s.yaw);
+    expect(stepLegs({ yaw: NaN, reversed: false, turning: false }, deg(30), deg(10), true, 1 / 60).yaw).toBeGreaterThan(deg(9));
+    expect(ok(stepLegs({ yaw: 0, reversed: false, turning: false }, NaN, deg(10), true, 1 / 60))).toBe(true);
+    expect(ok(stepLegs({ yaw: 0, reversed: false, turning: false }, Infinity, deg(10), false, 1 / 60))).toBe(true);
+    expect(ok(stepLegs({ yaw: 0, reversed: false, turning: false }, deg(30), NaN, true, 1 / 60))).toBe(true);
+    expect(stepLegs({ yaw: 0.2, reversed: false, turning: false }, deg(30), deg(10), true, NaN).yaw).toBeCloseTo(0.2, 9);
+    expect(stepLegs({ yaw: 0.2, reversed: false, turning: false }, deg(30), deg(10), true, -1).yaw).toBeCloseTo(0.2, 9);
+  });
+  test('aimSpine: an aim or leg yaw that is not finite turns nothing', () => {
+    const r = rig();
+    const s = findSpine(r)!;
+    const grip = r.getObjectByName('mixamorigRightHand')!;
+    const support = r.getObjectByName('mixamorigLeftHand')!;
+    const before = s.spine.map((b) => b.quaternion.clone());
+    const state = { base: [] as THREE.Quaternion[], set: [] as THREE.Quaternion[], corrYaw: 0, corrPitch: 0 };
+    aimSpine(s, { grip, support }, { yaw: NaN, pitch: 0 }, 0, state);
+    aimSpine(s, { grip, support }, { yaw: 0.3, pitch: Infinity }, 0, state);
+    aimSpine(s, { grip, support }, { yaw: 0.3, pitch: 0 }, NaN, state);
+    s.spine.forEach((b, i) => expect(b.quaternion.angleTo(before[i])).toBeLessThan(1e-9));
+    expect(Number.isFinite(state.corrYaw) && Number.isFinite(state.corrPitch)).toBe(true);
+    expect(weightedAim({ yaw: 0.3, pitch: 0, weight: 0.5 }, NaN).yaw).toBeCloseTo(0.15, 9); // a NaN movement facing counts as 0
+  });
+});
+
+describe('the weighted target turns, it does not jump', () => {
+  const dt = 1 / 60;
+  const step = (w: number) => (AIM_SLEW * dt) / (1 - w);
+  test('weight 0.5, the aim sweeping past straight behind: the side change swings over at most 24° a frame', () => {
+    const arc: AimArc = { delta: 0 };
+    let last = weightedAim({ yaw: deg(170), pitch: 0, weight: 0.5 }, 0, arc, dt).yaw;
+    let widest = 0;
+    let aimAt = 170;
+    for (let i = 0; i < 120; i++) {
+      if (aimAt < 260) aimAt += 2; // 170° → 260° (= −100°): through behind and 35° past the side change
+      const yaw = weightedAim({ yaw: deg(aimAt), pitch: 0, weight: 0.5 }, 0, arc, dt).yaw;
+      widest = Math.max(widest, diff(yaw, last));
+      last = yaw;
+    }
+    expect(widest).toBeLessThanOrEqual(step(0.5) + 1e-9);
+    expect(deg(24)).toBeCloseTo(step(0.5), 9);
+    expect(diff(last, deg(-50))).toBeLessThan(1e-9); // and it arrives: half of −100°
+  });
+  test('weight 0.5, the movement facing turning round in one frame: the same limit', () => {
+    const arc: AimArc = { delta: 0 };
+    let last = weightedAim({ yaw: deg(90), pitch: 0, weight: 0.5 }, 0, arc, dt).yaw; // 45°
+    const yaw = weightedAim({ yaw: deg(90), pitch: 0, weight: 0.5 }, deg(180), arc, dt).yaw; // target 135°
+    expect(diff(yaw, last)).toBeCloseTo(step(0.5), 9);
+    last = yaw;
+    for (let i = 0; i < 10; i++) last = weightedAim({ yaw: deg(90), pitch: 0, weight: 0.5 }, deg(180), arc, dt).yaw;
+    expect(diff(last, deg(135))).toBeLessThan(1e-9);
+  });
+  test('weight 1 is never held back: the target is the aim in the same frame, however far it moved', () => {
+    const arc: AimArc = { delta: 0 };
+    weightedAim({ yaw: 0, pitch: 0, weight: 1 }, 0, arc, dt);
+    for (const a of [170, -60, 100, -179, 5]) {
+      const to = weightedAim({ yaw: deg(a), pitch: deg(10), weight: 1 }, 0, arc, dt);
+      expect(diff(to.yaw, deg(a))).toBeLessThan(1e-12);
+      expect(to.pitch).toBeCloseTo(deg(10), 12);
+    }
+  });
+  test('a hand-moved aim is not held back at part weight either (600°/s of aim at weight 0.5)', () => {
+    const arc: AimArc = { delta: 0 };
+    weightedAim({ yaw: 0, pitch: 0, weight: 0.5 }, 0, arc, dt);
+    for (let i = 1; i <= 8; i++) {
+      const to = weightedAim({ yaw: deg(i * 10), pitch: 0, weight: 0.5 }, 0, arc, dt);
+      expect(diff(to.yaw, deg(i * 5))).toBeLessThan(1e-12);
+    }
+  });
+  test('the limit grows toward weight 1 and starts fresh after weight 0', () => {
+    expect(step(0.9)).toBeGreaterThan(5 * step(0.5) - 1e-9);
+    const arc: AimArc = { delta: 0 };
+    weightedAim({ yaw: deg(-80), pitch: 0, weight: 0.5 }, 0, arc, dt);
+    weightedAim({ yaw: deg(-80), pitch: 0, weight: 0 }, 0, arc, dt); // aim off: nothing remembered
+    expect(arc.yaw).toBeUndefined();
+    expect(weightedAim({ yaw: deg(80), pitch: 0, weight: 0.5 }, 0, arc, dt).yaw).toBeCloseTo(deg(40), 9);
+  });
+});
+
+describe('leaving weight 0', () => {
+  test('aimBlend: 0 at weight 0, the whole aimed pose from AIM_FADE up', () => {
+    expect(aimBlend(0)).toBe(0);
+    expect(aimBlend(AIM_FADE / 2)).toBeCloseTo(0.5, 9);
+    expect(aimBlend(AIM_FADE)).toBe(1);
+    expect(aimBlend(1)).toBe(1);
+    expect(aimBlend(NaN)).toBe(0);
+  });
+  test('a weight just above 0 leaves the spine next to the clip pose; the pose grows in step with the weight', () => {
+    /** How far (rad) a spine bone ends from its clip pose at a weight. */
+    const moved = (weight: number) => {
+      const r = rig();
+      const s = findSpine(r)!;
+      const grip = r.getObjectByName('mixamorigRightHand')!;
+      const support = r.getObjectByName('mixamorigLeftHand')!;
+      const clip = s.spine.map((b) => b.quaternion.clone());
+      const state = { base: [] as THREE.Quaternion[], set: [] as THREE.Quaternion[], corrYaw: 0, corrPitch: 0 };
+      const to = weightedAim({ yaw: deg(40), pitch: 0, weight }, 0);
+      for (let i = 0; i < 6; i++) aimSpine(s, { grip, support }, to, 0, state, aimBlend(to.weight));
+      return Math.max(...s.spine.map((b, i) => b.quaternion.angleTo(clip[i])));
+    };
+    const whole = moved(AIM_FADE); // the hands line turned onto the movement facing + 4°
+    expect(whole).toBeGreaterThan(deg(1)); // the rig's hands are off the facing: there is a turn to fade
+    expect(moved(0.001)).toBeLessThan(0.02 * whole + 1e-6);
+    expect(moved(AIM_FADE / 2)).toBeGreaterThan(0.3 * whole);
+    expect(moved(AIM_FADE / 2)).toBeLessThan(0.7 * whole);
+  });
+  test('the blended pose does not pile up over frames', () => {
+    const r = rig();
+    const s = findSpine(r)!;
+    const grip = r.getObjectByName('mixamorigRightHand')!;
+    const state = { base: [] as THREE.Quaternion[], set: [] as THREE.Quaternion[], corrYaw: 0, corrPitch: 0 };
+    for (let i = 0; i < 10; i++) aimSpine(s, { grip }, { yaw: deg(30), pitch: 0 }, 0, state, 0.5);
+    const q = s.spine[2].quaternion.clone();
+    aimSpine(s, { grip }, { yaw: deg(30), pitch: 0 }, 0, state, 0.5);
+    expect(s.spine[2].quaternion.angleTo(q)).toBeLessThan(1e-6); // float noise of the slerp, not a turn that grows
   });
 });

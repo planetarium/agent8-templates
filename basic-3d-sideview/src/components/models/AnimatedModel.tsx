@@ -61,7 +61,10 @@ function Model({ url, height, source, hold, meta }: { url: string; height: numbe
     if (!ground) {
       const names = clips.map((c) => c.name);
       const playable = new Set(STATES.map((s) => pickClip(names, s)));
-      ground = clipGroundOffsets(scene, clips.filter((c) => playable.has(c.name)));
+      ground = clipGroundOffsets(
+        scene,
+        clips.filter((c) => playable.has(c.name)),
+      );
       GROUND.set(key, ground);
     }
     return { scene, clips, ...fit, ground };
