@@ -8,11 +8,15 @@ import assets from '../../assets.json';
 import { retarget, type AnimState } from '../../game/anim';
 import { fitModel } from '../../game/fitModel';
 import { clipGroundOffsets } from '../../game/groundClips';
+import type { AssetMeta } from '../../game/assetMeta';
+import { HeldProp, useAssetMetaWhenRead, useBodyFollowsAim, usesRifleClips, type Hold } from './HeldProp';
 
 // The template's shared mixamo clips (src/assets.json `animations`): any model on the
-// mixamorig skeleton that ships without clips of its own can borrow them.
+// mixamorig skeleton that ships without clips of its own can borrow them — the rifle set while
+// it holds a gun.
 const SHARED = ['idle', 'walk', 'run'] as const;
 const SHARED_URLS = SHARED.map((n) => assets.animations[`anims/${n}`].url);
+const RIFLE_URLS = SHARED.map((n) => assets.animations[`anims/rifle-${n}`].url);
 const FADE = 0.15;
 const STATES: AnimState[] = ['idle', 'walk', 'run', 'jump', 'fall'];
 /** Ground offsets per model URL (model units, so every copy of a model shares them): sampled once. */
@@ -28,9 +32,10 @@ function pickClip(names: string[], want: AnimState) {
   return find(want) ?? (want === 'run' ? find('walk') : undefined) ?? find('idle') ?? names[0];
 }
 
-function Model({ url, height, source }: { url: string; height: number; source?: { state: AnimState } }) {
+function Model({ url, height, source, hold, meta }: { url: string; height: number; source?: { state: AnimState }; hold?: Hold; meta: AssetMeta | null }) {
   const gltf = useGLTF(url);
-  const shared = useGLTF(SHARED_URLS);
+  const rifle = usesRifleClips(hold, meta);
+  const shared = useGLTF(rifle ? RIFLE_URLS : SHARED_URLS);
   const { scene, clips, unit, lift, ground } = useMemo(() => {
     const scene = clone(gltf.scene); // skinned models need a real skeleton clone per instance
     scene.traverse((o) => {
@@ -51,17 +56,22 @@ function Model({ url, height, source }: { url: string; height: number; source?: 
     // lower or higher than the bind pose (a borrowed clip straightens bent legs), so each clip
     // this model can play is posed off screen once (per URL) and gets its own ground offset.
     const fit = fitModel(scene, { height });
-    let ground = GROUND.get(url);
+    const key = rifle ? `${url}|rifle` : url;
+    let ground = GROUND.get(key);
     if (!ground) {
       const names = clips.map((c) => c.name);
       const playable = new Set(STATES.map((s) => pickClip(names, s)));
-      ground = clipGroundOffsets(scene, clips.filter((c) => playable.has(c.name)));
-      GROUND.set(url, ground);
+      ground = clipGroundOffsets(
+        scene,
+        clips.filter((c) => playable.has(c.name)),
+      );
+      GROUND.set(key, ground);
     }
     return { scene, clips, ...fit, ground };
-  }, [url, gltf, shared, height]);
+  }, [url, gltf, shared, height, rifle]);
 
   const group = useRef<THREE.Group>(null);
+  useBodyFollowsAim(group, hold, meta); // aiming a gun: the drawn body turns to the aim
   const { actions, names } = useAnimations(clips, group);
   const current = useRef('');
   // lift eases from the old clip's ground offset to the new one's over the cross-fade
@@ -84,6 +94,7 @@ function Model({ url, height, source }: { url: string; height: number; source?: 
   return (
     <group ref={group} scale={unit} position-y={lift}>
       <primitive object={scene} />
+      {hold && <HeldProp rig={scene} {...hold} />}
     </group>
   );
 }
@@ -97,17 +108,22 @@ export function AnimatedModel({
   url,
   height,
   source,
+  hold,
   fallback = null,
 }: {
   url: string;
   height: number;
   source?: { state: AnimState };
+  /** A weapon / tool in its hand (models/HeldProp); a gun switches borrowed clips to the rifle set. */
+  hold?: Hold;
   fallback?: ReactNode;
 }) {
+  // the weapon's info file says whether it is a gun; until it arrives, its file name does
+  const meta = useAssetMetaWhenRead(hold?.url);
   return (
     <Suspense fallback={fallback}>
-      {/* A new url or height means new clips: remount so the playing-clip ref and the lift ease start fresh. */}
-      <Model key={`${url}|${height}`} url={url} height={height} source={source} />
+      {/* A new url, height or clip set means new clips: remount so the playing-clip ref and the lift ease start fresh. */}
+      <Model key={`${url}|${height}|${usesRifleClips(hold, meta)}`} url={url} height={height} source={source} hold={hold} meta={meta} />
     </Suspense>
   );
 }
