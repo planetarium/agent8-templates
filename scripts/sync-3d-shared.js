@@ -58,6 +58,9 @@ const CONTROLLER = [
   'src/game/player.test.ts',
   'src/game/world.ts',
   'src/components/Character.tsx',
+  // Character aiming a gun: legs walk, upper body aims (split body)
+  'src/game/aimRig.ts',
+  'src/game/aimRig.test.ts',
 ];
 
 // Putting models in: fitModel (metre size, feet on y = 0), static props and
@@ -66,15 +69,29 @@ const CONTROLLER = [
 // borrows clips through anim.ts retarget and the src/assets.json
 // `animations` idle / walk / run, so those come along; groundClips stands
 // each playable clip on the ground. retarget.test.ts (with its trimmed-rig
-// fixture) checks that retargeted feet stay on the ground.
+// fixture) checks that retargeted feet stay on the ground. HeldProp puts a
+// weapon in a hand (AnimatedModel and Character render it for `hold`):
+// hold.ts places it (hold.fixture.json: library hand rigs, most of them
+// reduced), assetMeta.ts reads the weapon's info file (<url>.meta.json on
+// the CDN), grip.ts takes its grip from there or estimates one
+// (gripEstimate.ts).
 const MODELS = [
   'src/game/anim.ts',
   'src/game/retarget.test.ts',
   'src/game/retarget.fixture.json',
   'src/game/fitModel.ts',
   'src/game/groundClips.ts',
+  'src/game/assetMeta.ts',
+  'src/game/assetMeta.test.ts',
+  'src/game/grip.ts',
+  'src/game/grip.test.ts',
+  'src/game/gripEstimate.ts',
+  'src/game/hold.ts',
+  'src/game/hold.test.ts',
+  'src/game/hold.fixture.json',
   'src/components/models/Props.tsx',
   'src/components/models/AnimatedModel.tsx',
+  'src/components/models/HeldProp.tsx',
 ];
 
 // Character views on the box / ramp / height-field stage: the controller plus
