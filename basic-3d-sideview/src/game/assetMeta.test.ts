@@ -3,6 +3,9 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import { latestAssetMeta, loadAssetMeta, META_TIMEOUT_MS, metaUrlOf, peekAssetMeta, resetAssetMeta, subscribeAssetMeta } from './assetMeta';
 
 const LIB = 'https://agent8-games.verse8.io/assets/3d/objects/weapons melee/sword.glb';
+// a generated asset: {wallet}/mcp-uploads/, whatever comes below
+const WALLET = '0x1A2b3C4d5E6f7890aBcDeF1234567890abCDef12';
+const GEN = `https://agent8-games.verse8.io/${WALLET}/mcp-uploads/static-assets/static-3d-9f3c.glb`;
 const realFetch = globalThis.fetch;
 let calls: { url: string; init?: RequestInit }[] = [];
 let warn: ReturnType<typeof spyOn>;
@@ -38,8 +41,57 @@ describe('metaUrlOf', () => {
   });
 });
 
+describe('generated folder URLs ({wallet}/mcp-uploads/)', () => {
+  const HOST = 'https://agent8-games.verse8.io';
+  test('path + .meta.json, query and hash dropped, whatever the wallet folder is called', () => {
+    expect(metaUrlOf(GEN)).toBe(`${GEN}.meta.json`);
+    expect(metaUrlOf(`${GEN}?v=2#x`)).toBe(`${GEN}.meta.json`);
+    expect(metaUrlOf(`${HOST}/seungbae/mcp-uploads/a16-probe-20261120.glb`)).toBe(`${HOST}/seungbae/mcp-uploads/a16-probe-20261120.glb.meta.json`);
+  });
+  test('only the prefix is matched: any folder or file name below it', () => {
+    expect(metaUrlOf(`${HOST}/${WALLET}/mcp-uploads/sword.glb`)).toBe(`${HOST}/${WALLET}/mcp-uploads/sword.glb.meta.json`);
+    expect(metaUrlOf(`${HOST}/${WALLET}/mcp-uploads/a/b c/Sword.GLB`)).toBe(`${HOST}/${WALLET}/mcp-uploads/a/b%20c/Sword.GLB.meta.json`);
+    // the 3D → 3d rule is the library's: a generated path keeps its case
+    expect(metaUrlOf(`${HOST}/${WALLET}/mcp-uploads/3D/sword.glb`)).toBe(`${HOST}/${WALLET}/mcp-uploads/3D/sword.glb.meta.json`);
+    expect(metaUrlOf(`${HOST}/3D/mcp-uploads/sword.glb`)).toBe(`${HOST}/3D/mcp-uploads/sword.glb.meta.json`);
+  });
+  test('the wallet folder is exactly one path segment', () => {
+    expect(metaUrlOf(`${HOST}/mcp-uploads/sword.glb`)).toBeNull(); // none
+    expect(metaUrlOf(`${HOST}//mcp-uploads/sword.glb`)).toBeNull(); // empty
+    expect(metaUrlOf(`${HOST}/a/b/mcp-uploads/sword.glb`)).toBeNull(); // two
+    expect(metaUrlOf(`${HOST}/${WALLET}/other/mcp-uploads/sword.glb`)).toBeNull();
+  });
+  test('another host or scheme, another folder name, the folder itself: no info file', () => {
+    expect(metaUrlOf(`https://example.com/${WALLET}/mcp-uploads/sword.glb`)).toBeNull();
+    expect(metaUrlOf(`https://agent8-games.verse8.io.example.com/${WALLET}/mcp-uploads/sword.glb`)).toBeNull();
+    expect(metaUrlOf(`http://agent8-games.verse8.io/${WALLET}/mcp-uploads/sword.glb`)).toBeNull();
+    expect(metaUrlOf(`${HOST}/${WALLET}/uploads/sword.glb`)).toBeNull();
+    expect(metaUrlOf(`${HOST}/${WALLET}/mcp-uploads-old/sword.glb`)).toBeNull();
+    expect(metaUrlOf(`${HOST}/${WALLET}/MCP-Uploads/sword.glb`)).toBeNull();
+    expect(metaUrlOf(`${HOST}/${WALLET}/mcp-uploads`)).toBeNull();
+    expect(metaUrlOf(`${HOST}/${WALLET}/mcp-uploads/`)).toBeNull();
+    expect(metaUrlOf(`${HOST}/${WALLET}/sword.glb`)).toBeNull();
+    expect(metaUrlOf(`${HOST}/assetsX/sword.glb`)).toBeNull();
+  });
+  test('a 404 is a kept "no info", without a warning: one revalidating request per URL', async () => {
+    answer(() => json('not found', 404));
+    expect(await loadAssetMeta(GEN)).toBeNull();
+    expect(await loadAssetMeta(GEN)).toBeNull();
+    expect(calls.map((c) => c.url)).toEqual([`${GEN}.meta.json`]);
+    expect(calls[0].init?.cache).toBe('no-cache');
+    expect(peekAssetMeta(GEN)).toBeNull();
+    expect(warn).not.toHaveBeenCalled();
+  });
+  test('a generated info file with fewer keys (v and grip) is read as it is', async () => {
+    const meta = { v: 1 as const, grip: { kind: 'gun', point: [0, 0, 0], forward: [1, 0, 0], up: [0, 1, 0], lengthM: 0.8, review: 'low' } };
+    answer(() => json(meta));
+    expect(await loadAssetMeta(GEN)).toEqual(meta);
+    expect(peekAssetMeta(GEN)).toEqual(meta);
+  });
+});
+
 describe('loadAssetMeta', () => {
-  test('asks only library URLs, revalidating every load, once per URL', async () => {
+  test('asks library URLs, not other hosts, revalidating every load, once per URL', async () => {
     answer(() => json({ v: 1, tags: ['weapons melee'] }));
     expect(await loadAssetMeta('https://cdn.example.com/generated/sword.glb')).toBeNull();
     expect(calls).toHaveLength(0);
