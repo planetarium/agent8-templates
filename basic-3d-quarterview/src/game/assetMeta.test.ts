@@ -61,7 +61,7 @@ describe('generated folder URLs ({wallet}/mcp-uploads/)', () => {
     expect(metaUrlOf(`${HOST}/a/b/mcp-uploads/sword.glb`)).toBeNull(); // two
     expect(metaUrlOf(`${HOST}/${WALLET}/other/mcp-uploads/sword.glb`)).toBeNull();
   });
-  test('another host, another folder, the folder itself: no info file', () => {
+  test('another host or scheme, another folder name, the folder itself: no info file', () => {
     expect(metaUrlOf(`https://example.com/${WALLET}/mcp-uploads/sword.glb`)).toBeNull();
     expect(metaUrlOf(`https://agent8-games.verse8.io.example.com/${WALLET}/mcp-uploads/sword.glb`)).toBeNull();
     expect(metaUrlOf(`http://agent8-games.verse8.io/${WALLET}/mcp-uploads/sword.glb`)).toBeNull();
@@ -73,7 +73,7 @@ describe('generated folder URLs ({wallet}/mcp-uploads/)', () => {
     expect(metaUrlOf(`${HOST}/${WALLET}/sword.glb`)).toBeNull();
     expect(metaUrlOf(`${HOST}/assetsX/sword.glb`)).toBeNull();
   });
-  test('asked like a library URL: revalidating, once per URL; a 404 is a kept "no info"', async () => {
+  test('a 404 is a kept "no info", without a warning: one revalidating request per URL', async () => {
     answer(() => json('not found', 404));
     expect(await loadAssetMeta(GEN)).toBeNull();
     expect(await loadAssetMeta(GEN)).toBeNull();
@@ -91,7 +91,7 @@ describe('generated folder URLs ({wallet}/mcp-uploads/)', () => {
 });
 
 describe('loadAssetMeta', () => {
-  test('asks only library and generated folder URLs, revalidating every load, once per URL', async () => {
+  test('asks library URLs, not other hosts, revalidating every load, once per URL', async () => {
     answer(() => json({ v: 1, tags: ['weapons melee'] }));
     expect(await loadAssetMeta('https://cdn.example.com/generated/sword.glb')).toBeNull();
     expect(calls).toHaveLength(0);
