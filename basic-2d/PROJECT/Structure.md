@@ -34,7 +34,7 @@ Static assets served as-is (default `vite.svg` favicon).
 
 ## Config files
 
-- **`vite.config.ts`** — React plugin, `base: "./"`, `outDir: "dist"`, excludes `lucide-react` from deps optimization.
+- **`vite.config.ts`** — React plugin, `base: "./"`, `outDir: "dist"`, pre-bundles `lucide-react` via `optimizeDeps.include`.
 - **`tailwind.config.js`** — scans `index.html` and `src/**/*.{js,ts,jsx,tsx}`.
 - **`tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`** — TypeScript project references.
 - **`postcss.config.js`** — Tailwind + Autoprefixer pipeline.
