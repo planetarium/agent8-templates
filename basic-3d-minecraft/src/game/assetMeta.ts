@@ -1,23 +1,30 @@
-// Asset info files. A library asset has `<asset url path>.meta.json` next to it on the CDN: the
-// metadata the library sync stores for that file, plus `v: 1` (agent8-library contract). Read it
-// by the asset URL at runtime; never copy its values into assets.json or code.
-// - Only URLs under META_PREFIXES are asked; any other URL (generated assets, other hosts) is
-//   "no info" without a request.
+// Asset info files. An asset can have `<asset url path>.meta.json` next to it on the CDN: for a
+// library asset the metadata the library sync stores for that file, plus `v: 1`; for a generated
+// asset the same format with fewer keys (agent8-library contract). Read it by the asset URL at
+// runtime; never copy its values into assets.json or code.
+// - Only URLs on META_HOST under the library folder (`/assets/`) or a generated folder
+//   (`/{wallet}/mcp-uploads/`, `{wallet}` = exactly one path segment) are asked; any other URL
+//   (other hosts, other folders) is "no info" without a request. Nothing below those two
+//   prefixes (folder or file names) is looked at. Most generated assets have no info file: 404.
 // - Always revalidated (`cache: 'no-cache'`): a fixed value reaches the game on the next load.
 // - 404 / CORS / network error / bad JSON / another `v` = "no info" (null), silently. A request
 //   slower than META_TIMEOUT_MS is "no info" too, with one console warning.
 // - An answer (the file, 404, bad JSON, another `v`) is kept for the page's life. A failure that
 //   may pass (network error, time limit, 5xx) is "no info" for whoever asked, and forgotten: the
 //   next component that mounts asks again.
-// - Info files live under lower-case `/assets/3d/` only; old `/assets/3D/` asset URLs (still
+// - Library info files live under lower-case `/assets/3d/` only; old `/assets/3D/` asset URLs (still
 //   served, and what search returned before 2026-11-18) are asked there.
 // - Unknown keys are kept and ignored (keys are only ever added; `v` stays 1).
 import { useEffect, useSyncExternalStore } from 'react';
 
 export type AssetMeta = { v: 1; tags?: string[]; [key: string]: unknown };
 
-/** URL prefixes that have info files. */
-export const META_PREFIXES = ['https://agent8-games.verse8.io/assets/'];
+/** The host whose assets have info files. */
+export const META_HOST = 'https://agent8-games.verse8.io';
+/** The library folder: every registered asset has an info file. */
+const LIBRARY = '/assets/';
+/** A generated folder: any one path segment (the user's wallet address), then `mcp-uploads/`. */
+const GENERATED = /^\/[^/]+\/mcp-uploads\/./;
 export const META_TIMEOUT_MS = 4000;
 
 /** The info file URL of an asset (path + `.meta.json`, query / hash dropped), or null when its URL has none. */
@@ -28,11 +35,14 @@ export function metaUrlOf(assetUrl: string): string | null {
   } catch {
     return null;
   }
-  const base = u.origin + u.pathname;
-  const prefix = META_PREFIXES.find((p) => base.startsWith(p));
-  if (!prefix) return null;
-  const rest = base.slice(prefix.length);
-  return `${prefix}${rest.startsWith('3D/') ? `3d/${rest.slice(3)}` : rest}.meta.json`;
+  if (u.origin !== META_HOST) return null;
+  const path = u.pathname;
+  if (path.startsWith(LIBRARY)) {
+    const rest = path.slice(LIBRARY.length);
+    return `${META_HOST}${LIBRARY}${rest.startsWith('3D/') ? `3d/${rest.slice(3)}` : rest}.meta.json`;
+  }
+  // generated folders keep their path as it is (the 3D → 3d rule is the library's)
+  return GENERATED.test(path) ? `${META_HOST}${path}.meta.json` : null;
 }
 
 const cache = new Map<string, Promise<AssetMeta | null>>();

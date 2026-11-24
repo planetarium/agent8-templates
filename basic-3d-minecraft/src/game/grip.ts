@@ -74,7 +74,7 @@ export function gripFromMeta(meta: AssetMeta | null | undefined): Grip | null {
 /**
  * Weapon kind when there is no usable grip: the info file's `grip.kind` / `kind` when known, then
  * its tags ("weapons ranged" → gun, or bow when the file name says bow; "weapons melee" → blade).
- * An asset with no info file (generated models) falls back to words in its URL — pass `kind` on
+ * An asset with no info file (most generated models) falls back to words in its URL — pass `kind` on
  * `hold` when it guesses wrong. Anything else (torch, staff, tool) is held like a blade.
  */
 export function kindOf(meta: AssetMeta | null | undefined, url: string): GripKind {
