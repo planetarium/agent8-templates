@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { MainScene } from "./scenes/MainScene";
+import { installCheck } from "./check";
 
 export const createGame = (parent: string) => {
   const originalSpriteSetDisplaySize = Phaser.GameObjects.Sprite.prototype.setDisplaySize;
@@ -31,6 +32,9 @@ export const createGame = (parent: string) => {
   };
 
   const game = new Phaser.Game(config);
+
+  // Lets the agent8 preview check measure what the game draws in the canvas (dev server only; see check.ts).
+  installCheck(game);
 
   // ⚠️ CRITICAL: DO NOT MODIFY THIS SECTION - LLM/AI MODIFICATION PROHIBITED ⚠️
   // This code overrides core Phaser engine behavior. Any changes will break the entire game.

@@ -11,7 +11,10 @@ runway, decor seed and counts).
 
 `<Canvas>` with `World`, `Airplane`, `Bullets`, `ChaseCamera` (and
 `LazyPhysics` when enabled), a hint label, the `Hud` and `MobileControls`.
-Binds the keyboard.
+Binds the keyboard. `CheckProbe` (in the Canvas) installs the preview
+measuring hook on the dev server only (`src/game/check.ts`: where the canvas
+draws, the plane's box on the screen); on-screen elements carry
+`data-a8-touch` / `-hud` / `-panel` / `-notice` labels.
 
 ## `src/game/`
 

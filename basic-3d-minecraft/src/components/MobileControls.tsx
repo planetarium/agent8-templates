@@ -58,6 +58,7 @@ function Joystick() {
   return (
     <div
       ref={base}
+      data-a8-touch="joystick"
       className="pointer-events-auto relative rounded-full border-2 border-white/60 bg-white/20"
       style={{ width: 'clamp(110px, 30vmin, 150px)', height: 'clamp(110px, 30vmin, 150px)', touchAction: 'none' }}
       onPointerDown={(e) => {
@@ -83,6 +84,7 @@ function JumpButton() {
   return (
     <button
       type="button"
+      data-a8-touch="jump"
       className={`pointer-events-auto rounded-full border-2 border-white/70 font-bold text-white shadow-xl ${down ? 'scale-95 bg-orange-500/90' : 'bg-orange-400/80'}`}
       style={{ width: 'clamp(80px, 22vmin, 104px)', height: 'clamp(80px, 22vmin, 104px)', touchAction: 'none' }}
       onPointerDown={(e) => {
@@ -104,6 +106,7 @@ function TapButton({ label, className, onTap }: { label: string; className: stri
   return (
     <button
       type="button"
+      data-a8-touch={label.toLowerCase()}
       className={`pointer-events-auto rounded-full border-2 border-white/70 text-sm font-bold text-white shadow-xl active:scale-95 ${className}`}
       style={{ width: 'clamp(60px, 16vmin, 76px)', height: 'clamp(60px, 16vmin, 76px)', touchAction: 'none' }}
       onPointerDown={onTap}

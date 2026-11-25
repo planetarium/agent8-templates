@@ -50,6 +50,12 @@ Read this, then `PROJECT/Structure.md`, before changing code.
   asset's info file on its own — don't copy search-result grip values into
   `src/assets.json` or code. Only to change how this game holds it:
   `hold={{ url, override }}`. Don't parent weapons to bones yourself.
+- Label every on-screen element you add for the preview check:
+  `data-a8-touch` (something to press), `data-a8-hud` (a value display),
+  `data-a8-panel` (anything else) or `data-a8-notice` (shows only briefly:
+  a countdown, a wave banner) `="<name>"` on its outermost element. Keep
+  `<CheckProbe>` inside the `<Canvas>` and pass it the player's box when
+  there is a player (`src/game/check.ts`).
 
 ## Commands
 

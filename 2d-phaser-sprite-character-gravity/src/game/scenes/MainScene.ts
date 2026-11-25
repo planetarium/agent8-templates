@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { SpriteCharacter } from "../characters/SpriteCharacter";
 import Assets from "../../assets.json";
+import { markPlayer } from "../check";
 export class MainScene extends Phaser.Scene {
   private player: SpriteCharacter;
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -47,6 +48,9 @@ export class MainScene extends Phaser.Scene {
       this.ground.y - this.ground.height,
       "2dbasic"
     );
+
+    // Tells the preview check where the player is (dev server only; see ../check.ts)
+    markPlayer(this.player);
 
     // 플레이어와 지면의 충돌 설정
     this.physics.add.collider(this.player, this.ground);

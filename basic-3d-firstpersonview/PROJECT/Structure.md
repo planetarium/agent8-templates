@@ -10,7 +10,10 @@ start yaw, pitch limits, look sensitivity, FOV).
 
 `<Canvas>` with `Level`, `Player`, `CameraRig` (and `LazyPhysics` when
 enabled), a crosshair, a hint label, and `MobileControls`. Binds the
-keyboard.
+keyboard. `CheckProbe` (in the Canvas) installs the preview measuring hook
+on the dev server only (`src/game/check.ts`: where the canvas draws; no
+player box — the player is the camera); on-screen elements carry
+`data-a8-touch` / `-hud` / `-panel` / `-notice` labels.
 
 ## `src/game/`
 

@@ -58,6 +58,7 @@ function Joystick() {
   return (
     <div
       ref={base}
+      data-a8-touch="joystick"
       className="pointer-events-auto relative rounded-full border-2 border-white/60 bg-white/20"
       style={{ width: 'clamp(110px, 30vmin, 150px)', height: 'clamp(110px, 30vmin, 150px)', touchAction: 'none' }}
       onPointerDown={(e) => {
@@ -99,6 +100,7 @@ function HoldButton({
   return (
     <button
       type="button"
+      data-a8-touch={label.toLowerCase()}
       className={`pointer-events-auto border-2 border-white/70 font-bold text-white shadow-xl ${className} ${down ? 'scale-95 brightness-110' : ''}`}
       style={{ touchAction: 'none', ...style }}
       onPointerDown={(e) => {
@@ -132,7 +134,7 @@ export function MobileControls({ touch }: { touch: boolean }) {
       <Joystick />
       <div className="flex items-end gap-4">
         {/* throttle rocker: one control, top half speeds up, bottom half slows down */}
-        <div className="flex flex-col overflow-hidden rounded-2xl">
+        <div data-a8-touch="throttle" className="flex flex-col overflow-hidden rounded-2xl">
           <HoldButton label="▲" className="rounded-t-2xl bg-sky-500/80" style={rocker} onChange={faster} />
           <HoldButton label="▼" className="rounded-b-2xl bg-slate-600/80" style={rocker} onChange={slower} />
         </div>

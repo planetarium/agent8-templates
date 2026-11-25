@@ -44,6 +44,12 @@ Read this, then `PROJECT/Structure.md`, before changing code.
   their physics. Leave the player controller (`src/game/player.ts`) as it is.
 - Register asset URLs in `src/assets.json`; load models with drei `useGLTF`
   inside `<Suspense>`.
+- Label every on-screen element you add for the preview check:
+  `data-a8-touch` (something to press), `data-a8-hud` (a value display),
+  `data-a8-panel` (anything else) or `data-a8-notice` (shows only briefly:
+  a countdown, a wave banner) `="<name>"` on its outermost element. Keep
+  `<CheckProbe>` inside the `<Canvas>` and pass it the player's box when
+  there is a player (`src/game/check.ts`).
 
 ## Commands
 

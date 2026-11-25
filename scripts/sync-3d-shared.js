@@ -26,9 +26,9 @@ const colorize = (color, text) => `${colors[color]}${text}${colors.reset}`;
 
 const SOURCE = 'basic-3d-freeview';
 
-// Build setup, page shell, the lazy rapier chunk and the import-order test
-// (config.ts stays a leaf so a module importing it can never load first):
-// every R3F template.
+// Build setup, page shell, the lazy rapier chunk, the import-order test
+// (config.ts stays a leaf so a module importing it can never load first) and
+// the preview measuring hook: every R3F template.
 const BUILD = [
   '.gitignore',
   'index.html',
@@ -41,6 +41,12 @@ const BUILD = [
   'src/physics/LazyPhysics.tsx',
   'src/physics/PhysicsDemo.tsx',
   'src/game/imports.test.ts',
+  // Preview measuring hook (dev server only): where the canvas draws and where the
+  // player is on the screen, for the agent8 preview check. Each App.tsx mounts
+  // <CheckProbe> inside its Canvas.
+  'src/game/check.ts',
+  'src/game/check.test.ts',
+  'src/components/CheckProbe.tsx',
 ];
 
 // Kinematic character controller: controller + its tests, the collision

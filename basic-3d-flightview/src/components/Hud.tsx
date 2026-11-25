@@ -14,7 +14,7 @@ export function Hud() {
     return () => clearInterval(id);
   }, []);
   return (
-    <div className="pointer-events-none absolute right-3 top-3 rounded bg-black/50 px-3 py-2 font-mono text-xs leading-5 text-white">
+    <div data-a8-hud="speed and altitude" className="pointer-events-none absolute right-3 top-3 rounded bg-black/50 px-3 py-2 font-mono text-xs leading-5 text-white">
       <div ref={speed}>Speed: 0.0 km/h</div>
       <div ref={alt}>Altitude: 0.0 m</div>
     </div>

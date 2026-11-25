@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { CAMERA, PHYSICS_DEMO } from './config';
 import { bindKeyboard } from './game/input';
 import { CameraRig } from './components/CameraRig';
+import { CheckProbe } from './components/CheckProbe';
 import { Level } from './components/Level';
 import { MobileControls, useIsTouch } from './components/MobileControls';
 import { Player } from './components/Player';
@@ -23,10 +24,12 @@ export default function App() {
         <Player />
         <CameraRig />
         {physics && <LazyPhysics />}
+        {/* First person: the player is the camera, not on the screen — no player box. */}
+        <CheckProbe />
       </Canvas>
       {/* crosshair */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.5)]" />
-      <div className="pointer-events-none absolute left-3 top-3 rounded bg-black/40 px-2 py-1 text-xs text-white">
+      <div data-a8-hud="crosshair" className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.5)]" />
+      <div data-a8-panel="controls hint" className="pointer-events-none absolute left-3 top-3 rounded bg-black/40 px-2 py-1 text-xs text-white">
         {touch ? TOUCH_HINT : HINT}
       </div>
       <MobileControls touch={touch} />

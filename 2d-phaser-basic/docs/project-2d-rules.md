@@ -12,6 +12,10 @@ YOU MUST follow these rules EXACTLY:
 7. ✅ BACKTICKS FOR STRINGS: Always use backticks (`) for multi-line strings
 8. 📐 SET DISPLAY SIZE: When adding images/sprites, ALWAYS use setDisplaySize() to control dimensions
    (VFX exception: PixelVfx sprites from src/game/vfx take only a whole-number `scale` option — NEVER setDisplaySize them. See docs/vfx-sheets.md)
+9. 🏷️ LABEL NEW SCREEN ELEMENTS: Every HUD, touch button, panel or banner you add gets a label for the preview check:
+   `markUi(obj, 'score', 'hud')` / `markUiRect(scene, 'jump', 'control', () => rect)` for Graphics-drawn ones /
+   `markUi(banner, 'wave banner', 'notice')` for anything that shows only briefly; DOM elements get
+   `data-a8-touch` / `data-a8-hud` / `data-a8-panel` / `data-a8-notice="<name>"`. Keep `installCheck(game)` in Game.ts (src/game/check.ts)
 
 🚨 CRITICAL RULE - NEVER BREAK THIS:
 When tweening size changes, you MUST use displayWidth/displayHeight!!!

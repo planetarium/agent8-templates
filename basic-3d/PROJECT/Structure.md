@@ -8,7 +8,11 @@
 ## `src/App.tsx`
 
 `<Canvas>` with `Stage`, drei `OrbitControls` (and `LazyPhysics` when
-enabled), and a hint label.
+enabled), and a hint label. `CheckProbe` (in the Canvas) installs the
+preview measuring hook on the dev server only (`src/game/check.ts`: where
+the canvas draws, the player's box on the screen when there is a player);
+on-screen elements carry `data-a8-touch` / `-hud` / `-panel` / `-notice`
+labels.
 
 ## `src/game/`
 

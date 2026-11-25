@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { CAMERA, PHYSICS_DEMO } from './config';
+import { CheckProbe } from './components/CheckProbe';
 import { Stage } from './components/Stage';
 import { LazyPhysics } from './physics/LazyPhysics';
 
@@ -22,8 +23,9 @@ export default function App() {
           maxPolarAngle={CAMERA.maxPolarAngle}
         />
         {physics && <LazyPhysics />}
+        <CheckProbe />
       </Canvas>
-      <div className="pointer-events-none absolute left-3 top-3 rounded bg-black/40 px-2 py-1 text-xs text-white">{HINT}</div>
+      <div data-a8-panel="controls hint" className="pointer-events-none absolute left-3 top-3 rounded bg-black/40 px-2 py-1 text-xs text-white">{HINT}</div>
     </div>
   );
 }

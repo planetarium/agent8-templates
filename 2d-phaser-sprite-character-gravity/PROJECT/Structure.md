@@ -18,7 +18,11 @@ React host for Phaser. Renders `<div id="phaser-game">`, calls `createGame(conta
 
 ## `src/game/Game.ts`
 
-Exports `createGame(parent)`. Builds the `Phaser.Game` config: `Phaser.AUTO` renderer, full-window size, Arcade Physics with `gravity.y = 2000`, `Phaser.Scale.RESIZE` + `CENTER_BOTH`, and `MainScene` as the only scene. Contains a marked critical section that monkey-patches `Sprite/Image.setDisplaySize`, `setScale`, and `TweenManager.add` to preserve a base display size under scaling.
+Exports `createGame(parent)`. Builds the `Phaser.Game` config: `Phaser.AUTO` renderer, full-window size, Arcade Physics with `gravity.y = 2000`, `Phaser.Scale.RESIZE` + `CENTER_BOTH`, and `MainScene` as the only scene. Contains a marked critical section that monkey-patches `Sprite/Image.setDisplaySize`, `setScale`, and `TweenManager.add` to preserve a base display size under scaling. Calls `installCheck(game)` (below) right after creating the game.
+
+## `src/game/check.ts`
+
+Preview measuring hook, dev server only (does nothing in `vite build`). `installCheck(game)` puts `window.__agent8Check` on the page so the agent8 preview check can measure what the game draws inside the canvas: `ready()`, `viewport()` (the main camera's rectangle), `player()` (`screen` rectangle) and `elements()` (name, kind, page rectangle). It collects Text objects, objects pinned to the screen (`setScrollFactor(0)`, minus full-screen backgrounds) and input-enabled objects (as controls) on its own, and folds a label sitting on a panel into that panel. Graphics have no bounds and are not seen. Label elements with `markUi(obj, name, kind)`, Graphics-drawn ones with `markUiRect(scene, name, kind, () => rect)` (screen px), the player with `markPlayer(obj)` (`MainScene` marks its `SpriteCharacter`). Kinds: `control`, `hud`, `panel`, `notice` (shows only briefly).
 
 ## `src/game/vfx/PixelVfx.ts`, `src/game/vfx/sheets.ts`
 
@@ -26,7 +30,7 @@ Pixel art helper for world effects (hits, explosions, deaths, pickups, status, p
 
 ## `src/game/scenes/MainScene.ts`
 
-Single scene. `preload()` loads the sprite sheet from `assets.json`. `create()` enables the physics debug graphic, sets world bounds to canvas size, paints a sky-blue background, builds a static green ground rectangle at the bottom, spawns one `SpriteCharacter`, registers a player–ground collider, and creates the cursor keys handler. `update()` forwards cursors to the character.
+Single scene. `preload()` loads the sprite sheet from `assets.json`. `create()` enables the physics debug graphic, sets world bounds to canvas size, paints a sky-blue background, builds a static green ground rectangle at the bottom, spawns one `SpriteCharacter` (marked as the player for the preview check with `markPlayer`), registers a player–ground collider, and creates the cursor keys handler. `update()` forwards cursors to the character.
 
 ## `src/game/characters/SpriteCharacter.ts`
 
